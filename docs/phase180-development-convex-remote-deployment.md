@@ -13,14 +13,17 @@ The workflow is source-only until the credential gate below is completed. Creati
 - GitHub environment: `kinflo-convex-development`.
 - Environment secret name: `CONVEX_DEPLOY_KEY`.
 - Accepted key binding: exactly `dev:hallowed-manatee-765` before the secret delimiter.
-- Convex command: one `npx convex dev --once` attempt with typechecking and code generation enabled, and log tailing disabled.
+- Non-deploying preflight: one `npx convex codegen --dry-run --typecheck enable` attempt. Its output is captured only in an ephemeral runner file and deleted when the step exits.
+- Convex deployment command: one `npx convex dev --once` attempt with the completed typecheck and codegen work disabled, and hosted log tailing disabled.
 - Repository permission: read-only contents.
 - Concurrency: one KinFlo development deployment at a time; an active run is never cancelled by a newer run.
 - Target selection: there is no deployment input, no `CONVEX_DEPLOYMENT`, no `--prod`, and no `convex deploy` command.
-- Evidence: commit SHA, workflow run link, fixed development binding, success/failure status, and one coarse allowlisted failure classification.
+- Evidence: commit SHA, workflow run link, fixed development binding, success/failure status, preflight status, deployment-attempt count, and one coarse allowlisted failure classification.
 - Secret values, raw Convex output, deployment URLs, environment values, and `.env.local` contents are never emitted.
 
-If the single Convex CLI attempt fails, the workflow inspects its ephemeral captured output without printing it and reports only one fixed category: `authentication_or_authorization`, `source_validation_or_codegen`, `network_or_service_availability`, `configuration_or_deployment_binding`, or `unclassified_cli_failure`. A failure before the CLI attempt reports `not_available_before_cli_attempt`. These categories are routing hints, not root-cause proof, and they never authorize a retry.
+The preflight uses the CLI's documented dry-run mode, which does not modify code running on the deployment and does not write generated files. Convex notes that code generation can still contact the bound deployment to evaluate configuration. The workflow therefore treats the preflight as non-deploying, not offline, and keeps the deployment-scoped key in force.
+
+If the preflight fails, the workflow reports only `preflight_authentication_or_authorization`, `preflight_network_or_service_availability`, or `preflight_codegen_typecheck_or_configuration`. If the later deployment attempt fails, it reports only `push_authentication_or_authorization`, `push_network_or_service_availability`, `push_configuration_or_deployment_binding`, or `bundle_or_push_failure`. An earlier failure reports `not_available_before_preflight`; any unexpected `.env.local` creation reports `environment_file_policy_failure`. These categories are routing hints, not root-cause proof, and they never authorize a retry. Raw preflight and deployment output remains withheld and is deleted from the runner.
 
 Convex documents that `CONVEX_DEPLOY_KEY` binds CLI commands to the deployment represented by the key. For a development backend, its supported push command is `npx convex dev --once`. A deploy key used only by this workflow should allow only `deployment:deploy`.
 
@@ -28,6 +31,7 @@ Official references:
 
 - <https://docs.convex.dev/cli/deploy-key-types>
 - <https://docs.convex.dev/platform-apis/overview#pushing-code-to-a-deployment>
+- <https://docs.convex.dev/cli/reference/codegen>
 - <https://docs.convex.dev/cli/reference/dev>
 
 ## Credential gate
@@ -58,7 +62,7 @@ After this branch is reviewed and merged to the default branch, an authorized ma
 3. Enter `deploy hallowed-manatee-765`.
 4. Select **Run workflow** once.
 5. If an environment review is configured, approve only after verifying the commit and fixed target.
-6. Copy only the sanitized job summary: commit, workflow run, `dev:hallowed-manatee-765`, status, and coarse failure classification when present.
+6. Copy only the sanitized job summary: commit, workflow run, `dev:hallowed-manatee-765`, status, preflight status, deployment-attempt count, and coarse failure classification when present.
 7. If the run fails or its result is unknown, stop. Treat the classification only as a review-routing hint. Do not retry until the failure is reviewed and a new run is explicitly authorized.
 
 ## Hard exclusions
@@ -86,4 +90,4 @@ npm run check
 git diff --check
 ```
 
-The source validation proves the fixed manual trigger, fixed deployment name, dev-key prefix check, least-privilege workflow permissions, single-attempt command, allowlisted coarse failure classification, sanitized evidence fields, absent production selectors, absent secret-output patterns, and `.env.local` prohibition. It is not proof that the protected secret exists, that a classification identifies the root cause, or that a deployment ran.
+The source validation proves the fixed manual trigger, fixed deployment name, dev-key prefix check, least-privilege workflow permissions, one non-deploying dry-run preflight, one actual deployment attempt, stage-specific allowlisted coarse failure classification, sanitized evidence fields, absent production selectors, absent secret-output patterns, and `.env.local` prohibition. It is not proof that the protected secret exists, that a classification identifies the root cause, that the preflight is fully offline, or that a deployment ran.
