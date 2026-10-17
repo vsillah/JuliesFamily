@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, type ReactNode } from "react";
+import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 import { useQuery } from "convex/react";
 import { makeFunctionReference } from "convex/server";
 import { getKinfloConvexRuntime } from "@/lib/kinfloConvexRuntime";
@@ -10,6 +10,12 @@ import {
   type ShellLaunchReadinessStage,
 } from "@/lib/kinfloShellData";
 import { resolveTenantPaletteId } from "@/lib/kinfloPaletteRegistry";
+import {
+  resolveKinfloAdminScope,
+  scopeFixtureKinfloShellSnapshot,
+  type KinfloAdminSiteOption,
+  type KinfloAdminTenantOption,
+} from "@/lib/kinfloAdminScope";
 
 type TenantRow = {
   _id: string;
@@ -126,6 +132,98 @@ const activationReadinessQuery = makeFunctionReference<"query", Record<string, n
 
 const KinfloShellSnapshotContext = createContext<KinfloShellSnapshot | null>(null);
 
+type KinfloAdminScopeContextValue = {
+  tenant: KinfloAdminTenantOption;
+  site: KinfloAdminSiteOption;
+  changeScope: () => void;
+};
+
+const KinfloAdminScopeContext = createContext<KinfloAdminScopeContextValue | null>(null);
+
+function initialScopeSelection() {
+  if (typeof window === "undefined") {
+    return { tenantId: "", siteId: "" };
+  }
+  const params = new URLSearchParams(window.location.search);
+  return {
+    tenantId: params.get("tenant") ?? "",
+    siteId: params.get("site") ?? "",
+  };
+}
+
+function KinfloAdminScopeGate({
+  tenants,
+  sites,
+  initialTenantId,
+  initialSiteId,
+  onTenantChange,
+  onApply,
+}: {
+  tenants: KinfloAdminTenantOption[];
+  sites: KinfloAdminSiteOption[];
+  initialTenantId: string;
+  initialSiteId: string;
+  onTenantChange: (tenantId: string) => void;
+  onApply: (tenantId: string, siteId: string) => void;
+}) {
+  const [tenantId, setTenantId] = useState(initialTenantId);
+  const [siteId, setSiteId] = useState(initialSiteId);
+  const availableSites = sites.filter((site) => site.tenantId === tenantId);
+  const selection = resolveKinfloAdminScope(tenants, sites, { tenantId, siteId });
+
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
+      <section className="w-full max-w-xl rounded-xl border border-slate-200 bg-white p-6 shadow-sm" data-testid="section-kinflo-admin-scope-gate">
+        <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">KinFlo admin scope</div>
+        <h1 className="mt-2 text-2xl font-semibold text-slate-950">Choose the tenant and site to review</h1>
+        <p className="mt-2 text-sm leading-6 text-slate-600">
+          No client data is loaded until both values form an authorized tenant/site pair.
+        </p>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          <label className="grid gap-2 text-sm font-medium text-slate-700">
+            Tenant
+            <select
+              className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950"
+              value={tenantId}
+              onChange={(event) => {
+                setTenantId(event.target.value);
+                setSiteId("");
+                onTenantChange(event.target.value);
+              }}
+              data-testid="select-kinflo-admin-tenant-scope"
+            >
+              <option value="">Select a tenant</option>
+              {tenants.map((tenant) => <option key={tenant.id} value={tenant.id}>{tenant.name}</option>)}
+            </select>
+          </label>
+          <label className="grid gap-2 text-sm font-medium text-slate-700">
+            Site
+            <select
+              className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm text-slate-950 disabled:bg-slate-100"
+              value={siteId}
+              onChange={(event) => setSiteId(event.target.value)}
+              disabled={!tenantId}
+              data-testid="select-kinflo-admin-site-scope"
+            >
+              <option value="">Select a site</option>
+              {availableSites.map((site) => <option key={site.id} value={site.id}>{site.name}</option>)}
+            </select>
+          </label>
+        </div>
+        <button
+          type="button"
+          className="mt-6 inline-flex h-10 items-center justify-center rounded-md bg-slate-950 px-4 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+          disabled={selection.status !== "ready"}
+          onClick={() => selection.status === "ready" && onApply(selection.tenant.id, selection.site.id)}
+          data-testid="button-apply-kinflo-admin-scope"
+        >
+          Open scoped admin view
+        </button>
+      </section>
+    </main>
+  );
+}
+
 function fixtureSnapshot() {
   return fixtureKinfloShellAdapter.getSnapshot();
 }
@@ -197,58 +295,161 @@ function readinessStages(readiness: LaunchReadiness): ShellLaunchReadinessStage[
 }
 
 export function FixtureKinfloShellSnapshotProvider({ children }: { children: ReactNode }) {
-  const snapshot = useMemo(fixtureSnapshot, []);
-  return <KinfloShellSnapshotContext.Provider value={snapshot}>{children}</KinfloShellSnapshotContext.Provider>;
+  const fixture = useMemo(fixtureSnapshot, []);
+  const initialSelection = useMemo(initialScopeSelection, []);
+  const [selection, setSelection] = useState(initialSelection);
+  const tenantOptions = useMemo(() => fixture.tenants.map((tenant) => ({
+    id: tenant.slug,
+    slug: tenant.slug,
+    name: tenant.name,
+  })), [fixture.tenants]);
+  const siteOptions = useMemo(() => fixture.clientWebsiteStudio.sites.map((site) => ({
+    id: site.key,
+    tenantId: site.tenantSlug,
+    key: site.key,
+    name: site.label,
+  })), [fixture.clientWebsiteStudio.sites]);
+  const scope = resolveKinfloAdminScope(tenantOptions, siteOptions, selection);
+
+  if (scope.status !== "ready") {
+    return (
+      <KinfloAdminScopeGate
+        tenants={tenantOptions}
+        sites={siteOptions}
+        initialTenantId={selection.tenantId}
+        initialSiteId={selection.siteId}
+        onTenantChange={(tenantId) => setSelection({ tenantId, siteId: "" })}
+        onApply={(tenantId, siteId) => setSelection({ tenantId, siteId })}
+      />
+    );
+  }
+
+  const snapshot = scopeFixtureKinfloShellSnapshot(fixture, scope.tenant.slug, scope.site.key);
+  const scopeValue = {
+    tenant: scope.tenant,
+    site: scope.site,
+    changeScope: () => setSelection({ tenantId: "", siteId: "" }),
+  };
+  return (
+    <KinfloAdminScopeContext.Provider value={scopeValue}>
+      <KinfloShellSnapshotContext.Provider key={`${scope.tenant.id}:${scope.site.id}`} value={snapshot}>
+        {children}
+      </KinfloShellSnapshotContext.Provider>
+    </KinfloAdminScopeContext.Provider>
+  );
 }
 
 export function ReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children: ReactNode }) {
   const runtime = getKinfloConvexRuntime();
-  const enabled = runtime.canUseReadOnlyLiveData;
+  if (!runtime.canUseReadOnlyLiveData) {
+    return <FixtureKinfloShellSnapshotProvider>{children}</FixtureKinfloShellSnapshotProvider>;
+  }
+  return <EnabledReadOnlyLiveKinfloShellSnapshotProvider>{children}</EnabledReadOnlyLiveKinfloShellSnapshotProvider>;
+}
+
+function EnabledReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children: ReactNode }) {
+  const runtime = getKinfloConvexRuntime();
+  const enabled = true;
+  const initialSelection = useMemo(initialScopeSelection, []);
+  const [selection, setSelection] = useState(initialSelection);
   const tenants = useQuery(listTenantsQuery, enabled ? {} : "skip");
   const plans = useQuery(listPlanCatalogQuery, enabled ? {} : "skip");
   const activation = useQuery(activationReadinessQuery, enabled ? {} : "skip");
-  const primaryTenant = tenants?.[0];
-  const sites = useQuery(listSitesQuery, enabled && primaryTenant ? { tenantId: primaryTenant._id } : "skip");
-  const auditEvents = useQuery(listAuditEventsQuery, enabled ? { scopeType: "platform", limit: 50 } : "skip");
+  const selectedTenant = tenants?.find((tenant) => tenant._id === selection.tenantId);
+  const sites = useQuery(listSitesQuery, enabled && selectedTenant ? { tenantId: selectedTenant._id } : "skip");
+  const selectedSite = sites?.find((site) => site._id === selection.siteId);
+  const auditEvents: AuditEvent[] = [];
   const entitlementUsage = useQuery(
     entitlementUsageQuery,
-    enabled && primaryTenant ? { tenantId: primaryTenant._id } : "skip",
+    enabled && selectedTenant ? { tenantId: selectedTenant._id } : "skip",
   );
   const siteLimit = useQuery(
     checkEntitlementLimitQuery,
-    enabled && primaryTenant ? { tenantId: primaryTenant._id, key: "sites", increment: 0 } : "skip",
+    enabled && selectedTenant ? { tenantId: selectedTenant._id, key: "sites", increment: 0 } : "skip",
   );
-  const primarySite = sites?.[0];
   const launchReadiness = useQuery(
     siteLaunchReadinessQuery,
-    enabled && primarySite ? { siteId: primarySite._id } : "skip",
+    enabled && selectedSite ? { siteId: selectedSite._id } : "skip",
   );
   const publicSite = useQuery(
     publicSiteQuery,
-    enabled && primarySite?.subdomain ? { subdomain: primarySite.subdomain, route: "/" } : "skip",
+    enabled && selectedSite?.subdomain ? { subdomain: selectedSite.subdomain, route: "/" } : "skip",
   );
 
+  const tenantOptions = (tenants ?? []).map((tenant) => ({ id: tenant._id, slug: tenant.slug, name: tenant.name }));
+  const siteOptions = (sites ?? []).map((site) => ({
+    id: site._id,
+    tenantId: site.tenantId,
+    key: site.slug,
+    name: site.name,
+  }));
+  const scope = resolveKinfloAdminScope(tenantOptions, siteOptions, selection);
+
+  const primaryTenant = scope.status === "ready" ? selectedTenant : undefined;
+  const primarySite = scope.status === "ready" ? selectedSite : undefined;
+  const coreLoaded = tenants !== undefined
+    && plans !== undefined
+    && activation !== undefined
+    && primaryTenant !== undefined
+    && sites !== undefined
+    && entitlementUsage !== undefined
+    && siteLimit !== undefined
+    && primarySite !== undefined
+    && launchReadiness !== undefined
+    && (primarySite.subdomain ? publicSite !== undefined : true);
+
   const snapshot = useMemo(() => {
-    const fallback = fixtureSnapshot();
+    let fallback = fixtureSnapshot();
     if (!enabled) {
       return fallback;
     }
 
-    const coreLoaded = tenants !== undefined
-      && plans !== undefined
-      && activation !== undefined
-      && auditEvents !== undefined
-      && primaryTenant !== undefined
-      && sites !== undefined
-      && entitlementUsage !== undefined
-      && siteLimit !== undefined
-      && primarySite !== undefined
-      && launchReadiness !== undefined
-      && (primarySite.subdomain ? publicSite !== undefined : true);
-
     if (!coreLoaded) {
       return fallback;
     }
+
+    const fixtureHasTenant = fallback.tenants.some((tenant) => tenant.slug === primaryTenant.slug);
+    const fixtureHasSite = fallback.clientWebsiteStudio.sites.some((site) => (
+      site.tenantSlug === primaryTenant.slug && site.key === primarySite.slug
+    ));
+    fallback = scopeFixtureKinfloShellSnapshot({
+      ...fallback,
+      tenants: fixtureHasTenant ? fallback.tenants : [...fallback.tenants, {
+        name: primaryTenant.name,
+        slug: primaryTenant.slug,
+        plan: primaryTenant.planKey ?? "Convex scoped",
+        sites: 1,
+        owner: "Convex scoped",
+        status: shellStatus(primaryTenant.status),
+      }],
+      sites: fixtureHasSite ? fallback.sites : [...fallback.sites, {
+        name: primarySite.name,
+        tenant: primaryTenant.slug,
+        domain: primarySite.primaryDomain ?? primarySite.subdomain ?? "Not attached",
+        route: "/",
+        template: primarySite.templateKey ?? "Unassigned",
+        status: shellStatus(primarySite.status),
+        previewPath: `/kinflo-sites/${primarySite.slug}`,
+      }],
+      clientWebsiteStudio: fixtureHasSite ? fallback.clientWebsiteStudio : {
+        ...fallback.clientWebsiteStudio,
+        sites: [...fallback.clientWebsiteStudio.sites, {
+          key: primarySite.slug,
+          label: primarySite.name,
+          tenantSlug: primaryTenant.slug,
+          previewPath: `/kinflo-sites/${primarySite.slug}`,
+          audience: "Scoped Convex site",
+          primaryCTA: "Review site",
+          trustSignal: "Only records resolved for the active tenant/site scope may appear here.",
+          heroDirection: "Fixture-backed design records remain hidden until this site has an explicit scoped record.",
+          mobileReadiness: "needs_review",
+          navReadiness: "needs_review",
+          heroReadiness: "needs_review",
+          portalReadiness: "needs_review",
+          status: "publish_gated",
+        }],
+      },
+    }, primaryTenant.slug, primarySite.slug);
 
     const tenantName = new Map(tenants.map((tenant) => [tenant._id, tenant.name]));
     const livePlans: ShellBillingPlan[] = plans.map((plan) => ({
@@ -278,7 +479,8 @@ export function ReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children
       featureOverrides: featureOverrides(entitlementUsage.entitlement?.featureOverrides),
       nextReview: "Read-only adapter verified; mutation cutover remains blocked",
     }];
-    const liveSites = sites.map((site) => ({
+    const scopedSites = sites.filter((site) => site._id === primarySite._id);
+    const liveSites = scopedSites.map((site) => ({
       name: site.name,
       tenant: tenantName.get(site.tenantId) ?? primaryTenant.name,
       domain: site.primaryDomain ?? (site.subdomain ? `${site.subdomain}.convex.site` : "Not attached"),
@@ -287,11 +489,11 @@ export function ReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children
       status: shellStatus(site.status),
       previewPath: `/kinflo-sites/${site.slug}`,
     }));
-    const liveTenants = tenants.map((tenant) => ({
+    const liveTenants = tenants.filter((tenant) => tenant._id === primaryTenant._id).map((tenant) => ({
       name: tenant.name,
       slug: tenant.slug,
       plan: plans.find((plan) => plan.key === tenant.planKey)?.label ?? tenant.planKey ?? "Pilot",
-      sites: tenant._id === primaryTenant._id ? sites.length : 0,
+      sites: scopedSites.length,
       owner: "Convex scoped",
       status: shellStatus(tenant.status),
     }));
@@ -307,8 +509,8 @@ export function ReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children
     };
     let liveBindings = liveBindingEvidence(fallback, "Tenant control plane", [
       `${tenants.length} scoped tenant(s) returned`,
-      `${sites.length} site(s) returned for ${primaryTenant.slug}`,
-      `${auditEvents.length} platform audit event(s) returned`,
+      `${scopedSites.length} active site returned for ${primaryTenant.slug}`,
+      "Platform-wide audit events are omitted from tenant/site views",
     ]);
     liveBindings = liveBindingEvidence({ ...fallback, liveAdapterBindings: liveBindings }, "Plans and entitlements", [
       `${entitlementUsage.usage.length} usage limits returned for ${primaryTenant.slug}`,
@@ -351,7 +553,7 @@ export function ReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children
         ...fallback.brandTheme,
         defaultSiteKey: primarySite._id,
         defaultPaletteKey: resolveTenantPaletteId(primaryTenant.slug),
-        siteOptions: sites.map((site) => ({
+        siteOptions: scopedSites.map((site) => ({
           key: site._id,
           label: site.name,
           previewPath: `/kinflo-sites/${site.slug}`,
@@ -376,6 +578,7 @@ export function ReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children
   }, [
     activation,
     auditEvents,
+    coreLoaded,
     enabled,
     entitlementUsage,
     launchReadiness,
@@ -392,7 +595,41 @@ export function ReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children
     tenants,
   ]);
 
-  return <KinfloShellSnapshotContext.Provider value={snapshot}>{children}</KinfloShellSnapshotContext.Provider>;
+  if (scope.status !== "ready") {
+    return (
+      <KinfloAdminScopeGate
+        tenants={tenantOptions}
+        sites={siteOptions}
+        initialTenantId={selection.tenantId}
+        initialSiteId={selection.siteId}
+        onTenantChange={(tenantId) => setSelection({ tenantId, siteId: "" })}
+        onApply={(tenantId, siteId) => setSelection({ tenantId, siteId })}
+      />
+    );
+  }
+
+  if (!coreLoaded) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-12">
+        <section className="w-full max-w-lg rounded-xl border border-slate-200 bg-white p-6 shadow-sm" data-testid="section-kinflo-admin-scope-loading">
+          <h1 className="text-xl font-semibold text-slate-950">Loading the selected KinFlo scope</h1>
+          <p className="mt-2 text-sm leading-6 text-slate-600">Client records remain hidden until every read resolves for the exact tenant/site pair.</p>
+        </section>
+      </main>
+    );
+  }
+
+  return (
+    <KinfloAdminScopeContext.Provider value={{
+      tenant: scope.tenant,
+      site: scope.site,
+      changeScope: () => setSelection({ tenantId: "", siteId: "" }),
+    }}>
+      <KinfloShellSnapshotContext.Provider key={`${scope.tenant.id}:${scope.site.id}`} value={snapshot}>
+        {children}
+      </KinfloShellSnapshotContext.Provider>
+    </KinfloAdminScopeContext.Provider>
+  );
 }
 
 export function useKinfloShellSnapshot() {
@@ -401,4 +638,12 @@ export function useKinfloShellSnapshot() {
     throw new Error("KinFlo shell snapshot provider is required.");
   }
   return snapshot;
+}
+
+export function useKinfloAdminScope() {
+  const scope = useContext(KinfloAdminScopeContext);
+  if (!scope) {
+    throw new Error("KinFlo admin scope provider is required.");
+  }
+  return scope;
 }

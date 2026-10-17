@@ -88,7 +88,12 @@ for (const forbiddenClass of ["bg-slate-950", "bg-slate-900", "text-slate-50", "
 
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "useKinfloAdminIdentity",
-  "const { isLoading, isAdmin } = useKinfloAdminIdentity();",
+  "const adminIdentity = useKinfloAdminIdentity();",
+  "const canAccessAdmin = canAccessKinfloAdmin(adminIdentity);",
+]);
+
+requireIncludes("client/src/contexts/KinfloAdminIdentityContext.tsx", [
+  'identity.source === "local_fixture" || identity.isAdmin',
 ]);
 
 const adminShell = read("client/src/pages/AdminKinfloShell.tsx");

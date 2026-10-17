@@ -2331,6 +2331,14 @@ const fixtureTenants: ShellTenant[] = [
     status: "active",
   },
   {
+    name: "Vanguard Enterprises",
+    slug: "vanguard-enterprises",
+    plan: "Engineering Pilot",
+    sites: 1,
+    owner: "Client Admin",
+    status: "active",
+  },
+  {
     name: "Advisor Client Starter",
     slug: "advisor-client-starter",
     plan: "Client Build",
@@ -2366,6 +2374,15 @@ const fixtureSites: ShellSite[] = [
     template: "Campaign Microsite",
     status: "preview",
     previewPath: "/kinflo-sites/campaign-microsite",
+  },
+  {
+    name: "Vanguard Enterprises",
+    tenant: "vanguard-enterprises",
+    domain: "pending",
+    route: "/",
+    template: "Advisor Consultant",
+    status: "preview",
+    previewPath: "/kinflo-sites/vanguard-enterprises",
   },
   {
     name: "Advisor Client Site",
@@ -10774,21 +10791,9 @@ function buildMetrics(): ShellMetric[] {
   ];
 }
 
-export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
-  mode: "fixture",
-  getSnapshot: () => {
-    const runtime = getKinfloConvexRuntime();
-
-    return {
-      dataMode: {
-        label: "Fixture Data",
-        description: "Convex API bindings are not generated yet. This shell is using typed fixture data that mirrors the Convex control-plane contract.",
-        source: "fixture",
-        runtimeMode: runtime.mode,
-        runtimeLabel: runtime.label,
-        activationGate: runtime.activationGate,
-        convexFunctions: runtime.functionNames,
-      },
+function buildFixtureKinfloShellSnapshot(dataMode: ShellDataMode): KinfloShellSnapshot {
+  return {
+      dataMode,
       activeObjectSignal: fixtureActiveObjectSignal,
       metrics: buildMetrics(),
       liveAdapterBindings: fixtureLiveAdapterBindings,
@@ -10821,7 +10826,34 @@ export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
       adapterSwitchReadiness: fixtureAdapterSwitchReadiness,
       hostedActivationRunbook: fixtureHostedActivationRunbook,
       launchGates: fixtureLaunchGates,
-    };
+  };
+}
+
+export function getFixtureKinfloShellSnapshotForValidation() {
+  return buildFixtureKinfloShellSnapshot({
+    label: "Fixture Data",
+    description: "Validation-only fixture snapshot. No hosted runtime or provider is contacted.",
+    source: "fixture",
+    runtimeMode: "fixture_only",
+    runtimeLabel: "Validation fixture",
+    activationGate: "Validation only",
+    convexFunctions: [],
+  });
+}
+
+export const fixtureKinfloShellAdapter: KinfloShellDataAdapter = {
+  mode: "fixture",
+  getSnapshot: () => {
+    const runtime = getKinfloConvexRuntime();
+    return buildFixtureKinfloShellSnapshot({
+      label: "Fixture Data",
+      description: "Convex API bindings are not generated yet. This shell is using typed fixture data that mirrors the Convex control-plane contract.",
+      source: "fixture",
+      runtimeMode: runtime.mode,
+      runtimeLabel: runtime.label,
+      activationGate: runtime.activationGate,
+      convexFunctions: runtime.functionNames,
+    });
   },
 };
 

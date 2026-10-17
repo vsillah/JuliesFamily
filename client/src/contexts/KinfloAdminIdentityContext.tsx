@@ -8,6 +8,10 @@ export type KinfloAdminIdentity = {
   source: KinfloAdminIdentitySource;
 };
 
+export function canAccessKinfloAdmin(identity: KinfloAdminIdentity) {
+  return identity.source === "local_fixture" || identity.isAdmin;
+}
+
 const KinfloAdminIdentityContext = createContext<KinfloAdminIdentity | null>(null);
 
 export function KinfloAdminIdentityProvider({
