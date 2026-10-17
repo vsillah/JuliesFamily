@@ -101,15 +101,44 @@ check(
   "Only the typed confirmation input is allowed; the target is code-fixed.",
 );
 check(
-  "environment file is guarded before and after deployment",
-  workflow.split("if [[ -e .env.local ]]").length === 4 &&
+  "preexisting environment file is rejected before ownership is armed",
+  workflow.includes("preexisting_environment_file_rejected") &&
+    workflow.includes('transient_env_guard_armed="false"') &&
+    workflow.includes('transient_env_guard_armed="true"') &&
+    workflow.indexOf("preexisting_environment_file_rejected") <
+      workflow.indexOf('transient_env_guard_armed="true"') &&
+    workflow.indexOf('transient_env_guard_armed="true"') <
+      workflow.indexOf("npx --no-install convex dev --once") &&
     workflow.split("unset CONVEX_DEPLOYMENT").length === 2,
-  "Reject .env.local and clear ambient CONVEX_DEPLOYMENT selection for deployment.",
+  "Leave a user-owned .env.local untouched and arm transient ownership only immediately before deployment.",
 );
 check(
-  "workflow never writes an environment file",
+  "workflow never creates an environment file directly",
   !/touch .*\.env\.local|>+\s*\.env\.local|--save-env|--env-file/.test(workflow),
-  "Never create, append, or pass an environment file.",
+  "Only the pinned Convex CLI may create the transient .env.local.",
+);
+check(
+  "transient environment keys are explicit and non-secret",
+  Boolean(pkg.dependencies?.vite ?? pkg.devDependencies?.vite) &&
+    ["CONVEX_DEPLOYMENT", "VITE_CONVEX_URL", "VITE_CONVEX_SITE_URL"].every((key) =>
+      workflow.includes(`${key})`),
+    ) &&
+    workflow.includes('if [[ "$key" == "CONVEX_DEPLOY_KEY" ]]') &&
+    workflow.includes('*) return 1 ;;') &&
+    workflow.includes('[[ "$saw_deployment" == "true" && "$saw_url" == "true" && "$saw_site_url" == "true" ]]') &&
+    !/echo[^\n]*\$key/.test(workflow),
+  "Accept exactly the three expected key names, reject CONVEX_DEPLOY_KEY and duplicates, and never print parsed content.",
+);
+check(
+  "owned transient environment file is removed by a verified EXIT trap",
+  workflow.includes("trap cleanup EXIT") &&
+    workflow.includes('transient_env_owned="true"') &&
+    workflow.includes('if [[ "$transient_env_guard_armed" == "true" && -e .env.local ]]') &&
+    workflow.includes("rm -f -- .env.local") &&
+    workflow.includes('[[ -e .env.local ]]') &&
+    workflow.includes("transient_environment_cleanup_failure") &&
+    workflow.includes('exit "$original_status"'),
+  "Remove only the file created after ownership was armed and fail if cleanup cannot be verified.",
 );
 check(
   "raw preflight and deployment outputs are withheld and removed",
@@ -117,7 +146,8 @@ check(
     workflow.includes('>"$deploy_log" 2>&1') &&
     workflow.includes("Raw CLI output was withheld") &&
     workflow.includes("trap 'rm -f \"$preflight_log\"' EXIT") &&
-    workflow.includes("trap 'rm -f \"$deploy_log\"' EXIT"),
+    workflow.includes('rm -f -- "$deploy_log"') &&
+    workflow.includes("ephemeral_output_cleanup_failure"),
   "Capture both ephemeral CLI outputs without publishing or retaining them.",
 );
 check(
@@ -130,6 +160,10 @@ check(
     "push_configuration_or_deployment_binding",
     "bundle_or_push_failure",
     "environment_file_policy_failure",
+    "preexisting_environment_file_rejected",
+    "transient_environment_policy_failure",
+    "ephemeral_output_cleanup_failure",
+    "transient_environment_cleanup_failure",
   ].every((classification) => workflow.includes(classification)) &&
     workflow.includes('echo "CONVEX_FAILURE_CLASSIFICATION=$failure_classification" >> "$GITHUB_ENV"') &&
     workflow.includes('*) failure_classification="bundle_or_push_failure" ;;'),
@@ -157,6 +191,7 @@ check(
     "Status:",
     "Credential-free local preflight:",
     "Deployment attempts:",
+    "Transient environment file:",
     "Production selectable:",
     "Secret values printed:",
     ".env.local",
@@ -195,7 +230,7 @@ check(
     "site creation",
     "order writes or uploads",
     "1Password item access or modification",
-    "`.env.local` creation or use",
+    "durable or preexisting `.env.local` creation or use",
   ].every((marker) => doc.includes(marker)),
   "Preserve every requested development-lane exclusion.",
 );
