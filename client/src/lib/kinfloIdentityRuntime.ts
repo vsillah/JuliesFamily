@@ -8,6 +8,24 @@ export type KinfloIdentityRuntime = {
   gate: string;
 };
 
+export const KINFLO_APPROVED_DEV_ACTIVATION_DEPLOYMENT = "hallowed-manatee-765";
+
+export function isApprovedKinfloDevActivationTarget(publicUrl?: string) {
+  if (!publicUrl) {
+    return false;
+  }
+
+  try {
+    const hostname = new URL(publicUrl).hostname;
+    return (
+      hostname.startsWith(`${KINFLO_APPROVED_DEV_ACTIVATION_DEPLOYMENT}.`)
+      && (hostname.endsWith(".convex.cloud") || hostname.endsWith(".convex.site"))
+    );
+  } catch {
+    return false;
+  }
+}
+
 function readEnvValue(value: unknown) {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }

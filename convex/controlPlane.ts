@@ -186,6 +186,34 @@ export const bootstrapPlatformAdmin = mutation({
   },
 });
 
+export const repairCurrentPlatformAdmin = mutation({
+  args: {},
+  handler: async (ctx) => {
+    if (process.env.KINFLO_DEV_ADMIN_REPAIR_ENABLED !== "true") {
+      throw new Error("Dev-only platform admin repair is disabled");
+    }
+
+    const user = await syncCurrentUser(ctx);
+    if (user.platformRole !== "super_admin") {
+      await ctx.db.patch(user._id, {
+        platformRole: "super_admin",
+        updatedAt: now(),
+      });
+    }
+
+    await writeAuditEvent(ctx, {
+      scopeType: "platform",
+      actorUserId: user._id,
+      action: "platform_admin_repaired",
+      resourceType: "user",
+      resourceId: user._id,
+      metadata: { scope: "dev_only", reason: "approved_role_repair" },
+    });
+
+    return { userId: user._id, platformRole: "super_admin" as const };
+  },
+});
+
 export const viewer = query({
   args: {},
   handler: async (ctx) => {
