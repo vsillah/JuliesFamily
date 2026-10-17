@@ -12,8 +12,8 @@ npm run kinflo:validate-generated-api-cutover-owner-review
 
 - Packet: `docs/convex-generated-api-cutover-owner-review.json`
 - Status: `prepare_only_generated_api_cutover_owner_review`
-- Generated API bindings: 86
-- Generated API review surfaces: 14
+- Generated API bindings: 93
+- Generated API review surfaces: 18
 - Cutover batches: 6
 - Cutover mapped functions: 44
 - Hosted-smoke evidence gaps: 28

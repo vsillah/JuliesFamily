@@ -130,9 +130,9 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "inviteRole: \"site.editor\"",
   "evidenceChecklist",
   "siteFactory.listClientWebsiteAdminInvitationReadinessPackets",
-  "totalBindings: 86",
-  "queryBindings: 48",
-  "smokeManifestGaps: 41",
+  "totalBindings: 93",
+  "queryBindings: 51",
+  "smokeManifestGaps: 48",
   "totalBindings: 25",
   "queryBindings: 24",
 ]);
@@ -159,9 +159,9 @@ requireIncludes("docs/kinflo-saas-execution-ledger.json", [
 ]);
 
 requireIncludes("docs/phase88-generated-api-review-board.md", [
-  "Generated API bindings: 86",
-  "Query bindings: 48",
-  "Smoke-manifest review gaps: 41",
+  "Generated API bindings: 93",
+  "Query bindings: 51",
+  "Smoke-manifest review gaps: 48",
   "siteFactory.listClientWebsiteAdminInvitationReadinessPackets",
 ]);
 

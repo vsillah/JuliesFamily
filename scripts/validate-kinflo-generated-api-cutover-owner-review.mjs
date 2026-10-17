@@ -121,8 +121,8 @@ requireIncludes("docs/phase168-generated-api-cutover-owner-review.md", [
   "Phase 168: Generated API Cutover Owner Review",
   "npm run kinflo:validate-generated-api-cutover-owner-review",
   "Packet: `docs/convex-generated-api-cutover-owner-review.json`",
-  "Generated API bindings: 86",
-  "Generated API review surfaces: 14",
+  "Generated API bindings: 93",
+  "Generated API review surfaces: 18",
   "Cutover batches: 6",
   "Cutover mapped functions: 44",
   "Hosted-smoke evidence gaps: 28",
@@ -192,6 +192,14 @@ for (const [key, expected] of Object.entries(expectedSummary)) {
   } else {
     fail(`owner review summary ${key} is ${expected}`, `Received ${packet?.summary?.[key]}.`);
   }
+}
+
+const generatedBindingReview = packet?.reviewItems?.find((item) => item.id === "generated-binding-contract");
+const expectedGeneratedBindingEvidence = `Phase 88 records ${generatedCounts.totalBindings} generated API bindings across ${generatedCounts.surfaces} surfaces with ${generatedCounts.queryBindings} query bindings and ${generatedCounts.mutationBindings} mutation bindings.`;
+if (generatedBindingReview?.evidence === expectedGeneratedBindingEvidence) {
+  pass("generated binding review evidence matches the current review board");
+} else {
+  fail("generated binding review evidence matches the current review board", `Received ${generatedBindingReview?.evidence}.`);
 }
 
 if (packet?.phase === 168) {
@@ -321,8 +329,8 @@ for (const check of checks) {
 }
 
 console.log("\nKinFlo generated API cutover owner review validation");
-console.log("Generated API bindings: 86");
-console.log("Generated API review surfaces: 14");
+console.log(`Generated API bindings: ${generatedCounts.totalBindings}`);
+console.log(`Generated API review surfaces: ${generatedCounts.surfaces}`);
 console.log("Cutover batches: 6");
 console.log("Cutover mapped functions: 44");
 console.log("Hosted smoke evidence gaps: 28");

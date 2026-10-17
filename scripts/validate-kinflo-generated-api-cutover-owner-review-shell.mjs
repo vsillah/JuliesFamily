@@ -49,6 +49,16 @@ function extractOwnerReviewBlock(contents) {
   return match[1];
 }
 
+function extractGeneratedReviewBlock(contents) {
+  const match = contents.match(/generatedApiReviewBoard:\s*\{([\s\S]*?)\n\s*\},\n\s*generatedApiCutoverOwnerReview:/);
+  if (!match) {
+    fail("generated API review board block exists", "Could not find hostedActivationRunbook.generatedApiReviewBoard.");
+    return "";
+  }
+  pass("generated API review board block exists");
+  return match[1];
+}
+
 const tracked = execFileSync("git", ["ls-files"], { encoding: "utf8" })
   .split("\n")
   .filter(Boolean);
@@ -88,8 +98,8 @@ requireIncludes("docs/phase169-generated-api-cutover-owner-review-shell.md", [
   "section-kinflo-generated-api-cutover-review-items",
   "section-kinflo-generated-api-cutover-batches",
   "button-generated-api-cutover-owner-review-gated",
-  "Generated API bindings: 86",
-  "Generated API review surfaces: 14",
+  "Generated API bindings: 93",
+  "Generated API review surfaces: 18",
   "Cutover batches: 6",
   "Cutover mapped functions: 44",
   "Hosted-smoke evidence gaps: 28",
@@ -108,8 +118,8 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
   "phase: 169",
   "provider_light_generated_api_cutover_owner_review_shell",
   "packetPath: \"docs/convex-generated-api-cutover-owner-review.json\"",
-  "totalBindings: 86",
-  "reviewSurfaces: 14",
+  "totalBindings: 93",
+  "reviewSurfaces: 18",
   "cutoverBatches: 6",
   "cutoverMappedFunctions: 44",
   "hostedSmokeEvidenceGaps: 28",
@@ -143,11 +153,43 @@ requireIncludes("package.json", [
 const shellData = read("client/src/lib/kinfloShellData.ts");
 const shellPage = read("client/src/pages/AdminKinfloShell.tsx");
 const block = extractOwnerReviewBlock(shellData);
+const generatedReviewBlock = extractGeneratedReviewBlock(shellData);
 const batchSummaryBlock = block.match(/batchSummaries:\s*\[([\s\S]*?)\n\s*\],\n\s*readinessScoreboard:/)?.[1] ?? "";
 const batchCount = (batchSummaryBlock.match(/batchId: "/g) ?? []).length;
 const reviewItemCount = (block.match(/status: "pending_owner_review"/g) ?? []).length;
 const canCutoverFalseCount = (batchSummaryBlock.match(/canCutover: false/g) ?? []).length;
 const canApproveFalseCount = (block.match(/canApprove: false/g) ?? []).length;
+const shellTotalBindings = Number(block.match(/totalBindings: (\d+)/)?.[1] ?? NaN);
+const shellReviewSurfaces = Number(block.match(/reviewSurfaces: (\d+)/)?.[1] ?? NaN);
+const boardTotalBindings = Number(generatedReviewBlock.match(/totalBindings: (\d+)/)?.[1] ?? NaN);
+const boardReviewSurfaces = (generatedReviewBlock.match(/surface: "/g) ?? []).length;
+
+if (shellTotalBindings === boardTotalBindings) {
+  pass("owner-review shell binding total matches the generated API review board");
+} else {
+  fail("owner-review shell binding total matches the generated API review board", `Received ${shellTotalBindings}; expected ${boardTotalBindings}.`);
+}
+
+if (shellReviewSurfaces === boardReviewSurfaces) {
+  pass("owner-review shell surface total matches the generated API review board");
+} else {
+  fail("owner-review shell surface total matches the generated API review board", `Received ${shellReviewSurfaces}; expected ${boardReviewSurfaces}.`);
+}
+
+const boardQueryBindings = Number(generatedReviewBlock.match(/queryBindings: (\d+)/)?.[1] ?? NaN);
+const boardMutationBindings = Number(generatedReviewBlock.match(/mutationBindings: (\d+)/)?.[1] ?? NaN);
+const currentEvidence = `Phase 88 records ${boardTotalBindings} generated API bindings across ${boardReviewSurfaces} surfaces with ${boardQueryBindings} query bindings and ${boardMutationBindings} mutation bindings.`;
+if (block.includes(`evidence: "${currentEvidence}"`)) {
+  pass("owner-review shell evidence matches the generated API review board");
+} else {
+  fail("owner-review shell evidence matches the generated API review board", `Expected ${currentEvidence}`);
+}
+
+if (block.includes(`evidence: "${boardTotalBindings} generated bindings are mapped across ${boardReviewSurfaces} surfaces, but the generated binding review window has not been approved."`)) {
+  pass("owner-review readiness evidence matches the generated API review board");
+} else {
+  fail("owner-review readiness evidence matches the generated API review board", "Expected current generated binding and surface totals in readiness evidence.");
+}
 
 if (batchCount === 6) {
   pass("generated API cutover owner-review shell covers six batches");
@@ -204,8 +246,8 @@ for (const check of checks) {
 }
 
 console.log("\nKinFlo generated API cutover owner-review shell validation");
-console.log("Generated API bindings: 86");
-console.log("Generated API review surfaces: 14");
+console.log(`Generated API bindings: ${boardTotalBindings}`);
+console.log(`Generated API review surfaces: ${boardReviewSurfaces}`);
 console.log("Cutover batches: 6");
 console.log("Cutover mapped functions: 44");
 console.log("Hosted smoke evidence gaps: 28");

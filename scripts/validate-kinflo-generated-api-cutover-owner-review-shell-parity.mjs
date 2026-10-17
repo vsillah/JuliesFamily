@@ -60,6 +60,16 @@ function extractOwnerReviewBlock(contents) {
   return match[1];
 }
 
+function extractGeneratedReviewBlock(contents) {
+  const match = contents.match(/generatedApiReviewBoard:\s*\{([\s\S]*?)\n\s*\},\n\s*generatedApiCutoverOwnerReview:/);
+  if (!match) {
+    fail("generated API review board block exists", "Could not find hostedActivationRunbook.generatedApiReviewBoard.");
+    return "";
+  }
+  pass("generated API review board block exists");
+  return match[1];
+}
+
 function extractObjectArray(block, propertyName) {
   const match = block.match(new RegExp(`${propertyName}:\\s*\\[([\\s\\S]*?)\\n\\s*\\],`));
   if (!match) {
@@ -158,8 +168,8 @@ requireIncludes("docs/phase170-generated-api-cutover-owner-review-shell-parity.m
   "npm run kinflo:validate-generated-api-cutover-owner-review-shell-parity",
   "docs/convex-generated-api-cutover-owner-review.json",
   "hostedActivationRunbook.generatedApiCutoverOwnerReview",
-  "Generated API bindings: 86",
-  "Generated API review surfaces: 14",
+  "Generated API bindings: 93",
+  "Generated API review surfaces: 18",
   "Cutover batches: 6",
   "Cutover mapped functions: 44",
   "Hosted-smoke evidence gaps: 28",
@@ -181,6 +191,7 @@ const packet = parseJson("docs/convex-generated-api-cutover-owner-review.json");
 const shellData = read("client/src/lib/kinfloShellData.ts");
 const shellPage = read("client/src/pages/AdminKinfloShell.tsx");
 const shellBlock = extractOwnerReviewBlock(shellData);
+const generatedReviewBlock = extractGeneratedReviewBlock(shellData);
 const shellReviewItems = extractReviewItems(extractObjectArray(shellBlock, "reviewItemsList"));
 const shellBatchSummaries = extractBatchSummaries(extractObjectArray(shellBlock, "batchSummaries"));
 
@@ -195,6 +206,12 @@ compare("shell hosted-smoke evidence gaps", extractNumber(shellBlock, "hostedSmo
 compare("shell review item count", extractNumber(shellBlock, "reviewItems"), packet?.summary?.reviewItems);
 compare("shell ready review item count", extractNumber(shellBlock, "readyReviewItems"), packet?.summary?.readyReviewItems);
 compare("shell pending review item count", extractNumber(shellBlock, "pendingReviewItems"), packet?.summary?.pendingReviewItems);
+compare("packet generated API bindings against review board", packet?.summary?.generatedApiBindings, extractNumber(generatedReviewBlock, "totalBindings"));
+compare("packet generated API review surfaces against review board", packet?.summary?.generatedApiReviewSurfaces, (generatedReviewBlock.match(/surface: "/g) ?? []).length);
+compare("packet query bindings against review board", packet?.summary?.queryBindings, extractNumber(generatedReviewBlock, "queryBindings"));
+compare("packet mutation bindings against review board", packet?.summary?.mutationBindings, extractNumber(generatedReviewBlock, "mutationBindings"));
+compare("packet smoke-manifest functions against review board", packet?.summary?.smokeManifestFunctions, extractNumber(generatedReviewBlock, "smokeManifestFunctions"));
+compare("packet smoke-manifest review gaps against review board", packet?.summary?.smokeManifestReviewGaps, extractNumber(generatedReviewBlock, "smokeManifestGaps"));
 compare("shell review item array length", shellReviewItems.length, packet?.reviewItems?.length);
 compare("shell batch summary array length", shellBatchSummaries.length, packet?.batchSummaries?.length);
 
@@ -281,8 +298,8 @@ for (const check of checks) {
 console.log("\nKinFlo generated API cutover owner-review shell parity validation");
 console.log("Packet phase: 168");
 console.log("Shell phase: 169");
-console.log("Generated API bindings: 86");
-console.log("Generated API review surfaces: 14");
+console.log(`Generated API bindings: ${packet?.summary?.generatedApiBindings}`);
+console.log(`Generated API review surfaces: ${packet?.summary?.generatedApiReviewSurfaces}`);
 console.log("Cutover batches: 6");
 console.log("Cutover mapped functions: 44");
 console.log("Hosted smoke evidence gaps: 28");
