@@ -72,36 +72,23 @@ jobs:
       - name: Install locked dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
 
-      - name: Validate Convex codegen and typecheck without deploying
+      - name: Typecheck Convex source locally without credentials
         shell: bash
         run: |
           set -euo pipefail
-          unset CONVEX_DEPLOYMENT
 
           preflight_log="$RUNNER_TEMP/kinflo-convex-preflight-${GITHUB_RUN_ID}.log"
           trap 'rm -f "$preflight_log"' EXIT
 
-          if ! npx --no-install convex codegen --dry-run --typecheck enable >"$preflight_log" 2>&1; then
-            failure_classification="preflight_codegen_typecheck_or_configuration"
-            if grep -Eiq "unauthorized|not authorized|permission denied|access denied|do not have access|don't have access|invalid (deploy )?key|deploy key.*(invalid|expired)|authentication" "$preflight_log"; then
-              failure_classification="preflight_authentication_or_authorization"
-            elif grep -Eiq 'network|timed out|timeout|connection (refused|reset)|socket hang up|temporary failure|service unavailable|bad gateway|gateway timeout|econnreset|econnrefused|enotfound' "$preflight_log"; then
-              failure_classification="preflight_network_or_service_availability"
-            fi
-
-            case "$failure_classification" in
-              preflight_authentication_or_authorization|preflight_network_or_service_availability|preflight_codegen_typecheck_or_configuration) ;;
-              *) failure_classification="preflight_codegen_typecheck_or_configuration" ;;
-            esac
-
-            echo "CONVEX_FAILURE_CLASSIFICATION=$failure_classification" >> "$GITHUB_ENV"
-            echo "::error title=Convex development preflight failed::The non-deploying codegen and typecheck preflight failed with sanitized classification: $failure_classification. Raw CLI output was withheld to preserve the sanitized evidence boundary."
+          if ! env -u CONVEX_DEPLOY_KEY -u CONVEX_DEPLOYMENT npm run convex:check >"$preflight_log" 2>&1; then
+            echo "CONVEX_FAILURE_CLASSIFICATION=preflight_local_typecheck_failure" >> "$GITHUB_ENV"
+            echo "::error title=Convex source typecheck failed::The credential-free local Convex source typecheck failed. Raw compiler output was withheld to preserve the sanitized evidence boundary."
             exit 1
           fi
 
           if [[ -e .env.local ]]; then
             echo "CONVEX_FAILURE_CLASSIFICATION=environment_file_policy_failure" >> "$GITHUB_ENV"
-            echo "::error title=Environment-file policy failed::The non-deploying Convex preflight created .env.local unexpectedly; no deployment was attempted."
+            echo "::error title=Environment-file policy failed::The credential-free local typecheck created .env.local unexpectedly; no deployment was attempted."
             exit 1
           fi
 
@@ -149,7 +136,7 @@ jobs:
             echo "- Workflow run: [$GITHUB_RUN_ID]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)"
             echo "- Deployment binding: \`dev:$EXPECTED_CONVEX_DEPLOYMENT\`"
             echo "- Status: \`succeeded\`"
-            echo "- Non-deploying preflight: \`passed\`"
+            echo "- Credential-free local preflight: \`passed\`"
             echo "- Deployment attempts: \`1\`"
             echo "- Production selectable: \`no\`"
             echo "- Secret values printed: \`no\`"
@@ -168,5 +155,5 @@ jobs:
             echo "- Status: \`failed; no retry attempted\`"
             echo "- Failure classification: \`$CONVEX_FAILURE_CLASSIFICATION\`"
             echo "- Secret values printed: \`no\`"
-            echo "- Raw CLI output printed: \`no\`"
+            echo "- Raw preflight/deployment output printed: \`no\`"
           } >> "$GITHUB_STEP_SUMMARY"

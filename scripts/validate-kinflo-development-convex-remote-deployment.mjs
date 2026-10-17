@@ -68,14 +68,20 @@ check(
   "Use one fail-closed Convex development push without retry.",
 );
 check(
-  "non-deploying preflight isolates codegen and typecheck",
-  workflow.split("npx --no-install convex codegen --dry-run --typecheck enable").length === 2 &&
-    workflow.includes("Validate Convex codegen and typecheck without deploying") &&
-    workflow.indexOf("npx --no-install convex codegen --dry-run --typecheck enable") <
+  "credential-free local preflight typechecks Convex source",
+  workflow.split("npm run convex:check").length === 2 &&
+    workflow.includes("Typecheck Convex source locally without credentials") &&
+    workflow.includes("env -u CONVEX_DEPLOY_KEY -u CONVEX_DEPLOYMENT npm run convex:check") &&
+    workflow.indexOf("npm run convex:check") <
       workflow.indexOf("npx --no-install convex dev --once") &&
     workflow.includes('>"$preflight_log" 2>&1') &&
     workflow.includes("trap 'rm -f \"$preflight_log\"' EXIT"),
-  "Run one ephemeral dry-run codegen and typecheck preflight before any deployment attempt.",
+  "Run the repository's focused Convex TypeScript check without deployment selectors or credentials.",
+);
+check(
+  "workflow never invokes codegen outside deployment",
+  !workflow.includes("convex codegen") && workflow.includes("--codegen disable"),
+  "Keep generated bindings in source control and do not run the unsupported codegen path in CI.",
 );
 check(
   "deployment attempt skips completed preflight work",
@@ -97,8 +103,8 @@ check(
 check(
   "environment file is guarded before and after deployment",
   workflow.split("if [[ -e .env.local ]]").length === 4 &&
-    workflow.split("unset CONVEX_DEPLOYMENT").length === 3,
-  "Reject .env.local and clear ambient CONVEX_DEPLOYMENT selection for preflight and deployment.",
+    workflow.split("unset CONVEX_DEPLOYMENT").length === 2,
+  "Reject .env.local and clear ambient CONVEX_DEPLOYMENT selection for deployment.",
 );
 check(
   "workflow never writes an environment file",
@@ -106,7 +112,7 @@ check(
   "Never create, append, or pass an environment file.",
 );
 check(
-  "raw Convex outputs are withheld and removed",
+  "raw preflight and deployment outputs are withheld and removed",
   workflow.includes('>"$preflight_log" 2>&1') &&
     workflow.includes('>"$deploy_log" 2>&1') &&
     workflow.includes("Raw CLI output was withheld") &&
@@ -118,9 +124,7 @@ check(
   "preflight and deployment classifications are coarse and allowlisted",
   [
     "not_available_before_preflight",
-    "preflight_authentication_or_authorization",
-    "preflight_network_or_service_availability",
-    "preflight_codegen_typecheck_or_configuration",
+    "preflight_local_typecheck_failure",
     "push_authentication_or_authorization",
     "push_network_or_service_availability",
     "push_configuration_or_deployment_binding",
@@ -128,7 +132,6 @@ check(
     "environment_file_policy_failure",
   ].every((classification) => workflow.includes(classification)) &&
     workflow.includes('echo "CONVEX_FAILURE_CLASSIFICATION=$failure_classification" >> "$GITHUB_ENV"') &&
-    workflow.includes('*) failure_classification="preflight_codegen_typecheck_or_configuration" ;;') &&
     workflow.includes('*) failure_classification="bundle_or_push_failure" ;;'),
   "Classify failed preflight and deployment stages using only fixed coarse labels.",
 );
@@ -152,7 +155,7 @@ check(
     "Workflow run:",
     "Deployment binding:",
     "Status:",
-    "Non-deploying preflight:",
+    "Credential-free local preflight:",
     "Deployment attempts:",
     "Production selectable:",
     "Secret values printed:",
@@ -164,7 +167,7 @@ check(
   "sanitized failure evidence stops without retry",
   workflow.includes("failed; no retry attempted") &&
     workflow.includes("Failure classification:") &&
-    workflow.includes("Raw CLI output printed:") &&
+    workflow.includes("Raw preflight/deployment output printed:") &&
     workflow.includes("if: ${{ failure() }}"),
   "A failure must leave a clear, sanitized stop receipt.",
 );
