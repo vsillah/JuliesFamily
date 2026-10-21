@@ -583,6 +583,10 @@ export default function KinfloPublicSitePreview() {
     reviewSource: searchParams.get("source") ?? undefined,
     experimentKey: searchParams.get("experiment") ?? undefined,
     variantKey: searchParams.get("experimentVariant") ?? undefined,
+    capabilityMode: searchParams.get("capabilityMode") ?? undefined,
+    capabilityUserId: searchParams.get("viewAsUser") ?? undefined,
+    capabilityRole: searchParams.get("simulatedRole") ?? undefined,
+    capabilityPermission: searchParams.get("simulatedPermission") ?? undefined,
     device: searchParams.get("device") === "tablet" || searchParams.get("device") === "mobile"
       ? searchParams.get("device") as "tablet" | "mobile"
       : searchParams.get("device") === "desktop"
@@ -634,6 +638,7 @@ export default function KinfloPublicSitePreview() {
     : preview.theme.media.logoImage;
   const audienceResolution = preview.context.audience;
   const experimentResolution = preview.context.experiment;
+  const capabilityPreview = preview.context.capabilityPreview;
   const previewBlocked = audienceResolution?.status === "invalid" || experimentResolution?.status === "invalid";
   const previewBlockReason = audienceResolution?.status === "invalid"
     ? audienceResolution.reason
@@ -729,6 +734,11 @@ export default function KinfloPublicSitePreview() {
                   ? ` Experiment ${experimentResolution.experiment?.label} · ${experimentResolution.variant.label}.`
                   : " No experiment selected."}
                 {" "}Deterministic selection only; no live allocation, measurement emission, or persistence is changed.
+              </div>
+            )}
+            {capabilityPreview && (
+              <div className="border-b border-slate-200 bg-slate-50 px-4 py-3 text-center text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300" data-testid="public-preview-capability-context">
+                Capability simulation: {capabilityPreview.role} · {capabilityPreview.permission}. Capability simulation is display-only; access is not granted, authorization is unchanged, and impersonation is disabled.
               </div>
             )}
             {orderedBlocks.map((block) => (

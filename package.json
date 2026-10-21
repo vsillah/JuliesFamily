@@ -80,6 +80,8 @@
     "kinflo:test-phase4-personas-journeys": "node --import tsx --test scripts/test-kinflo-phase4-personas-journeys.ts",
     "kinflo:test-phase5-experiments-measurement": "node --import tsx --test scripts/test-kinflo-phase5-experiments-measurement.ts",
     "kinflo:validate-phase5-experiments-measurement": "node scripts/validate-kinflo-phase5-experiments-measurement.mjs",
+    "kinflo:test-phase6-admin-governance": "node --import tsx --test scripts/test-kinflo-phase6-admin-governance.ts",
+    "kinflo:validate-phase6-admin-governance": "node scripts/validate-kinflo-phase6-admin-governance.mjs",
     "kinflo:validate-phase4-personas-journeys": "node scripts/validate-kinflo-phase4-personas-journeys.mjs",
     "kinflo:validate-theme-write-contract": "node scripts/validate-kinflo-theme-write-contract.mjs",
     "kinflo:capture-tenant-palette-qa": "node scripts/capture-kinflo-tenant-palette-qa.mjs",
