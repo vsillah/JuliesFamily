@@ -199,6 +199,8 @@ export function buildKinfloAudiencePreviewHref(input: {
   siteSlug: string;
   persona?: string;
   journeyStage?: string;
+  experimentKey?: string;
+  variantKey?: string;
   device?: "desktop" | "tablet" | "mobile";
 }) {
   const params = new URLSearchParams({
@@ -211,6 +213,12 @@ export function buildKinfloAudiencePreviewHref(input: {
   });
   if (input.persona && !["anonymous", "default", "none"].includes(input.persona)) params.set("persona", input.persona);
   if (input.journeyStage && !["anonymous", "default", "none"].includes(input.journeyStage)) params.set("journeyStage", input.journeyStage);
+  if (input.experimentKey && input.experimentKey !== "none") {
+    params.set("experimentMode", "preview_only");
+    params.set("allocation", "deterministic_preview_only");
+    params.set("experiment", input.experimentKey);
+  }
+  if (input.variantKey && input.variantKey !== "auto") params.set("experimentVariant", input.variantKey);
   if (input.device) params.set("device", input.device);
   return `${input.previewPath}?${params.toString()}`;
 }

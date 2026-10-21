@@ -13,6 +13,10 @@ import {
   resolveKinfloAudiencePreview,
   type KinfloAudiencePreviewResolution,
 } from "@/lib/kinfloAudiencePreview";
+import {
+  resolveKinfloExperimentPreview,
+  type KinfloExperimentPreviewResolution,
+} from "@/lib/kinfloExperimentPreview";
 
 export type KinfloPublicBlockType =
   | "hero"
@@ -106,6 +110,7 @@ export type KinfloPublicSitePreview = {
     studioSite?: string;
     reviewSource?: string;
     audience?: KinfloAudiencePreviewResolution;
+    experiment?: KinfloExperimentPreviewResolution;
     source: "fixture-public-renderer";
     convexFunction: "publicSite.resolvePublishedSite";
   };
@@ -119,6 +124,8 @@ export type KinfloPublicSitePreviewOptions = {
   device?: "desktop" | "tablet" | "mobile";
   studioSite?: string;
   reviewSource?: string;
+  experimentKey?: string;
+  variantKey?: string;
 };
 
 const publishedAt = Date.UTC(2026, 6, 1);
@@ -516,6 +523,8 @@ export function resolveKinfloPublicSitePreviewWithContext(
   const tenantSlug = options.tenantSlug?.trim() || undefined;
   const studioSite = options.studioSite?.trim() || undefined;
   const reviewSource = options.reviewSource?.trim() || undefined;
+  const experimentKey = options.experimentKey?.trim() || undefined;
+  const variantKey = options.variantKey?.trim() || undefined;
   const audience = resolveKinfloAudiencePreview(preview.site.slug, {
     tenantSlug: tenantSlug ?? preview.tenant.slug,
     persona,
@@ -527,6 +536,19 @@ export function resolveKinfloPublicSitePreviewWithContext(
         reason: "The requested preview site does not match the route site.",
       }
     : audience;
+  const experiment = resolveKinfloExperimentPreview(preview.site.slug, {
+    tenantSlug: tenantSlug ?? preview.tenant.slug,
+    persona,
+    journeyStage,
+    experimentKey,
+    variantKey,
+  });
+  const scopedExperiment = studioSite && studioSite !== preview.site.slug
+    ? {
+        status: "invalid" as const,
+        reason: "The requested experiment preview site does not match the route site.",
+      }
+    : experiment;
 
   return {
     ...preview,
@@ -540,6 +562,7 @@ export function resolveKinfloPublicSitePreviewWithContext(
       studioSite,
       reviewSource,
       audience: scopedAudience,
+      experiment: scopedExperiment,
     },
   };
 }

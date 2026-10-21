@@ -581,6 +581,8 @@ export default function KinfloPublicSitePreview() {
     tenantSlug: searchParams.get("studioTenant") ?? undefined,
     studioSite: searchParams.get("studioSite") ?? undefined,
     reviewSource: searchParams.get("source") ?? undefined,
+    experimentKey: searchParams.get("experiment") ?? undefined,
+    variantKey: searchParams.get("experimentVariant") ?? undefined,
     device: searchParams.get("device") === "tablet" || searchParams.get("device") === "mobile"
       ? searchParams.get("device") as "tablet" | "mobile"
       : searchParams.get("device") === "desktop"
@@ -631,6 +633,13 @@ export default function KinfloPublicSitePreview() {
     ? preview.theme.media.logoImageOnDark ?? preview.theme.media.logoImage
     : preview.theme.media.logoImage;
   const audienceResolution = preview.context.audience;
+  const experimentResolution = preview.context.experiment;
+  const previewBlocked = audienceResolution?.status === "invalid" || experimentResolution?.status === "invalid";
+  const previewBlockReason = audienceResolution?.status === "invalid"
+    ? audienceResolution.reason
+    : experimentResolution?.status === "invalid"
+      ? experimentResolution.reason
+      : "This preview context is invalid.";
 
   useEffect(() => {
     const rootStyle = document.documentElement.style;
@@ -702,12 +711,12 @@ export default function KinfloPublicSitePreview() {
       </header>
 
       <main>
-        {audienceResolution?.status === "invalid" ? (
+        {previewBlocked ? (
           <section className="flex min-h-[70vh] items-center justify-center px-4 py-24 sm:px-6 lg:px-8" data-testid="public-preview-audience-blocked">
             <div className="max-w-xl rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center text-amber-950 shadow-sm">
               <Badge variant="outline" className="border-amber-300 bg-white text-amber-900">Preview unavailable</Badge>
               <h1 className="mt-4 text-3xl font-bold tracking-tight">This audience preview is blocked</h1>
-              <p className="mt-3 text-sm leading-6 text-amber-900">{audienceResolution.reason}</p>
+              <p className="mt-3 text-sm leading-6 text-amber-900">{previewBlockReason}</p>
               <p className="mt-4 text-xs leading-5 text-amber-800">KinFlo will not substitute another tenant or site when the preview scope is invalid.</p>
             </div>
           </section>
@@ -715,7 +724,11 @@ export default function KinfloPublicSitePreview() {
           <>
             {audienceResolution?.status === "ready" && (
               <div className="border-b border-slate-200 bg-slate-50 px-4 py-3 text-center text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300" data-testid="public-preview-audience-context">
-                Preview only: {preview.context.persona ?? "anonymous"} / {preview.context.journeyStage ?? "default"}. No live audience state or allocation is changed.
+                Preview only: {preview.context.persona ?? "anonymous"} / {preview.context.journeyStage ?? "default"}.
+                {experimentResolution?.status === "ready" && experimentResolution.variant
+                  ? ` Experiment ${experimentResolution.experiment?.label} · ${experimentResolution.variant.label}.`
+                  : " No experiment selected."}
+                {" "}Deterministic selection only; no live allocation, measurement emission, or persistence is changed.
               </div>
             )}
             {orderedBlocks.map((block) => (
