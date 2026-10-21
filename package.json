@@ -82,6 +82,8 @@
     "kinflo:validate-phase5-experiments-measurement": "node scripts/validate-kinflo-phase5-experiments-measurement.mjs",
     "kinflo:test-phase7-operations": "node --import tsx --test scripts/test-kinflo-phase7-operations.ts",
     "kinflo:validate-phase7-operations": "node scripts/validate-kinflo-phase7-operations.mjs",
+    "kinflo:test-phase8-release-readiness": "node --import tsx --test scripts/test-kinflo-phase8-release-readiness.ts",
+    "kinflo:validate-phase8-release-readiness": "node scripts/validate-kinflo-phase8-release-readiness.mjs",
     "kinflo:validate-phase4-personas-journeys": "node scripts/validate-kinflo-phase4-personas-journeys.mjs",
     "kinflo:validate-theme-write-contract": "node scripts/validate-kinflo-theme-write-contract.mjs",
     "kinflo:capture-tenant-palette-qa": "node scripts/capture-kinflo-tenant-palette-qa.mjs",
