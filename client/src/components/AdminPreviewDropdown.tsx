@@ -250,13 +250,14 @@ interface AdminPreviewDropdownProps {
   isScrolled?: boolean;
   kinfloPalette?: boolean;
   siteSlug?: string;
+  tenantSlug?: string;
 }
 
-export function AdminPreviewDropdown({ isScrolled = false, kinfloPalette = false, siteSlug }: AdminPreviewDropdownProps) {
+export function AdminPreviewDropdown({ isScrolled = false, kinfloPalette = false, siteSlug, tenantSlug }: AdminPreviewDropdownProps) {
   const { isAdmin } = useUserRole();
   const { persona: appliedPersona } = usePersona();
   const adminHref = siteSlug
-    ? `/admin/kinflo-os?tab=site-studio&studioSite=${encodeURIComponent(siteSlug)}&studioLane=workbench&studioStage=preview`
+    ? `/admin/kinflo-os?tab=site-studio&studioSite=${encodeURIComponent(siteSlug)}${tenantSlug ? `&studioTenant=${encodeURIComponent(tenantSlug)}` : ""}&studioLane=workbench&studioStage=preview`
     : "/admin/kinflo-os";
   const isMobile = useIsMobile(768); // Runtime check for mobile viewport
   const [open, setOpen] = useState(false);

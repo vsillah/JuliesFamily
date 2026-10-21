@@ -102,6 +102,11 @@ import TenantSiteComposer from "@/components/TenantSiteComposer";
 import { VANGUARD_SITE_KEY, vanguardWorkflow } from "@/lib/kinfloVanguardWorkflow";
 import { isKinfloPaletteId } from "@/lib/kinfloPaletteRegistry";
 import {
+  buildKinfloAdminSiteHref,
+  resolveKinfloAdminScope,
+  type KinfloAdminScopeOption,
+} from "@/lib/kinfloAdminContext";
+import {
   VANGUARD_ORDER_PORTAL_PATH,
   vanguardAssociateAssistContract,
   vanguardAssistQueueFixture,
@@ -396,12 +401,11 @@ function readInitialClientWebsiteStudioLane(): ClientWebsiteStudioLane {
     : "workbench";
 }
 
-function readInitialClientWebsiteStudioSiteKey(defaultSiteKey: string, siteKeys: string[]): string {
+function readInitialClientWebsiteStudioSiteKey(defaultSiteKey: string, siteOptions: KinfloAdminScopeOption[]): string {
   if (typeof window === "undefined") {
     return defaultSiteKey;
   }
-  const siteKey = new URLSearchParams(window.location.search).get("studioSite");
-  return siteKey && siteKeys.includes(siteKey) ? siteKey : defaultSiteKey;
+  return resolveKinfloAdminScope(window.location.search, siteOptions, defaultSiteKey).siteKey ?? defaultSiteKey;
 }
 
 function readInitialClientWebsiteWorkbenchStage(): ClientWebsiteWorkbenchStage {
@@ -4622,13 +4626,25 @@ export default function AdminKinfloShell() {
   const [previewPersona, setPreviewPersona] = useState(snapshot.previewStudio.defaultPersona);
   const [previewJourneyStage, setPreviewJourneyStage] = useState(snapshot.previewStudio.defaultJourneyStage);
   const [previewDevice, setPreviewDevice] = useState(snapshot.previewStudio.defaultDevice);
-  const clientWebsiteStudioSiteKeys = useMemo(
-    () => snapshot.clientWebsiteStudio.sites.map((site) => site.key),
+  const clientWebsiteStudioScopeOptions = useMemo<KinfloAdminScopeOption[]>(
+    () => snapshot.clientWebsiteStudio.sites.map((site) => ({
+      key: site.key,
+      tenantSlug: site.tenantSlug,
+      label: site.label,
+    })),
     [snapshot.clientWebsiteStudio.sites],
+  );
+  const clientWebsiteAdminScope = useMemo(
+    () => resolveKinfloAdminScope(
+      typeof window === "undefined" ? "" : window.location.search,
+      clientWebsiteStudioScopeOptions,
+      snapshot.clientWebsiteStudio.defaultSiteKey,
+    ),
+    [clientWebsiteStudioScopeOptions, location, snapshot.clientWebsiteStudio.defaultSiteKey],
   );
   const [clientWebsiteStudioSiteKey, setClientWebsiteStudioSiteKey] = useState(() => readInitialClientWebsiteStudioSiteKey(
     snapshot.clientWebsiteStudio.defaultSiteKey,
-    clientWebsiteStudioSiteKeys,
+    clientWebsiteStudioScopeOptions,
   ));
   const [clientWebsiteStudioLane, setClientWebsiteStudioLane] = useState<ClientWebsiteStudioLane>(readInitialClientWebsiteStudioLane);
   const [clientWebsiteWorkbenchStage, setClientWebsiteWorkbenchStage] = useState<ClientWebsiteWorkbenchStage>(readInitialClientWebsiteWorkbenchStage);
@@ -4978,8 +4994,7 @@ export default function AdminKinfloShell() {
   const previewReadyCount = previewReadiness.filter((item) => item.done).length;
   const previewReadinessPercent = Math.round((previewReadyCount / previewReadiness.length) * 100);
   const selectedClientWebsiteStudioSite = useMemo(
-    () => snapshot.clientWebsiteStudio.sites.find((site) => site.key === clientWebsiteStudioSiteKey)
-      ?? snapshot.clientWebsiteStudio.sites[0],
+    () => snapshot.clientWebsiteStudio.sites.find((site) => site.key === clientWebsiteStudioSiteKey),
     [clientWebsiteStudioSiteKey, snapshot.clientWebsiteStudio.sites],
   );
   const isVanguardWebsite = selectedClientWebsiteStudioSite?.key === VANGUARD_SITE_KEY;
@@ -4994,90 +5009,74 @@ export default function AdminKinfloShell() {
   const clientWebsiteStudioReadinessPercent = Math.round(
     (clientWebsiteStudioReadyCount / clientWebsiteStudioReadiness.length) * 100,
   );
-  const clientWebsiteStudioPreviewPath = selectedClientWebsiteStudioSite?.previewPath ?? "/kinflo-sites/julies-family";
+  const clientWebsiteStudioPreviewPath = selectedClientWebsiteStudioSite?.previewPath ?? "/kinflo-sites/vanguard-enterprises";
   const selectedClientWebsiteLaunchBlueprint = useMemo(
-    () => snapshot.clientWebsiteStudio.launchBlueprints.find((blueprint) => blueprint.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? snapshot.clientWebsiteStudio.launchBlueprints[0],
+    () => snapshot.clientWebsiteStudio.launchBlueprints.find((blueprint) => blueprint.siteKey === selectedClientWebsiteStudioSite?.key),
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.launchBlueprints],
   );
   const selectedClientWebsiteAdminPermissionPreset = useMemo(
-    () => snapshot.clientWebsiteStudio.adminPermissionPresets.find((preset) => preset.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? snapshot.clientWebsiteStudio.adminPermissionPresets[0],
+    () => snapshot.clientWebsiteStudio.adminPermissionPresets.find((preset) => preset.siteKey === selectedClientWebsiteStudioSite?.key),
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.adminPermissionPresets],
   );
   const selectedClientWebsiteConfigurationProfile = useMemo(
-    () => snapshot.clientWebsiteStudio.configurationProfiles.profiles.find((profile) => profile.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? snapshot.clientWebsiteStudio.configurationProfiles.profiles[0],
+    () => snapshot.clientWebsiteStudio.configurationProfiles.profiles.find((profile) => profile.siteKey === selectedClientWebsiteStudioSite?.key),
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.configurationProfiles.profiles],
   );
   const selectedClientWebsiteProvisioningOrder = useMemo(
-    () => snapshot.clientWebsiteStudio.provisioningOrders.find((order) => order.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? snapshot.clientWebsiteStudio.provisioningOrders[0],
+    () => snapshot.clientWebsiteStudio.provisioningOrders.find((order) => order.siteKey === selectedClientWebsiteStudioSite?.key),
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.provisioningOrders],
   );
   const selectedClientWebsiteProvisioningExecution = useMemo(
-    () => snapshot.clientWebsiteStudio.provisioningExecution.orderSteps.find((order) => order.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? snapshot.clientWebsiteStudio.provisioningExecution.orderSteps[0],
+    () => snapshot.clientWebsiteStudio.provisioningExecution.orderSteps.find((order) => order.siteKey === selectedClientWebsiteStudioSite?.key),
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.provisioningExecution.orderSteps],
   );
   const selectedClientWebsiteConfigurationReviewPacket = useMemo(
-    () => snapshot.clientWebsiteStudio.configurationReviewPackets.find((packet) => packet.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? snapshot.clientWebsiteStudio.configurationReviewPackets[0],
+    () => snapshot.clientWebsiteStudio.configurationReviewPackets.find((packet) => packet.siteKey === selectedClientWebsiteStudioSite?.key),
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.configurationReviewPackets],
   );
   const selectedClientWebsiteConfigurationChangeSet = useMemo(
-    () => snapshot.clientWebsiteStudio.configurationChangeSets.find((changeSet) => changeSet.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? snapshot.clientWebsiteStudio.configurationChangeSets[0],
+    () => snapshot.clientWebsiteStudio.configurationChangeSets.find((changeSet) => changeSet.siteKey === selectedClientWebsiteStudioSite?.key),
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.configurationChangeSets],
   );
   const selectedClientWebsiteConfigurationApprovalMatrix = useMemo(
-    () => snapshot.clientWebsiteStudio.configurationApprovalMatrices.find((matrix) => matrix.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? snapshot.clientWebsiteStudio.configurationApprovalMatrices[0],
+    () => snapshot.clientWebsiteStudio.configurationApprovalMatrices.find((matrix) => matrix.siteKey === selectedClientWebsiteStudioSite?.key),
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.configurationApprovalMatrices],
   );
   const selectedClientWebsiteConfigurationSaveRequest = useMemo(
-    () => snapshot.clientWebsiteStudio.configurationSaveRequests.find((request) => request.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? snapshot.clientWebsiteStudio.configurationSaveRequests[0],
+    () => snapshot.clientWebsiteStudio.configurationSaveRequests.find((request) => request.siteKey === selectedClientWebsiteStudioSite?.key),
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.configurationSaveRequests],
   );
   const selectedClientWebsiteConfigurationAuditTimeline = useMemo(
-    () => snapshot.clientWebsiteStudio.configurationAuditTimelines.find((timeline) => timeline.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? snapshot.clientWebsiteStudio.configurationAuditTimelines[0],
+    () => snapshot.clientWebsiteStudio.configurationAuditTimelines.find((timeline) => timeline.siteKey === selectedClientWebsiteStudioSite?.key),
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.configurationAuditTimelines],
   );
   const selectedClientWebsiteConfigurationPublishReadiness = useMemo(
-    () => snapshot.clientWebsiteStudio.configurationPublishReadiness.find((readiness) => readiness.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? snapshot.clientWebsiteStudio.configurationPublishReadiness[0],
+    () => snapshot.clientWebsiteStudio.configurationPublishReadiness.find((readiness) => readiness.siteKey === selectedClientWebsiteStudioSite?.key),
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.configurationPublishReadiness],
   );
   const selectedClientWebsiteDomainReadinessPacket = useMemo(
-    () => snapshot.clientWebsiteStudio.domainReadinessPackets.find((packet) => packet.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? snapshot.clientWebsiteStudio.domainReadinessPackets[0],
+    () => snapshot.clientWebsiteStudio.domainReadinessPackets.find((packet) => packet.siteKey === selectedClientWebsiteStudioSite?.key),
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.domainReadinessPackets],
   );
   const selectedClientWebsiteAdminInvitationReadinessPacket = useMemo(
-    () => snapshot.clientWebsiteStudio.adminInvitationReadinessPackets.find((packet) => packet.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? snapshot.clientWebsiteStudio.adminInvitationReadinessPackets[0],
+    () => snapshot.clientWebsiteStudio.adminInvitationReadinessPackets.find((packet) => packet.siteKey === selectedClientWebsiteStudioSite?.key),
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.adminInvitationReadinessPackets],
   );
   const selectedClientWebsiteExperienceConfigurationPreset = useMemo(
-    () => snapshot.clientWebsiteStudio.experienceConfigurationPresets.find((preset) => preset.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? snapshot.clientWebsiteStudio.experienceConfigurationPresets[0],
+    () => snapshot.clientWebsiteStudio.experienceConfigurationPresets.find((preset) => preset.siteKey === selectedClientWebsiteStudioSite?.key),
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.experienceConfigurationPresets],
   );
   const selectedClientWebsiteConfigurationRollbackCheckpoint = useMemo(
-    () => snapshot.clientWebsiteStudio.configurationRollbackCheckpoints.find((checkpoint) => checkpoint.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? snapshot.clientWebsiteStudio.configurationRollbackCheckpoints[0],
+    () => snapshot.clientWebsiteStudio.configurationRollbackCheckpoints.find((checkpoint) => checkpoint.siteKey === selectedClientWebsiteStudioSite?.key),
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.configurationRollbackCheckpoints],
   );
   const selectedClientWebsiteLaunchPacket = useMemo(
-    () => snapshot.clientWebsiteStudio.launchPackets.find((packet) => packet.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? snapshot.clientWebsiteStudio.launchPackets[0],
+    () => snapshot.clientWebsiteStudio.launchPackets.find((packet) => packet.siteKey === selectedClientWebsiteStudioSite?.key),
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.launchPackets],
   );
   const selectedClientWebsiteStarterContentPack = useMemo(
     () => snapshot.clientWebsiteStudio.starterContentPacks.find((pack) => pack.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? (selectedClientWebsiteStudioSite?.key === VANGUARD_SITE_KEY ? undefined : snapshot.clientWebsiteStudio.starterContentPacks[0]),
+      ?? undefined,
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.starterContentPacks],
   );
   const clientWebsiteStudioPreviewRoute = selectedClientWebsiteStarterContentPack?.pages[0]?.route ?? "/";
@@ -5100,38 +5099,33 @@ export default function AdminKinfloShell() {
     device: "mobile",
   });
   const selectedClientWebsiteOnboardingReadiness = useMemo(
-    () => snapshot.clientWebsiteStudio.onboardingReadiness.find((readiness) => readiness.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? snapshot.clientWebsiteStudio.onboardingReadiness[0],
+    () => snapshot.clientWebsiteStudio.onboardingReadiness.find((readiness) => readiness.siteKey === selectedClientWebsiteStudioSite?.key),
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.onboardingReadiness],
   );
   const selectedClientWebsiteLaunchSimulation = useMemo(
-    () => snapshot.clientWebsiteStudio.launchSimulations.find((simulation) => simulation.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? snapshot.clientWebsiteStudio.launchSimulations[0],
+    () => snapshot.clientWebsiteStudio.launchSimulations.find((simulation) => simulation.siteKey === selectedClientWebsiteStudioSite?.key),
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.launchSimulations],
   );
   const selectedClientWebsitePolishScorecard = useMemo(
-    () => snapshot.clientWebsiteStudio.polishScorecards.find((scorecard) => scorecard.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? snapshot.clientWebsiteStudio.polishScorecards[0],
+    () => snapshot.clientWebsiteStudio.polishScorecards.find((scorecard) => scorecard.siteKey === selectedClientWebsiteStudioSite?.key),
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.polishScorecards],
   );
   const selectedClientWebsiteVisualQaBudget = useMemo(
-    () => snapshot.clientWebsiteStudio.visualQaBudgets.find((budget) => budget.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? snapshot.clientWebsiteStudio.visualQaBudgets[0],
+    () => snapshot.clientWebsiteStudio.visualQaBudgets.find((budget) => budget.siteKey === selectedClientWebsiteStudioSite?.key),
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.visualQaBudgets],
   );
   const selectedClientWebsiteVisualQaEvidencePacket = useMemo(
-    () => snapshot.clientWebsiteStudio.visualQaEvidencePackets.find((packet) => packet.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? snapshot.clientWebsiteStudio.visualQaEvidencePackets[0],
+    () => snapshot.clientWebsiteStudio.visualQaEvidencePackets.find((packet) => packet.siteKey === selectedClientWebsiteStudioSite?.key),
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.visualQaEvidencePackets],
   );
   const selectedClientWebsiteLaunchDecisionPacket = useMemo(
     () => snapshot.clientWebsiteStudio.launchDecisionPackets.find((packet) => packet.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? (selectedClientWebsiteStudioSite?.key === VANGUARD_SITE_KEY ? undefined : snapshot.clientWebsiteStudio.launchDecisionPackets[0]),
+      ?? undefined,
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.launchDecisionPackets],
   );
   const selectedClientWebsitePreviewReviewPacket = useMemo(
     () => snapshot.clientWebsiteStudio.previewReviewPackets.find((packet) => packet.siteKey === selectedClientWebsiteStudioSite?.key)
-      ?? (selectedClientWebsiteStudioSite?.key === VANGUARD_SITE_KEY ? undefined : snapshot.clientWebsiteStudio.previewReviewPackets[0]),
+      ?? undefined,
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.previewReviewPackets],
   );
   const clientWebsiteStudioStatusLabel = selectedClientWebsiteStudioSite?.status.replaceAll("_", " ") ?? "not selected";
@@ -5160,6 +5154,9 @@ export default function AdminKinfloShell() {
     unblockPath: snapshot.activeObjectSignal.unblockCondition,
     owner: snapshot.activeObjectSignal.owner,
   };
+  const clientWebsiteAdminHref = selectedClientWebsiteStudioSite
+    ? buildKinfloAdminSiteHref(selectedClientWebsiteStudioSite)
+    : "/admin/kinflo-os";
   const isClientWebsiteLaunchWorkbench =
     clientWebsiteStudioLane === "workbench" && clientWebsiteWorkbenchStage === "launch" && !isVanguardWebsite;
   const shouldShowClientWebsiteStudioContext =
@@ -5594,10 +5591,12 @@ export default function AdminKinfloShell() {
   useEffect(() => {
     const nextTab = readInitialShellTab();
     const nextLane = readInitialClientWebsiteStudioLane();
-    const nextSiteKey = readInitialClientWebsiteStudioSiteKey(
+    const nextScope = resolveKinfloAdminScope(
+      typeof window === "undefined" ? "" : window.location.search,
+      clientWebsiteStudioScopeOptions,
       snapshot.clientWebsiteStudio.defaultSiteKey,
-      clientWebsiteStudioSiteKeys,
     );
+    const nextSiteKey = nextScope.siteKey ?? snapshot.clientWebsiteStudio.defaultSiteKey;
     const nextStage = readInitialClientWebsiteWorkbenchStage();
     const nextDossier = readInitialClientWebsiteLaunchDossier();
     const nextHandoffWorkspace = readInitialClientWebsiteHandoffWorkspace();
@@ -5664,7 +5663,7 @@ export default function AdminKinfloShell() {
     setGeneratedApiCutoverBatchId((current) => (current === nextGeneratedApiCutoverBatchId ? current : nextGeneratedApiCutoverBatchId));
   }, [
     adapterSwitchBatchIds,
-    clientWebsiteStudioSiteKeys,
+    clientWebsiteStudioScopeOptions,
     generatedApiCutoverBatchIds,
     generatedApiCutoverReviewItemIds,
     hostedActivationStepIds,
@@ -5775,6 +5774,14 @@ export default function AdminKinfloShell() {
       } else {
         params.delete(key);
       }
+    }
+    const nextTab = params.get("tab");
+    const nextSiteKey = params.get("studioSite");
+    const nextSite = clientWebsiteStudioScopeOptions.find((site) => site.key === nextSiteKey);
+    if (nextTab === "site-studio" && nextSite) {
+      params.set("studioTenant", nextSite.tenantSlug);
+    } else {
+      params.delete("studioTenant");
     }
     const query = params.toString();
     navigate(query ? `/admin/kinflo-os?${query}` : "/admin/kinflo-os");
@@ -6507,9 +6514,17 @@ export default function AdminKinfloShell() {
       <div className="border-b border-slate-200 bg-white/95">
         <div className={`mx-auto flex max-w-7xl flex-col px-4 sm:px-6 lg:px-8 ${activeTab === "site-studio" ? "gap-2 py-3" : "gap-5 py-6"}`}>
           <Breadcrumbs
-            items={[{ label: "Admin Dashboard", href: `/admin/kinflo-os?tab=site-studio&studioSite=${encodeURIComponent(clientWebsiteStudioSiteKey)}&studioLane=workbench&studioStage=preview` }, { label: "KinFlo OS" }]}
+            items={[{ label: "Admin Dashboard", href: clientWebsiteAdminHref }, { label: "KinFlo OS" }]}
             homeHref={clientWebsiteStudioPreviewPath}
           />
+          {clientWebsiteAdminScope.status === "invalid" ? (
+            <div
+              className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950"
+              data-testid="section-kinflo-admin-scope-gate"
+            >
+              <span className="font-semibold">Site scope unavailable.</span> {clientWebsiteAdminScope.reason} The shell stayed on its safe default scope and did not load another tenant&apos;s records.
+            </div>
+          ) : null}
           <div className={`flex flex-col lg:flex-row lg:items-center lg:justify-between ${activeTab === "site-studio" ? "gap-2" : "gap-4"}`}>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">

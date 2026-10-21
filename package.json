@@ -74,6 +74,7 @@
     "kinflo:capture-vanguard-theme-contrast-qa": "node scripts/capture-vanguard-theme-contrast-qa.mjs",
     "kinflo:validate-tenant-palettes": "tsx scripts/validate-kinflo-tenant-palettes.ts",
     "kinflo:test-tenant-site-composer": "node --import tsx --test scripts/test-kinflo-tenant-site-composer.ts",
+    "kinflo:test-admin-foundation": "node --import tsx --test scripts/test-kinflo-admin-foundation.ts",
     "kinflo:validate-theme-write-contract": "node scripts/validate-kinflo-theme-write-contract.mjs",
     "kinflo:capture-tenant-palette-qa": "node scripts/capture-kinflo-tenant-palette-qa.mjs",
     "kinflo:capture-home-recovery-qa": "node scripts/capture-kinflo-home-recovery-qa.mjs",

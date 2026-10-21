@@ -2768,7 +2768,7 @@ const fixturePreviewStudio: ShellPreviewStudioDraft = {
 };
 
 const fixtureClientWebsiteStudio: ShellClientWebsiteStudio = {
-  defaultSiteKey: "julies-family-public",
+  defaultSiteKey: "vanguard-enterprises",
   sites: [
     {
       key: "julies-family-public",

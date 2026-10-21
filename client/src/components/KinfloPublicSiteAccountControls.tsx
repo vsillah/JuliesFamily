@@ -18,6 +18,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 interface KinfloPublicSiteAccountControlsProps {
   navSolid?: boolean;
   siteSlug?: string;
+  tenantSlug?: string;
 }
 
 function getInitials(firstName?: string | null, lastName?: string | null) {
@@ -27,17 +28,18 @@ function getInitials(firstName?: string | null, lastName?: string | null) {
 export default function KinfloPublicSiteAccountControls({
   navSolid = false,
   siteSlug,
+  tenantSlug,
 }: KinfloPublicSiteAccountControlsProps) {
   const { user, isAuthenticated } = useAuth();
   const { isAdmin } = useUserRole();
   const adminHref = siteSlug
-    ? `/admin/kinflo-os?tab=site-studio&studioSite=${encodeURIComponent(siteSlug)}&studioLane=workbench&studioStage=preview`
+    ? `/admin/kinflo-os?tab=site-studio&studioSite=${encodeURIComponent(siteSlug)}${tenantSlug ? `&studioTenant=${encodeURIComponent(tenantSlug)}` : ""}&studioLane=workbench&studioStage=preview`
     : "/admin/kinflo-os";
 
   return (
     <div className="flex items-center gap-1.5" data-testid="kinflo-public-account-controls">
       {!isAdmin && isAuthenticated && <DevAdminButton />}
-      {isAdmin && <AdminPreviewDropdown isScrolled={navSolid} kinfloPalette siteSlug={siteSlug} />}
+      {isAdmin && <AdminPreviewDropdown isScrolled={navSolid} kinfloPalette siteSlug={siteSlug} tenantSlug={tenantSlug} />}
       {isAuthenticated && user ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
