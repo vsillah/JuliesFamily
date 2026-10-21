@@ -131,6 +131,11 @@ import {
   type KinfloDashboardWorkspace,
   type KinfloDashboardShellTab,
 } from "@/lib/kinfloDashboardShell";
+import {
+  buildKinfloAudiencePreviewHref,
+  resolveKinfloAudienceContract,
+  resolveKinfloAudiencePreview,
+} from "@/lib/kinfloAudiencePreview";
 
 const metricIcons: Record<ShellMetricIconKey, typeof Boxes> = {
   tenants: Boxes,
@@ -4974,28 +4979,45 @@ export default function AdminKinfloShell() {
     () => snapshot.previewStudio.siteOptions.find((site) => site.slug === previewSiteSlug) ?? snapshot.previewStudio.siteOptions[0],
     [previewSiteSlug, snapshot.previewStudio.siteOptions],
   );
+  const previewAudienceContract = useMemo(
+    () => resolveKinfloAudienceContract(previewSiteSlug),
+    [previewSiteSlug],
+  );
+  const previewAudienceResolution = useMemo(
+    () => resolveKinfloAudiencePreview(previewSiteSlug, {
+      persona: previewPersona,
+      journeyStage: previewJourneyStage,
+    }),
+    [previewJourneyStage, previewPersona, previewSiteSlug],
+  );
+  const previewPersonaOptions = previewAudienceContract.status === "ready"
+    ? [{ key: "anonymous", label: "Anonymous" }, ...previewAudienceContract.contract.personas]
+    : [{ key: "anonymous", label: "Anonymous" }];
+  const previewJourneyStageOptions = previewAudienceContract.status === "ready"
+    ? [{ key: "default", label: "Default" }, ...previewAudienceContract.contract.journeyStages]
+    : [{ key: "default", label: "Default" }];
   const selectedPreviewDevice = useMemo(
     () => snapshot.previewStudio.deviceOptions.find((device) => device.key === previewDevice) ?? snapshot.previewStudio.deviceOptions[0],
     [previewDevice, snapshot.previewStudio.deviceOptions],
   );
   const previewQuery = useMemo(() => {
-    const params = new URLSearchParams();
-    const route = previewRoute.trim() || "/";
-    params.set("route", route);
-    if (previewPersona !== "anonymous") {
-      params.set("persona", previewPersona);
-    }
-    if (previewJourneyStage !== "default") {
-      params.set("journeyStage", previewJourneyStage);
-    }
-    params.set("device", previewDevice);
-    return params.toString();
-  }, [previewDevice, previewJourneyStage, previewPersona, previewRoute]);
-  const previewHref = `${selectedPreviewSite?.previewPath ?? "/kinflo-sites/advisor-client-site"}?${previewQuery}`;
+    if (previewAudienceContract.status !== "ready" || previewAudienceResolution.status !== "ready") return "";
+    return buildKinfloAudiencePreviewHref({
+      previewPath: selectedPreviewSite?.previewPath ?? "/kinflo-sites/advisor-client-site",
+      route: previewRoute,
+      tenantSlug: previewAudienceContract.contract.tenantSlug,
+      siteSlug: previewAudienceContract.contract.siteSlug,
+      persona: previewAudienceResolution.context.persona,
+      journeyStage: previewAudienceResolution.context.journeyStage,
+      device: previewDevice,
+    });
+  }, [previewAudienceContract, previewAudienceResolution, previewDevice, previewRoute, selectedPreviewSite]);
+  const previewHref = previewQuery || "#preview-scope-blocked";
   const previewReadiness = [
     { label: "Site selected", done: Boolean(selectedPreviewSite) },
     { label: "Route set", done: Boolean(previewRoute.trim()) },
-    { label: "Audience context explicit", done: Boolean(previewPersona && previewJourneyStage) },
+    { label: "Audience scope valid", done: previewAudienceResolution.status === "ready" },
+    { label: "Preview-only mode", done: previewAudienceResolution.status === "ready" },
     { label: "Device checkpoint selected", done: Boolean(selectedPreviewDevice) },
     { label: "Live lead smoke pending", done: false },
   ];
@@ -11430,7 +11452,17 @@ export default function AdminKinfloShell() {
                     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                       <div className="space-y-2">
                         <Label>Site</Label>
-                        <Select value={previewSiteSlug} onValueChange={setPreviewSiteSlug}>
+                        <Select value={previewSiteSlug} onValueChange={(value) => {
+                          setPreviewSiteSlug(value);
+                          const nextContract = resolveKinfloAudienceContract(value);
+                          if (nextContract.status === "ready") {
+                            setPreviewPersona(nextContract.contract.defaultPersona ?? "anonymous");
+                            setPreviewJourneyStage(nextContract.contract.defaultJourneyStage ?? "default");
+                          } else {
+                            setPreviewPersona("anonymous");
+                            setPreviewJourneyStage("default");
+                          }
+                        }}>
                           <SelectTrigger data-testid="select-kinflo-preview-site">
                             <SelectValue placeholder="Select site" />
                           </SelectTrigger>
@@ -11474,7 +11506,7 @@ export default function AdminKinfloShell() {
                             <SelectValue placeholder="Select persona" />
                           </SelectTrigger>
                           <SelectContent>
-                            {snapshot.previewStudio.personaOptions.map((persona) => (
+                            {previewPersonaOptions.map((persona) => (
                               <SelectItem key={persona.key} value={persona.key}>
                                 {persona.label}
                               </SelectItem>
@@ -11489,7 +11521,7 @@ export default function AdminKinfloShell() {
                             <SelectValue placeholder="Select journey stage" />
                           </SelectTrigger>
                           <SelectContent>
-                            {snapshot.previewStudio.journeyStageOptions.map((stage) => (
+                            {previewJourneyStageOptions.map((stage) => (
                               <SelectItem key={stage.key} value={stage.key}>
                                 {stage.label}
                               </SelectItem>
@@ -11513,11 +11545,11 @@ export default function AdminKinfloShell() {
                         <div className="mt-4 grid gap-3 sm:grid-cols-3">
                           <div className="rounded-md bg-muted/40 px-3 py-2">
                             <div className="text-xs text-muted-foreground">Persona</div>
-                            <div className="font-medium">{previewPersona}</div>
+                            <div className="font-medium">{previewAudienceResolution.status === "ready" ? (previewAudienceResolution.context.persona ?? "anonymous") : "Blocked"}</div>
                           </div>
                           <div className="rounded-md bg-muted/40 px-3 py-2">
                             <div className="text-xs text-muted-foreground">Journey</div>
-                            <div className="font-medium">{previewJourneyStage}</div>
+                            <div className="font-medium">{previewAudienceResolution.status === "ready" ? (previewAudienceResolution.context.journeyStage ?? "default") : "Blocked"}</div>
                           </div>
                           <div className="rounded-md bg-muted/40 px-3 py-2">
                             <div className="text-xs text-muted-foreground">Device</div>
@@ -11553,11 +11585,15 @@ export default function AdminKinfloShell() {
                     <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
                       <div className="text-sm text-muted-foreground">{snapshot.previewStudio.providerBoundary}</div>
                       <div className="flex flex-wrap gap-2">
-                        <Button asChild data-testid="button-open-preview-qa">
-                          <Link href={previewHref}>
-                            <ExternalLink className="mr-2 h-4 w-4" />
-                            Open preview
-                          </Link>
+                        <Button asChild={previewAudienceResolution.status === "ready"} disabled={previewAudienceResolution.status !== "ready"} data-testid="button-open-preview-qa">
+                          {previewAudienceResolution.status === "ready" ? (
+                            <Link href={previewHref}>
+                              <ExternalLink className="mr-2 h-4 w-4" />
+                              Open preview
+                            </Link>
+                          ) : (
+                            <span>Preview scope blocked</span>
+                          )}
                         </Button>
                         <Button disabled variant="outline" data-testid="button-publish-preview-qa">
                           <Rocket className="mr-2 h-4 w-4" />

@@ -8,6 +8,11 @@ import {
   resolveTenantPaletteId,
   type KinfloPaletteId,
 } from "@/lib/kinfloPaletteRegistry";
+import {
+  filterKinfloPreviewBlocks,
+  resolveKinfloAudiencePreview,
+  type KinfloAudiencePreviewResolution,
+} from "@/lib/kinfloAudiencePreview";
 
 export type KinfloPublicBlockType =
   | "hero"
@@ -100,6 +105,7 @@ export type KinfloPublicSitePreview = {
     device?: "desktop" | "tablet" | "mobile";
     studioSite?: string;
     reviewSource?: string;
+    audience?: KinfloAudiencePreviewResolution;
     source: "fixture-public-renderer";
     convexFunction: "publicSite.resolvePublishedSite";
   };
@@ -109,6 +115,7 @@ export type KinfloPublicSitePreviewOptions = {
   route?: string;
   persona?: string;
   journeyStage?: string;
+  tenantSlug?: string;
   device?: "desktop" | "tablet" | "mobile";
   studioSite?: string;
   reviewSource?: string;
@@ -465,8 +472,37 @@ export function listKinfloPublicSitePreviews() {
 }
 
 export function resolveKinfloPublicSitePreview(siteSlug = "julies-family") {
-  const preview = previews.find((item) => item.site.slug === siteSlug) ?? previews[0];
-  return preview;
+  return previews.find((item) => item.site.slug === siteSlug) ?? {
+    ...previews[0],
+    tenant: {
+      _id: "tenant_unavailable",
+      name: "Unavailable KinFlo tenant",
+      slug: "unavailable",
+    },
+    site: {
+      _id: "site_unavailable",
+      name: "Unavailable KinFlo site",
+      slug: siteSlug,
+      templateKey: "unavailable",
+      subdomain: "unavailable",
+      publishedAt,
+    },
+    navigationItems: [],
+    page: {
+      _id: "page_unavailable",
+      title: "Preview unavailable",
+      route: "/",
+      seo: {},
+      templateKey: "unavailable",
+      publishedAt,
+    },
+    blocks: [],
+    context: {
+      route: "/",
+      source: "fixture-public-renderer",
+      convexFunction: "publicSite.resolvePublishedSite",
+    },
+  } satisfies KinfloPublicSitePreview;
 }
 
 export function resolveKinfloPublicSitePreviewWithContext(
@@ -477,11 +513,24 @@ export function resolveKinfloPublicSitePreviewWithContext(
   const route = options.route?.trim() || preview.context.route;
   const persona = options.persona?.trim() || undefined;
   const journeyStage = options.journeyStage?.trim() || undefined;
+  const tenantSlug = options.tenantSlug?.trim() || undefined;
   const studioSite = options.studioSite?.trim() || undefined;
   const reviewSource = options.reviewSource?.trim() || undefined;
+  const audience = resolveKinfloAudiencePreview(preview.site.slug, {
+    tenantSlug: tenantSlug ?? preview.tenant.slug,
+    persona,
+    journeyStage,
+  });
+  const scopedAudience = studioSite && studioSite !== preview.site.slug
+    ? {
+        status: "invalid" as const,
+        reason: "The requested preview site does not match the route site.",
+      }
+    : audience;
 
   return {
     ...preview,
+    blocks: filterKinfloPreviewBlocks(preview.blocks, scopedAudience),
     context: {
       ...preview.context,
       route,
@@ -490,6 +539,7 @@ export function resolveKinfloPublicSitePreviewWithContext(
       device: options.device,
       studioSite,
       reviewSource,
+      audience: scopedAudience,
     },
   };
 }
