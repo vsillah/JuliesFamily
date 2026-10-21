@@ -192,6 +192,14 @@ export function resolveTenantSiteComposition(siteKey = "julies-family") {
   return compositions[key] ?? compositions["julies-family-public"];
 }
 
+export function resolveTenantSiteCompositionStrict(tenantSlug: string, siteKey: string) {
+  const key = siteKeyAliases[siteKey] ?? siteKey;
+  const composition = compositions[key];
+  return composition?.tenantSlug === tenantSlug && composition.siteKey === key
+    ? composition
+    : undefined;
+}
+
 export function sortTenantSiteSections(sections: TenantSiteSection[]) {
   return sections.filter((section) => section.enabled).slice().sort((a, b) => a.order - b.order);
 }

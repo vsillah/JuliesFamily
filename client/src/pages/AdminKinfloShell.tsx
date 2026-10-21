@@ -99,6 +99,10 @@ import { useKinfloAdminScope, useKinfloShellSnapshot } from "@/contexts/KinfloSh
 import { useKinfloPreferencesAdapter } from "@/contexts/KinfloPreferencesAdapterContext";
 import { useKinfloThemeWriteAdapter } from "@/contexts/KinfloThemeWriteAdapterContext";
 import TenantSiteComposer from "@/components/TenantSiteComposer";
+import {
+  buildWebsiteStudioDeepLink,
+  resolveWebsiteStudioRouteScope,
+} from "@/lib/kinfloWebsiteConfigurationStudio";
 import { VANGUARD_SITE_KEY, vanguardWorkflow } from "@/lib/kinfloVanguardWorkflow";
 import { isKinfloPaletteId } from "@/lib/kinfloPaletteRegistry";
 import {
@@ -526,6 +530,7 @@ function readInitialClientConfigurationApprovalDetail(): ClientConfigurationAppr
 
 function buildClientWebsiteStudioPreviewHref({
   previewPath,
+  tenantSlug,
   siteKey,
   route,
   persona,
@@ -533,6 +538,7 @@ function buildClientWebsiteStudioPreviewHref({
   device,
 }: {
   previewPath: string;
+  tenantSlug?: string;
   siteKey?: string;
   route?: string;
   persona?: string;
@@ -545,6 +551,9 @@ function buildClientWebsiteStudioPreviewHref({
   params.set("source", "site-studio-preview");
   if (siteKey?.trim()) {
     params.set("studioSite", siteKey);
+  }
+  if (tenantSlug?.trim()) {
+    params.set("studioTenant", tenantSlug);
   }
   if (persona?.trim()) {
     params.set("persona", persona);
@@ -4655,6 +4664,12 @@ export default function AdminKinfloShell() {
     clientWebsiteStudioScopeOptions,
   ));
   const [clientWebsiteStudioLane, setClientWebsiteStudioLane] = useState<ClientWebsiteStudioLane>(readInitialClientWebsiteStudioLane);
+  const websiteStudioRouteScope = activeTab === "site-studio" && typeof window !== "undefined"
+    ? resolveWebsiteStudioRouteScope(window.location.search, {
+        tenantSlug: adminScope.tenant.slug,
+        siteKey: clientWebsiteStudioSiteKey,
+      })
+    : { status: "ready" as const, scope: { tenantSlug: adminScope.tenant.slug, siteKey: clientWebsiteStudioSiteKey } };
   const [clientWebsiteWorkbenchStage, setClientWebsiteWorkbenchStage] = useState<ClientWebsiteWorkbenchStage>(readInitialClientWebsiteWorkbenchStage);
   const [clientWebsiteLaunchDossier, setClientWebsiteLaunchDossier] = useState<ClientWebsiteLaunchDossier>(readInitialClientWebsiteLaunchDossier);
   const [clientWebsiteProvisioningView, setClientWebsiteProvisioningView] = useState<ClientWebsiteProvisioningView>(readInitialClientWebsiteProvisioningView);
@@ -5092,6 +5107,7 @@ export default function AdminKinfloShell() {
   const clientWebsiteStudioPreviewJourneyStage = selectedClientWebsiteStarterContentPack?.journeyStage ?? "review";
   const clientWebsiteStudioPreviewHref = buildClientWebsiteStudioPreviewHref({
     previewPath: clientWebsiteStudioPreviewPath,
+    tenantSlug: selectedClientWebsiteStudioSite?.tenantSlug,
     siteKey: selectedClientWebsiteStudioSite?.key,
     route: clientWebsiteStudioPreviewRoute,
     persona: clientWebsiteStudioPreviewPersona,
@@ -5100,6 +5116,7 @@ export default function AdminKinfloShell() {
   });
   const clientWebsiteStudioMobilePreviewHref = buildClientWebsiteStudioPreviewHref({
     previewPath: clientWebsiteStudioPreviewPath,
+    tenantSlug: selectedClientWebsiteStudioSite?.tenantSlug,
     siteKey: selectedClientWebsiteStudioSite?.key,
     route: clientWebsiteStudioPreviewRoute,
     persona: clientWebsiteStudioPreviewPersona,
@@ -5168,7 +5185,9 @@ export default function AdminKinfloShell() {
   const isClientWebsiteLaunchWorkbench =
     clientWebsiteStudioLane === "workbench" && clientWebsiteWorkbenchStage === "launch" && !isVanguardWebsite;
   const shouldShowClientWebsiteStudioContext =
-    clientWebsiteStudioLane === "workbench" && !isClientWebsiteLaunchWorkbench;
+    clientWebsiteStudioLane === "workbench"
+    && !isClientWebsiteLaunchWorkbench
+    && websiteStudioRouteScope.status === "ready";
   const clientWebsitePreviewReviewContext = selectedClientWebsitePreviewReviewPacket?.context ?? [];
   const clientWebsitePreviewReviewEvidence = selectedClientWebsitePreviewReviewPacket?.evidenceChecklist.map((item) => ({
     label: item.label,
@@ -11606,11 +11625,13 @@ export default function AdminKinfloShell() {
             <section className="flex min-w-0 flex-col gap-2 overflow-x-clip" data-testid="section-kinflo-client-studio-compact-shell">
               {clientWebsiteStudioLaneRail}
 
-              <div className={`${shouldShowClientWebsiteStudioContext ? "block" : "hidden"} order-2`}>
+              <div className={`${shouldShowClientWebsiteStudioContext || websiteStudioRouteScope.status === "blocked" ? "block" : "hidden"} order-2`}>
                 <TenantSiteComposer
                   siteKey={selectedClientWebsiteStudioSite?.key ?? "julies-family-public"}
+                  tenantSlug={selectedClientWebsiteStudioSite?.tenantSlug ?? adminScope.tenant.slug}
                   siteLabel={selectedClientWebsiteStudioSite?.label ?? "Tenant site"}
                   previewPath={clientWebsiteStudioPreviewPath}
+                  routeScope={websiteStudioRouteScope}
                   onOpenControl={(control) => selectShellTab(control)}
                 />
               </div>

@@ -58,9 +58,13 @@ if (trackedSecretFiles.length > 0) {
 
 for (const path of [
   "docs/phase55-client-website-design-studio.md",
+  "docs/phase3-kinflo-website-configuration-studio.md",
   "client/src/lib/kinfloShellData.ts",
+  "client/src/lib/kinfloWebsiteConfigurationStudio.ts",
   "client/src/pages/AdminKinfloShell.tsx",
+  "client/src/components/TenantSiteComposer.tsx",
   "package.json",
+  "scripts/test-kinflo-website-configuration-studio.ts",
   "scripts/validate-kinflo-client-website-studio.mjs",
 ]) {
   requireFile(path);
@@ -115,10 +119,29 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "snapshot.clientWebsiteStudio.researchSources",
   "snapshot.clientWebsiteStudio.convexFunctions",
   "snapshot.clientWebsiteStudio.activationEvidence",
+  "studioTenant",
+  "resolveWebsiteStudioRouteScope",
+  "buildWebsiteStudioDeepLink",
+]);
+
+requireIncludes("client/src/components/TenantSiteComposer.tsx", [
+  "resolveTenantSiteCompositionStrict",
+  "section-kinflo-tenant-composer-brand-assets",
+  "section-kinflo-tenant-composer-responsive-preview",
+  "button-mark-tenant-site-composer-review",
+  "Save: gated · Publish: gated",
+]);
+
+requireIncludes("client/src/lib/kinfloWebsiteConfigurationStudio.ts", [
+  "resolveWebsiteStudioRouteScope",
+  "studioTenant",
+  "uploadsEnabled: false",
+  "publishEnabled: false",
 ]);
 
 requireIncludes("package.json", [
   "\"kinflo:validate-client-website-studio\"",
+  "\"kinflo:test-website-configuration-studio\"",
 ]);
 
 const shellContents = read("client/src/pages/AdminKinfloShell.tsx");
