@@ -249,11 +249,15 @@ function UnifiedVariantSelector({
 interface AdminPreviewDropdownProps {
   isScrolled?: boolean;
   kinfloPalette?: boolean;
+  siteSlug?: string;
 }
 
-export function AdminPreviewDropdown({ isScrolled = false, kinfloPalette = false }: AdminPreviewDropdownProps) {
+export function AdminPreviewDropdown({ isScrolled = false, kinfloPalette = false, siteSlug }: AdminPreviewDropdownProps) {
   const { isAdmin } = useUserRole();
   const { persona: appliedPersona } = usePersona();
+  const adminHref = siteSlug
+    ? `/admin/kinflo-os?tab=site-studio&studioSite=${encodeURIComponent(siteSlug)}&studioLane=workbench&studioStage=preview`
+    : "/admin/kinflo-os";
   const isMobile = useIsMobile(768); // Runtime check for mobile viewport
   const [open, setOpen] = useState(false);
   const [showMobileOverlay, setShowMobileOverlay] = useState(false);
@@ -647,7 +651,7 @@ export function AdminPreviewDropdown({ isScrolled = false, kinfloPalette = false
               Role Provisioning
             </Button>
           </Link>
-          <Link href="/admin">
+          <Link href={adminHref}>
             <Button
               variant="ghost"
               className="w-full justify-start h-12 text-base"
@@ -995,7 +999,7 @@ export function AdminPreviewDropdown({ isScrolled = false, kinfloPalette = false
                 Role Provisioning
               </DropdownMenuItem>
             </Link>
-            <Link href="/admin">
+            <Link href={adminHref}>
               <DropdownMenuItem data-testid="menu-admin-dashboard-dropdown">
                 <Shield className="w-4 h-4 mr-2" />
                 Admin Dashboard
