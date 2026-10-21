@@ -132,6 +132,7 @@ import {
 } from "@/lib/kinfloOrderOperationsWorkbench";
 import KinfloDashboardShell from "@/components/KinfloDashboardShell";
 import KinfloOperationsWorkspace from "@/components/KinfloOperationsWorkspace";
+import KinfloReleaseReadinessPanel from "@/components/KinfloReleaseReadinessPanel";
 import {
   type KinfloDashboardWorkspace,
   type KinfloDashboardShellTab,
@@ -7253,6 +7254,12 @@ export default function AdminKinfloShell() {
           </TabsContent>
 
           <TabsContent value="launch-readiness" className="mt-6">
+            <KinfloReleaseReadinessPanel
+              scope={{
+                tenantSlug: adminScope.tenant.slug,
+                siteSlug: adminScope.site.key,
+              }}
+            />
             <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
               <div className="min-w-0 space-y-4">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
