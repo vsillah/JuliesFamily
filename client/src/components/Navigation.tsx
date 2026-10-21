@@ -357,7 +357,7 @@ export default function Navigation({ heroImageLoaded = true }: NavigationProps) 
                       </DropdownMenuItem>
                     </Link>
                     {isAdmin && (
-                      <Link href="/admin">
+                      <Link href="/admin/kinflo-os">
                         <DropdownMenuItem className="cursor-pointer" data-testid="menu-admin-dashboard">
                           <Shield className="w-4 h-4 mr-2" />
                           Admin Dashboard

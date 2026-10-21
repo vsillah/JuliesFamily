@@ -61,6 +61,8 @@ test("public navigation uses compact theme and Julie account controls", () => {
   const renderer = readFileSync("client/src/pages/KinfloPublicSitePreview.tsx", "utf8");
   const themeControl = readFileSync("client/src/components/VanguardThemeControl.tsx", "utf8");
   const accountControls = readFileSync("client/src/components/KinfloPublicSiteAccountControls.tsx", "utf8");
+  const previewDropdown = readFileSync("client/src/components/AdminPreviewDropdown.tsx", "utf8");
+  const legacyNavigation = readFileSync("client/src/components/Navigation.tsx", "utf8");
 
   assert.match(renderer, /KinfloPublicSiteAccountControls/);
   assert.match(themeControl, /DropdownMenuRadioGroup/);
@@ -74,6 +76,11 @@ test("public navigation uses compact theme and Julie account controls", () => {
   assert.match(themeControl, /kinflo-palette-surface/);
   assert.match(accountControls, /menu-public-profile-settings/);
   assert.match(accountControls, /button-public-sign-in/);
+  assert.match(accountControls, /siteSlug\?: string/);
+  assert.match(accountControls, /admin\/kinflo-os/);
+  assert.match(previewDropdown, /siteSlug\?: string/);
+  assert.match(previewDropdown, /admin\/kinflo-os/);
+  assert.match(legacyNavigation, /href="\/admin\/kinflo-os"/);
 });
 
 test("public primary navigation stays on the first header line at narrow widths", () => {
