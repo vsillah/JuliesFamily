@@ -131,6 +131,7 @@ import {
   summarizeTenantOrderQueue,
 } from "@/lib/kinfloOrderOperationsWorkbench";
 import KinfloDashboardShell from "@/components/KinfloDashboardShell";
+import KinfloOperationsWorkspace from "@/components/KinfloOperationsWorkspace";
 import {
   type KinfloDashboardWorkspace,
   type KinfloDashboardShellTab,
@@ -7042,6 +7043,18 @@ export default function AdminKinfloShell() {
           }}
           onSelectTab={selectDashboardWorkspace}
         />
+
+        {activeWorkspaceKey === "operations" || activeWorkspaceKey === "communications" || activeWorkspaceKey === "analytics" ? (
+          <KinfloOperationsWorkspace
+            activeView={activeWorkspaceKey}
+            scope={{
+              tenantSlug: clientWebsiteAdminScope.tenantSlug
+                ?? snapshot.clientWebsiteStudio.sites.find((site) => site.key === clientWebsiteStudioSiteKey)?.tenantSlug
+                ?? "vanguard-enterprises",
+              siteSlug: clientWebsiteAdminScope.siteKey ?? clientWebsiteStudioSiteKey,
+            }}
+          />
+        ) : null}
 
         <Tabs value={activeTab} onValueChange={(value) => selectShellTab(value as ShellTabValue)} className={`${activeTab === "site-studio" ? "mt-1" : "mt-7"} min-w-0`}>
           <section
