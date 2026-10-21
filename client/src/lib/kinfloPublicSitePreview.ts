@@ -17,6 +17,10 @@ import {
   resolveKinfloExperimentPreview,
   type KinfloExperimentPreviewResolution,
 } from "@/lib/kinfloExperimentPreview";
+import {
+  resolveKinfloCapabilityPreviewMarker,
+  type KinfloCapabilityPreviewMarker,
+} from "@/lib/kinfloAdminGovernance";
 
 export type KinfloPublicBlockType =
   | "hero"
@@ -111,6 +115,7 @@ export type KinfloPublicSitePreview = {
     reviewSource?: string;
     audience?: KinfloAudiencePreviewResolution;
     experiment?: KinfloExperimentPreviewResolution;
+    capabilityPreview?: KinfloCapabilityPreviewMarker;
     source: "fixture-public-renderer";
     convexFunction: "publicSite.resolvePublishedSite";
   };
@@ -126,6 +131,10 @@ export type KinfloPublicSitePreviewOptions = {
   reviewSource?: string;
   experimentKey?: string;
   variantKey?: string;
+  capabilityMode?: string;
+  capabilityUserId?: string;
+  capabilityRole?: string;
+  capabilityPermission?: string;
 };
 
 const publishedAt = Date.UTC(2026, 6, 1);
@@ -525,6 +534,12 @@ export function resolveKinfloPublicSitePreviewWithContext(
   const reviewSource = options.reviewSource?.trim() || undefined;
   const experimentKey = options.experimentKey?.trim() || undefined;
   const variantKey = options.variantKey?.trim() || undefined;
+  const capabilityPreview = resolveKinfloCapabilityPreviewMarker({
+    capabilityMode: options.capabilityMode,
+    userId: options.capabilityUserId,
+    role: options.capabilityRole,
+    permission: options.capabilityPermission,
+  });
   const audience = resolveKinfloAudiencePreview(preview.site.slug, {
     tenantSlug: tenantSlug ?? preview.tenant.slug,
     persona,
@@ -563,6 +578,7 @@ export function resolveKinfloPublicSitePreviewWithContext(
       reviewSource,
       audience: scopedAudience,
       experiment: scopedExperiment,
+      capabilityPreview,
     },
   };
 }

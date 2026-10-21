@@ -144,6 +144,15 @@ import {
   resolveKinfloExperimentContract,
   resolveKinfloExperimentPreview,
 } from "@/lib/kinfloExperimentPreview";
+import {
+  buildKinfloCapabilitySimulationHref,
+  evaluateKinfloCapability,
+  kinfloGovernancePermissions,
+  kinfloGovernanceRoleLabels,
+  kinfloGovernanceRoles,
+  type KinfloGovernancePermission,
+  type KinfloGovernanceRole,
+} from "@/lib/kinfloAdminGovernance";
 
 const metricIcons: Record<ShellMetricIconKey, typeof Boxes> = {
   tenants: Boxes,
@@ -4654,6 +4663,9 @@ export default function AdminKinfloShell() {
   const [previewDevice, setPreviewDevice] = useState(snapshot.previewStudio.defaultDevice);
   const [previewExperimentKey, setPreviewExperimentKey] = useState("none");
   const [previewExperimentVariant, setPreviewExperimentVariant] = useState("auto");
+  const [previewCapabilityUserId, setPreviewCapabilityUserId] = useState("preview-user");
+  const [previewCapabilityRole, setPreviewCapabilityRole] = useState<KinfloGovernanceRole>("site_admin");
+  const [previewCapabilityPermission, setPreviewCapabilityPermission] = useState<KinfloGovernancePermission>("preview:simulate");
   const clientWebsiteStudioScopeOptions = useMemo<KinfloAdminScopeOption[]>(
     () => snapshot.clientWebsiteStudio.sites.map((site) => ({
       key: site.key,
@@ -5062,6 +5074,35 @@ export default function AdminKinfloShell() {
     });
   }, [previewAudienceContract, previewAudienceResolution, previewDevice, previewExperimentResolution, previewRoute, selectedPreviewSite]);
   const previewHref = previewQuery || "#preview-scope-blocked";
+  const previewCapabilityScope = previewAudienceContract.status === "ready"
+    ? {
+        type: "site" as const,
+        tenantSlug: previewAudienceContract.contract.tenantSlug,
+        siteSlug: previewAudienceContract.contract.siteSlug,
+      }
+    : { type: "site" as const, tenantSlug: previewSiteSlug, siteSlug: previewSiteSlug };
+  const previewCapabilityEvaluation = useMemo(
+    () => evaluateKinfloCapability({
+      actorUserId: previewCapabilityUserId,
+      requestedPermission: previewCapabilityPermission,
+      requestedScope: previewCapabilityScope,
+      memberships: [{
+        userId: previewCapabilityUserId,
+        role: previewCapabilityRole,
+        status: "active",
+        scope: previewCapabilityScope,
+      }],
+    }),
+    [previewAudienceContract, previewCapabilityPermission, previewCapabilityRole, previewCapabilityScope, previewCapabilityUserId, previewSiteSlug],
+  );
+  const previewCapabilityHref = previewCapabilityEvaluation.status === "allowed"
+    ? buildKinfloCapabilitySimulationHref({
+        baseHref: previewHref,
+        userId: previewCapabilityUserId,
+        role: previewCapabilityRole,
+        permission: previewCapabilityPermission,
+      })
+    : "#capability-simulation-blocked";
   const previewReadiness = [
     { label: "Site selected", done: Boolean(selectedPreviewSite) },
     { label: "Route set", done: Boolean(previewRoute.trim()) },
@@ -11617,6 +11658,45 @@ export default function AdminKinfloShell() {
                             ))}
                           </SelectContent>
                         </Select>
+                      </div>
+                    </div>
+
+                    <div className="rounded-md border border-dashed p-4" data-testid="kinflo-capability-simulation">
+                      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <div className="font-medium">Capability simulation</div>
+                          <p className="text-xs text-muted-foreground">View as a scoped member for review only. This never impersonates a user or changes authorization.</p>
+                        </div>
+                        <Badge variant="secondary">read_only · preview_only</Badge>
+                      </div>
+                      <div className="mt-4 grid gap-4 md:grid-cols-3">
+                        <div className="space-y-2">
+                          <Label htmlFor="kinflo-capability-user">Preview user</Label>
+                          <Input id="kinflo-capability-user" value={previewCapabilityUserId} onChange={(event) => setPreviewCapabilityUserId(event.target.value)} data-testid="input-kinflo-capability-user" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Simulated role</Label>
+                          <Select value={previewCapabilityRole} onValueChange={(value) => setPreviewCapabilityRole(value as KinfloGovernanceRole)}>
+                            <SelectTrigger data-testid="select-kinflo-capability-role"><SelectValue /></SelectTrigger>
+                            <SelectContent>{kinfloGovernanceRoles.map((role) => <SelectItem key={role} value={role}>{kinfloGovernanceRoleLabels[role]}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Permission</Label>
+                          <Select value={previewCapabilityPermission} onValueChange={(value) => setPreviewCapabilityPermission(value as KinfloGovernancePermission)}>
+                            <SelectTrigger data-testid="select-kinflo-capability-permission"><SelectValue /></SelectTrigger>
+                            <SelectContent>{kinfloGovernancePermissions.map((permission) => <SelectItem key={permission} value={permission}>{permission}</SelectItem>)}</SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div className="mt-4 flex flex-col gap-3 border-t pt-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+                        <div className="text-muted-foreground" data-testid="text-kinflo-capability-evaluation">
+                          Evaluation: <span className="font-medium text-foreground">{previewCapabilityEvaluation.status}</span>
+                          {previewCapabilityEvaluation.reason ? ` · ${previewCapabilityEvaluation.reason.replaceAll("_", " ")}` : " · same-site active membership"}
+                        </div>
+                        <Button asChild={previewCapabilityEvaluation.status === "allowed"} disabled={previewCapabilityEvaluation.status !== "allowed"} variant="outline" data-testid="button-open-capability-simulation">
+                          {previewCapabilityEvaluation.status === "allowed" ? <Link href={previewCapabilityHref}><ExternalLink className="mr-2 h-4 w-4" />Open display-only simulation</Link> : <span>Simulation blocked</span>}
+                        </Button>
                       </div>
                     </div>
 
