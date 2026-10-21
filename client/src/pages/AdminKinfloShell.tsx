@@ -126,6 +126,11 @@ import {
   getTenantOrderQueueOptions,
   summarizeTenantOrderQueue,
 } from "@/lib/kinfloOrderOperationsWorkbench";
+import KinfloDashboardShell from "@/components/KinfloDashboardShell";
+import {
+  type KinfloDashboardWorkspace,
+  type KinfloDashboardShellTab,
+} from "@/lib/kinfloDashboardShell";
 
 const metricIcons: Record<ShellMetricIconKey, typeof Boxes> = {
   tenants: Boxes,
@@ -4508,6 +4513,9 @@ export default function AdminKinfloShell() {
       }
     : snapshot.experiencePreferences;
   const [activeTab, setActiveTab] = useState<ShellTabValue>(readInitialShellTab);
+  const [activeWorkspaceKey, setActiveWorkspaceKey] = useState<string | null>(() => (
+    typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("workspace")
+  ));
   const [selectedLaunchPacketId, setSelectedLaunchPacketId] = useState(snapshot.siteLaunchPackets[0]?.id ?? "");
   const [launchReadinessSiteKey, setLaunchReadinessSiteKey] = useState(snapshot.launchReadiness.defaultSiteKey);
   const adapterSwitchBatchIds = useMemo(
@@ -5778,7 +5786,7 @@ export default function AdminKinfloShell() {
     const nextTab = params.get("tab");
     const nextSiteKey = params.get("studioSite");
     const nextSite = clientWebsiteStudioScopeOptions.find((site) => site.key === nextSiteKey);
-    if (nextTab === "site-studio" && nextSite) {
+    if (nextSite) {
       params.set("studioTenant", nextSite.tenantSlug);
     } else {
       params.delete("studioTenant");
@@ -5813,8 +5821,9 @@ export default function AdminKinfloShell() {
     scrollClientWebsiteStudioLaneToTop(clientWebsiteStudioLane);
   }, [activeTab, clientWebsiteStudioLane]);
 
-  const selectShellTab = (tab: ShellTabValue) => {
+  const selectShellTab = (tab: ShellTabValue, workspaceKey?: string) => {
     setActiveTab(tab);
+    setActiveWorkspaceKey(workspaceKey ?? null);
     const shouldKeepDossier = tab === "site-studio"
       && clientWebsiteStudioLane === "workbench"
       && clientWebsiteWorkbenchStage === "launch";
@@ -5828,7 +5837,8 @@ export default function AdminKinfloShell() {
     const shouldKeepConfigurationSaveDetail = tab === "site-studio" && clientWebsiteStudioLane === "configuration";
     updateKinfloShellRoute({
       tab,
-      studioSite: tab === "site-studio" ? clientWebsiteStudioSiteKey : undefined,
+      studioSite: clientWebsiteStudioSiteKey,
+      workspace: workspaceKey,
       studioLane: tab === "site-studio" ? clientWebsiteStudioLane : undefined,
       studioStage: tab === "site-studio" && clientWebsiteStudioLane === "workbench" ? clientWebsiteWorkbenchStage : undefined,
       studioDossier: shouldKeepDossier ? clientWebsiteLaunchDossier : undefined,
@@ -5849,6 +5859,10 @@ export default function AdminKinfloShell() {
       cutoverReview: tab === "hosted-activation" ? generatedApiCutoverReviewItemId : undefined,
       cutoverBatch: tab === "hosted-activation" ? generatedApiCutoverBatchId : undefined,
     });
+  };
+
+  const selectDashboardWorkspace = (tab: KinfloDashboardShellTab, workspace: KinfloDashboardWorkspace) => {
+    selectShellTab(tab as ShellTabValue, workspace.key);
   };
 
   const selectClientWebsiteStudioSite = (siteKey: string) => {
@@ -6898,6 +6912,19 @@ export default function AdminKinfloShell() {
             </div>
           </CardContent>
         </Card>
+
+        <KinfloDashboardShell
+          activeTab={activeTab as KinfloDashboardShellTab}
+          activeWorkspaceKey={activeWorkspaceKey}
+          scope={{
+            tenantSlug: clientWebsiteAdminScope.tenantSlug
+              ?? clientWebsiteStudioScopeOptions.find((site) => site.key === snapshot.clientWebsiteStudio.defaultSiteKey)?.tenantSlug
+              ?? "vanguard-enterprises",
+            siteKey: clientWebsiteAdminScope.siteKey ?? snapshot.clientWebsiteStudio.defaultSiteKey,
+            label: clientWebsiteAdminScope.label ?? "Current KinFlo scope",
+          }}
+          onSelectTab={selectDashboardWorkspace}
+        />
 
         <Tabs value={activeTab} onValueChange={(value) => selectShellTab(value as ShellTabValue)} className={`${activeTab === "site-studio" ? "mt-1" : "mt-7"} min-w-0`}>
           <section
