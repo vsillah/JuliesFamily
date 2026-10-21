@@ -140,6 +140,10 @@ import {
   resolveKinfloAudienceContract,
   resolveKinfloAudiencePreview,
 } from "@/lib/kinfloAudiencePreview";
+import {
+  resolveKinfloExperimentContract,
+  resolveKinfloExperimentPreview,
+} from "@/lib/kinfloExperimentPreview";
 
 const metricIcons: Record<ShellMetricIconKey, typeof Boxes> = {
   tenants: Boxes,
@@ -4648,6 +4652,8 @@ export default function AdminKinfloShell() {
   const [previewPersona, setPreviewPersona] = useState(snapshot.previewStudio.defaultPersona);
   const [previewJourneyStage, setPreviewJourneyStage] = useState(snapshot.previewStudio.defaultJourneyStage);
   const [previewDevice, setPreviewDevice] = useState(snapshot.previewStudio.defaultDevice);
+  const [previewExperimentKey, setPreviewExperimentKey] = useState("none");
+  const [previewExperimentVariant, setPreviewExperimentVariant] = useState("auto");
   const clientWebsiteStudioScopeOptions = useMemo<KinfloAdminScopeOption[]>(
     () => snapshot.clientWebsiteStudio.sites.map((site) => ({
       key: site.key,
@@ -5005,6 +5011,32 @@ export default function AdminKinfloShell() {
     }),
     [previewJourneyStage, previewPersona, previewSiteSlug],
   );
+  const previewExperimentContract = useMemo(
+    () => resolveKinfloExperimentContract(
+      previewSiteSlug,
+      previewAudienceContract.status === "ready" ? previewAudienceContract.contract.tenantSlug : undefined,
+    ),
+    [previewAudienceContract, previewSiteSlug],
+  );
+  const previewExperimentResolution = useMemo(
+    () => resolveKinfloExperimentPreview(previewSiteSlug, {
+      tenantSlug: previewAudienceContract.status === "ready" ? previewAudienceContract.contract.tenantSlug : undefined,
+      persona: previewPersona,
+      journeyStage: previewJourneyStage,
+      experimentKey: previewExperimentKey,
+      variantKey: previewExperimentVariant,
+    }),
+    [previewAudienceContract, previewExperimentKey, previewExperimentVariant, previewJourneyStage, previewPersona, previewSiteSlug],
+  );
+  const previewExperimentOptions = previewExperimentContract.status === "ready"
+    ? [{ key: "none", label: "No experiment" }, ...previewExperimentContract.contract.experiments]
+    : [{ key: "none", label: "No experiment" }];
+  const selectedPreviewExperiment = previewExperimentContract.status === "ready"
+    ? previewExperimentContract.contract.experiments.find((item) => item.key === previewExperimentKey)
+    : undefined;
+  const previewExperimentVariantOptions = selectedPreviewExperiment
+    ? [{ key: "auto", label: "Deterministic preview selection" }, ...selectedPreviewExperiment.variants.filter((item) => item.status === "active")]
+    : [{ key: "auto", label: "Deterministic preview selection" }];
   const previewPersonaOptions = previewAudienceContract.status === "ready"
     ? [{ key: "anonymous", label: "Anonymous" }, ...previewAudienceContract.contract.personas]
     : [{ key: "anonymous", label: "Anonymous" }];
@@ -5016,23 +5048,26 @@ export default function AdminKinfloShell() {
     [previewDevice, snapshot.previewStudio.deviceOptions],
   );
   const previewQuery = useMemo(() => {
-    if (previewAudienceContract.status !== "ready" || previewAudienceResolution.status !== "ready") return "";
+    if (previewAudienceContract.status !== "ready" || previewAudienceResolution.status !== "ready" || previewExperimentResolution.status !== "ready") return "";
     return buildKinfloAudiencePreviewHref({
       previewPath: selectedPreviewSite?.previewPath ?? "/kinflo-sites/advisor-client-site",
       route: previewRoute,
       tenantSlug: previewAudienceContract.contract.tenantSlug,
       siteSlug: previewAudienceContract.contract.siteSlug,
-      persona: previewAudienceResolution.context.persona,
-      journeyStage: previewAudienceResolution.context.journeyStage,
+      persona: previewExperimentResolution.context.persona,
+      journeyStage: previewExperimentResolution.context.journeyStage,
+      experimentKey: previewExperimentResolution.context.experimentKey,
+      variantKey: previewExperimentResolution.context.variantKey,
       device: previewDevice,
     });
-  }, [previewAudienceContract, previewAudienceResolution, previewDevice, previewRoute, selectedPreviewSite]);
+  }, [previewAudienceContract, previewAudienceResolution, previewDevice, previewExperimentResolution, previewRoute, selectedPreviewSite]);
   const previewHref = previewQuery || "#preview-scope-blocked";
   const previewReadiness = [
     { label: "Site selected", done: Boolean(selectedPreviewSite) },
     { label: "Route set", done: Boolean(previewRoute.trim()) },
     { label: "Audience scope valid", done: previewAudienceResolution.status === "ready" },
-    { label: "Preview-only mode", done: previewAudienceResolution.status === "ready" },
+    { label: "Preview-only mode", done: previewAudienceResolution.status === "ready" && previewExperimentResolution.status === "ready" },
+    { label: "Experiment scope valid", done: previewExperimentResolution.status === "ready" },
     { label: "Device checkpoint selected", done: Boolean(selectedPreviewDevice) },
     { label: "Live lead smoke pending", done: false },
   ];
@@ -11481,6 +11516,8 @@ export default function AdminKinfloShell() {
                             setPreviewPersona("anonymous");
                             setPreviewJourneyStage("default");
                           }
+                          setPreviewExperimentKey("none");
+                          setPreviewExperimentVariant("auto");
                         }}>
                           <SelectTrigger data-testid="select-kinflo-preview-site">
                             <SelectValue placeholder="Select site" />
@@ -11548,6 +11585,39 @@ export default function AdminKinfloShell() {
                           </SelectContent>
                         </Select>
                       </div>
+                      <div className="space-y-2">
+                        <Label>Experiment</Label>
+                        <Select value={previewExperimentKey} onValueChange={(value) => {
+                          setPreviewExperimentKey(value);
+                          setPreviewExperimentVariant("auto");
+                        }}>
+                          <SelectTrigger data-testid="select-kinflo-preview-experiment">
+                            <SelectValue placeholder="Select experiment" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {previewExperimentOptions.map((item) => (
+                              <SelectItem key={item.key} value={item.key}>
+                                {item.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Variant</Label>
+                        <Select value={previewExperimentVariant} onValueChange={setPreviewExperimentVariant}>
+                          <SelectTrigger data-testid="select-kinflo-preview-experiment-variant">
+                            <SelectValue placeholder="Select variant" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {previewExperimentVariantOptions.map((item) => (
+                              <SelectItem key={item.key} value={item.key}>
+                                {item.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
 
                     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
@@ -11573,6 +11643,14 @@ export default function AdminKinfloShell() {
                           <div className="rounded-md bg-muted/40 px-3 py-2">
                             <div className="text-xs text-muted-foreground">Device</div>
                             <div className="font-medium">{selectedPreviewDevice?.label}</div>
+                          </div>
+                          <div className="rounded-md bg-muted/40 px-3 py-2">
+                            <div className="text-xs text-muted-foreground">Experiment</div>
+                            <div className="font-medium">
+                              {previewExperimentResolution.status === "ready"
+                                ? previewExperimentResolution.variant?.label ?? "None"
+                                : "Blocked"}
+                            </div>
                           </div>
                         </div>
                         <div className="mt-4 rounded-md border px-3 py-2 text-muted-foreground">
@@ -11604,8 +11682,8 @@ export default function AdminKinfloShell() {
                     <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
                       <div className="text-sm text-muted-foreground">{snapshot.previewStudio.providerBoundary}</div>
                       <div className="flex flex-wrap gap-2">
-                        <Button asChild={previewAudienceResolution.status === "ready"} disabled={previewAudienceResolution.status !== "ready"} data-testid="button-open-preview-qa">
-                          {previewAudienceResolution.status === "ready" ? (
+                        <Button asChild={previewAudienceResolution.status === "ready" && previewExperimentResolution.status === "ready"} disabled={previewAudienceResolution.status !== "ready" || previewExperimentResolution.status !== "ready"} data-testid="button-open-preview-qa">
+                          {previewAudienceResolution.status === "ready" && previewExperimentResolution.status === "ready" ? (
                             <Link href={previewHref}>
                               <ExternalLink className="mr-2 h-4 w-4" />
                               Open preview
