@@ -578,6 +578,7 @@ export default function KinfloPublicSitePreview() {
     route: searchParams.get("route") ?? undefined,
     persona: searchParams.get("persona") ?? undefined,
     journeyStage: searchParams.get("journeyStage") ?? undefined,
+    tenantSlug: searchParams.get("studioTenant") ?? undefined,
     studioSite: searchParams.get("studioSite") ?? undefined,
     reviewSource: searchParams.get("source") ?? undefined,
     device: searchParams.get("device") === "tablet" || searchParams.get("device") === "mobile"
@@ -629,6 +630,7 @@ export default function KinfloPublicSitePreview() {
   const logoImage = useDarkLogo
     ? preview.theme.media.logoImageOnDark ?? preview.theme.media.logoImage
     : preview.theme.media.logoImage;
+  const audienceResolution = preview.context.audience;
 
   useEffect(() => {
     const rootStyle = document.documentElement.style;
@@ -700,9 +702,27 @@ export default function KinfloPublicSitePreview() {
       </header>
 
       <main>
-        {orderedBlocks.map((block) => (
-            <BlockSection key={block._id} block={block} preview={preview} heroParallaxY={heroParallaxY} />
-          ))}
+        {audienceResolution?.status === "invalid" ? (
+          <section className="flex min-h-[70vh] items-center justify-center px-4 py-24 sm:px-6 lg:px-8" data-testid="public-preview-audience-blocked">
+            <div className="max-w-xl rounded-2xl border border-amber-200 bg-amber-50 p-8 text-center text-amber-950 shadow-sm">
+              <Badge variant="outline" className="border-amber-300 bg-white text-amber-900">Preview unavailable</Badge>
+              <h1 className="mt-4 text-3xl font-bold tracking-tight">This audience preview is blocked</h1>
+              <p className="mt-3 text-sm leading-6 text-amber-900">{audienceResolution.reason}</p>
+              <p className="mt-4 text-xs leading-5 text-amber-800">KinFlo will not substitute another tenant or site when the preview scope is invalid.</p>
+            </div>
+          </section>
+        ) : (
+          <>
+            {audienceResolution?.status === "ready" && (
+              <div className="border-b border-slate-200 bg-slate-50 px-4 py-3 text-center text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300" data-testid="public-preview-audience-context">
+                Preview only: {preview.context.persona ?? "anonymous"} / {preview.context.journeyStage ?? "default"}. No live audience state or allocation is changed.
+              </div>
+            )}
+            {orderedBlocks.map((block) => (
+              <BlockSection key={block._id} block={block} preview={preview} heroParallaxY={heroParallaxY} />
+            ))}
+          </>
+        )}
       </main>
 
       <footer id="contact" className="border-t px-4 py-10 sm:px-6 lg:px-8">
