@@ -133,6 +133,7 @@ import {
 import KinfloDashboardShell from "@/components/KinfloDashboardShell";
 import KinfloOperationsWorkspace from "@/components/KinfloOperationsWorkspace";
 import KinfloReleaseReadinessPanel from "@/components/KinfloReleaseReadinessPanel";
+import KinfloHostedActivationReadinessPanel from "@/components/KinfloHostedActivationReadinessPanel";
 import {
   type KinfloDashboardWorkspace,
   type KinfloDashboardShellTab,
@@ -7990,6 +7991,12 @@ export default function AdminKinfloShell() {
           </TabsContent>
 
           <TabsContent value="hosted-activation" className="mt-6">
+            <KinfloHostedActivationReadinessPanel
+              scope={{
+                tenantSlug: adminScope.tenant.slug,
+                siteSlug: adminScope.site.key,
+              }}
+            />
             <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
               <div className="min-w-0 space-y-4">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
