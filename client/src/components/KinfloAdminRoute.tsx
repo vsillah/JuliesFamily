@@ -29,6 +29,8 @@ import {
 } from "@/contexts/KinfloThemeWriteAdapterContext";
 import { Phase174GeneratedReadOnlyHarness } from "@/components/Phase174GeneratedReadOnlyHarness";
 import { isPhase174GeneratedReadOnlyHarnessRequested } from "@/lib/kinfloPhase174GeneratedReadOnlyHarness";
+import { Phase180ReadOnlyGatesHarness } from "@/components/Phase180ReadOnlyGatesHarness";
+import { isPhase180ReadOnlyGatesRequested } from "@/lib/kinfloPhase180ReadOnlyGates";
 
 type ConvexViewer = {
   _id: string;
@@ -263,6 +265,16 @@ function ConvexIdentityGate({ children }: { children: ReactNode }) {
         value={{ isLoading: false, isAdmin: true, source: "convex_auth" }}
       >
         <Phase174GeneratedReadOnlyHarness />
+      </KinfloAdminIdentityProvider>
+    );
+  }
+
+  if (isPhase180ReadOnlyGatesRequested(window.location.search)) {
+    return (
+      <KinfloAdminIdentityProvider
+        value={{ isLoading: false, isAdmin: true, source: "convex_auth" }}
+      >
+        <Phase180ReadOnlyGatesHarness />
       </KinfloAdminIdentityProvider>
     );
   }

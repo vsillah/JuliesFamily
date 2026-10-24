@@ -3,6 +3,12 @@ import { anyApi, type FunctionReference } from "convex/server";
 type ReadOnlyReference = FunctionReference<"query">;
 
 type Phase174GeneratedApi = {
+  activation: {
+    readiness: ReadOnlyReference;
+  };
+  accessPolicy: {
+    viewerPermissionSnapshot: ReadOnlyReference;
+  };
   launchReadiness: {
     getSiteLaunchReadiness: ReadOnlyReference;
   };

@@ -130,7 +130,11 @@ for (const [pattern, label] of forbiddenSourcePatterns) {
 }
 
 const stubReferences = Array.from(buildStub.matchAll(/: ReadOnlyReference;/g));
-check(stubReferences.length === 20, "clean-build shim exposes exactly 20 query references", `Found ${stubReferences.length}.`);
+check(
+  stubReferences.length === expectedQueries.length + 2,
+  "clean-build shim exposes the 20 Phase 174 plus 2 Phase 180 query references",
+  `Found ${stubReferences.length}.`,
+);
 
 for (const marker of [
   "rawResponsesIncluded: false",
