@@ -6,6 +6,8 @@ This lane prepares one manual GitHub Actions path for deploying the repository's
 
 The workflow is source-only until the credential gate below is completed. Creating the workflow does not create a deploy key, configure GitHub, run Convex, or authorize any production change.
 
+> **Current execution blocker:** Run `39033697728` showed that Convex CLI `1.42.1` writes `.env.local` while resolving the deployment-key-backed `convex dev` path. The CLI command returned successfully before the workflow's environment-file policy guard failed, so a remote push may have completed and no retry is authorized. See [Phase 180 Convex CLI configuration-write diagnostic](./phase180-convex-cli-config-write-diagnostic.md). The next source change requires an official no-write CLI path or explicit approval for the bounded transient-file exception described there.
+
 ## Fixed safety contract
 
 - Trigger: manual `workflow_dispatch` only.
