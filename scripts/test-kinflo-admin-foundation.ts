@@ -63,3 +63,21 @@ test("KinFlo public controls do not link to Julie's legacy admin route", () => {
     assert.equal(source.includes('href="/admin"'), false, `${path} still exposes the legacy admin href`);
   }
 });
+
+test("production cannot expose the dev-only role repair control", () => {
+  const source = readFileSync("client/src/components/KinfloAdminRoute.tsx", "utf8");
+  assert.match(source, /const canRepair = import\.meta\.env\.DEV\s+&&\s+isApprovedKinfloDevActivationTarget/);
+  assert.match(source, /controlPlane:repairCurrentPlatformAdmin/);
+  assert.doesNotMatch(source, /const canRepair = isApprovedKinfloDevActivationTarget/);
+});
+
+test("production exposes only the governed first-admin bootstrap path", () => {
+  const route = readFileSync("client/src/components/KinfloAdminRoute.tsx", "utf8");
+  const controlPlane = readFileSync("convex/controlPlane.ts", "utf8");
+  assert.match(route, /controlPlane:bootstrapPlatformAdmin/);
+  assert.match(route, /controlPlane:platformAdminBootstrapStatus/);
+  assert.match(route, /data-testid="button-kinflo-bootstrap-platform-admin"/);
+  assert.match(controlPlane, /export const platformAdminBootstrapStatus = query/);
+  assert.match(controlPlane, /canBootstrap: true/);
+  assert.match(controlPlane, /A platform administrator already exists/);
+});

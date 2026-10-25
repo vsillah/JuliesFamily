@@ -186,6 +186,34 @@ export const bootstrapPlatformAdmin = mutation({
   },
 });
 
+export const platformAdminBootstrapStatus = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return {
+        canBootstrap: false,
+        reason: "Authentication required",
+      };
+    }
+
+    const existingAdmin = await ctx.db
+      .query("users")
+      .withIndex("by_platform_role", (q) => q.eq("platformRole", "super_admin"))
+      .first();
+
+    return existingAdmin
+      ? {
+          canBootstrap: false,
+          reason: "A platform administrator already exists",
+        }
+      : {
+          canBootstrap: true,
+          reason: "No platform administrator exists yet",
+        };
+  },
+});
+
 export const repairCurrentPlatformAdmin = mutation({
   args: {},
   handler: async (ctx) => {
