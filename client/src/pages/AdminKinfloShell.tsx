@@ -131,6 +131,7 @@ import {
   summarizeTenantOrderQueue,
 } from "@/lib/kinfloOrderOperationsWorkbench";
 import KinfloDashboardShell from "@/components/KinfloDashboardShell";
+import VanguardOperatorPortal from "@/components/VanguardOperatorPortal";
 import KinfloOperationsWorkspace from "@/components/KinfloOperationsWorkspace";
 import KinfloReleaseReadinessPanel from "@/components/KinfloReleaseReadinessPanel";
 import KinfloHostedActivationReadinessPanel from "@/components/KinfloHostedActivationReadinessPanel";
@@ -6585,6 +6586,10 @@ export default function AdminKinfloShell() {
 
   if (!canAccessAdmin) {
     return null;
+  }
+
+  if (activeWorkspaceKey === "operator-portal") {
+    return <VanguardOperatorPortal scope={{ tenantSlug: adminScope.tenant.slug, siteKey: adminScope.site.key }} />;
   }
 
   const clientWebsiteStudioLaneRail = (
