@@ -17,6 +17,7 @@ export const KINFLO_CONVEX_FUNCTIONS = {
   audienceUpsertPersonaDefinition: "audience.upsertPersonaDefinition",
   controlPlaneAcceptInvitation: "controlPlane.acceptInvitation",
   controlPlaneBootstrapPlatformAdmin: "controlPlane.bootstrapPlatformAdmin",
+  controlPlanePlatformAdminBootstrapStatus: "controlPlane.platformAdminBootstrapStatus",
   controlPlaneCreateInvitation: "controlPlane.createInvitation",
   controlPlaneCreateSite: "controlPlane.createSite",
   controlPlaneCreateTenant: "controlPlane.createTenant",

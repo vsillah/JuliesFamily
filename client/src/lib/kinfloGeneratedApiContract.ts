@@ -62,6 +62,7 @@ export const KINFLO_GENERATED_API_BINDINGS: KinfloGeneratedApiBinding[] = [
   binding("aiReviewReviewRecord", "mutation", "AI review", "AI generation review records reviewer approval state without publishing generated content"),
   binding("controlPlaneUpsertCurrentUser", "mutation", "identity", "signed-in user is synced before any admin mutation"),
   binding("controlPlaneBootstrapPlatformAdmin", "mutation", "identity", "first platform admin can bootstrap once"),
+  binding("controlPlanePlatformAdminBootstrapStatus", "query", "identity", "first-admin bootstrap is available only when no platform admin exists"),
   binding("controlPlaneViewer", "query", "identity", "viewer query returns current synced user"),
   binding("activationReadiness", "query", "activation", "readiness counts tenants, sites, users, roles, plans, and published pages"),
   binding("activationSeedSmokeSite", "mutation", "activation", "activation seed creates tenant, site, published page, resolver args, entitlements, and audit event"),

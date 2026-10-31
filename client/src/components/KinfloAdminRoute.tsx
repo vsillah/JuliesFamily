@@ -48,6 +48,16 @@ const repairCurrentPlatformAdminMutation = makeFunctionReference<
   Record<string, never>,
   { userId: string; platformRole: "super_admin" }
 >("controlPlane:repairCurrentPlatformAdmin");
+const bootstrapPlatformAdminMutation = makeFunctionReference<
+  "mutation",
+  Record<string, never>,
+  string
+>("controlPlane:bootstrapPlatformAdmin");
+const platformAdminBootstrapStatusQuery = makeFunctionReference<
+  "query",
+  Record<string, never>,
+  { canBootstrap: boolean; reason: string }
+>("controlPlane:platformAdminBootstrapStatus");
 
 function IdentityGateCard({
   title,
@@ -112,12 +122,19 @@ function ConvexIdentityGate({ children }: { children: ReactNode }) {
   const { isLoading: authLoading, isAuthenticated } = useConvexAuth();
   const { signIn, signOut } = useAuthActions();
   const viewer = useQuery(viewerQuery, isAuthenticated ? {} : "skip");
+  const bootstrapStatus = useQuery(
+    platformAdminBootstrapStatusQuery,
+    isAuthenticated && viewer ? {} : "skip",
+  );
   const upsertCurrentUser = useMutation(upsertCurrentUserMutation);
   const repairCurrentPlatformAdmin = useMutation(repairCurrentPlatformAdminMutation);
+  const bootstrapPlatformAdmin = useMutation(bootstrapPlatformAdminMutation);
   const [syncState, setSyncState] = useState<"idle" | "syncing" | "complete" | "failed">("idle");
   const [signInPending, setSignInPending] = useState(false);
   const [repairState, setRepairState] = useState<"idle" | "running" | "succeeded" | "failed">("idle");
   const [repairError, setRepairError] = useState("");
+  const [bootstrapState, setBootstrapState] = useState<"idle" | "running" | "succeeded" | "failed">("idle");
+  const [bootstrapError, setBootstrapError] = useState("");
 
   useEffect(() => {
     if (!isAuthenticated || viewer !== null || syncState !== "idle") {
@@ -193,7 +210,8 @@ function ConvexIdentityGate({ children }: { children: ReactNode }) {
   }
 
   if (viewer.platformRole !== "super_admin") {
-    const canRepair = isApprovedKinfloDevActivationTarget(getKinfloIdentityRuntime().publicUrl);
+    const canRepair = import.meta.env.DEV
+      && isApprovedKinfloDevActivationTarget(getKinfloIdentityRuntime().publicUrl);
 
     if (canRepair) {
       return (
@@ -243,10 +261,68 @@ function ConvexIdentityGate({ children }: { children: ReactNode }) {
       );
     }
 
+    if (bootstrapStatus === undefined) {
+      return (
+        <IdentityGateCard
+          title="Checking KinFlo admin bootstrap"
+          detail="The one-time production bootstrap gate is checking whether a platform administrator already exists."
+          busy
+        />
+      );
+    }
+
+    if (bootstrapStatus.canBootstrap) {
+      return (
+        <IdentityGateCard
+          title={bootstrapState === "succeeded" ? "KinFlo admin bootstrap complete" : "KinFlo admin access required"}
+          detail={bootstrapState === "succeeded"
+            ? "Your signed-in identity is now the platform administrator. Reload the admin shell to continue."
+            : "Your identity is valid and no platform administrator exists yet. You can claim the one-time administrator seat for this KinFlo deployment."}
+          busy={bootstrapState === "running"}
+          action={bootstrapState === "succeeded" ? (
+            <Button className="w-full" onClick={() => window.location.reload()}>
+              <CheckCircle2 className="mr-2 h-4 w-4" />
+              Reload admin shell
+            </Button>
+          ) : (
+            <div className="space-y-3">
+              <Button
+                className="w-full"
+                disabled={bootstrapState === "running"}
+                onClick={() => {
+                  setBootstrapState("running");
+                  setBootstrapError("");
+                  void bootstrapPlatformAdmin({})
+                    .then(() => setBootstrapState("succeeded"))
+                    .catch((error) => {
+                      setBootstrapError(error instanceof Error ? error.message : "The platform bootstrap failed.");
+                      setBootstrapState("failed");
+                    });
+                }}
+                data-testid="button-kinflo-bootstrap-platform-admin"
+              >
+                {bootstrapState === "running" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
+                Bootstrap platform admin
+              </Button>
+              {bootstrapState === "failed" ? (
+                <p className="rounded-md border border-rose-200 bg-rose-50 p-3 text-sm leading-5 text-rose-800" data-testid="text-kinflo-bootstrap-error">
+                  Bootstrap failed: {bootstrapError}
+                </p>
+              ) : (
+                <p className="text-xs leading-5 text-slate-600">
+                  One-time, deployment-scoped bootstrap. It does not create a tenant, site, or provider connection.
+                </p>
+              )}
+            </div>
+          )}
+        />
+      );
+    }
+
     return (
       <IdentityGateCard
         title="KinFlo admin access required"
-        detail="Your identity is valid, but the Convex product record does not grant platform administration."
+        detail={`${bootstrapStatus.reason}. Ask that administrator to grant your tenant or site permissions.`}
         action={(
           <Button variant="secondary" className="w-full" onClick={() => void signOut()}>
             <LogOut className="mr-2 h-4 w-4" />
