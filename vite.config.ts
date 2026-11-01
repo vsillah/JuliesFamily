@@ -3,7 +3,8 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 
 export default defineConfig(({ command }) => {
-  const phase174GeneratedApi = command === "serve"
+  const useLocalAdminSmokeStub = process.env.KINFLO_LOCAL_ADMIN_SMOKE === "true";
+  const phase174GeneratedApi = command === "serve" && !useLocalAdminSmokeStub
     ? path.resolve(import.meta.dirname, "convex", "_generated", "api")
     : path.resolve(import.meta.dirname, "client", "src", "lib", "kinfloPhase174GeneratedApiBuildStub.ts");
 

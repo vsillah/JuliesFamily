@@ -101,3 +101,12 @@ test("Convex identity sync starts while the viewer query is still pending", () =
   assert.match(adminRoute, /data-testid="button-kinflo-retry-access-lookup"/);
   assert.match(adminRoute, /title="KinFlo access lookup failed"/);
 });
+
+test("database-free KinFlo smoke opts into the checked-in API build stub", () => {
+  const viteConfig = readFileSync("vite.config.ts", "utf8");
+  const smokeServer = readFileSync("scripts/serve-kinflo-local-admin-smoke.mjs", "utf8");
+
+  assert.match(viteConfig, /KINFLO_LOCAL_ADMIN_SMOKE/);
+  assert.match(viteConfig, /command === "serve" && !useLocalAdminSmokeStub/);
+  assert.match(smokeServer, /KINFLO_LOCAL_ADMIN_SMOKE = "true"/);
+});
