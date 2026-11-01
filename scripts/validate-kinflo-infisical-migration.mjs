@@ -7,6 +7,7 @@ const packageJson = JSON.parse(read("package.json"));
 const wrapper = read("scripts/run-kinflo-with-infisical-env.mjs");
 const docs = read("docs/phase181-infisical-migration.md");
 const envExample = read(".env.example");
+const workflow = read(".github/workflows/validate-infisical-development.yml");
 
 const checks = [
   ["infisical wrapper exists", wrapper.includes('spawnSync("infisical"')],
@@ -22,6 +23,12 @@ const checks = [
   ["migration docs exist", docs.includes("Phase 181") && docs.includes("source-only")],
   ["docs preserve 1Password rollback", docs.includes("1Password") && docs.includes("rollback")],
   ["docs prohibit external writes", docs.toLowerCase().includes("no infisical secret creation") && docs.includes("Vercel change")],
+  ["OIDC validation workflow exists", workflow.includes("Infisical/secrets-action@d2e351f16c6ca20d17c85e6c992e04bdeb64e87d")],
+  ["workflow is manual and development-only", workflow.includes("workflow_dispatch") && workflow.includes("INFISICAL_ENV: dev") && workflow.includes("INFISICAL_PATH: /convex")],
+  ["workflow requires non-secret bindings", workflow.includes("INFISICAL_PROJECT_ID") && workflow.includes("INFISICAL_DEV_IDENTITY_ID")],
+  ["workflow grants OIDC only", workflow.includes("id-token: write") && !workflow.includes("secrets.INFISICAL")],
+  ["workflow performs no deployment", workflow.includes("Deployment attempts: \\\`0\\\`") && !workflow.includes("convex deploy")],
+  ["workflow preserves environment-file policy", workflow.includes(".env.local must remain absent")],
 ];
 
 const failures = checks.filter(([, passed]) => !passed).map(([label]) => label);

@@ -1,0 +1,150 @@
+name: Validate KinFlo Infisical development binding
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type "validate infisical dev hallowed-manatee-765" to confirm the fixed development target
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: kinflo-infisical-development-validation
+  cancel-in-progress: false
+
+jobs:
+  validate-development-binding:
+    name: Validate Infisical dev binding
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: kinflo-convex-development
+    env:
+      EXPECTED_CONVEX_DEPLOYMENT: hallowed-manatee-765
+      DISPATCH_CONFIRMATION: ${{ inputs.confirmation }}
+      INFISICAL_PROJECT_ID: ${{ vars.INFISICAL_PROJECT_ID }}
+      INFISICAL_IDENTITY_ID: ${{ vars.INFISICAL_DEV_IDENTITY_ID }}
+      INFISICAL_ENV: dev
+      INFISICAL_PATH: /convex
+
+    steps:
+      - name: Check out requested commit
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Verify fixed development-only contract
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "$GITHUB_EVENT_NAME" != "workflow_dispatch" ]]; then
+            echo "::error title=Unsupported trigger::This workflow may run only through workflow_dispatch."
+            exit 1
+          fi
+
+          if [[ "$DISPATCH_CONFIRMATION" != "validate infisical dev $EXPECTED_CONVEX_DEPLOYMENT" ]]; then
+            echo "::error title=Confirmation mismatch::Enter the exact development validation confirmation shown in the workflow form."
+            exit 1
+          fi
+
+          if [[ -z "${INFISICAL_PROJECT_ID:-}" || -z "${INFISICAL_IDENTITY_ID:-}" ]]; then
+            echo "::error title=Missing Infisical binding::Configure the protected non-secret GitHub environment variables INFISICAL_PROJECT_ID and INFISICAL_DEV_IDENTITY_ID before dispatching."
+            exit 1
+          fi
+
+          if [[ "$INFISICAL_ENV" != "dev" || "$INFISICAL_PATH" != "/convex" ]]; then
+            echo "::error title=Infisical scope rejected::This workflow is fixed to the dev environment and /convex path."
+            exit 1
+          fi
+
+          if [[ -e .env.local ]]; then
+            echo "::error title=Local environment file rejected::.env.local must remain absent."
+            exit 1
+          fi
+
+          echo "Fixed Infisical development validation binding verified."
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Fetch dev secrets through Infisical OIDC
+        uses: Infisical/secrets-action@d2e351f16c6ca20d17c85e6c992e04bdeb64e87d # v1.0.18
+        with:
+          method: oidc
+          identity-id: ${{ env.INFISICAL_IDENTITY_ID }}
+          project-id: ${{ env.INFISICAL_PROJECT_ID }}
+          env-slug: ${{ env.INFISICAL_ENV }}
+          secret-path: ${{ env.INFISICAL_PATH }}
+          domain: https://app.infisical.com
+
+      - name: Install locked dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Verify fetched development deploy-key binding
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${CONVEX_DEPLOY_KEY:-}" ]]; then
+            echo "::error title=Missing development deploy key::Infisical did not provide CONVEX_DEPLOY_KEY from the approved /convex path."
+            exit 1
+          fi
+
+          deploy_key_binding="${CONVEX_DEPLOY_KEY%%|*}"
+          if [[ "$deploy_key_binding" != "dev:$EXPECTED_CONVEX_DEPLOYMENT" ]]; then
+            echo "::error title=Development binding rejected::The fetched deploy key is not bound to the approved KinFlo development deployment."
+            exit 1
+          fi
+
+          if [[ -e .env.local ]]; then
+            echo "::error title=Environment-file policy failed::.env.local must remain absent."
+            exit 1
+          fi
+
+          echo "Fetched development binding verified; secret values printed: no."
+
+      - name: Typecheck Convex source without deployment
+        shell: bash
+        run: |
+          set -euo pipefail
+          env -u CONVEX_DEPLOY_KEY -u CONVEX_DEPLOYMENT npm run convex:check
+
+          if [[ -e .env.local ]]; then
+            echo "::error title=Environment-file policy failed::.env.local must remain absent after validation."
+            exit 1
+          fi
+
+      - name: Publish sanitized validation receipt
+        shell: bash
+        run: |
+          {
+            echo "### KinFlo Infisical development validation"
+            echo "- Commit: \`$GITHUB_SHA\`"
+            echo "- Workflow run: [$GITHUB_RUN_ID]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)"
+            echo "- Deployment binding: \`dev:$EXPECTED_CONVEX_DEPLOYMENT\`"
+            echo "- Infisical environment/path: \`$INFISICAL_ENV$INFISICAL_PATH\`"
+            echo "- Status: \`succeeded; validation only\`"
+            echo "- OIDC authentication: \`used\`"
+            echo "- Deployment attempts: \`0\`"
+            echo "- Secret values printed: \`no\`"
+            echo "- \.env.local retained: \`no\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish sanitized failure receipt
+        if: ${{ failure() }}
+        shell: bash
+        run: |
+          {
+            echo "### KinFlo Infisical development validation"
+            echo "- Commit: \`$GITHUB_SHA\`"
+            echo "- Workflow run: [$GITHUB_RUN_ID]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)"
+            echo "- Deployment binding: \`dev:$EXPECTED_CONVEX_DEPLOYMENT\`"
+            echo "- Status: \`failed; no retry attempted\`"
+            echo "- Secret values printed: \`no\`"
+            echo "- Raw secret-manager/CLI output printed: \`no\`"
+          } >> "$GITHUB_STEP_SUMMARY"
