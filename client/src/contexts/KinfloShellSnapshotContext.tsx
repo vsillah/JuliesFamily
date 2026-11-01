@@ -1,5 +1,5 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { makeFunctionReference } from "convex/server";
 import { getKinfloConvexRuntime } from "@/lib/kinfloConvexRuntime";
 import {
@@ -110,6 +110,11 @@ type AuditEvent = { _id: string; action: string; resourceType: string };
 
 const listTenantsQuery = makeFunctionReference<"query", Record<string, never>, TenantRow[]>("controlPlane:listTenants");
 const listSitesQuery = makeFunctionReference<"query", { tenantId: string }, SiteRow[]>("controlPlane:listSitesForTenant");
+const provisionTenantAndSiteMutation = makeFunctionReference<
+  "mutation",
+  { tenantName: string; tenantSlug: string; siteName: string; siteSlug: string; subdomain?: string },
+  { tenantId: string; siteId: string; tenantSlug: string; siteSlug: string; status: "draft" }
+>("controlPlane:provisionTenantAndSite");
 const listAuditEventsQuery = makeFunctionReference<
   "query",
   { scopeType: "platform"; limit: number },
@@ -158,6 +163,10 @@ function KinfloAdminScopeGate({
   initialSiteId,
   onTenantChange,
   onApply,
+  canProvision,
+  isProvisioning,
+  provisioningError,
+  onProvision,
 }: {
   tenants: KinfloAdminTenantOption[];
   sites: KinfloAdminSiteOption[];
@@ -165,6 +174,10 @@ function KinfloAdminScopeGate({
   initialSiteId: string;
   onTenantChange: (tenantId: string) => void;
   onApply: (tenantId: string, siteId: string) => void;
+  canProvision?: boolean;
+  isProvisioning?: boolean;
+  provisioningError?: string | null;
+  onProvision?: () => void;
 }) {
   const [tenantId, setTenantId] = useState(initialTenantId);
   const [siteId, setSiteId] = useState(initialSiteId);
@@ -179,6 +192,26 @@ function KinfloAdminScopeGate({
         <p className="mt-2 text-sm leading-6 text-slate-600">
           No client data is loaded until both values form an authorized tenant/site pair.
         </p>
+        {canProvision && tenants.length === 0 && onProvision ? (
+          <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4" data-testid="panel-kinflo-provision-empty-state">
+            <p className="text-sm font-semibold text-amber-950">No production tenant is provisioned yet.</p>
+            <p className="mt-1 text-sm leading-6 text-amber-900">
+              Create the approved Vanguard tenant and draft site to unlock scoped administration.
+            </p>
+            <button
+              type="button"
+              className="mt-4 inline-flex h-10 items-center justify-center rounded-md bg-amber-900 px-4 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={isProvisioning}
+              onClick={onProvision}
+              data-testid="button-provision-vanguard-scope"
+            >
+              {isProvisioning ? "Provisioning Vanguard..." : "Provision Vanguard scope"}
+            </button>
+            {provisioningError ? (
+              <p className="mt-3 text-sm font-medium text-red-800" role="alert">{provisioningError}</p>
+            ) : null}
+          </div>
+        ) : null}
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <label className="grid gap-2 text-sm font-medium text-slate-700">
             Tenant
@@ -352,6 +385,9 @@ function EnabledReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children
   const enabled = true;
   const initialSelection = useMemo(initialScopeSelection, []);
   const [selection, setSelection] = useState(initialSelection);
+  const [provisioningError, setProvisioningError] = useState<string | null>(null);
+  const [isProvisioning, setIsProvisioning] = useState(false);
+  const provisionTenantAndSite = useMutation(provisionTenantAndSiteMutation);
   const tenants = useQuery(listTenantsQuery, enabled ? {} : "skip");
   const plans = useQuery(listPlanCatalogQuery, enabled ? {} : "skip");
   const activation = useQuery(activationReadinessQuery, enabled ? {} : "skip");
@@ -608,6 +644,23 @@ function EnabledReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children
         initialSiteId={selection.siteId}
         onTenantChange={(tenantId) => setSelection({ tenantId, siteId: "" })}
         onApply={(tenantId, siteId) => setSelection({ tenantId, siteId })}
+        canProvision={Boolean(activation?.platformAdmin && tenants?.length === 0)}
+        isProvisioning={isProvisioning}
+        provisioningError={provisioningError}
+        onProvision={() => {
+          if (!window.confirm("Create the Vanguard Enterprises tenant and draft site now?")) return;
+          setIsProvisioning(true);
+          setProvisioningError(null);
+          void provisionTenantAndSite({
+            tenantName: "Vanguard Enterprises",
+            tenantSlug: "vanguard-enterprises",
+            siteName: "Vanguard Enterprises",
+            siteSlug: "vanguard-enterprises",
+            subdomain: "vanguard-enterprises",
+          }).catch((error: unknown) => {
+            setProvisioningError(error instanceof Error ? error.message : "Provisioning failed");
+          }).finally(() => setIsProvisioning(false));
+        }}
       />
     );
   }
