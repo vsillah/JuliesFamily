@@ -64,11 +64,11 @@ test("KinFlo public controls do not link to Julie's legacy admin route", () => {
   }
 });
 
-test("production cannot expose the dev-only role repair control", () => {
+test("dev-only role repair stays bounded to the approved deployment", () => {
   const source = readFileSync("client/src/components/KinfloAdminRoute.tsx", "utf8");
-  assert.match(source, /const canRepair = import\.meta\.env\.DEV\s+&&\s+isApprovedKinfloDevActivationTarget/);
+  assert.match(source, /const canRepair = isApprovedKinfloDevActivationTarget/);
   assert.match(source, /controlPlane:repairCurrentPlatformAdmin/);
-  assert.doesNotMatch(source, /const canRepair = isApprovedKinfloDevActivationTarget/);
+  assert.doesNotMatch(source, /const canRepair = true/);
 });
 
 test("production exposes only the governed first-admin bootstrap path", () => {

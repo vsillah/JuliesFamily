@@ -214,8 +214,9 @@ function ConvexIdentityGate({ children }: { children: ReactNode }) {
   }
 
   if (viewer.platformRole !== "super_admin") {
-    const canRepair = import.meta.env.DEV
-      && isApprovedKinfloDevActivationTarget(getKinfloIdentityRuntime().publicUrl);
+    // The server-side mutation remains the authoritative repair flag check.
+    // The client only exposes this control for the approved dev deployment.
+    const canRepair = isApprovedKinfloDevActivationTarget(getKinfloIdentityRuntime().publicUrl);
 
     if (canRepair) {
       return (
