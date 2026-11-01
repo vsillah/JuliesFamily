@@ -117,7 +117,11 @@ function LiveWorkspaceProvider({ children, gate }: { children: ReactNode; gate: 
   );
 
   useEffect(() => {
-    if (!isAuthenticated || viewer !== null || syncState !== "idle") return;
+    if (
+      !isAuthenticated
+      || syncState !== "idle"
+      || (viewer !== undefined && viewer !== null)
+    ) return;
     setSyncState("syncing");
     void upsertCurrentUser({})
       .then(() => setSyncState("ready"))

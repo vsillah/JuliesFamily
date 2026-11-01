@@ -137,7 +137,11 @@ function ConvexIdentityGate({ children }: { children: ReactNode }) {
   const [bootstrapError, setBootstrapError] = useState("");
 
   useEffect(() => {
-    if (!isAuthenticated || viewer !== null || syncState !== "idle") {
+    if (
+      !isAuthenticated
+      || syncState !== "idle"
+      || (viewer !== undefined && viewer !== null)
+    ) {
       return;
     }
 
@@ -183,7 +187,7 @@ function ConvexIdentityGate({ children }: { children: ReactNode }) {
   if (
     viewer === undefined
     || syncState === "syncing"
-    || (viewer === null && syncState === "complete")
+    || (viewer === null && syncState === "idle")
   ) {
     return (
       <IdentityGateCard

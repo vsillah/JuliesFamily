@@ -81,3 +81,22 @@ test("production exposes only the governed first-admin bootstrap path", () => {
   assert.match(controlPlane, /canBootstrap: true/);
   assert.match(controlPlane, /A platform administrator already exists/);
 });
+
+test("Convex identity sync starts while the viewer query is still pending", () => {
+  const adminRoute = readFileSync("client/src/components/KinfloAdminRoute.tsx", "utf8");
+  const orderWorkspace = readFileSync("client/src/contexts/VanguardOrderWorkspaceContext.tsx", "utf8");
+
+  for (const source of [adminRoute, orderWorkspace]) {
+    assert.match(
+      source,
+      /!isAuthenticated\s+\|\| syncState !== "idle"\s+\|\| \(viewer !== undefined && viewer !== null\)/,
+    );
+    assert.doesNotMatch(source, /!isAuthenticated \|\| viewer !== null \|\| syncState !== "idle"/);
+  }
+
+  assert.match(
+    adminRoute,
+    /viewer === undefined\s+\|\| syncState === "syncing"\s+\|\| \(viewer === null && syncState === "idle"\)/,
+  );
+  assert.doesNotMatch(adminRoute, /\(viewer === null && syncState === "complete"\)/);
+});
