@@ -58,6 +58,27 @@ Convex deploy keys remain environment-scoped and must be injected only into a
 bounded deployment workflow. They must not be placed in the repository,
 `.env.local`, a browser bundle, or chat.
 
+## Phase 3 source-only CI contract
+
+`.github/workflows/validate-infisical-development.yml` is the first remote
+integration lane. It is manual-only and validation-only: it fetches the
+development `/convex` path through Infisical OIDC, checks that the fetched
+`CONVEX_DEPLOY_KEY` is bound to `dev:hallowed-manatee-765`, and runs the
+credential-free Convex typecheck. It never runs `convex deploy`, never selects
+Preview or Production, and never writes `.env.local`.
+
+The workflow intentionally expects these protected, non-secret GitHub
+environment variables in `kinflo-convex-development`:
+
+- `INFISICAL_PROJECT_ID` — the Infisical project identifier;
+- `INFISICAL_DEV_IDENTITY_ID` — the OIDC machine identity identifier.
+
+The corresponding Infisical identity must be restricted to this repository,
+the validation workflow, the `dev` environment, and the `/convex` path. Its
+project role must permit only the reads required for validation. The workflow
+must not be dispatched until those bindings are created and separately
+reviewed.
+
 ## Migration sequence
 
 1. Create or select the KinFlo Infisical project and confirm the non-secret
@@ -69,7 +90,8 @@ bounded deployment workflow. They must not be placed in the repository,
    sanitized presence/status evidence.
 5. Add dedicated machine identities for remote agents and CI, each limited to
    one environment/path. Prefer short-lived access tokens or OIDC where the
-   platform supports it.
+   platform supports it. For GitHub Actions, use the source-only OIDC workflow
+   contract above rather than a long-lived client secret.
 6. Add Preview values and verify the Preview deployment path separately.
 7. Configure Vercel environment sync and GitHub Actions only under separate
    approvals; verify each binding before changing production.
