@@ -355,9 +355,13 @@ function EnabledReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children
   const tenants = useQuery(listTenantsQuery, enabled ? {} : "skip");
   const plans = useQuery(listPlanCatalogQuery, enabled ? {} : "skip");
   const activation = useQuery(activationReadinessQuery, enabled ? {} : "skip");
-  const selectedTenant = tenants?.find((tenant) => tenant._id === selection.tenantId);
+  const selectedTenant = tenants?.find((tenant) => (
+    tenant._id === selection.tenantId || tenant.slug === selection.tenantId
+  ));
   const sites = useQuery(listSitesQuery, enabled && selectedTenant ? { tenantId: selectedTenant._id } : "skip");
-  const selectedSite = sites?.find((site) => site._id === selection.siteId);
+  const selectedSite = sites?.find((site) => (
+    site._id === selection.siteId || site.slug === selection.siteId
+  ));
   const auditEvents: AuditEvent[] = [];
   const entitlementUsage = useQuery(
     entitlementUsageQuery,

@@ -31,10 +31,12 @@ export function resolveKinfloAdminScope(
   }
 
   const tenant = tenants.find(
-    (candidate) => candidate.id === selection.tenantId,
+    (candidate) => candidate.id === selection.tenantId || candidate.slug === selection.tenantId,
   );
-  const site = sites.find((candidate) => candidate.id === selection.siteId);
-  if (!tenant || !site || site.tenantId !== tenant.id) {
+  const site = sites.find(
+    (candidate) => candidate.id === selection.siteId || candidate.key === selection.siteId,
+  );
+  if (!tenant || !site || (site.tenantId !== tenant.id && site.tenantId !== tenant.slug)) {
     return { status: "invalid_selection" as const };
   }
 
