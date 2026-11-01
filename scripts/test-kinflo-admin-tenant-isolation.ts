@@ -63,6 +63,31 @@ test("admin scope rejects a cross-tenant site selection", () => {
   );
 });
 
+test("admin scope accepts URL slugs against live Convex-shaped options", () => {
+  const liveTenants = [{
+    id: "tenant_vanguard",
+    slug: "vanguard-enterprises",
+    name: "Vanguard Enterprises",
+  }];
+  const liveSites = [{
+    id: "site_vanguard",
+    tenantId: "tenant_vanguard",
+    key: "vanguard-enterprises",
+    name: "Vanguard Enterprises",
+  }];
+
+  const scope = resolveKinfloAdminScope(liveTenants, liveSites, {
+    tenantId: "vanguard-enterprises",
+    siteId: "vanguard-enterprises",
+  });
+
+  assert.equal(scope.status, "ready");
+  if (scope.status === "ready") {
+    assert.equal(scope.tenant.id, "tenant_vanguard");
+    assert.equal(scope.site.id, "site_vanguard");
+  }
+});
+
 test("Vanguard admin scope cannot surface Julie site-owned records", () => {
   const scoped = scopeFixtureKinfloShellSnapshot(
     fixture,

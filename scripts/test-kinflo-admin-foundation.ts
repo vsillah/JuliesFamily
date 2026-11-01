@@ -64,11 +64,11 @@ test("KinFlo public controls do not link to Julie's legacy admin route", () => {
   }
 });
 
-test("production cannot expose the dev-only role repair control", () => {
+test("dev-only role repair stays bounded to the approved deployment", () => {
   const source = readFileSync("client/src/components/KinfloAdminRoute.tsx", "utf8");
-  assert.match(source, /const canRepair = import\.meta\.env\.DEV\s+&&\s+isApprovedKinfloDevActivationTarget/);
+  assert.match(source, /const canRepair = isApprovedKinfloDevActivationTarget/);
   assert.match(source, /controlPlane:repairCurrentPlatformAdmin/);
-  assert.doesNotMatch(source, /const canRepair = isApprovedKinfloDevActivationTarget/);
+  assert.doesNotMatch(source, /const canRepair = true/);
 });
 
 test("production exposes only the governed first-admin bootstrap path", () => {
@@ -80,4 +80,23 @@ test("production exposes only the governed first-admin bootstrap path", () => {
   assert.match(controlPlane, /export const platformAdminBootstrapStatus = query/);
   assert.match(controlPlane, /canBootstrap: true/);
   assert.match(controlPlane, /A platform administrator already exists/);
+});
+
+test("Convex identity sync starts while the viewer query is still pending", () => {
+  const adminRoute = readFileSync("client/src/components/KinfloAdminRoute.tsx", "utf8");
+  const orderWorkspace = readFileSync("client/src/contexts/VanguardOrderWorkspaceContext.tsx", "utf8");
+
+  for (const source of [adminRoute, orderWorkspace]) {
+    assert.match(
+      source,
+      /!isAuthenticated\s+\|\| syncState !== "idle"\s+\|\| \(viewer !== undefined && viewer !== null\)/,
+    );
+    assert.doesNotMatch(source, /!isAuthenticated \|\| viewer !== null \|\| syncState !== "idle"/);
+  }
+
+  assert.match(
+    adminRoute,
+    /viewer === undefined\s+\|\| syncState === "syncing"\s+\|\| \(viewer === null && syncState === "idle"\)/,
+  );
+  assert.doesNotMatch(adminRoute, /\(viewer === null && syncState === "complete"\)/);
 });
