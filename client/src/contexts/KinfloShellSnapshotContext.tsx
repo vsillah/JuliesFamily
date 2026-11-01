@@ -363,6 +363,9 @@ export function FixtureKinfloShellSnapshotProvider({ children }: { children: Rea
   const fixture = useMemo(fixtureSnapshot, []);
   const initialSelection = useMemo(initialScopeSelection, []);
   const [selection, setSelection] = useState(initialSelection);
+  const [isProvisionConfirmationPending, setIsProvisionConfirmationPending] = useState(false);
+  const [provisioningError, setProvisioningError] = useState<string | null>(null);
+  const isEmptyProvisioningQa = import.meta.env.VITE_KINFLO_LOCAL_ADMIN_EMPTY_SCOPE === "true";
   const tenantOptions = useMemo(() => fixture.tenants.map((tenant) => ({
     id: tenant.slug,
     slug: tenant.slug,
@@ -374,17 +377,32 @@ export function FixtureKinfloShellSnapshotProvider({ children }: { children: Rea
     key: site.key,
     name: site.label,
   })), [fixture.clientWebsiteStudio.sites]);
-  const scope = resolveKinfloAdminScope(tenantOptions, siteOptions, selection);
+  const scopedTenantOptions = isEmptyProvisioningQa ? [] : tenantOptions;
+  const scopedSiteOptions = isEmptyProvisioningQa ? [] : siteOptions;
+  const scope = resolveKinfloAdminScope(scopedTenantOptions, scopedSiteOptions, selection);
 
   if (scope.status !== "ready") {
     return (
       <KinfloAdminScopeGate
-        tenants={tenantOptions}
-        sites={siteOptions}
+        tenants={scopedTenantOptions}
+        sites={scopedSiteOptions}
         initialTenantId={selection.tenantId}
         initialSiteId={selection.siteId}
         onTenantChange={(tenantId) => setSelection({ tenantId, siteId: "" })}
         onApply={(tenantId, siteId) => setSelection({ tenantId, siteId })}
+        canProvision={isEmptyProvisioningQa}
+        isProvisioning={false}
+        isProvisionConfirmationPending={isProvisionConfirmationPending}
+        provisioningError={provisioningError}
+        onRequestProvision={() => {
+          setProvisioningError(null);
+          setIsProvisionConfirmationPending(true);
+        }}
+        onProvision={() => {
+          setIsProvisionConfirmationPending(false);
+          setProvisioningError("Local QA fixture: production provisioning is disabled.");
+        }}
+        onCancelProvision={() => setIsProvisionConfirmationPending(false)}
       />
     );
   }

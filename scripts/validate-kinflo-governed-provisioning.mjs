@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 const controlPlane = readFileSync("convex/controlPlane.ts", "utf8");
 const context = readFileSync("client/src/contexts/KinfloShellSnapshotContext.tsx", "utf8");
 const runtime = readFileSync("client/src/lib/kinfloConvexRuntime.ts", "utf8");
+const smokeServer = readFileSync("scripts/serve-kinflo-local-admin-smoke.mjs", "utf8");
 
 const checks = [
   ["atomic provisioning mutation exists", controlPlane.includes("export const provisionTenantAndSite = mutation")],
@@ -15,6 +16,8 @@ const checks = [
   ["empty state is super-admin gated", context.includes("activation?.platformAdmin && tenants?.length === 0")],
   ["empty state uses an in-page confirmation", context.includes('data-testid="panel-kinflo-provision-confirmation"') && context.includes('data-testid="button-confirm-provision-vanguard-scope"')],
   ["empty state avoids native confirmation dialogs", !context.includes("window.confirm")],
+  ["empty-scope fixture is explicitly local-gated", smokeServer.includes("KINFLO_LOCAL_ADMIN_EMPTY_SCOPE") && context.includes("VITE_KINFLO_LOCAL_ADMIN_EMPTY_SCOPE")],
+  ["empty-scope fixture never invokes production mutation", context.includes("Local QA fixture: production provisioning is disabled.")],
   ["runtime contract includes provisioning", runtime.includes("controlPlaneProvisionTenantAndSite")],
 ];
 
