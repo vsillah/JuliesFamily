@@ -549,6 +549,118 @@ export const createSite = mutation({
   },
 });
 
+export const provisionTenantAndSite = mutation({
+  args: {
+    tenantName: v.string(),
+    tenantSlug: v.string(),
+    siteName: v.string(),
+    siteSlug: v.string(),
+    subdomain: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const actor = await requirePermission(ctx, { permission: "tenant:create" });
+    const tenantName = args.tenantName.trim();
+    const tenantSlug = slugify(args.tenantSlug);
+    const siteName = args.siteName.trim();
+    const siteSlug = slugify(args.siteSlug);
+    const subdomain = slugify(args.subdomain ?? args.siteSlug);
+
+    if (!tenantName || !tenantSlug || !siteName || !siteSlug || !subdomain) {
+      throw new Error("Tenant and site names, slugs, and subdomain are required");
+    }
+
+    const existingTenant = await ctx.db
+      .query("tenants")
+      .withIndex("by_slug", (q) => q.eq("slug", tenantSlug))
+      .first();
+    if (existingTenant) {
+      throw new Error(`Tenant slug already exists: ${tenantSlug}`);
+    }
+
+    const timestamp = now();
+    const tenantId = await ctx.db.insert("tenants", {
+      name: tenantName,
+      slug: tenantSlug,
+      status: "active",
+      createdBy: actor._id,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
+
+    await ctx.db.insert("memberships", {
+      userId: actor._id,
+      tenantId,
+      role: "owner",
+      status: "active",
+      createdBy: actor._id,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
+
+    const existingSubdomain = await ctx.db
+      .query("sites")
+      .withIndex("by_subdomain", (q) => q.eq("subdomain", subdomain))
+      .first();
+    if (existingSubdomain) {
+      throw new Error(`Site subdomain already exists: ${subdomain}`);
+    }
+
+    const siteId = await ctx.db.insert("sites", {
+      tenantId,
+      name: siteName,
+      slug: siteSlug,
+      status: "draft",
+      subdomain,
+      createdBy: actor._id,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
+
+    await ctx.db.insert("themeTokens", {
+      tenantId,
+      siteId,
+      palette: {
+        background: "#ffffff",
+        foreground: "#111827",
+        accent: "#0f766e",
+      },
+      typography: {
+        heading: "Playfair Display",
+        body: "Inter",
+      },
+      radii: {
+        card: 8,
+        control: 6,
+      },
+      createdBy: actor._id,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
+
+    await writeAuditEvent(ctx, {
+      scopeType: "tenant",
+      tenantId,
+      actorUserId: actor._id,
+      action: "tenant_created",
+      resourceType: "tenant",
+      resourceId: tenantId,
+      metadata: { name: tenantName, slug: tenantSlug, source: "governed_provisioning" },
+    });
+    await writeAuditEvent(ctx, {
+      scopeType: "site",
+      tenantId,
+      siteId,
+      actorUserId: actor._id,
+      action: "site_created",
+      resourceType: "site",
+      resourceId: siteId,
+      metadata: { name: siteName, slug: siteSlug, source: "governed_provisioning" },
+    });
+
+    return { tenantId, siteId, tenantSlug, siteSlug, status: "draft" as const };
+  },
+});
+
 export const listSitesForTenant = query({
   args: {
     tenantId: v.id("tenants"),

@@ -21,6 +21,7 @@ export const KINFLO_CONVEX_FUNCTIONS = {
   controlPlaneCreateInvitation: "controlPlane.createInvitation",
   controlPlaneCreateSite: "controlPlane.createSite",
   controlPlaneCreateTenant: "controlPlane.createTenant",
+  controlPlaneProvisionTenantAndSite: "controlPlane.provisionTenantAndSite",
   controlPlaneEntitlementSnapshot: "controlPlane.entitlementSnapshot",
   controlPlaneGrantMembership: "controlPlane.grantMembership",
   controlPlaneListAuditEvents: "controlPlane.listAuditEvents",
