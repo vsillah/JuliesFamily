@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { ConvexAuthProvider, useAuthActions, useConvexAuth } from "@convex-dev/auth/react";
-import { useMutation, useQuery } from "convex/react";
+import { useConvex, useMutation, useQuery } from "convex/react";
 import { makeFunctionReference } from "convex/server";
 import { AlertTriangle, CheckCircle2, Loader2, LogIn, LogOut, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,11 @@ type ConvexViewer = {
   name?: string;
   platformRole?: "user" | "super_admin";
 };
+
+type ViewerState =
+  | { status: "idle" | "loading"; value: undefined }
+  | { status: "loaded"; value: ConvexViewer | null }
+  | { status: "failed"; value: undefined };
 
 const viewerQuery = makeFunctionReference<"query", Record<string, never>, ConvexViewer | null>(
   "controlPlane:viewer",
@@ -121,35 +126,64 @@ function LocalFixtureIdentityGate({ children }: { children: ReactNode }) {
 function ConvexIdentityGate({ children }: { children: ReactNode }) {
   const { isLoading: authLoading, isAuthenticated } = useConvexAuth();
   const { signIn, signOut } = useAuthActions();
-  const viewer = useQuery(viewerQuery, isAuthenticated ? {} : "skip");
-  const bootstrapStatus = useQuery(
-    platformAdminBootstrapStatusQuery,
-    isAuthenticated && viewer ? {} : "skip",
-  );
-  const upsertCurrentUser = useMutation(upsertCurrentUserMutation);
-  const repairCurrentPlatformAdmin = useMutation(repairCurrentPlatformAdminMutation);
-  const bootstrapPlatformAdmin = useMutation(bootstrapPlatformAdminMutation);
+  const convex = useConvex();
   const [syncState, setSyncState] = useState<"idle" | "syncing" | "complete" | "failed">("idle");
   const [signInPending, setSignInPending] = useState(false);
+  const [viewerAttempt, setViewerAttempt] = useState(0);
+  const [viewerState, setViewerState] = useState<ViewerState>({ status: "idle", value: undefined });
   const [repairState, setRepairState] = useState<"idle" | "running" | "succeeded" | "failed">("idle");
   const [repairError, setRepairError] = useState("");
   const [bootstrapState, setBootstrapState] = useState<"idle" | "running" | "succeeded" | "failed">("idle");
   const [bootstrapError, setBootstrapError] = useState("");
+  const viewer = viewerState.status === "loaded" ? viewerState.value : undefined;
+  const bootstrapStatus = useQuery(
+    platformAdminBootstrapStatusQuery,
+    isAuthenticated && viewerState.status === "loaded" && viewer !== null ? {} : "skip",
+  );
+  const upsertCurrentUser = useMutation(upsertCurrentUserMutation);
+  const repairCurrentPlatformAdmin = useMutation(repairCurrentPlatformAdminMutation);
+  const bootstrapPlatformAdmin = useMutation(bootstrapPlatformAdminMutation);
 
   useEffect(() => {
-    if (
-      !isAuthenticated
-      || syncState !== "idle"
-      || (viewer !== undefined && viewer !== null)
-    ) {
+    if (!isAuthenticated) {
+      setViewerState({ status: "idle", value: undefined });
+      setSyncState("idle");
+      return;
+    }
+
+    let active = true;
+    setViewerState({ status: "loading", value: undefined });
+    void convex
+      .query(viewerQuery, {})
+      .then((value) => {
+        if (active) {
+          setViewerState({ status: "loaded", value });
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setViewerState({ status: "failed", value: undefined });
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [convex, isAuthenticated, viewerAttempt]);
+
+  useEffect(() => {
+    if (!isAuthenticated || viewerState.status !== "loaded" || syncState !== "idle" || viewer !== null) {
       return;
     }
 
     setSyncState("syncing");
     void upsertCurrentUser({})
-      .then(() => setSyncState("complete"))
+      .then(() => {
+        setSyncState("complete");
+        setViewerAttempt((attempt) => attempt + 1);
+      })
       .catch(() => setSyncState("failed"));
-  }, [isAuthenticated, syncState, upsertCurrentUser, viewer]);
+  }, [isAuthenticated, syncState, upsertCurrentUser, viewer, viewerState.status]);
 
   if (authLoading) {
     return (
@@ -184,10 +218,38 @@ function ConvexIdentityGate({ children }: { children: ReactNode }) {
     );
   }
 
+  if (viewerState.status === "failed") {
+    return (
+      <IdentityGateCard
+        title="KinFlo access lookup failed"
+        detail="Your Convex Auth session was accepted, but KinFlo could not read the user projection. Retry the read-only lookup or sign out and start a fresh session."
+        action={(
+          <div className="space-y-3">
+            <Button
+              className="w-full"
+              onClick={() => {
+                setSyncState("idle");
+                setViewerAttempt((attempt) => attempt + 1);
+              }}
+              data-testid="button-kinflo-retry-access-lookup"
+            >
+              <Loader2 className="mr-2 h-4 w-4" />
+              Retry access lookup
+            </Button>
+            <Button variant="secondary" className="w-full" onClick={() => void signOut()}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign out
+            </Button>
+          </div>
+        )}
+      />
+    );
+  }
+
   if (
-    viewer === undefined
+    viewerState.status !== "loaded"
     || syncState === "syncing"
-    || (viewer === null && syncState === "idle")
+    || (viewer === null && syncState === "complete")
   ) {
     return (
       <IdentityGateCard
@@ -198,7 +260,7 @@ function ConvexIdentityGate({ children }: { children: ReactNode }) {
     );
   }
 
-  if (syncState === "failed" || viewer === null) {
+  if (syncState === "failed" || viewerState.value === null) {
     return (
       <IdentityGateCard
         title="KinFlo identity sync failed"
@@ -213,7 +275,7 @@ function ConvexIdentityGate({ children }: { children: ReactNode }) {
     );
   }
 
-  if (viewer.platformRole !== "super_admin") {
+  if (viewerState.value.platformRole !== "super_admin") {
     // The server-side mutation remains the authoritative repair flag check.
     // The client only exposes this control for the approved dev deployment.
     const canRepair = isApprovedKinfloDevActivationTarget(getKinfloIdentityRuntime().publicUrl);

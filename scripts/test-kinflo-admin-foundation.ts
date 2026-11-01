@@ -86,17 +86,27 @@ test("Convex identity sync starts while the viewer query is still pending", () =
   const adminRoute = readFileSync("client/src/components/KinfloAdminRoute.tsx", "utf8");
   const orderWorkspace = readFileSync("client/src/contexts/VanguardOrderWorkspaceContext.tsx", "utf8");
 
-  for (const source of [adminRoute, orderWorkspace]) {
-    assert.match(
-      source,
-      /!isAuthenticated\s+\|\| syncState !== "idle"\s+\|\| \(viewer !== undefined && viewer !== null\)/,
-    );
-    assert.doesNotMatch(source, /!isAuthenticated \|\| viewer !== null \|\| syncState !== "idle"/);
-  }
+  assert.match(
+    orderWorkspace,
+    /!isAuthenticated\s+\|\| syncState !== "idle"\s+\|\| \(viewer !== undefined && viewer !== null\)/,
+  );
+  assert.doesNotMatch(orderWorkspace, /!isAuthenticated \|\| viewer !== null \|\| syncState !== "idle"/);
 
   assert.match(
     adminRoute,
-    /viewer === undefined\s+\|\| syncState === "syncing"\s+\|\| \(viewer === null && syncState === "idle"\)/,
+    /viewerState\.status !== "loaded"\s+\|\| syncState === "syncing"\s+\|\| \(viewer === null && syncState === "complete"\)/,
   );
-  assert.doesNotMatch(adminRoute, /\(viewer === null && syncState === "complete"\)/);
+  assert.match(adminRoute, /convex\s*\.query\(viewerQuery, \{\}\)/);
+  assert.match(adminRoute, /setSyncState\("complete"\)[\s\S]*setViewerAttempt/);
+  assert.match(adminRoute, /data-testid="button-kinflo-retry-access-lookup"/);
+  assert.match(adminRoute, /title="KinFlo access lookup failed"/);
+});
+
+test("database-free KinFlo smoke opts into the checked-in API build stub", () => {
+  const viteConfig = readFileSync("vite.config.ts", "utf8");
+  const smokeServer = readFileSync("scripts/serve-kinflo-local-admin-smoke.mjs", "utf8");
+
+  assert.match(viteConfig, /KINFLO_LOCAL_ADMIN_SMOKE/);
+  assert.match(viteConfig, /command === "serve" && !useLocalAdminSmokeStub/);
+  assert.match(smokeServer, /KINFLO_LOCAL_ADMIN_SMOKE = "true"/);
 });
