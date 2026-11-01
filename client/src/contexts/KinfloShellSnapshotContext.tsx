@@ -165,8 +165,11 @@ function KinfloAdminScopeGate({
   onApply,
   canProvision,
   isProvisioning,
+  isProvisionConfirmationPending,
   provisioningError,
+  onRequestProvision,
   onProvision,
+  onCancelProvision,
 }: {
   tenants: KinfloAdminTenantOption[];
   sites: KinfloAdminSiteOption[];
@@ -176,8 +179,11 @@ function KinfloAdminScopeGate({
   onApply: (tenantId: string, siteId: string) => void;
   canProvision?: boolean;
   isProvisioning?: boolean;
+  isProvisionConfirmationPending?: boolean;
   provisioningError?: string | null;
+  onRequestProvision?: () => void;
   onProvision?: () => void;
+  onCancelProvision?: () => void;
 }) {
   const [tenantId, setTenantId] = useState(initialTenantId);
   const [siteId, setSiteId] = useState(initialSiteId);
@@ -201,12 +207,38 @@ function KinfloAdminScopeGate({
             <button
               type="button"
               className="mt-4 inline-flex h-10 items-center justify-center rounded-md bg-amber-900 px-4 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
-              disabled={isProvisioning}
-              onClick={onProvision}
+              disabled={isProvisioning || isProvisionConfirmationPending}
+              onClick={onRequestProvision}
               data-testid="button-provision-vanguard-scope"
             >
               {isProvisioning ? "Provisioning Vanguard..." : "Provision Vanguard scope"}
             </button>
+            {isProvisionConfirmationPending ? (
+              <div className="mt-3 rounded-md border border-amber-300 bg-white p-3" data-testid="panel-kinflo-provision-confirmation">
+                <p className="text-sm font-medium text-slate-900">Confirm creating the Vanguard tenant and draft site.</p>
+                <p className="mt-1 text-sm leading-6 text-slate-600">This creates one production tenant, one draft site, and your owner membership.</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    className="inline-flex h-9 items-center justify-center rounded-md bg-amber-900 px-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={isProvisioning}
+                    onClick={onProvision}
+                    data-testid="button-confirm-provision-vanguard-scope"
+                  >
+                    Confirm provisioning
+                  </button>
+                  <button
+                    type="button"
+                    className="inline-flex h-9 items-center justify-center rounded-md border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    disabled={isProvisioning}
+                    onClick={onCancelProvision}
+                    data-testid="button-cancel-provision-vanguard-scope"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : null}
             {provisioningError ? (
               <p className="mt-3 text-sm font-medium text-red-800" role="alert">{provisioningError}</p>
             ) : null}
@@ -387,6 +419,7 @@ function EnabledReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children
   const [selection, setSelection] = useState(initialSelection);
   const [provisioningError, setProvisioningError] = useState<string | null>(null);
   const [isProvisioning, setIsProvisioning] = useState(false);
+  const [isProvisionConfirmationPending, setIsProvisionConfirmationPending] = useState(false);
   const provisionTenantAndSite = useMutation(provisionTenantAndSiteMutation);
   const tenants = useQuery(listTenantsQuery, enabled ? {} : "skip");
   const plans = useQuery(listPlanCatalogQuery, enabled ? {} : "skip");
@@ -646,9 +679,14 @@ function EnabledReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children
         onApply={(tenantId, siteId) => setSelection({ tenantId, siteId })}
         canProvision={Boolean(activation?.platformAdmin && tenants?.length === 0)}
         isProvisioning={isProvisioning}
+        isProvisionConfirmationPending={isProvisionConfirmationPending}
         provisioningError={provisioningError}
+        onRequestProvision={() => {
+          setProvisioningError(null);
+          setIsProvisionConfirmationPending(true);
+        }}
         onProvision={() => {
-          if (!window.confirm("Create the Vanguard Enterprises tenant and draft site now?")) return;
+          setIsProvisionConfirmationPending(false);
           setIsProvisioning(true);
           setProvisioningError(null);
           void provisionTenantAndSite({
@@ -661,6 +699,7 @@ function EnabledReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children
             setProvisioningError(error instanceof Error ? error.message : "Provisioning failed");
           }).finally(() => setIsProvisioning(false));
         }}
+        onCancelProvision={() => setIsProvisionConfirmationPending(false)}
       />
     );
   }

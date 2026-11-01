@@ -13,7 +13,8 @@ const checks = [
   ["does not publish from governed provisioning", !controlPlane.slice(controlPlane.indexOf("export const provisionTenantAndSite"), controlPlane.indexOf("export const listSitesForTenant")).includes("publishHomepage")],
   ["live client references the mutation", context.includes('"controlPlane:provisionTenantAndSite"')],
   ["empty state is super-admin gated", context.includes("activation?.platformAdmin && tenants?.length === 0")],
-  ["empty state requires explicit confirmation", context.includes("Create the Vanguard Enterprises tenant and draft site now?")],
+  ["empty state uses an in-page confirmation", context.includes('data-testid="panel-kinflo-provision-confirmation"') && context.includes('data-testid="button-confirm-provision-vanguard-scope"')],
+  ["empty state avoids native confirmation dialogs", !context.includes("window.confirm")],
   ["runtime contract includes provisioning", runtime.includes("controlPlaneProvisionTenantAndSite")],
 ];
 
