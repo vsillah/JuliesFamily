@@ -25,12 +25,18 @@ const sections: { key: View; label: string; icon: typeof Boxes }[] = [
   { key: "release", label: "Release", icon: ClipboardCheck },
 ];
 
+function getInitialView(): View {
+  if (typeof window === "undefined") return "home";
+  const requestedView = new URLSearchParams(window.location.search).get("operatorView");
+  return sections.some(({ key }) => key === requestedView) ? requestedView as View : "home";
+}
+
 function WorkspaceLink({ href, children }: { href: string; children: React.ReactNode }) {
   return <Button asChild variant="outline" className="h-auto min-h-9 whitespace-normal text-left"><a href={href}>{children}<ArrowRight className="ml-2 h-4 w-4 shrink-0" /></a></Button>;
 }
 
 export default function VanguardOperatorPortal({ scope }: { scope: { tenantSlug: string; siteKey: string } }) {
-  const [view, setView] = useState<View>("home");
+  const [view, setView] = useState<View>(getInitialView);
   if (!isVanguardOperatorScope(scope)) {
     return <main className="mx-auto max-w-3xl p-6" data-testid="vanguard-operator-scope-denied"><h1 className="text-xl font-semibold">Vanguard scope unavailable</h1><p className="mt-2 text-sm text-slate-600">Select the authorized Vanguard tenant and site in KinFlo. This portal does not display records from another scope.</p></main>;
   }

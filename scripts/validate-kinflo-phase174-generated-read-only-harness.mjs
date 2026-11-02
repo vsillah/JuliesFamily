@@ -129,8 +129,8 @@ for (const [pattern, label] of forbiddenSourcePatterns) {
   check(!`${harness}\n${component}\n${buildStub}`.includes(pattern), `harness excludes ${label}`);
 }
 
-const stubReferences = Array.from(buildStub.matchAll(/: ReadOnlyReference;/g));
-check(stubReferences.length === 20, "clean-build shim exposes exactly 20 query references", `Found ${stubReferences.length}.`);
+const stubQueryReferenceCount = (buildStub.match(/^\s+\w+: ReadOnlyReference.*;$/gm) ?? []).length;
+check(stubQueryReferenceCount === 28, "clean-build shim exposes the Phase 174 and read-only shell query references", `Found ${stubQueryReferenceCount}.`);
 
 for (const marker of [
   "rawResponsesIncluded: false",
