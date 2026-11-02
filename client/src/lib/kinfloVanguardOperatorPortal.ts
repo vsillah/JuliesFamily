@@ -1,4 +1,4 @@
-import { buildKinfloDashboardWorkspaceHref, type KinfloDashboardWorkspaceKey } from "./kinfloDashboardShell";
+import type { KinfloDashboardWorkspaceKey } from "./kinfloDashboardShell";
 
 export const VANGUARD_OPERATOR_SCOPE = {
   tenantSlug: "vanguard-enterprises",
@@ -23,9 +23,18 @@ export function buildVanguardOperatorHref() {
 }
 
 export function buildVanguardOperatorWorkspaceHref(workspace: KinfloDashboardWorkspaceKey) {
-  const href = buildKinfloDashboardWorkspaceHref(workspace, VANGUARD_OPERATOR_SCOPE);
-  const url = new URL(href, "https://kinflo.invalid");
-  url.searchParams.set("tenant", VANGUARD_OPERATOR_SCOPE.tenantSlug);
-  url.searchParams.set("site", VANGUARD_OPERATOR_SCOPE.siteKey);
+  const operatorView = ({
+    overview: "home",
+    operations: "fulfillment",
+    "website-configuration": "studio",
+    "personas-journeys": "intelligence",
+    experiments: "intelligence",
+    "launch-governance": "release",
+    access: "release",
+    communications: "fulfillment",
+    analytics: "intelligence",
+  } as const satisfies Record<KinfloDashboardWorkspaceKey, string>)[workspace];
+  const url = new URL(buildVanguardOperatorHref(), "https://kinflo.invalid");
+  url.searchParams.set("operatorView", operatorView);
   return `${url.pathname}${url.search}`;
 }
