@@ -81,6 +81,7 @@ export const KINFLO_GENERATED_API_BINDINGS: KinfloGeneratedApiBinding[] = [
   binding("controlPlaneListTenants", "query", "tenant control plane", "super admin can list tenants"),
   binding("controlPlaneCreateTenant", "mutation", "tenant control plane", "super admin can create tenant"),
   binding("controlPlaneCreateSite", "mutation", "tenant control plane", "site limit is enforced before site creation"),
+  binding("controlPlaneProvisionTenantAndSite", "mutation", "tenant control plane", "bounded tenant and draft site provisioning remains explicitly represented"),
   binding("controlPlaneListSitesForTenant", "query", "tenant control plane", "tenant-scoped site list returns only authorized sites"),
   binding("controlPlaneUpdateSiteStatus", "mutation", "tenant control plane", "site status update writes audit event"),
   binding("controlPlaneUpdateThemeTokens", "mutation", "tenant control plane", "theme token update writes audit event"),

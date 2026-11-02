@@ -136,6 +136,7 @@ requireIncludes("client/src/lib/kinfloGeneratedApiContract.ts", [
   "smokeEvidence",
   "controlPlaneListPlanCatalog",
   "controlPlaneSetTenantEntitlementOverride",
+  "controlPlaneProvisionTenantAndSite",
   "roleCatalogSyncDefaultRoles",
   "accessPolicyViewerPermissionSnapshot",
   "siteBuilderPublishPage",
