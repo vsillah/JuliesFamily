@@ -2,6 +2,7 @@ import { createServer } from "vite";
 
 process.env.VITE_KINFLO_IDENTITY_MODE = "local_fixture";
 process.env.KINFLO_LOCAL_ADMIN_SMOKE = "true";
+process.env.VITE_KINFLO_LOCAL_ADMIN_EMPTY_SCOPE = process.env.KINFLO_LOCAL_ADMIN_EMPTY_SCOPE === "true" ? "true" : "false";
 
 const port = Number(process.env.PORT ?? 5177);
 const host = "127.0.0.1";
