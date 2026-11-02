@@ -88,6 +88,8 @@
     "kinflo:validate-phase9-hosted-activation-readiness": "node scripts/validate-kinflo-phase9-hosted-activation-readiness.mjs",
     "kinflo:validate-phase4-personas-journeys": "node scripts/validate-kinflo-phase4-personas-journeys.mjs",
     "kinflo:validate-theme-write-contract": "node scripts/validate-kinflo-theme-write-contract.mjs",
+    "kinflo:validate-vanguard-operator-theme-draft": "node scripts/validate-kinflo-vanguard-operator-theme-draft.mjs",
+    "kinflo:test-vanguard-operator-portal": "node --import tsx --test scripts/test-kinflo-vanguard-operator-portal.ts",
     "kinflo:capture-tenant-palette-qa": "node scripts/capture-kinflo-tenant-palette-qa.mjs",
     "kinflo:capture-home-recovery-qa": "node scripts/capture-kinflo-home-recovery-qa.mjs",
     "kinflo:validate-dev-admin-role-repair": "node scripts/validate-kinflo-dev-admin-role-repair.mjs",
