@@ -50,6 +50,10 @@ test("the operator slice cannot invoke a live mutation from its controls", () =>
   assert.equal(source.includes("fetch("), false);
   assert.match(source, /disabled className="mt-4">Publish site/);
   assert.match(source, /disabled className="mt-4">Record delivery/);
+  assert.match(source, /data-testid="vanguard-theme-draft-panel"/);
+  assert.match(source, /data-testid="select-vanguard-theme-draft-palette"/);
+  assert.match(source, /Live theme save gated/);
+  assert.match(source, /Fixture preview only/);
 });
 
 test("legacy creation controls are gated in fixture and read-only review modes", () => {
