@@ -6592,6 +6592,9 @@ export default function AdminKinfloShell() {
     return <VanguardOperatorPortal scope={{ tenantSlug: adminScope.tenant.slug, siteKey: adminScope.site.key }} />;
   }
 
+  const readOnlyReview = snapshot.dataMode.source === "fixture"
+    || snapshot.dataMode.runtimeMode === "read_only_live_ready";
+
   const clientWebsiteStudioLaneRail = (
     <div
       className="order-1 sticky top-0 z-30 -mx-1 bg-slate-50/95 px-1 pb-2 pt-0 backdrop-blur supports-[backdrop-filter]:bg-slate-50/80"
@@ -6675,16 +6678,22 @@ export default function AdminKinfloShell() {
                 The operating shell for tenants, sites, templates, permissions, and configurable public experiences.
               </p>
             </div>
-            <div className={`${activeTab === "site-studio" ? "hidden sm:flex" : "flex"} flex-wrap gap-2`}>
-              <Button className="bg-slate-950 hover:bg-slate-800" onClick={() => selectShellTab("factory")} data-testid="button-create-tenant">
-                <Plus className="mr-2 h-4 w-4" />
-                New Tenant
-              </Button>
-              <Button variant="outline" className="border-slate-300 bg-white" onClick={() => selectShellTab("factory")} data-testid="button-create-site">
-                <Globe2 className="mr-2 h-4 w-4" />
-                New Site
-              </Button>
-            </div>
+            {readOnlyReview ? (
+              <div className={`${activeTab === "site-studio" ? "hidden sm:flex" : "flex"} max-w-sm items-center rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900`} data-testid="section-kinflo-read-only-creation-gate">
+                Tenant and site creation are disabled in fixture and read-only review mode.
+              </div>
+            ) : (
+              <div className={`${activeTab === "site-studio" ? "hidden sm:flex" : "flex"} flex-wrap gap-2`}>
+                <Button className="bg-slate-950 hover:bg-slate-800" onClick={() => selectShellTab("factory")} data-testid="button-create-tenant">
+                  <Plus className="mr-2 h-4 w-4" />
+                  New Tenant
+                </Button>
+                <Button variant="outline" className="border-slate-300 bg-white" onClick={() => selectShellTab("factory")} data-testid="button-create-site">
+                  <Globe2 className="mr-2 h-4 w-4" />
+                  New Site
+                </Button>
+              </div>
+            )}
           </div>
           <div
             className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-slate-950 px-4 py-3 text-white sm:flex-row sm:items-center sm:justify-between"

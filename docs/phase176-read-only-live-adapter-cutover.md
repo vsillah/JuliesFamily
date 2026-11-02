@@ -24,7 +24,7 @@ Missing or misspelled values fail closed to fixtures. The original `liveKinfloSh
 
 ## Source boundary
 
-The client uses reviewed `makeFunctionReference` query bindings. The `convex/_generated remains ignored` validation confirms that committed client code does not depend on generated files. `.env.local remains absent` is a validation requirement, not an operator suggestion.
+The client uses reviewed query bindings from the `@kinflo-phase174-generated-api` alias. Development resolves that alias to ignored `convex/_generated/api`; clean-checkout builds resolve it to a query-only stub so committed client code does not depend on generated files. The `convex/_generated remains ignored` validation confirms that boundary. `.env.local remains absent` is a validation requirement, not an operator suggestion.
 
 No mutation-backed live smoke was run. This phase does not mount mutation hooks, run a Convex deployment, import production data, publish a site, create a lead, send an invitation, call a provider, change DNS, or activate billing.
 

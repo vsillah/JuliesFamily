@@ -51,12 +51,15 @@ const allowedReadOnlyFunctions = [
 ];
 
 for (const functionName of allowedReadOnlyFunctions) {
-  check(`read-only binding exists for ${functionName}`, context.includes(`"${functionName}"`), "Approved read-only query binding is missing.");
+  const [module, exportName] = functionName.split(":");
+  check(`read-only binding exists for ${functionName}`, context.includes(`api.${module}.${exportName}`), "Approved generated read-only query binding is missing.");
 }
 
-const functionReferenceCount = context.match(/makeFunctionReference</g)?.length ?? 0;
-check("all live adapter references are queries", functionReferenceCount === allowedReadOnlyFunctions.length
-  && !/makeFunctionReference<"(?:mutation|action)"/.test(context), "A mutation/action reference was added or an approved query is missing.");
+check("live adapter uses the generated API alias", context.includes('from "@kinflo-phase174-generated-api"'), "The read-only provider must resolve bindings through the generated API alias.");
+check("all live adapter references are generated queries", allowedReadOnlyFunctions.every((functionName) => {
+  const [module, exportName] = functionName.split(":");
+  return context.includes(`api.${module}.${exportName}`);
+}) && !context.includes("makeFunctionReference"), "A hand-written or mutation/action reference was added or an approved generated query is missing.");
 check("read-only provider does not import useMutation", !context.includes("useMutation"), "Mutation hooks are forbidden in the read-only adapter.");
 check("read-only provider does not import generated files", !context.includes("convex/_generated"), "Ignored generated bindings must not become a source dependency.");
 check("fixture provider remains wired", route.includes("FixtureKinfloShellSnapshotProvider"), "Local fixture rollback provider is missing.");
