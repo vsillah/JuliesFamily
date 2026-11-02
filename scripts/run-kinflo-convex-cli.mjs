@@ -1,4 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 
@@ -8,36 +9,48 @@ const cliPath = resolve("node_modules/convex/bin/main.js");
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
 const args = process.argv.slice(2);
 
-function runNpmExec(cliArgs) {
+function runNpmInstall() {
   return spawnSync(npmCommand, [
-    "exec",
-    "--yes",
-    "--package",
+    "install",
+    "--no-save",
+    "--ignore-scripts",
+    "--no-audit",
+    "--no-fund",
+    "--package-lock=false",
     `convex@${expectedVersion}`,
-    "--",
-    "convex",
-    ...cliArgs,
   ], {
     stdio: "inherit",
     env: process.env,
   });
 }
 
-if (!existsSync(packagePath) || !existsSync(cliPath)) {
-  const result = runNpmExec(["--version"]);
-  if (result.error || result.status !== 0) {
-    console.error(`Pinned Convex CLI preflight failed: ${result.error?.message ?? "npm exec could not resolve the pinned package."}`);
-    process.exit(result.error ? 1 : result.status ?? 1);
+function resolveServerModule() {
+  try {
+    const requireFromProject = createRequire(resolve(process.cwd(), "package.json"));
+    requireFromProject.resolve("convex/server");
+    return true;
+  } catch {
+    return false;
   }
-
-  console.log(`Pinned Convex CLI preflight passed via npm exec: ${expectedVersion}`);
-  if (args.includes("--preflight")) {
-    process.exit(0);
-  }
-
-  const fallbackResult = runNpmExec(args);
-  process.exit(fallbackResult.error ? 1 : fallbackResult.status ?? 1);
 }
+
+function ensureLocalCli() {
+  if (!existsSync(packagePath) || !existsSync(cliPath) || !resolveServerModule()) {
+    console.log(`Convex ${expectedVersion} is not fully materialized after npm ci; installing the pinned package locally.`);
+    const result = runNpmInstall();
+    if (result.error || result.status !== 0) {
+      console.error(`Pinned Convex CLI materialization failed: ${result.error?.message ?? "npm install could not resolve the pinned package."}`);
+      process.exit(result.error ? 1 : result.status ?? 1);
+    }
+  }
+
+  if (!existsSync(packagePath) || !existsSync(cliPath) || !resolveServerModule()) {
+    console.error("Pinned Convex CLI preflight failed: convex/server is not resolvable from the project checkout.");
+    process.exit(1);
+  }
+}
+
+ensureLocalCli();
 
 const installedPackage = JSON.parse(readFileSync(packagePath, "utf8"));
 if (installedPackage.version !== expectedVersion) {
