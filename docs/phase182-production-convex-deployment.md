@@ -20,9 +20,14 @@ The Infisical project, `prod` environment, `/convex` path, and concealed
 `CONVEX_DEPLOY_KEY` must be verified before the command. The key must bind to
 `clever-viper-68`; values must never be printed or written to `.env.local`.
 
-The runner performs its executable and version preflight in the same
-Infisical-bound process before invoking `node_modules/convex/bin/main.js` through
-the current Node executable. This avoids relying on the child process `PATH`.
+The runner performs its executable, version, and `convex/server` resolution
+preflight in the same Infisical-bound process before invoking
+`node_modules/convex/bin/main.js` through the current Node executable. If a clean
+`npm ci` leaves the pinned package absent from `node_modules`, the runner
+materializes only `convex@1.42.1` with `--no-save`, `--ignore-scripts`, and
+`--package-lock=false`, then rechecks the local module resolution. This avoids
+relying on an isolated `npm exec` package or the child process `PATH`, and does
+not change source or lockfiles.
 
 The deploy command performs Convex typecheck, code generation, bundling, and
 function/schema push for the selected deployment. It must be one bounded attempt.
