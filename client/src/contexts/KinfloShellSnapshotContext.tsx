@@ -1,7 +1,7 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
-import { useMutation, useQuery } from "convex/react";
-import { makeFunctionReference } from "convex/server";
+import { useQuery } from "convex/react";
 import { getKinfloConvexRuntime } from "@/lib/kinfloConvexRuntime";
+import { api } from "@kinflo-phase174-generated-api";
 import {
   fixtureKinfloShellAdapter,
   type KinfloShellSnapshot,
@@ -108,32 +108,16 @@ type PublicSiteResult = {
 
 type AuditEvent = { _id: string; action: string; resourceType: string };
 
-const listTenantsQuery = makeFunctionReference<"query", Record<string, never>, TenantRow[]>("controlPlane:listTenants");
-const listSitesQuery = makeFunctionReference<"query", { tenantId: string }, SiteRow[]>("controlPlane:listSitesForTenant");
-const provisionTenantAndSiteMutation = makeFunctionReference<
-  "mutation",
-  { tenantName: string; tenantSlug: string; siteName: string; siteSlug: string; subdomain?: string },
-  { tenantId: string; siteId: string; tenantSlug: string; siteSlug: string; status: "draft" }
->("controlPlane:provisionTenantAndSite");
-const listAuditEventsQuery = makeFunctionReference<
-  "query",
-  { scopeType: "platform"; limit: number },
-  AuditEvent[]
->("controlPlane:listAuditEvents");
-const listPlanCatalogQuery = makeFunctionReference<"query", Record<string, never>, PlanRow[]>("controlPlane:listPlanCatalog");
-const entitlementUsageQuery = makeFunctionReference<"query", { tenantId: string }, EntitlementUsage>("entitlements:entitlementUsageSnapshot");
-const checkEntitlementLimitQuery = makeFunctionReference<
-  "query",
-  { tenantId: string; key: "sites"; increment: number },
-  LimitCheck
->("entitlements:checkEntitlementLimit");
-const publicSiteQuery = makeFunctionReference<
-  "query",
-  { subdomain: string; route: string },
-  PublicSiteResult
->("publicSite:resolvePublishedSite");
-const siteLaunchReadinessQuery = makeFunctionReference<"query", { siteId: string }, LaunchReadiness>("launchReadiness:getSiteLaunchReadiness");
-const activationReadinessQuery = makeFunctionReference<"query", Record<string, never>, ActivationReadiness>("activation:readiness");
+const listTenantsQuery = api.controlPlane.listTenants;
+const listSitesQuery = api.controlPlane.listSitesForTenant;
+// Keep the reviewed binding visible while platform-wide audit events remain intentionally unmounted in tenant/site views.
+const listAuditEventsQuery = api.controlPlane.listAuditEvents;
+const listPlanCatalogQuery = api.controlPlane.listPlanCatalog;
+const entitlementUsageQuery = api.entitlements.entitlementUsageSnapshot;
+const checkEntitlementLimitQuery = api.entitlements.checkEntitlementLimit;
+const publicSiteQuery = api.publicSite.resolvePublishedSite;
+const siteLaunchReadinessQuery = api.launchReadiness.getSiteLaunchReadiness;
+const activationReadinessQuery = api.activation.readiness;
 
 const KinfloShellSnapshotContext = createContext<KinfloShellSnapshot | null>(null);
 
@@ -435,10 +419,6 @@ function EnabledReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children
   const enabled = true;
   const initialSelection = useMemo(initialScopeSelection, []);
   const [selection, setSelection] = useState(initialSelection);
-  const [provisioningError, setProvisioningError] = useState<string | null>(null);
-  const [isProvisioning, setIsProvisioning] = useState(false);
-  const [isProvisionConfirmationPending, setIsProvisionConfirmationPending] = useState(false);
-  const provisionTenantAndSite = useMutation(provisionTenantAndSiteMutation);
   const tenants = useQuery(listTenantsQuery, enabled ? {} : "skip");
   const plans = useQuery(listPlanCatalogQuery, enabled ? {} : "skip");
   const activation = useQuery(activationReadinessQuery, enabled ? {} : "skip");
@@ -695,29 +675,6 @@ function EnabledReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children
         initialSiteId={selection.siteId}
         onTenantChange={(tenantId) => setSelection({ tenantId, siteId: "" })}
         onApply={(tenantId, siteId) => setSelection({ tenantId, siteId })}
-        canProvision={Boolean(activation?.platformAdmin && tenants?.length === 0)}
-        isProvisioning={isProvisioning}
-        isProvisionConfirmationPending={isProvisionConfirmationPending}
-        provisioningError={provisioningError}
-        onRequestProvision={() => {
-          setProvisioningError(null);
-          setIsProvisionConfirmationPending(true);
-        }}
-        onProvision={() => {
-          setIsProvisionConfirmationPending(false);
-          setIsProvisioning(true);
-          setProvisioningError(null);
-          void provisionTenantAndSite({
-            tenantName: "Vanguard Enterprises",
-            tenantSlug: "vanguard-enterprises",
-            siteName: "Vanguard Enterprises",
-            siteSlug: "vanguard-enterprises",
-            subdomain: "vanguard-enterprises",
-          }).catch((error: unknown) => {
-            setProvisioningError(error instanceof Error ? error.message : "Provisioning failed");
-          }).finally(() => setIsProvisioning(false));
-        }}
-        onCancelProvision={() => setIsProvisionConfirmationPending(false)}
       />
     );
   }
