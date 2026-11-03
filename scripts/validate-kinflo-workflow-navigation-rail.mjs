@@ -166,7 +166,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-workflow-navigation-rail\"",
 ]);
 
-const expectedLanes = ["control", "build", "launch", "growth", "evidence", "activation"];
+const expectedLanes = ["control", "build", "analytics", "launch", "growth", "evidence", "activation"];
 for (const lane of expectedLanes) {
   requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
     `key: "${lane}"`,

@@ -598,13 +598,14 @@ function KinfloBuildAnalytics({
 }
 
 const workflowNavigationLanes: {
-  key: "control" | "build" | "studio" | "launch" | "growth" | "evidence" | "activation";
+  key: "control" | "build" | "analytics" | "studio" | "launch" | "growth" | "evidence" | "activation";
   label: string;
   description: string;
   icon: typeof Boxes;
   tabs: ShellTabValue[];
   primaryTab: ShellTabValue;
   sectionCount?: number;
+  standalone?: boolean;
   status: "ready" | "review" | "blocked";
   blockedLiveAction: string;
 }[] = [
@@ -623,11 +624,23 @@ const workflowNavigationLanes: {
     label: "Build",
     description: "Build sites, review configuration, handoff health, and supporting content",
     icon: Factory,
-    tabs: ["site-studio", "build-analytics", "factory", "content", "brand", "navigation", "assets", "templates"],
+    tabs: ["site-studio", "factory", "content", "brand", "navigation", "assets", "templates"],
     primaryTab: "site-studio",
-    sectionCount: 10,
+    sectionCount: 9,
     status: "ready",
     blockedLiveAction: "live content save gated",
+  },
+  {
+    key: "analytics",
+    label: "Analytics",
+    description: "Cross-section Build and Handoff health",
+    icon: ListChecks,
+    tabs: ["build-analytics"],
+    primaryTab: "build-analytics",
+    sectionCount: 1,
+    standalone: true,
+    status: "ready",
+    blockedLiveAction: "live analytics reads gated",
   },
   {
     key: "launch",
@@ -739,56 +752,57 @@ function KinfloOperatorSidebar({
                   </span>
                 </span>
               </button>
-              {isActiveLane ? (
+              {isActiveLane && !lane.standalone ? (
                 <div className="ml-4 mt-1 space-y-0.5 border-l border-primary/30 pl-2" data-testid={`section-kinflo-workflow-lane-tabs-${lane.key}`}>
-                  <div className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Sections in this workspace</div>
-                  {lane.key !== "activation" ? lane.tabs.map((tabValue) => (
-                    (() => {
-                      const isActiveTab = activeTab === tabValue
-                        && (tabValue !== "site-studio" || activeStudioSection === "build");
-                      return (
-                        <button
-                          key={tabValue}
-                          type="button"
-                          onClick={() => tabValue === "site-studio" ? onSelectStudioSection("build") : onSelectTab(tabValue)}
-                          aria-current={isActiveTab ? "page" : undefined}
-                          className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition ${isActiveTab ? "bg-primary/10 font-semibold text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
-                          data-testid={`dot-kinflo-workflow-lane-${lane.key}-${tabValue}`}
-                        >
-                          <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${isActiveTab ? "bg-primary" : "bg-muted-foreground/40"}`} />
-                          <span className="truncate">{shellTabLabels[tabValue]}</span>
-                        </button>
-                      );
-                    })()
-                  )) : null}
-                  {lane.key === "build" ? (
-                    <div className="mt-1 space-y-0.5 border-t border-border/70 pt-1" data-testid="section-kinflo-sidebar-build-site-sections">
-                      {[
-                        { key: "configuration", label: "Configuration", detail: "Profiles and approvals" },
-                        { key: "handoff", label: "Handoff", detail: "Permissions and delivery" },
-                      ].map((section) => {
-                        const isActiveSection = activeStudioSection === section.key;
-                        return (
-                          <button
-                            key={section.key}
-                            type="button"
-                            onClick={() => onSelectStudioSection(section.key as ClientWebsiteStudioNavigationKey)}
-                            aria-current={isActiveSection ? "page" : undefined}
-                            className={`flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left text-xs transition ${isActiveSection ? "bg-primary/10 font-semibold text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
-                            data-testid={`button-kinflo-studio-section-${section.key}`}
-                          >
-                            <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${isActiveSection ? "bg-primary" : "bg-muted-foreground/40"}`} />
-                            <span className="min-w-0">
-                              <span className="block truncate">{section.label}</span>
-                              <span className="block truncate text-[10px] font-normal text-muted-foreground">{section.detail}</span>
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  ) : null}
-                  {lane.key === "activation" ? (
-                    <div className="mt-1 border-t border-border/70 pt-1" data-testid="section-kinflo-sidebar-activation-steps">
+                  <>
+                      <div className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Sections in this workspace</div>
+                      {lane.key !== "activation" ? lane.tabs.map((tabValue) => (
+                        (() => {
+                          const isActiveTab = activeTab === tabValue
+                            && (tabValue !== "site-studio" || activeStudioSection === "build");
+                          return (
+                            <button
+                              key={tabValue}
+                              type="button"
+                              onClick={() => tabValue === "site-studio" ? onSelectStudioSection("build") : onSelectTab(tabValue)}
+                              aria-current={isActiveTab ? "page" : undefined}
+                              className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition ${isActiveTab ? "bg-primary/10 font-semibold text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+                              data-testid={`dot-kinflo-workflow-lane-${lane.key}-${tabValue}`}
+                            >
+                              <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${isActiveTab ? "bg-primary" : "bg-muted-foreground/40"}`} />
+                              <span className="truncate">{shellTabLabels[tabValue]}</span>
+                            </button>
+                          );
+                        })()
+                      )) : null}
+                      {lane.key === "build" ? (
+                        <div className="mt-1 space-y-0.5 border-t border-border/70 pt-1" data-testid="section-kinflo-sidebar-build-site-sections">
+                          {[
+                            { key: "configuration", label: "Configuration", detail: "Profiles and approvals" },
+                            { key: "handoff", label: "Handoff", detail: "Permissions and delivery" },
+                          ].map((section) => {
+                            const isActiveSection = activeStudioSection === section.key;
+                            return (
+                              <button
+                                key={section.key}
+                                type="button"
+                                onClick={() => onSelectStudioSection(section.key as ClientWebsiteStudioNavigationKey)}
+                                aria-current={isActiveSection ? "page" : undefined}
+                                className={`flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left text-xs transition ${isActiveSection ? "bg-primary/10 font-semibold text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+                                data-testid={`button-kinflo-studio-section-${section.key}`}
+                              >
+                                <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${isActiveSection ? "bg-primary" : "bg-muted-foreground/40"}`} />
+                                <span className="min-w-0">
+                                  <span className="block truncate">{section.label}</span>
+                                  <span className="block truncate text-[10px] font-normal text-muted-foreground">{section.detail}</span>
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ) : null}
+                      {lane.key === "activation" ? (
+                        <div className="mt-1 border-t border-border/70 pt-1" data-testid="section-kinflo-sidebar-activation-steps">
                       <button
                         type="button"
                         onClick={() => onSelectTab("hosted-activation")}
@@ -822,8 +836,9 @@ function KinfloOperatorSidebar({
                           })}
                         </div>
                       ) : null}
-                    </div>
-                  ) : null}
+                        </div>
+                      ) : null}
+                  </>
                 </div>
               ) : null}
             </div>

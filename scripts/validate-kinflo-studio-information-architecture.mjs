@@ -33,9 +33,9 @@ requireFile("docs/phase153-studio-information-architecture.md");
 for (const pattern of [
   'key: "build"',
   'label: "Build"',
-  'tabs: ["site-studio", "build-analytics", "factory", "content", "brand", "navigation", "assets", "templates"]',
+  'tabs: ["site-studio", "factory", "content", "brand", "navigation", "assets", "templates"]',
   'primaryTab: "site-studio"',
-  'sectionCount: 10',
+  'sectionCount: 9',
   "activeStudioSection",
   "onSelectStudioSection",
   'data-testid="section-kinflo-sidebar-build-site-sections"',
