@@ -130,6 +130,24 @@ if (shellContents.includes('data-testid="section-kinflo-contextual-navigation"')
   pass("admin shell has no duplicate contextual section rail");
 }
 
+const sectionSnapshotIndex = shellContents.indexOf("<KinfloSectionSnapshot");
+const dataModeIndex = shellContents.indexOf("<Card className={`${activeWorkflowLane.key === \"evidence\"");
+const operationsWorkspaceIndex = shellContents.indexOf("<KinfloOperationsWorkspace");
+if (
+  sectionSnapshotIndex >= 0
+  && dataModeIndex >= 0
+  && operationsWorkspaceIndex >= 0
+  && sectionSnapshotIndex < dataModeIndex
+  && sectionSnapshotIndex < operationsWorkspaceIndex
+) {
+  pass("section snapshot precedes technical and operations panels");
+} else {
+  fail(
+    "section snapshot precedes technical and operations panels",
+    "Every non-overview workspace must lead with its section snapshot before Data Mode or operations content.",
+  );
+}
+
 for (const pattern of [
   "<KinfloDashboardShell",
   "section-kinflo-command-brief",
