@@ -6366,9 +6366,9 @@ export default function AdminKinfloShell() {
         return;
       }
 
-      const sectionNavigation = document.querySelector('[data-testid="section-kinflo-contextual-navigation"]');
-      if (sectionNavigation instanceof HTMLElement) {
-        const top = sectionNavigation.getBoundingClientRect().top + window.scrollY;
+      const selectedSectionContent = document.querySelector('[data-testid="section-kinflo-selected-content"]');
+      if (selectedSectionContent instanceof HTMLElement) {
+        const top = selectedSectionContent.getBoundingClientRect().top + window.scrollY;
         window.scrollTo({ top: Math.max(0, top - 16), behavior: "auto" });
         return;
       }
@@ -7416,26 +7416,7 @@ export default function AdminKinfloShell() {
           />
         ) : null}
 
-        <Tabs value={activeTab} onValueChange={(value) => selectShellTab(value as ShellTabValue)} className={`${activeTab === "site-studio" ? "mt-1" : "mt-7"} min-w-0`}>
-        {activeTab === "overview" ? null : <Tabs value={activeTab} onValueChange={(value) => selectShellTab(value as ShellTabValue)} className={`${activeTab === "site-studio" ? "mt-1" : "mt-7"} min-w-0`}>
-          <section className="min-w-0" data-testid="section-kinflo-workflow-navigation-rail">
-          <div className={`${activeTab === "site-studio" ? "hidden sm:block" : "block"} w-full min-w-0 rounded-md border border-border bg-card`} data-testid="section-kinflo-contextual-navigation">
-            <div className="flex flex-col gap-2 border-b border-border px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">Sections</div>
-                <div className="text-sm font-semibold text-slate-950">{activeWorkflowLane.label}</div>
-              </div>
-              <div className="text-xs text-slate-500">{activeWorkflowLane.tabs.length} sections</div>
-            </div>
-            <TabsList className={`${activeTab === "site-studio" ? "p-0.5" : "p-1"} flex h-auto w-full flex-wrap justify-start gap-1 bg-white`}>
-              {activeWorkflowLane.tabs.map((tabValue) => (
-                <TabsTrigger key={tabValue} className="shrink-0" value={tabValue}>
-                  {shellTabLabels[tabValue]}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </div>
-
+        {activeTab === "overview" ? null : <Tabs value={activeTab} onValueChange={(value) => selectShellTab(value as ShellTabValue)} className={`${activeTab === "site-studio" ? "mt-1" : "mt-7"} min-w-0`} data-testid="section-kinflo-selected-content">
           <TabsContent value="tenants" className="mt-6">
             <section className="space-y-4">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -16035,7 +16016,6 @@ export default function AdminKinfloShell() {
               </div>
             </section>
           </TabsContent>
-          </section>
         </Tabs>}
 
         <div className={`${activeTab === "site-studio" ? "hidden" : "mt-8 flex"} flex-col gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between`}>
