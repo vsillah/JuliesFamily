@@ -549,7 +549,7 @@ function KinfloBuildAnalytics({
 
       <div className="mt-4 grid gap-2 sm:grid-cols-3" data-testid="section-kinflo-build-analytics-summary">
         {[
-          { label: "Build sections", value: sections.length, detail: "Persistent destinations" },
+          { label: "Build destinations", value: sections.length + 1, detail: "Persistent destinations" },
           { label: "Scoped sites", value: snapshot.clientWebsiteStudio.sites.length, detail: "Available for review" },
           { label: "Handoff measures", value: vanguardOperationsMetricsFixture.length, detail: "Visible in the Handoff source" },
         ].map((metric) => (
