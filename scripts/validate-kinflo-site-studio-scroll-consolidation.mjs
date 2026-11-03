@@ -78,11 +78,10 @@ const compactMarkers = [
   "activeTab === \"site-studio\" ? \"gap-2 py-3\" : \"gap-5 py-6\"",
   "activeTab === \"site-studio\" ? \"py-3\" : \"py-7\"",
   "activeTab === \"site-studio\" ? \"hidden sm:flex\" : \"flex\"",
-  "activeTab === \"site-studio\" ? \"hidden sm:block\" : \"block\"",
-  "activeTab === \"site-studio\" ? \"mb-1 hidden rounded-md px-2 py-1.5 lg:block\"",
+  "section-kinflo-client-studio-context",
   "const clientWebsiteStudioLaneRail = (",
   "const shouldShowClientWebsiteStudioContext =",
-  "clientWebsiteStudioLane === \"workbench\" && !isClientWebsiteLaunchWorkbench",
+  "clientWebsiteStudioLane === \"workbench\"",
   "section-kinflo-client-studio-compact-shell",
   "{clientWebsiteStudioLaneRail}",
   "hidden max-w-3xl text-sm leading-5 text-slate-600 sm:block",
@@ -90,26 +89,11 @@ const compactMarkers = [
   "${shouldShowClientWebsiteStudioContext ? \"hidden lg:grid\" : \"hidden\"} grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm lg:grid-cols-4",
   "${shouldShowClientWebsiteStudioContext ? \"grid\" : \"hidden\"} gap-2 xl:grid-cols-[minmax(0,0.48fr)_minmax(0,0.52fr)]",
   "tabs-kinflo-client-studio-lanes",
-  "section-kinflo-client-studio-lane-switcher",
   "overflow-x-hidden",
-  "sticky top-0 z-30 -mx-1",
-  "bg-slate-50/95 px-1 pb-2",
-  "rounded-lg border border-slate-200 bg-white p-1.5 shadow-sm",
-  "Studio lanes",
-  "grid h-auto w-full grid-cols-4 gap-1",
-  "text-xs font-medium transition sm:px-3 sm:text-sm",
-  "section-kinflo-client-studio-lane-summary",
-  "hidden grid-cols-3 gap-2 text-xs sm:grid",
-  "tab-kinflo-client-studio-lane-queue",
-  "tab-kinflo-client-studio-lane-configuration",
-  "tab-kinflo-client-studio-lane-handoff",
-  "tab-kinflo-client-studio-lane-workbench",
   "section-kinflo-client-studio-lane-queue",
   "section-kinflo-client-studio-lane-configuration",
   "section-kinflo-client-studio-lane-handoff",
   "section-kinflo-client-studio-lane-workbench",
-  "role=\"tablist\"",
-  "aria-selected={isActiveLane}",
   "clientWebsiteStudioLane === \"workbench\" ? \"block\" : \"hidden\"",
   "clientWebsiteStudioLane === \"queue\" ? \"block\" : \"hidden\"",
   "tabs-kinflo-client-workbench-stage",
@@ -277,12 +261,11 @@ if (shellContents.includes("useMutation(") || shellContents.includes("useAction(
   pass("Site Studio consolidation does not execute live Convex");
 }
 
-const laneSwitcherIndex = shellContents.indexOf("section-kinflo-client-studio-lane-switcher");
+const laneSwitcherIndex = shellContents.indexOf('data-testid="section-kinflo-client-studio-context"');
 const siteStudioIndex = shellContents.indexOf('value="site-studio"');
 const compactShellIndex = shellContents.indexOf('data-testid="section-kinflo-client-studio-compact-shell"', siteStudioIndex);
 const laneRailRenderIndex = shellContents.indexOf("{clientWebsiteStudioLaneRail}", compactShellIndex);
 const headerRailRenderIndex = shellContents.indexOf('activeTab === "site-studio" ? clientWebsiteStudioLaneRail : null');
-const persistentIdentityIndex = shellContents.indexOf("section-kinflo-persistent-identity-strip");
 const controlRoomIndex = shellContents.indexOf("section-kinflo-client-control-room-frame", siteStudioIndex);
 const operatingFrameIndex = shellContents.indexOf("section-kinflo-client-studio-operating-frame", siteStudioIndex);
 const workbenchContractIndex = shellContents.indexOf("section-kinflo-client-workbench-grid-contract", siteStudioIndex);
@@ -293,11 +276,9 @@ if (
   compactShellIndex !== -1 &&
   laneRailRenderIndex !== -1 &&
   headerRailRenderIndex === -1 &&
-  persistentIdentityIndex !== -1 &&
   controlRoomIndex !== -1 &&
   operatingFrameIndex !== -1 &&
   workbenchContractIndex !== -1 &&
-  persistentIdentityIndex < compactShellIndex &&
   compactShellIndex < laneRailRenderIndex &&
   laneRailRenderIndex < controlRoomIndex &&
   laneRailRenderIndex < operatingFrameIndex &&
@@ -306,8 +287,8 @@ if (
   pass("Site Studio lane switcher renders first in the compact section above lane sections");
 } else {
   fail(
-    "Site Studio lane switcher renders first in the compact section above lane sections",
-    "The lane switcher must stay inside the compact Site Studio shell before the control-room and lane-specific summary cards so it does not jump lower as lanes change."
+    "Studio context renders first in the compact section above lane sections",
+    "The Studio context summary must stay inside the compact Site Studio shell before the control-room and lane-specific summary cards."
   );
 }
 
@@ -319,16 +300,15 @@ const laneRailClassWindow = laneRailIndex === -1
   ? ""
   : shellContents.slice(Math.max(0, laneRailIndex - 360), laneRailIndex + 120);
 if (
-  laneRailClassWindow.includes("sticky top-0 z-30 -mx-1") &&
-  laneRailClassWindow.includes("bg-slate-50/95") &&
+  laneRailClassWindow.includes("order-1 border-b border-border bg-background") &&
   !laneRailClassWindow.includes("order-first") &&
   !laneRailClassWindow.includes("relative z-10")
 ) {
-  pass("Site Studio lane switcher uses a sticky compact-section top rail");
+  pass("Studio context uses a compact section-top anchor");
 } else {
   fail(
-    "Site Studio lane switcher uses a sticky compact-section top rail",
-    "The lane switcher must stay in the compact Site Studio shell with sticky top-0 placement before lane content."
+    "Studio context uses a compact section-top anchor",
+    "The Studio context summary must stay in the compact Site Studio shell before lane content."
   );
 }
 
@@ -353,14 +333,14 @@ if (
   registryGuardIndex !== -1 &&
   commandSurfaceGuardIndex !== -1 &&
   queueLaneIndex !== -1 &&
-  shellContents.includes("order-1 sticky top-0") &&
+  shellContents.includes("order-1 border-b border-border bg-background") &&
   shellContents.includes('className="order-2 min-w-0"')
 ) {
   pass("Site Studio active lanes render above the secondary context stack");
 } else {
   fail(
     "Site Studio active lanes render above the secondary context stack",
-    "Spin up, Configure, Handoff, and Workbench must open directly below the lane rail instead of inheriting the Workbench control-room, registry, composer, and contract stack."
+    "Studio child sections must open directly below the context summary instead of inheriting the Workbench control-room, registry, composer, and contract stack."
   );
 }
 
