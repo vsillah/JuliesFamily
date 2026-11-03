@@ -8250,7 +8250,10 @@ export default function AdminKinfloShell() {
           </div>
         </section>
 
-        {activeTab === "overview" || activeTab === "hosted-activation" || activeTab === "build-analytics" ? null : (
+        {activeTab === "overview"
+          || activeTab === "hosted-activation"
+          || activeTab === "build-analytics"
+          || (activeTab === "site-studio" && getClientWebsiteStudioNavigationKey(clientWebsiteStudioLane, clientWebsiteWorkbenchStage) !== "build") ? null : (
           <KinfloSectionSnapshot
             activeTab={activeTab}
             snapshot={snapshot}
