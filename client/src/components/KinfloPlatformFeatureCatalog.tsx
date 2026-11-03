@@ -208,6 +208,282 @@ function PlatformMetricGrid() {
   );
 }
 
+const analyticsDimensions = [
+  "Tenant reach",
+  "Sessions",
+  "Build usage",
+  "Launch usage",
+  "Growth usage",
+] as const;
+
+const flowStages = [
+  { label: "Tenant entry", detail: "Opened consumer workspace" },
+  { label: "Build", detail: "Configured site experience" },
+  { label: "Launch", detail: "Reached readiness review" },
+  { label: "Operate", detail: "Used tenant workflows" },
+] as const;
+
+function PlatformAnalyticsWorkspace() {
+  return (
+    <section
+      className="mt-8 border-t border-slate-300 pt-8"
+      aria-labelledby="platform-analytics-heading"
+      data-testid="section-kinflo-platform-analytics"
+    >
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+            Platform analytics
+          </div>
+          <h2
+            id="platform-analytics-heading"
+            className="mt-2 text-2xl font-semibold tracking-tight text-slate-950"
+          >
+            How tenants use KinFlo
+          </h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+            One place for tenant activity, capability adoption, end-to-end
+            sessions, and usage economics. Live telemetry is not connected in
+            this read-only build.
+          </p>
+        </div>
+        <span className="inline-flex items-center gap-2 text-sm font-medium text-slate-500">
+          <Gauge className="h-4 w-4" aria-hidden="true" /> Awaiting live
+          telemetry
+        </span>
+      </div>
+
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {[
+          ["Activity over time", "No live events", "7-day event trend"],
+          ["End-to-end sessions", "Not connected", "Entry to operation"],
+          ["Usage economics", "Not connected", "Price per usage unit"],
+          ["Tenant coverage", "No live tenants", "Cross-tenant comparison"],
+        ].map(([label, value, detail]) => (
+          <div
+            key={label}
+            className="border border-slate-300 bg-white px-4 py-4 shadow-sm"
+          >
+            <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+              {label}
+            </div>
+            <div className="mt-3 text-lg font-semibold text-slate-950">
+              {value}
+            </div>
+            <div className="mt-2 text-sm leading-5 text-slate-600">
+              {detail}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.65fr)]">
+        <section
+          className="border border-slate-300 bg-white p-5 shadow-sm"
+          aria-labelledby="platform-activity-heading"
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                Trend view
+              </div>
+              <h3
+                id="platform-activity-heading"
+                className="mt-2 text-lg font-semibold text-slate-950"
+              >
+                Activity over time
+              </h3>
+            </div>
+            <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+              Last 7 days
+            </span>
+          </div>
+          <div
+            className="mt-5 flex h-44 items-center justify-center border border-dashed border-slate-300 bg-slate-50 px-5 text-center"
+            data-testid="panel-kinflo-activity-empty"
+          >
+            <div>
+              <div className="text-sm font-semibold text-slate-700">
+                No live activity events loaded
+              </div>
+              <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">
+                This view will plot tenant sessions, workflow transitions, and
+                platform events once telemetry is connected.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section
+          className="border border-slate-300 bg-white p-5 shadow-sm"
+          aria-labelledby="platform-capability-heading"
+        >
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+              Capability mix
+            </div>
+            <h3
+              id="platform-capability-heading"
+              className="mt-2 text-lg font-semibold text-slate-950"
+            >
+              Components in use
+            </h3>
+          </div>
+          <div
+            className="mt-3 flex justify-center"
+            data-testid="chart-kinflo-capability-radar"
+          >
+            <svg
+              viewBox="0 0 240 210"
+              className="h-52 w-full max-w-xs text-slate-300"
+              role="img"
+              aria-label="Capability mix radar chart awaiting live telemetry"
+            >
+              <polygon
+                points="120,18 205,80 172,175 68,175 35,80"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1"
+              />
+              <polygon
+                points="120,55 170,91 150,148 90,148 70,91"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1"
+              />
+              <line
+                x1="120"
+                y1="18"
+                x2="120"
+                y2="175"
+                stroke="currentColor"
+                strokeWidth="1"
+              />
+              <line
+                x1="35"
+                y1="80"
+                x2="172"
+                y2="175"
+                stroke="currentColor"
+                strokeWidth="1"
+              />
+              <line
+                x1="205"
+                y1="80"
+                x2="68"
+                y2="175"
+                stroke="currentColor"
+                strokeWidth="1"
+              />
+              <text
+                x="120"
+                y="10"
+                textAnchor="middle"
+                className="fill-slate-500 text-[9px]"
+              >
+                Tenant reach
+              </text>
+              <text x="214" y="82" className="fill-slate-500 text-[9px]">
+                Sessions
+              </text>
+              <text x="176" y="193" className="fill-slate-500 text-[9px]">
+                Build
+              </text>
+              <text x="39" y="193" className="fill-slate-500 text-[9px]">
+                Launch
+              </text>
+              <text x="2" y="82" className="fill-slate-500 text-[9px]">
+                Growth
+              </text>
+              <text
+                x="120"
+                y="108"
+                textAnchor="middle"
+                className="fill-slate-700 text-[10px]"
+              >
+                No live data
+              </text>
+            </svg>
+          </div>
+          <div className="mt-1 flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs text-slate-500">
+            {analyticsDimensions.map((dimension) => (
+              <span key={dimension}>{dimension}</span>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <section
+          className="border border-slate-300 bg-white p-5 shadow-sm"
+          aria-labelledby="platform-flow-heading"
+        >
+          <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+            Session paths
+          </div>
+          <h3
+            id="platform-flow-heading"
+            className="mt-2 text-lg font-semibold text-slate-950"
+          >
+            End-to-end tenant flow
+          </h3>
+          <div className="mt-4 grid gap-2 sm:grid-cols-4">
+            {flowStages.map((stage, index) => (
+              <div
+                key={stage.label}
+                className="border border-slate-200 bg-slate-50 px-3 py-3"
+              >
+                <div className="text-xs font-semibold text-slate-400">
+                  {String(index + 1).padStart(2, "0")}
+                </div>
+                <div className="mt-2 text-sm font-semibold text-slate-800">
+                  {stage.label}
+                </div>
+                <div className="mt-1 text-xs leading-5 text-slate-500">
+                  {stage.detail}
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-4 text-sm leading-6 text-slate-500">
+            Conversion and drop-off rates will appear here when session events
+            are available.
+          </p>
+        </section>
+        <section
+          className="border border-slate-300 bg-white p-5 shadow-sm"
+          aria-labelledby="platform-economics-heading"
+        >
+          <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+            Usage economics
+          </div>
+          <h3
+            id="platform-economics-heading"
+            className="mt-2 text-lg font-semibold text-slate-950"
+          >
+            Price per usage
+          </h3>
+          <div className="mt-4 grid gap-2 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+            {["Per tenant", "Per site", "Per session"].map((label) => (
+              <div key={label} className="border border-slate-200 px-3 py-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">
+                  {label}
+                </div>
+                <div className="mt-2 text-sm font-semibold text-slate-700">
+                  Not connected
+                </div>
+                <div className="mt-1 text-xs leading-5 text-slate-500">
+                  Requires billing and usage events
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+    </section>
+  );
+}
+
 function PlatformLaneView({
   section,
 }: {
@@ -280,7 +556,8 @@ function TenantRelationshipForm({
   const [tenantPlan, setTenantPlan] = useState<TenantPlan | null>(null);
   const validSourceUrl = !sourceUrl || /^https?:\/\/[^\s]+$/i.test(sourceUrl);
   const derivedSlug = useMemo(() => slugify(tenantName), [tenantName]);
-  const websiteReferenceNote = "Entering a URL never starts scraping or creates records.";
+  const websiteReferenceNote =
+    "Entering a URL never starts scraping or creates records.";
   const canReviewPlan =
     tenantName.trim().length > 1 &&
     siteName.trim().length > 1 &&
@@ -638,6 +915,7 @@ export default function KinfloPlatformFeatureCatalog({
             {activeSection === "overview" ? (
               <>
                 <PlatformMetricGrid />
+                <PlatformAnalyticsWorkspace />
                 <section
                   className="mt-8"
                   aria-labelledby="platform-lanes-heading"
