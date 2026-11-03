@@ -5,6 +5,8 @@ import {
   AlertTriangle,
   Boxes,
   CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
   Clock3,
   CircleDashed,
   Command,
@@ -29,6 +31,7 @@ import {
   RotateCcw,
   Rocket,
   Save,
+  Search,
   Settings2,
   ShieldCheck,
   Sparkles,
@@ -94,6 +97,8 @@ import {
   type ShellIntegrationDraft,
   type ShellLaunchReadinessSite,
   type ShellMetricIconKey,
+  type ShellSite,
+  type ShellTenant,
 } from "@/lib/kinfloShellData";
 import { useKinfloAdminScope, useKinfloShellSnapshot } from "@/contexts/KinfloShellSnapshotContext";
 import { useKinfloPreferencesAdapter } from "@/contexts/KinfloPreferencesAdapterContext";
@@ -237,12 +242,12 @@ const shellTabLabels: Record<ShellTabValue, string> = {
   tenants: "Tenants",
   sites: "Sites",
   "launch-readiness": "Launch",
-  "adapter-switch": "Switch",
+  "adapter-switch": "Adapter",
   "hosted-activation": "Activation",
-  factory: "Factory",
+  factory: "Website setup",
   plans: "Plans",
   brand: "Brand",
-  navigation: "Nav",
+  navigation: "Navigation",
   preview: "Preview",
   "site-studio": "Studio",
   assets: "Assets",
@@ -258,7 +263,7 @@ const shellTabLabels: Record<ShellTabValue, string> = {
 };
 
 const workflowNavigationLanes: {
-  key: "control" | "build" | "launch" | "growth" | "evidence" | "hosted-activation";
+  key: "control" | "build" | "launch" | "growth" | "evidence";
   label: string;
   description: string;
   icon: typeof Boxes;
@@ -309,27 +314,94 @@ const workflowNavigationLanes: {
   },
   {
     key: "evidence",
-    label: "Evidence",
-    description: "AI review, adapter switch, proof, and audit posture",
+    label: "Evidence & Activation",
+    description: "AI review, adapters, Convex activation, and rollback gates",
     icon: FileText,
-    tabs: ["ai-review", "adapter-switch"],
+    tabs: ["ai-review", "adapter-switch", "hosted-activation"],
     primaryTab: "ai-review",
-    status: "review",
-    blockedLiveAction: "generated API import gated",
-  },
-  {
-    key: "hosted-activation",
-    label: "Hosted Activation",
-    description: "Convex ownership, codegen, smoke, and rollback gates",
-    icon: KeyRound,
-    tabs: ["hosted-activation"],
-    primaryTab: "hosted-activation",
     status: "blocked",
-    blockedLiveAction: "hosted deployment gated",
+    blockedLiveAction: "generated API and hosted deployment gated",
   },
 ];
 
 const workflowNavigationTabCoverage = workflowNavigationLanes.flatMap((lane) => lane.tabs);
+
+const READ_ONLY_TABLE_PAGE_SIZE = 5;
+
+function ReadOnlyTableControls({
+  search,
+  onSearchChange,
+  resultCount,
+  totalCount,
+  page,
+  pageCount,
+  onPageChange,
+  placeholder,
+  testId,
+}: {
+  search: string;
+  onSearchChange: (value: string) => void;
+  resultCount: number;
+  totalCount: number;
+  page: number;
+  pageCount: number;
+  onPageChange: (page: number) => void;
+  placeholder: string;
+  testId: string;
+}) {
+  const hasPreviousPage = page > 0;
+  const hasNextPage = page < pageCount - 1;
+
+  return (
+    <div className="mt-3 flex flex-col gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 sm:flex-row sm:items-center sm:justify-between" data-testid={`${testId}-controls`}>
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        <Search className="h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
+        <Input
+          value={search}
+          onChange={(event) => onSearchChange(event.target.value)}
+          placeholder={placeholder}
+          aria-label={placeholder}
+          className="h-8 min-w-0 bg-white text-sm"
+          data-testid={`${testId}-search`}
+        />
+      </div>
+      <div className="flex items-center justify-between gap-3 text-xs text-slate-600 sm:justify-end">
+        <span data-testid={`${testId}-count`}>
+          {resultCount === totalCount ? `${totalCount} records` : `${resultCount} of ${totalCount} records`}
+        </span>
+        <div className="flex items-center gap-1">
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            className="h-8 w-8 bg-white"
+            disabled={!hasPreviousPage}
+            onClick={() => onPageChange(page - 1)}
+            aria-label="Previous table page"
+            data-testid={`${testId}-previous`}
+          >
+            <ChevronLeft aria-hidden="true" />
+          </Button>
+          <span className="min-w-16 text-center" data-testid={`${testId}-page`}>
+            Page {page + 1} of {pageCount}
+          </span>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            className="h-8 w-8 bg-white"
+            disabled={!hasNextPage}
+            onClick={() => onPageChange(page + 1)}
+            aria-label="Next table page"
+            data-testid={`${testId}-next`}
+          >
+            <ChevronRight aria-hidden="true" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const clientHandoffPermissionStripTestIds = {
   root: "section-kinflo-client-handoff-permission-strip",
@@ -664,6 +736,147 @@ function statusBadge(status: KinfloShellStatus) {
     return <Badge className="bg-amber-600 hover:bg-amber-600">Nurture</Badge>;
   }
   return <Badge variant="outline">Draft</Badge>;
+}
+
+function TenantControlPlaneTable({ tenants }: { tenants: ShellTenant[] }) {
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const searchedTenants = tenants.filter((tenant) => {
+    const query = search.trim().toLowerCase();
+    if (!query) return true;
+    return [tenant.name, tenant.slug, tenant.plan, tenant.owner, tenant.status].join(" ").toLowerCase().includes(query);
+  });
+  const pageCount = Math.max(1, Math.ceil(searchedTenants.length / READ_ONLY_TABLE_PAGE_SIZE));
+  const safePage = Math.min(page, pageCount - 1);
+  const visibleTenants = searchedTenants.slice(safePage * READ_ONLY_TABLE_PAGE_SIZE, (safePage + 1) * READ_ONLY_TABLE_PAGE_SIZE);
+
+  useEffect(() => {
+    setPage(0);
+  }, [search]);
+
+  return (
+    <>
+      <ReadOnlyTableControls
+        search={search}
+        onSearchChange={setSearch}
+        resultCount={searchedTenants.length}
+        totalCount={tenants.length}
+        page={safePage}
+        pageCount={pageCount}
+        onPageChange={setPage}
+        placeholder="Search tenants, plans, or owners"
+        testId="kinflo-tenant-control-plane"
+      />
+      <div className="overflow-x-auto rounded-lg border" data-testid="section-kinflo-tenant-control-plane-table">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Tenant</TableHead>
+              <TableHead>Plan</TableHead>
+              <TableHead>Sites</TableHead>
+              <TableHead>Owner</TableHead>
+              <TableHead className="text-right">State</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {visibleTenants.length > 0 ? visibleTenants.map((tenant) => (
+              <TableRow key={tenant.slug}>
+                <TableCell>
+                  <div className="font-medium">{tenant.name}</div>
+                  <div className="text-xs text-muted-foreground">{tenant.slug}</div>
+                </TableCell>
+                <TableCell>{tenant.plan}</TableCell>
+                <TableCell>{tenant.sites}</TableCell>
+                <TableCell>{tenant.owner}</TableCell>
+                <TableCell className="text-right">{statusBadge(tenant.status)}</TableCell>
+              </TableRow>
+            )) : (
+              <TableRow>
+                <TableCell colSpan={5} className="py-8 text-center text-sm text-slate-500" data-testid="section-kinflo-tenant-control-plane-empty">
+                  No tenants match this search.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </>
+  );
+}
+
+function SiteFactoryQueueTable({ sites }: { sites: ShellSite[] }) {
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const searchedSites = sites.filter((site) => {
+    const query = search.trim().toLowerCase();
+    if (!query) return true;
+    return [site.name, site.tenant, site.domain, site.route, site.template, site.status].join(" ").toLowerCase().includes(query);
+  });
+  const pageCount = Math.max(1, Math.ceil(searchedSites.length / READ_ONLY_TABLE_PAGE_SIZE));
+  const safePage = Math.min(page, pageCount - 1);
+  const visibleSites = searchedSites.slice(safePage * READ_ONLY_TABLE_PAGE_SIZE, (safePage + 1) * READ_ONLY_TABLE_PAGE_SIZE);
+
+  useEffect(() => {
+    setPage(0);
+  }, [search]);
+
+  return (
+    <>
+      <ReadOnlyTableControls
+        search={search}
+        onSearchChange={setSearch}
+        resultCount={searchedSites.length}
+        totalCount={sites.length}
+        page={safePage}
+        pageCount={pageCount}
+        onPageChange={setPage}
+        placeholder="Search sites, tenants, domains, or templates"
+        testId="kinflo-site-factory-queue"
+      />
+      <div className="overflow-x-auto rounded-lg border" data-testid="section-kinflo-site-factory-queue-table">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Site</TableHead>
+              <TableHead>Tenant</TableHead>
+              <TableHead>Domain</TableHead>
+              <TableHead>Template</TableHead>
+              <TableHead>Preview</TableHead>
+              <TableHead className="text-right">State</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {visibleSites.length > 0 ? visibleSites.map((site) => (
+              <TableRow key={`${site.tenant}-${site.name}`}>
+                <TableCell>
+                  <div className="font-medium">{site.name}</div>
+                  <div className="text-xs text-muted-foreground">{site.route}</div>
+                </TableCell>
+                <TableCell>{site.tenant}</TableCell>
+                <TableCell>{site.domain}</TableCell>
+                <TableCell>{site.template}</TableCell>
+                <TableCell>
+                  <Button size="sm" variant="outline" asChild>
+                    <Link href={site.previewPath}>
+                      <ExternalLink className="mr-2 h-3 w-3" />
+                      Open
+                    </Link>
+                  </Button>
+                </TableCell>
+                <TableCell className="text-right">{statusBadge(site.status)}</TableCell>
+              </TableRow>
+            )) : (
+              <TableRow>
+                <TableCell colSpan={6} className="py-8 text-center text-sm text-slate-500" data-testid="section-kinflo-site-factory-queue-empty">
+                  No sites match this search.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+    </>
+  );
 }
 
 function liveAdapterStatusBadge(status: ShellLiveAdapterStatus) {
@@ -1483,6 +1696,8 @@ function ClientAdminHandoffMatrix({
   onFilterChange: (filter: ClientAdminHandoffMatrixFilter) => void;
   testIds: typeof clientAdminHandoffMatrixTestIds;
 }) {
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
   const filteredRows = matrix.rows.filter((row) => {
     if (filter === "blocked") {
       return !Boolean(row.canInvite) || !Boolean(row.canGrantMembership);
@@ -1495,6 +1710,21 @@ function ClientAdminHandoffMatrix({
     }
     return true;
   });
+  const searchedRows = filteredRows.filter((row) => {
+    const query = search.trim().toLowerCase();
+    if (!query) return true;
+    return [row.label, row.tenantSlug, row.scope, row.ownerRole, row.inviteRole, row.approvalGate, row.missingArtifact]
+      .join(" ")
+      .toLowerCase()
+      .includes(query);
+  });
+  const pageCount = Math.max(1, Math.ceil(searchedRows.length / READ_ONLY_TABLE_PAGE_SIZE));
+  const safePage = Math.min(page, pageCount - 1);
+  const visibleRows = searchedRows.slice(safePage * READ_ONLY_TABLE_PAGE_SIZE, (safePage + 1) * READ_ONLY_TABLE_PAGE_SIZE);
+
+  useEffect(() => {
+    setPage(0);
+  }, [filter, search]);
 
   const filterOptions: { value: ClientAdminHandoffMatrixFilter; label: string; count: number }[] = [
     { value: "all", label: "All", count: matrix.rows.length },
@@ -1520,7 +1750,7 @@ function ClientAdminHandoffMatrix({
     { label: "Site", value: matrix.siteScoped },
     { label: "Ready", value: matrix.readyForInvite },
     { label: "Blocked", value: matrix.blockedInvites },
-    { label: "Showing", value: filteredRows.length },
+    { label: "Showing", value: searchedRows.length },
   ];
 
   return (
@@ -1577,6 +1807,18 @@ function ClientAdminHandoffMatrix({
         })}
       </div>
 
+      <ReadOnlyTableControls
+        search={search}
+        onSearchChange={setSearch}
+        resultCount={searchedRows.length}
+        totalCount={matrix.rows.length}
+        page={safePage}
+        pageCount={pageCount}
+        onPageChange={setPage}
+        placeholder="Search sites, roles, or gates"
+        testId={testIds.table}
+      />
+
       <div className="mt-4 max-h-[360px] overflow-y-auto rounded-xl border border-slate-200" data-testid={testIds.table}>
         <Table>
           <TableHeader className="sticky top-0 bg-white">
@@ -1590,7 +1832,7 @@ function ClientAdminHandoffMatrix({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredRows.length > 0 ? filteredRows.map((row) => (
+            {visibleRows.length > 0 ? visibleRows.map((row) => (
               <TableRow key={row.siteKey}>
                 <TableCell className="min-w-[180px]">
                   <div className="font-medium text-slate-950">{row.label}</div>
@@ -1634,7 +1876,7 @@ function ClientAdminHandoffMatrix({
         <div className="max-h-[220px] overflow-y-auto rounded-xl border border-amber-200 bg-amber-50 p-3" data-testid={testIds.blocked}>
           <div className="text-sm font-semibold text-amber-950">Blocked handoff actions</div>
           <div className="mt-2 grid gap-2 md:grid-cols-3">
-            {filteredRows.length > 0 ? filteredRows.map((row) => (
+            {visibleRows.length > 0 ? visibleRows.map((row) => (
               <div key={row.siteKey} className="rounded-lg border border-amber-200 bg-white/70 p-2 text-xs leading-5 text-amber-900">
                 <div className="font-semibold">{row.blockedInviteAction}</div>
                 <div>{row.nextHumanGate}</div>
@@ -1810,8 +2052,25 @@ function ClientWebsitePortfolioRegistry({
   onSiteChange: (siteKey: string) => void;
   testIds: typeof clientWebsitePortfolioRegistryTestIds;
 }) {
-  const selectedRow = registry.rows.find((row) => row.siteKey === selectedSiteKey) ?? registry.rows[0];
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const searchedRows = registry.rows.filter((row) => {
+    const query = search.trim().toLowerCase();
+    if (!query) return true;
+    return [row.label, row.tenantSlug, row.templateKey, row.requestedPlan, row.adminPresetLabel, row.ownerRole, row.scope, row.nextGate]
+      .join(" ")
+      .toLowerCase()
+      .includes(query);
+  });
+  const pageCount = Math.max(1, Math.ceil(searchedRows.length / READ_ONLY_TABLE_PAGE_SIZE));
+  const safePage = Math.min(page, pageCount - 1);
+  const visibleRows = searchedRows.slice(safePage * READ_ONLY_TABLE_PAGE_SIZE, (safePage + 1) * READ_ONLY_TABLE_PAGE_SIZE);
+  const selectedRow = searchedRows.find((row) => row.siteKey === selectedSiteKey) ?? searchedRows[0] ?? registry.rows[0];
   const selectedBlockedActions = selectedRow?.blockedActions ?? [];
+
+  useEffect(() => {
+    setPage(0);
+  }, [search]);
 
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-2 shadow-sm sm:p-3" data-testid={testIds.root}>
@@ -1849,6 +2108,18 @@ function ClientWebsitePortfolioRegistry({
         ))}
       </div>
 
+      <ReadOnlyTableControls
+        search={search}
+        onSearchChange={setSearch}
+        resultCount={searchedRows.length}
+        totalCount={registry.rows.length}
+        page={safePage}
+        pageCount={pageCount}
+        onPageChange={setPage}
+        placeholder="Search sites, plans, or gates"
+        testId={testIds.table}
+      />
+
       <div className="mt-3 hidden overflow-hidden rounded-lg border border-slate-200 lg:block" data-testid={testIds.table}>
         <Table>
           <TableHeader>
@@ -1862,7 +2133,7 @@ function ClientWebsitePortfolioRegistry({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {registry.rows.map((row) => (
+            {visibleRows.map((row) => (
               <TableRow
                 key={row.siteKey}
                 className={row.siteKey === selectedSiteKey ? "bg-slate-50" : undefined}
@@ -1903,7 +2174,7 @@ function ClientWebsitePortfolioRegistry({
       </div>
 
       <div className="mt-3 grid max-h-[420px] gap-2 overflow-y-auto pr-1 lg:hidden" data-testid={`${testIds.table}-cards`}>
-        {registry.rows.map((row) => (
+        {visibleRows.map((row) => (
           <button
             key={row.siteKey}
             type="button"
@@ -6968,82 +7239,91 @@ export default function AdminKinfloShell() {
           </CardHeader>
           <CardContent className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(280px,420px)]">
             <div className="min-w-0">
-              <div className="text-sm font-medium">Activation gate</div>
+              <div className="text-sm font-medium">What this means</div>
               <p className="mt-1 text-sm text-muted-foreground">{snapshot.dataMode.activationGate}</p>
             </div>
-            <div className="min-w-0">
-              <div className="text-sm font-medium">Convex contract</div>
-              <div className="mt-2 flex min-w-0 flex-wrap gap-2">
-                {snapshot.dataMode.convexFunctions.slice(0, 8).map((functionName) => (
-                  <Badge key={functionName} variant="secondary">{functionName}</Badge>
-                ))}
-                {snapshot.dataMode.convexFunctions.length > 8 ? (
-                  <Badge variant="outline">+{snapshot.dataMode.convexFunctions.length - 8} more mapped</Badge>
-                ) : null}
-              </div>
-            </div>
-            <div className="min-w-0 lg:col-span-2">
-              <div className="text-sm font-medium">Live adapter readiness</div>
-              <div className="mt-2 grid gap-3 md:hidden">
-                {snapshot.liveAdapterBindings.map((binding) => (
-                  <div key={binding.surface} className="rounded-md border p-3 text-sm">
-                    <div className="flex flex-col items-start gap-2 sm:flex-row sm:justify-between">
-                      <div>
-                        <div className="font-medium">{binding.surface}</div>
-                        <div className="mt-1 text-xs text-muted-foreground">{binding.fixtureSource}</div>
-                      </div>
-                      {liveAdapterStatusBadge(binding.status)}
-                    </div>
-                    <div className="mt-3 flex flex-wrap gap-1">
-                      {binding.convexFunctions.map((functionName) => (
-                        <Badge key={functionName} variant="secondary" className="max-w-full whitespace-normal break-all text-left">{functionName}</Badge>
-                      ))}
-                    </div>
-                    <div className="mt-3 flex flex-wrap gap-1">
-                      {binding.activationEvidence.map((item) => (
-                        <Badge key={item} variant="outline" className="max-w-full whitespace-normal break-words text-left">{item}</Badge>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-2 hidden rounded-md border md:block">
-                <Table className="min-w-[920px]">
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Surface</TableHead>
-                      <TableHead>Fixture source</TableHead>
-                      <TableHead>Convex functions</TableHead>
-                      <TableHead>Evidence</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {snapshot.liveAdapterBindings.map((binding) => (
-                      <TableRow key={binding.surface}>
-                        <TableCell className="font-medium">{binding.surface}</TableCell>
-                        <TableCell>{binding.fixtureSource}</TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-1">
-                            {binding.convexFunctions.map((functionName) => (
-                              <Badge key={functionName} variant="secondary">{functionName}</Badge>
-                            ))}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-1">
-                            {binding.activationEvidence.map((item) => (
-                              <Badge key={item} variant="outline">{item}</Badge>
-                            ))}
-                          </div>
-                        </TableCell>
-                        <TableCell>{liveAdapterStatusBadge(binding.status)}</TableCell>
-                      </TableRow>
+            <details className="group min-w-0 rounded-lg border border-slate-200 bg-slate-50 p-3 lg:col-span-2">
+              <summary className="flex cursor-pointer list-none flex-col gap-1 text-sm font-medium text-slate-900 sm:flex-row sm:items-center sm:justify-between">
+                <span>Advanced runtime diagnostics</span>
+                <span className="text-xs font-normal text-slate-600 group-open:hidden">Function mappings and adapter evidence</span>
+                <span className="hidden text-xs font-normal text-slate-600 group-open:inline">Hide technical details</span>
+              </summary>
+              <div className="mt-3 grid min-w-0 gap-4">
+                <div className="min-w-0">
+                  <div className="text-sm font-medium">Convex contract</div>
+                  <div className="mt-2 flex min-w-0 flex-wrap gap-2">
+                    {snapshot.dataMode.convexFunctions.slice(0, 8).map((functionName) => (
+                      <Badge key={functionName} variant="secondary">{functionName}</Badge>
                     ))}
-                  </TableBody>
-                </Table>
+                    {snapshot.dataMode.convexFunctions.length > 8 ? (
+                      <Badge variant="outline">+{snapshot.dataMode.convexFunctions.length - 8} more mapped</Badge>
+                    ) : null}
+                  </div>
+                </div>
+                <div className="min-w-0">
+                  <div className="text-sm font-medium">Live adapter readiness</div>
+                  <div className="mt-2 grid gap-3 text-slate-950 dark:text-slate-100 md:hidden">
+                    {snapshot.liveAdapterBindings.map((binding) => (
+                      <div key={binding.surface} className="rounded-md border bg-white p-3 text-sm">
+                        <div className="flex flex-col items-start gap-2 sm:flex-row sm:justify-between">
+                          <div>
+                            <div className="font-medium">{binding.surface}</div>
+                            <div className="mt-1 text-xs text-slate-700 dark:text-slate-300">{binding.fixtureSource}</div>
+                          </div>
+                          {liveAdapterStatusBadge(binding.status)}
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-1">
+                          {binding.convexFunctions.map((functionName) => (
+                            <Badge key={functionName} variant="secondary" className="max-w-full whitespace-normal break-all text-left">{functionName}</Badge>
+                          ))}
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-1">
+                          {binding.activationEvidence.map((item) => (
+                            <Badge key={item} variant="outline" className="max-w-full whitespace-normal break-words text-left">{item}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-2 hidden rounded-md border bg-white text-slate-950 dark:text-slate-100 md:block">
+                    <Table className="min-w-[920px] text-slate-950 dark:text-slate-100">
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-slate-700 dark:text-slate-300">Surface</TableHead>
+                          <TableHead className="text-slate-700 dark:text-slate-300">Fixture source</TableHead>
+                          <TableHead className="text-slate-700 dark:text-slate-300">Convex functions</TableHead>
+                          <TableHead className="text-slate-700 dark:text-slate-300">Evidence</TableHead>
+                          <TableHead className="text-slate-700 dark:text-slate-300">Status</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {snapshot.liveAdapterBindings.map((binding) => (
+                          <TableRow key={binding.surface}>
+                            <TableCell className="font-medium">{binding.surface}</TableCell>
+                            <TableCell className="text-slate-700 dark:text-slate-300">{binding.fixtureSource}</TableCell>
+                            <TableCell>
+                              <div className="flex flex-wrap gap-1">
+                                {binding.convexFunctions.map((functionName) => (
+                                  <Badge key={functionName} variant="secondary">{functionName}</Badge>
+                                ))}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-wrap gap-1">
+                                {binding.activationEvidence.map((item) => (
+                                  <Badge key={item} variant="outline">{item}</Badge>
+                                ))}
+                              </div>
+                            </TableCell>
+                            <TableCell>{liveAdapterStatusBadge(binding.status)}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
               </div>
-            </div>
+            </details>
           </CardContent>
         </Card>
 
@@ -7081,7 +7361,7 @@ export default function AdminKinfloShell() {
               <div>
                 <div className={`${activeTab === "site-studio" ? "text-xs" : "text-sm"} font-semibold text-slate-950`}>Workflow navigation</div>
                 <p className={`${activeTab === "site-studio" ? "hidden" : "mt-1"} text-xs leading-5 text-slate-500`}>
-                  Control, Build, Launch, Growth, Evidence, and Hosted Activation group every existing tab by work mode.
+                  Five workspaces group every existing tab by work mode, with technical activation details kept under Evidence &amp; Activation.
                 </p>
               </div>
               <Badge variant="outline" className={`${activeTab === "site-studio" ? "text-[11px]" : ""} self-start border-amber-200 bg-amber-50 text-amber-700`}>
@@ -7187,33 +7467,7 @@ export default function AdminKinfloShell() {
                   </Link>
                 </Button>
               </div>
-              <div className="overflow-hidden rounded-lg border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Tenant</TableHead>
-                      <TableHead>Plan</TableHead>
-                      <TableHead>Sites</TableHead>
-                      <TableHead>Owner</TableHead>
-                      <TableHead className="text-right">State</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {snapshot.tenants.map((tenant) => (
-                      <TableRow key={tenant.slug}>
-                        <TableCell>
-                          <div className="font-medium">{tenant.name}</div>
-                          <div className="text-xs text-muted-foreground">{tenant.slug}</div>
-                        </TableCell>
-                        <TableCell>{tenant.plan}</TableCell>
-                        <TableCell>{tenant.sites}</TableCell>
-                        <TableCell>{tenant.owner}</TableCell>
-                        <TableCell className="text-right">{statusBadge(tenant.status)}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+              <TenantControlPlaneTable tenants={snapshot.tenants} />
             </section>
           </TabsContent>
 
@@ -7229,42 +7483,7 @@ export default function AdminKinfloShell() {
                   Preview
                 </Button>
               </div>
-              <div className="overflow-hidden rounded-lg border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Site</TableHead>
-                      <TableHead>Tenant</TableHead>
-                      <TableHead>Domain</TableHead>
-                      <TableHead>Template</TableHead>
-                      <TableHead>Preview</TableHead>
-                      <TableHead className="text-right">State</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {snapshot.sites.map((site) => (
-                      <TableRow key={`${site.tenant}-${site.name}`}>
-                        <TableCell>
-                          <div className="font-medium">{site.name}</div>
-                          <div className="text-xs text-muted-foreground">{site.route}</div>
-                        </TableCell>
-                        <TableCell>{site.tenant}</TableCell>
-                        <TableCell>{site.domain}</TableCell>
-                        <TableCell>{site.template}</TableCell>
-                        <TableCell>
-                          <Button size="sm" variant="outline" asChild>
-                            <Link href={site.previewPath}>
-                              <ExternalLink className="mr-2 h-3 w-3" />
-                              Open
-                            </Link>
-                          </Button>
-                        </TableCell>
-                        <TableCell className="text-right">{statusBadge(site.status)}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+              <SiteFactoryQueueTable sites={snapshot.sites} />
             </section>
           </TabsContent>
 
