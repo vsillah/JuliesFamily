@@ -6382,9 +6382,18 @@ export default function AdminKinfloShell() {
     clientWebsiteStudioLane === "workbench" && clientWebsiteWorkbenchStage === "launch" && !isVanguardWebsite;
   const isClientWebsiteBuildWorkbench =
     clientWebsiteStudioLane === "workbench" && clientWebsiteWorkbenchStage === "sites";
+  const isClientWebsitePreviewLaunchWorkbench =
+    clientWebsiteStudioLane === "workbench"
+    && (clientWebsiteWorkbenchStage === "preview" || clientWebsiteWorkbenchStage === "launch");
+  const clientWebsitePreviewLaunchStep = clientWebsiteWorkbenchStage === "preview"
+    ? "preview"
+    : clientWebsiteLaunchDossier === "decision"
+      ? "decision"
+      : "qa";
   const shouldShowClientWebsiteStudioContext =
     clientWebsiteStudioLane === "workbench"
     && !isClientWebsiteBuildWorkbench
+    && !isClientWebsitePreviewLaunchWorkbench
     && !isClientWebsiteLaunchWorkbench
     && websiteStudioRouteScope.status === "ready";
   const clientWebsitePreviewReviewContext = selectedClientWebsitePreviewReviewPacket?.context ?? [];
@@ -13080,6 +13089,7 @@ export default function AdminKinfloShell() {
                     isClientWebsiteLaunchWorkbench
                       ? "max-h-[calc(100vh-14rem)] overflow-hidden pr-0"
                       : clientWebsiteWorkbenchStage === "sites"
+                        || clientWebsiteWorkbenchStage === "preview"
                         ? "max-h-none overflow-visible pr-0"
                       : "max-h-[min(540px,calc(100vh-15rem))] overflow-y-auto overflow-x-hidden pr-1"
                   }`}
@@ -13089,12 +13099,67 @@ export default function AdminKinfloShell() {
                     className="min-w-0 rounded-lg border border-slate-200 bg-white p-2 shadow-sm sm:p-3"
                     data-testid="section-kinflo-client-workbench-grid"
                   >
-                    <Tabs value={clientWebsiteWorkbenchStage} onValueChange={(value) => selectClientWebsiteWorkbenchStage(value as ClientWebsiteWorkbenchStage)} className={isVanguardWebsite ? "contents" : "min-w-0"} data-testid="tabs-kinflo-client-workbench-stage">
-                      <TabsList className={`${isVanguardWebsite ? "hidden" : "grid"} h-auto w-full grid-cols-3 bg-slate-100 p-1`}>
+                    <Tabs value={clientWebsiteWorkbenchStage} onValueChange={(value) => selectClientWebsiteWorkbenchStage(value as ClientWebsiteWorkbenchStage)} className="min-w-0" data-testid="tabs-kinflo-client-workbench-stage">
+                      <TabsList className="hidden h-auto w-full grid-cols-3 bg-slate-100 p-1">
                         <TabsTrigger value="sites" data-testid="tab-kinflo-client-workbench-sites">Sites</TabsTrigger>
                         <TabsTrigger value="preview" data-testid="tab-kinflo-client-workbench-preview">Preview</TabsTrigger>
                         <TabsTrigger value="launch" data-testid="tab-kinflo-client-workbench-launch">Launch</TabsTrigger>
                       </TabsList>
+
+                      {isClientWebsitePreviewLaunchWorkbench ? (
+                        <section className="mb-3 rounded-xl border border-border bg-card p-3" data-testid="section-kinflo-client-preview-launch-sequence">
+                          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="min-w-0">
+                              <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Preview &amp; Launch sequence</div>
+                              <h3 className="mt-1 text-base font-semibold text-foreground">Review the site, then make the launch decision</h3>
+                              <p className="mt-1 max-w-2xl text-xs leading-5 text-muted-foreground">
+                                Preview &amp; Launch ends at Decision. Publish, handoff, and domain actions remain gated until their evidence is approved.
+                              </p>
+                            </div>
+                            <Badge variant="outline" className="w-fit border-border bg-muted text-foreground">Read only</Badge>
+                          </div>
+
+                          <div className="mt-3 grid gap-2 sm:grid-cols-3" role="tablist" aria-label="Preview and launch sequence">
+                            {[
+                              { key: "preview", label: "Preview", detail: "Inspect the public experience." },
+                              { key: "qa", label: "QA", detail: "Review proof and blocked actions." },
+                              { key: "decision", label: "Decision", detail: "Confirm readiness without publishing." },
+                            ].map((step, index) => {
+                              const isActive = clientWebsitePreviewLaunchStep === step.key;
+                              return (
+                                <button
+                                  key={step.key}
+                                  type="button"
+                                  role="tab"
+                                  aria-selected={isActive}
+                                  aria-current={isActive ? "step" : undefined}
+                                  onClick={() => {
+                                    if (step.key === "preview") {
+                                      selectClientWebsiteWorkbenchStage("preview");
+                                    } else {
+                                      selectClientWebsiteLaunchDossier(step.key === "decision" ? "decision" : "qa");
+                                    }
+                                  }}
+                                  className={`min-w-0 rounded-lg border px-3 py-2 text-left transition ${
+                                    isActive
+                                      ? "border-primary bg-primary text-primary-foreground"
+                                      : "border-border bg-muted/30 text-foreground hover:bg-muted"
+                                  }`}
+                                  data-testid={`tab-kinflo-client-preview-launch-step-${step.key}`}
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-current text-[10px] font-semibold">{index + 1}</span>
+                                    <span className="truncate text-sm font-semibold">{step.label}</span>
+                                  </div>
+                                  <span className={`mt-1 block text-[11px] leading-4 ${isActive ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
+                                    {step.detail}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </section>
+                      ) : null}
 
                   <TabsContent value="sites" className="mt-4" data-testid="section-kinflo-client-workbench-sites">
                     <section className="mb-3 rounded-xl border border-border bg-card p-3" data-testid="section-kinflo-client-build-sequence">
@@ -13291,8 +13356,8 @@ export default function AdminKinfloShell() {
                       </div>
                     </div>
                   </CardHeader>
-                  <CardContent className="max-h-[min(420px,calc(100vh-18rem))] space-y-4 overflow-y-auto pt-4">
-                    <div className="max-h-[280px] overflow-y-auto overflow-x-hidden rounded-xl border border-amber-200 bg-amber-50 p-3" data-testid="section-kinflo-client-preview-review-packet">
+                  <CardContent className="space-y-4 pt-4">
+                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-3" data-testid="section-kinflo-client-preview-review-packet">
                       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 text-sm font-semibold text-amber-950">
@@ -13318,7 +13383,7 @@ export default function AdminKinfloShell() {
                         ))}
                       </div>
                       <div className="mt-3 grid grid-cols-[minmax(0,1fr)_minmax(130px,0.58fr)] gap-2">
-                        <div className="grid max-h-32 gap-2 overflow-y-auto pr-1 lg:max-h-40" data-testid="section-kinflo-client-preview-review-evidence">
+                        <div className="grid gap-2" data-testid="section-kinflo-client-preview-review-evidence">
                           {clientWebsitePreviewReviewEvidence.map((item) => (
                             <div key={item.label} className="flex items-start gap-2 rounded-md border border-amber-200 bg-white p-2 text-xs leading-5 text-slate-700">
                               {item.done ? (
@@ -13360,7 +13425,15 @@ export default function AdminKinfloShell() {
                       journeyStage={clientWebsiteStudioPreviewJourneyStage}
                     />
 
-                    <div className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-3 sm:grid-cols-3" data-testid="section-kinflo-client-control-room-path">
+                    <details className="rounded-xl border border-border bg-muted/20 p-3" data-testid="section-kinflo-client-preview-evidence-collapsed">
+                      <summary className="cursor-pointer list-none text-sm font-semibold text-foreground">
+                        <span className="flex items-center justify-between gap-3">
+                          <span>Review evidence and patterns</span>
+                          <span className="text-xs font-normal text-muted-foreground">Optional detail</span>
+                        </span>
+                      </summary>
+
+                    <div className="mt-3 grid gap-3 rounded-2xl border border-slate-200 bg-white p-3 sm:grid-cols-3" data-testid="section-kinflo-client-control-room-path">
                       <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
                         <div className="flex items-center gap-2 text-sm font-medium text-emerald-800">
                           <CheckCircle2 className="h-4 w-4" />
@@ -13420,6 +13493,7 @@ export default function AdminKinfloShell() {
                         );
                       })}
                     </div>
+                    </details>
                   </CardContent>
                     </Card>
                   </TabsContent>

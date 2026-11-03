@@ -52,6 +52,10 @@ for (const pattern of [
   'Build ends at Review.',
   'data-testid="section-kinflo-client-build-step-detail"',
   'data-testid="section-kinflo-client-build-review"',
+  'clientWebsitePreviewLaunchStep',
+  'data-testid="section-kinflo-client-preview-launch-sequence"',
+  'Preview &amp; Launch ends at Decision.',
+  'data-testid="section-kinflo-client-preview-evidence-collapsed"',
   'isActiveLane ? "text-foreground/75" : statusTone',
 ]) {
   if (shell.includes(pattern)) {
