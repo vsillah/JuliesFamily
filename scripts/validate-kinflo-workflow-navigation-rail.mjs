@@ -96,7 +96,6 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "button-kinflo-sidebar-overview",
   "focusSelectedShellSection",
   "activeTab === \"overview\" ? null",
-  "section-kinflo-contextual-navigation",
   "section-kinflo-decision-rail",
   "section-kinflo-next-actions",
   "section-kinflo-readiness-snapshot",
@@ -106,7 +105,6 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "Review adapter mapping",
   "Review launch evidence",
   "Choose a workspace or return to the overview",
-  "Sections in this workspace",
   "label: \"Evidence & Activation\"",
   "client sharing gated",
   "provider writes gated",
@@ -117,6 +115,15 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "className=\"hidden overflow-x-auto rounded-lg border lg:block\"",
   "className=\"grid gap-2 lg:hidden\"",
 ]);
+
+if (shellContents.includes('data-testid="section-kinflo-contextual-navigation"')) {
+  fail(
+    "admin shell has no duplicate contextual section rail",
+    "Section navigation must remain in the persistent operator sidebar instead of rendering a second horizontal rail.",
+  );
+} else {
+  pass("admin shell has no duplicate contextual section rail");
+}
 
 for (const pattern of [
   "<KinfloDashboardShell",
