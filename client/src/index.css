@@ -308,8 +308,31 @@
   background-color: hsl(var(--muted)) !important;
 }
 
+/* Keep Tailwind opacity variants on the same theme surface as their solid utilities. */
+.kinflo-admin-shell [class~="bg-slate-50/70"] {
+  background-color: hsl(var(--muted) / 0.7) !important;
+}
+
+.kinflo-admin-shell [class~="bg-slate-50/80"] {
+  background-color: hsl(var(--background) / 0.8) !important;
+}
+
+.kinflo-admin-shell [class~="bg-slate-50/95"] {
+  background-color: hsl(var(--background) / 0.95) !important;
+}
+
+.kinflo-admin-shell .bg-slate-100,
+.kinflo-admin-shell [class~="bg-slate-100/70"] {
+  background-color: hsl(var(--muted)) !important;
+}
+
+.kinflo-admin-shell [class~="bg-white/70"] {
+  background-color: hsl(var(--card) / 0.7) !important;
+}
+
 .kinflo-admin-shell .border-slate-200,
-.kinflo-admin-shell .border-slate-300 {
+.kinflo-admin-shell .border-slate-300,
+.kinflo-admin-shell .border-slate-100 {
   border-color: hsl(var(--border)) !important;
 }
 
