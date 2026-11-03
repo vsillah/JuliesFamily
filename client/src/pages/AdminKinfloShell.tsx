@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 import {
   Bell,
@@ -42,7 +42,9 @@ import {
   Workflow,
 } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import VanguardThemeControl from "@/components/VanguardThemeControl";
 import { canAccessKinfloAdmin, useKinfloAdminIdentity } from "@/contexts/KinfloAdminIdentityContext";
+import { useVanguardTheme } from "@/hooks/useVanguardTheme";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -169,6 +171,14 @@ const metricIcons: Record<ShellMetricIconKey, typeof Boxes> = {
   templates: Factory,
   leads: UserRoundCheck,
   launchGates: Rocket,
+};
+
+const metricFilterTargets: Record<ShellMetricIconKey, { tab: ShellTabValue; label: string }> = {
+  tenants: { tab: "tenants", label: "Filter tenants" },
+  sites: { tab: "sites", label: "Filter sites" },
+  templates: { tab: "templates", label: "Filter templates" },
+  leads: { tab: "crm", label: "Filter leads" },
+  launchGates: { tab: "launch-readiness", label: "Filter launch gates" },
 };
 
 const experienceIcons: Record<ExperienceIconKey, typeof Palette> = {
@@ -724,18 +734,22 @@ function readInitialAdapterSwitchSurfaceId(defaultSurfaceId: string, surfaceIds:
 
 function statusBadge(status: KinfloShellStatus) {
   if (status === "active" || status === "published" || status === "done") {
-    return <Badge className="bg-emerald-600 hover:bg-emerald-600">Ready</Badge>;
+    return <Badge className="kinflo-pill kinflo-pill-success">Ready</Badge>;
   }
   if (status === "preview") {
-    return <Badge className="bg-sky-600 hover:bg-sky-600">Preview</Badge>;
+    return <Badge className="kinflo-pill kinflo-pill-info">Preview</Badge>;
   }
   if (status === "converted") {
-    return <Badge className="bg-teal-600 hover:bg-teal-600">Converted</Badge>;
+    return <Badge className="kinflo-pill kinflo-pill-info">Converted</Badge>;
   }
   if (status === "nurture") {
-    return <Badge className="bg-amber-600 hover:bg-amber-600">Nurture</Badge>;
+    return <Badge className="kinflo-pill kinflo-pill-warning">Nurture</Badge>;
   }
-  return <Badge variant="outline">Draft</Badge>;
+  return <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">Draft</Badge>;
+}
+
+function KinfloPillCluster({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <div className={`kinflo-pill-cluster flex flex-wrap items-center justify-end gap-2 ${className}`}>{children}</div>;
 }
 
 function TenantControlPlaneTable({ tenants }: { tenants: ShellTenant[] }) {
@@ -4866,6 +4880,7 @@ export default function AdminKinfloShell() {
   const adminIdentity = useKinfloAdminIdentity();
   const { isLoading } = adminIdentity;
   const canAccessAdmin = canAccessKinfloAdmin(adminIdentity);
+  const vanguardTheme = useVanguardTheme(canAccessAdmin && !isLoading);
   const [location, navigate] = useLocation();
   const snapshot = useKinfloShellSnapshot();
   const adminScope = useKinfloAdminScope();
@@ -7010,8 +7025,8 @@ export default function AdminKinfloShell() {
   );
 
   return (
-    <div className="min-h-screen overflow-x-clip bg-slate-50 text-slate-950">
-      <div className="border-b border-slate-200 bg-white/95">
+    <div className="kinflo-admin-shell min-h-screen overflow-x-clip bg-background text-foreground">
+      <div className="border-b border-border bg-card/95">
         <div className={`mx-auto flex max-w-7xl flex-col px-4 sm:px-6 lg:px-8 ${activeTab === "site-studio" ? "gap-2 py-3" : "gap-5 py-6"}`}>
           <Breadcrumbs
             items={[{ label: "Admin Dashboard", href: clientWebsiteAdminHref }, { label: "KinFlo OS" }]}
@@ -7027,10 +7042,11 @@ export default function AdminKinfloShell() {
           ) : null}
           <div className={`flex flex-col lg:flex-row lg:items-center lg:justify-between ${activeTab === "site-studio" ? "gap-2" : "gap-4"}`}>
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
+              <KinfloPillCluster className="sm:ml-auto">
                 <Badge className="bg-slate-950 text-white hover:bg-slate-950">Convex Phase 1</Badge>
-                <Badge variant="outline" className="border-slate-300 bg-white">Provider-light shell</Badge>
-              </div>
+                <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">Provider-light shell</Badge>
+                <VanguardThemeControl mode={vanguardTheme.mode} onChange={vanguardTheme.setMode} navSolid />
+              </KinfloPillCluster>
               <h1 className={`${activeTab === "site-studio" ? "mt-2 text-2xl sm:text-3xl" : "mt-3 text-3xl sm:text-4xl"} font-semibold leading-tight tracking-normal`}>KinFlo OS</h1>
               <p className={`${activeTab === "site-studio" ? "hidden" : "mt-2"} max-w-3xl text-base leading-7 text-slate-600`}>
                 The operating shell for tenants, sites, templates, permissions, and configurable public experiences.
@@ -7078,17 +7094,17 @@ export default function AdminKinfloShell() {
             data-testid="section-kinflo-persistent-identity-strip"
           >
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
+              <KinfloPillCluster className="lg:ml-auto">
+                <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">
                   {persistentIdentity.objectType}
                 </Badge>
-                <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700" data-testid="text-kinflo-persistent-identity-environment">
+                <Badge variant="outline" className="kinflo-pill kinflo-pill-warning" data-testid="text-kinflo-persistent-identity-environment">
                   {persistentIdentity.environment}
                 </Badge>
-                <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
+                <Badge variant="outline" className="kinflo-pill kinflo-pill-success">
                   {snapshot.dataMode.runtimeLabel}
                 </Badge>
-              </div>
+              </KinfloPillCluster>
               <div className="mt-2 grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)_minmax(0,0.8fr)]">
                 <div className="min-w-0">
                   <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Active object</div>
@@ -7130,20 +7146,20 @@ export default function AdminKinfloShell() {
             data-testid="section-kinflo-active-object-signal"
           >
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
+              <KinfloPillCluster className="lg:ml-auto">
+                <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">
                   {snapshot.activeObjectSignal.objectType}
                 </Badge>
-                <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">
+                <Badge variant="outline" className="kinflo-pill kinflo-pill-warning">
                   {snapshot.activeObjectSignal.environment}
                 </Badge>
-                <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
+                <Badge variant="outline" className="kinflo-pill kinflo-pill-success">
                   {snapshot.activeObjectSignal.readinessLabel}
                 </Badge>
-                <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
+                <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">
                   Owner: {snapshot.activeObjectSignal.owner}
                 </Badge>
-              </div>
+              </KinfloPillCluster>
               <div className="mt-2 truncate text-base font-semibold leading-tight text-slate-950" data-testid="text-kinflo-active-object-name">
                 {snapshot.activeObjectSignal.label}
               </div>
@@ -7179,11 +7195,11 @@ export default function AdminKinfloShell() {
           data-testid="section-kinflo-command-brief"
         >
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary" className="bg-emerald-50 text-emerald-800 hover:bg-emerald-50">Command Brief</Badge>
-              <Badge variant="outline" className="border-slate-300 bg-white">{snapshot.dataMode.runtimeLabel}</Badge>
-              <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">{snapshot.activeObjectSignal.environment}</Badge>
-            </div>
+            <KinfloPillCluster>
+              <Badge variant="secondary" className="kinflo-pill kinflo-pill-success">Command Brief</Badge>
+              <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">{snapshot.dataMode.runtimeLabel}</Badge>
+              <Badge variant="outline" className="kinflo-pill kinflo-pill-warning">{snapshot.activeObjectSignal.environment}</Badge>
+            </KinfloPillCluster>
             <h2 className={`${activeTab === "site-studio" ? "mt-2 text-lg" : "mt-4 text-2xl md:text-3xl"} max-w-3xl font-semibold leading-tight tracking-normal`}>
               {commandBrief.decision}
             </h2>
@@ -7316,17 +7332,27 @@ export default function AdminKinfloShell() {
         <div className={`${activeTab === "site-studio" ? "hidden" : "mt-5 grid"} gap-3 md:grid-cols-2 xl:grid-cols-5`}>
           {snapshot.metrics.map((metric) => {
             const Icon = metricIcons[metric.iconKey];
+            const filterTarget = metricFilterTargets[metric.iconKey];
+            const isActiveFilter = activeTab === filterTarget.tab;
             return (
-              <Card key={metric.label} className="border-slate-200 bg-white shadow-none">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-xs font-medium uppercase tracking-normal text-slate-500">{metric.label}</CardTitle>
-                  <Icon className="h-4 w-4 text-slate-400" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-semibold tracking-normal">{metric.value}</div>
-                  <p className="mt-1 text-xs leading-5 text-slate-500">{metric.detail}</p>
-                </CardContent>
-              </Card>
+              <button
+                key={metric.label}
+                type="button"
+                className={`kinflo-metric-card rounded-lg border p-4 text-left shadow-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${isActiveFilter ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/50 hover:bg-muted"}`}
+                onClick={() => selectShellTab(filterTarget.tab)}
+                aria-label={`${metric.label}: ${metric.value}. ${filterTarget.label}.`}
+                aria-pressed={isActiveFilter}
+                data-filter-target={filterTarget.tab}
+                data-testid={`kinflo-metric-card-${metric.iconKey}`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-xs font-medium uppercase tracking-normal text-muted-foreground">{metric.label}</span>
+                  <Icon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                </div>
+                <div className="mt-2 text-2xl font-semibold tracking-normal text-foreground">{metric.value}</div>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">{metric.detail}</p>
+                <span className="mt-3 inline-flex items-center text-xs font-medium text-primary">{filterTarget.label} <ChevronRight className="ml-1 h-3 w-3" aria-hidden="true" /></span>
+              </button>
             );
           })}
         </div>
@@ -7474,7 +7500,7 @@ export default function AdminKinfloShell() {
                   Choose a work area first. The section tabs below change within that workspace.
                 </p>
               </div>
-              <Badge variant="outline" className={`${activeTab === "site-studio" ? "text-[11px]" : ""} self-start border-amber-200 bg-amber-50 text-amber-700`}>
+              <Badge variant="outline" className={`${activeTab === "site-studio" ? "text-[11px]" : ""} kinflo-pill kinflo-pill-warning self-start`}>
                 {workflowNavigationTabCoverage.length}/{shellTabValues.length} tabs reachable
               </Badge>
             </div>
@@ -7483,10 +7509,10 @@ export default function AdminKinfloShell() {
                 const LaneIcon = lane.icon;
                 const isActiveLane = lane.tabs.includes(activeTab);
                 const laneTone = lane.status === "blocked"
-                  ? "border-amber-200 bg-amber-50 text-amber-900"
+                  ? "border-amber-300/70 bg-amber-50 text-amber-900 dark:border-amber-400/50 dark:bg-amber-950/40 dark:text-amber-100"
                   : lane.status === "ready"
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-                    : "border-slate-200 bg-slate-50 text-slate-800";
+                    ? "border-emerald-300/70 bg-emerald-50 text-emerald-900 dark:border-emerald-400/50 dark:bg-emerald-950/40 dark:text-emerald-100"
+                    : "border-border bg-muted text-foreground";
 
                 return (
                   <button
@@ -7495,10 +7521,10 @@ export default function AdminKinfloShell() {
                     onClick={() => selectShellTab(lane.primaryTab)}
                     role="tab"
                     aria-selected={isActiveLane}
-                    className={`min-w-0 rounded-xl border p-3 text-left transition ${
+                    className={`kinflo-workspace-lane-card min-w-0 rounded-xl border p-3 text-left transition ${
                       isActiveLane
                         ? "border-slate-900 bg-slate-950 text-white shadow-sm"
-                        : "border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50"
+                        : "border-border bg-card text-foreground hover:border-primary/50 hover:bg-muted"
                     }`}
                     data-testid={`button-kinflo-workflow-lane-${lane.key}`}
                   >
@@ -7509,20 +7535,20 @@ export default function AdminKinfloShell() {
                         </div>
                         <div className="min-w-0">
                           <div className="truncate text-sm font-semibold">{lane.label}</div>
-                          <div className={`mt-1 line-clamp-2 text-xs leading-5 ${isActiveLane ? "text-slate-300" : "text-slate-500"}`}>
+                          <div className={`kinflo-workspace-lane-description mt-1 line-clamp-2 text-xs leading-5 ${isActiveLane ? "text-slate-300" : "text-muted-foreground"}`}>
                             {lane.description}
                           </div>
                         </div>
                       </div>
                       <Badge
                         variant="outline"
-                        className={isActiveLane ? "shrink-0 border-white/10 bg-white/10 text-white" : "shrink-0 bg-white"}
+                        className={isActiveLane ? "shrink-0 border-white/10 bg-white/10 text-white" : "kinflo-pill kinflo-pill-neutral shrink-0"}
                       >
                         {lane.tabs.length}
                       </Badge>
                     </div>
-                    <div className={`mt-3 border-t pt-3 ${isActiveLane ? "border-white/10" : "border-slate-200"}`} data-testid={`section-kinflo-workflow-lane-tabs-${lane.key}`}>
-                      <div className={`mb-2 text-[10px] font-semibold uppercase tracking-wider ${isActiveLane ? "text-slate-400" : "text-slate-500"}`}>Sections in this workspace</div>
+                    <div className={`mt-3 border-t pt-3 ${isActiveLane ? "border-white/10" : "border-border"}`} data-testid={`section-kinflo-workflow-lane-tabs-${lane.key}`}>
+                      <div className={`mb-2 text-[10px] font-semibold uppercase tracking-wider ${isActiveLane ? "text-slate-400" : "text-muted-foreground"}`}>Sections in this workspace</div>
                       <div className="flex flex-wrap gap-1.5">
                       {lane.tabs.map((tabValue) => (
                         <span
@@ -7534,7 +7560,7 @@ export default function AdminKinfloShell() {
                                 : "border-emerald-200 bg-emerald-50 text-emerald-700"
                               : isActiveLane
                                 ? "border-white/10 bg-white/10 text-slate-200"
-                                : "border-slate-200 bg-slate-50 text-slate-600"
+                                : "border-border bg-muted text-muted-foreground"
                           }`}
                           data-testid={`dot-kinflo-workflow-lane-${lane.key}-${tabValue}`}
                         >
@@ -7548,7 +7574,7 @@ export default function AdminKinfloShell() {
                       ))}
                       </div>
                     </div>
-                    <div className={`mt-3 text-xs leading-5 ${isActiveLane ? "text-amber-100" : "text-amber-700"}`}>
+                    <div className={`mt-3 text-xs leading-5 ${isActiveLane ? "text-amber-100" : "text-amber-700 dark:text-amber-200"}`}>
                       {lane.blockedLiveAction}
                     </div>
                   </button>
@@ -7557,8 +7583,8 @@ export default function AdminKinfloShell() {
             </div>
           </section>
 
-          <div className={`${activeTab === "site-studio" ? "hidden sm:block" : "block"} w-full min-w-0 rounded-md border border-slate-200 bg-white`} data-testid="section-kinflo-contextual-navigation">
-            <div className="flex flex-col gap-2 border-b border-slate-200 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className={`${activeTab === "site-studio" ? "hidden sm:block" : "block"} w-full min-w-0 rounded-md border border-border bg-card`} data-testid="section-kinflo-contextual-navigation">
+            <div className="flex flex-col gap-2 border-b border-border px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">Sections</div>
                 <div className="text-sm font-semibold text-slate-950">{activeWorkflowLane.label}</div>

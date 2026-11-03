@@ -154,6 +154,7 @@
     "kinflo:validate-proof-before-publish": "node scripts/validate-kinflo-proof-before-publish.mjs",
     "kinflo:validate-mobile-inspection-mode": "node scripts/validate-kinflo-mobile-inspection-mode.mjs",
     "kinflo:validate-workflow-navigation-rail": "node scripts/validate-kinflo-workflow-navigation-rail.mjs",
+    "kinflo:validate-nav-theme": "node scripts/validate-kinflo-nav-theme.mjs",
     "kinflo:validate-configuration-field-affordances": "node scripts/validate-kinflo-configuration-field-affordances.mjs",
     "kinflo:validate-client-handoff-permission-strip": "node scripts/validate-kinflo-client-handoff-permission-strip.mjs",
     "kinflo:validate-client-admin-handoff-matrix": "node scripts/validate-kinflo-client-admin-handoff-matrix.mjs",
