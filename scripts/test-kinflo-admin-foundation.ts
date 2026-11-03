@@ -64,6 +64,16 @@ test("KinFlo shell names the platform parent before the tenant workspace", () =>
   assert.match(source, /Parent platform: KinFlo platform/);
 });
 
+test("platform view is tenant-independent and offers a scoped entry point", () => {
+  const context = readFileSync("client/src/contexts/KinfloShellSnapshotContext.tsx", "utf8");
+  const catalog = readFileSync("client/src/components/KinfloPlatformFeatureCatalog.tsx", "utf8");
+  assert.match(context, /get\("view"\) === "platform"/);
+  assert.match(context, /<KinfloPlatformFeatureCatalog \/>/);
+  assert.match(catalog, /Platform control plane/);
+  assert.match(catalog, /tenant and site workspaces are children/i);
+  assert.match(catalog, /href="\/admin\/kinflo-os"/);
+});
+
 test("KinFlo public controls do not link to Julie's legacy admin route", () => {
   for (const path of [
     "client/src/components/KinfloPublicSiteAccountControls.tsx",

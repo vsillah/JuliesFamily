@@ -10,6 +10,7 @@ import {
   type ShellLaunchReadinessStage,
 } from "@/lib/kinfloShellData";
 import { resolveTenantPaletteId } from "@/lib/kinfloPaletteRegistry";
+import KinfloPlatformFeatureCatalog from "@/components/KinfloPlatformFeatureCatalog";
 import {
   resolveKinfloAdminScope,
   scopeFixtureKinfloShellSnapshot,
@@ -138,6 +139,11 @@ function initialScopeSelection() {
     tenantId: params.get("tenant") ?? "",
     siteId: params.get("site") ?? "",
   };
+}
+
+function isKinfloPlatformView() {
+  if (typeof window === "undefined") return false;
+  return new URLSearchParams(window.location.search).get("view") === "platform";
 }
 
 function KinfloAdminScopeGate({
@@ -364,6 +370,10 @@ export function FixtureKinfloShellSnapshotProvider({ children }: { children: Rea
   const scopedTenantOptions = isEmptyProvisioningQa ? [] : tenantOptions;
   const scopedSiteOptions = isEmptyProvisioningQa ? [] : siteOptions;
   const scope = resolveKinfloAdminScope(scopedTenantOptions, scopedSiteOptions, selection);
+
+  if (isKinfloPlatformView()) {
+    return <KinfloPlatformFeatureCatalog />;
+  }
 
   if (scope.status !== "ready") {
     return (
@@ -667,6 +677,9 @@ function EnabledReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children
   ]);
 
   if (scope.status !== "ready") {
+    if (isKinfloPlatformView()) {
+      return <KinfloPlatformFeatureCatalog />;
+    }
     return (
       <KinfloAdminScopeGate
         tenants={tenantOptions}
