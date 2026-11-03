@@ -1,5 +1,4 @@
 import { ArrowRight, Blocks, Building2, ChartNoAxesCombined, ClipboardCheck, Globe2, LockKeyhole, Settings2 } from "lucide-react";
-import { Link } from "wouter";
 
 const platformSurfaces = [
   {
@@ -82,13 +81,13 @@ export default function KinfloPlatformFeatureCatalog() {
               These capabilities belong to KinFlo. Each tenant and site receives its own entry point into the subset that applies to its organization.
             </p>
           </div>
-          <Link
+          <a
             href="/admin/kinflo-os"
             className="inline-flex shrink-0 items-center justify-center gap-2 rounded-md bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
             data-testid="link-kinflo-choose-tenant-site"
           >
             Choose tenant/site <ArrowRight className="h-4 w-4" aria-hidden="true" />
-          </Link>
+          </a>
         </section>
 
         <section className="mt-5 overflow-hidden rounded-xl border border-slate-300 bg-white" aria-label="KinFlo workspace catalog">

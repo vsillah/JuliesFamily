@@ -57,7 +57,7 @@ test("KinFlo shell names the platform parent before the tenant workspace", () =>
   const source = readFileSync("client/src/pages/AdminKinfloShell.tsx", "utf8");
   const breadcrumbs = source.slice(source.indexOf("<Breadcrumbs"), source.indexOf("{clientWebsiteAdminScope.status"));
   assert.match(breadcrumbs, /KinFlo platform/);
-  assert.doesNotMatch(breadcrumbs, /KinFlo platform.*href/);
+  assert.match(breadcrumbs, /admin\/kinflo-os\?view=platform/);
   assert.match(breadcrumbs, /adminScope\.tenant\.name.*workspace/);
   assert.match(breadcrumbs, /showHome=\{false\}/);
   assert.match(source, /Child entry point · active tenant\/site scope/);
