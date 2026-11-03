@@ -101,6 +101,7 @@ import {
   type ShellMetricIconKey,
   type ShellSite,
   type ShellTenant,
+  type KinfloShellSnapshot,
 } from "@/lib/kinfloShellData";
 import { useKinfloAdminScope, useKinfloShellSnapshot } from "@/contexts/KinfloShellSnapshotContext";
 import { useKinfloPreferencesAdapter } from "@/contexts/KinfloPreferencesAdapterContext";
@@ -267,6 +268,194 @@ const shellTabLabels: Record<ShellTabValue, string> = {
   experience: "Experience",
   access: "Access",
 };
+
+type KinfloSectionSnapshotMetric = {
+  label: string;
+  value: string | number;
+  detail: string;
+  targetTestId?: string;
+};
+
+function countStatuses(items: Array<{ status?: string }>, status: string) {
+  return items.filter((item) => item.status === status).length;
+}
+
+function getKinfloSectionSnapshotMetrics(
+  activeTab: ShellTabValue,
+  snapshot: KinfloShellSnapshot,
+): KinfloSectionSnapshotMetric[] {
+  const focusTarget = "section-kinflo-selected-content";
+  switch (activeTab) {
+    case "tenants":
+      return [
+        { label: "Tenant records", value: snapshot.tenants.length, detail: "Scoped to this operator view", targetTestId: "section-kinflo-tenant-control-plane-table" },
+        { label: "Sites", value: snapshot.sites.length, detail: "Available across the tenant scope", targetTestId: "section-kinflo-tenant-control-plane-table" },
+        { label: "Active tenants", value: countStatuses(snapshot.tenants, "active"), detail: "Ready for read-only review", targetTestId: "section-kinflo-tenant-control-plane-table" },
+      ];
+    case "sites":
+      return [
+        { label: "Site records", value: snapshot.sites.length, detail: "Filtered in the queue below", targetTestId: "section-kinflo-site-factory-queue-table" },
+        { label: "Published", value: countStatuses(snapshot.sites, "published"), detail: "Public records currently listed", targetTestId: "section-kinflo-site-factory-queue-table" },
+        { label: "Preview or draft", value: snapshot.sites.length - countStatuses(snapshot.sites, "published"), detail: "Still gated from publishing", targetTestId: "section-kinflo-site-factory-queue-table" },
+      ];
+    case "launch-readiness":
+      return [
+        { label: "Sites in review", value: snapshot.launchReadiness.sites.length, detail: "Launch packets in this scope", targetTestId: focusTarget },
+        { label: "Launch gates", value: snapshot.launchGates.length, detail: "Readiness checks represented", targetTestId: focusTarget },
+        { label: "Ready gates", value: countStatuses(snapshot.launchGates, "active"), detail: "Provider-light status only", targetTestId: focusTarget },
+      ];
+    case "adapter-switch":
+      return [
+        { label: "Batches", value: snapshot.adapterSwitchReadiness.batches.length, detail: "Generated contract batches", targetTestId: focusTarget },
+        { label: "Runway steps", value: snapshot.adapterSwitchReadiness.runwaySteps.length, detail: "Review steps before cutover", targetTestId: focusTarget },
+        { label: "Acceptance groups", value: snapshot.adapterSwitchReadiness.acceptanceMatrix.length, detail: "Still read-only and gated", targetTestId: focusTarget },
+      ];
+    case "hosted-activation":
+      return [
+        { label: "Activation steps", value: snapshot.hostedActivationRunbook.steps.length, detail: "Prepare-only checklist", targetTestId: focusTarget },
+        { label: "Decision gates", value: snapshot.hostedActivationRunbook.decisionRegister.length, detail: "Owner approvals still required", targetTestId: focusTarget },
+        { label: "Evidence targets", value: snapshot.hostedActivationRunbook.evidenceTargets.length, detail: "No hosted execution performed", targetTestId: focusTarget },
+      ];
+    case "factory":
+      return [
+        { label: "Starter templates", value: snapshot.templates.length, detail: "Available for review", targetTestId: focusTarget },
+        { label: "Sites in queue", value: snapshot.sites.length, detail: "Existing records only", targetTestId: focusTarget },
+        { label: "Readiness checks", value: snapshot.siteCreationWizard.readinessChecks.length, detail: "Creation remains gated", targetTestId: focusTarget },
+      ];
+    case "plans":
+      return [
+        { label: "Plans", value: snapshot.billingPlans.length, detail: "Plan definitions in the shell", targetTestId: focusTarget },
+        { label: "Entitlements", value: snapshot.tenantEntitlements.length, detail: "Scoped entitlement records", targetTestId: focusTarget },
+        { label: "Tenant scope", value: snapshot.tenants.length, detail: "No billing writes enabled", targetTestId: focusTarget },
+      ];
+    case "brand":
+      return [
+        { label: "Site themes", value: snapshot.brandTheme.siteOptions.length, detail: "Scoped theme targets", targetTestId: focusTarget },
+        { label: "Palettes", value: snapshot.brandTheme.paletteOptions.length, detail: "Available for local review", targetTestId: focusTarget },
+        { label: "Typography", value: snapshot.brandTheme.typographyOptions.length, detail: "Preview configuration only", targetTestId: focusTarget },
+      ];
+    case "navigation":
+      return [
+        { label: "Navigation items", value: snapshot.navigationDraft.items.length, detail: "Draft links in the selected site", targetTestId: focusTarget },
+        { label: "Visible links", value: snapshot.navigationDraft.items.filter((item) => item.isVisible).length, detail: "Current draft visibility", targetTestId: focusTarget },
+        { label: "Sites", value: snapshot.navigationDraft.siteOptions.length, detail: "Scoped navigation targets", targetTestId: focusTarget },
+      ];
+    case "preview":
+      return [
+        { label: "Preview sites", value: snapshot.previewStudio.siteOptions.length, detail: "Fixture preview routes", targetTestId: focusTarget },
+        { label: "Personas", value: snapshot.previewStudio.personaOptions.length, detail: "Audience contexts", targetTestId: focusTarget },
+        { label: "Devices", value: snapshot.previewStudio.deviceOptions.length, detail: "Responsive review targets", targetTestId: focusTarget },
+      ];
+    case "site-studio":
+      return [
+        { label: "Studio sites", value: snapshot.clientWebsiteStudio.sites.length, detail: "Scoped workspace targets", targetTestId: focusTarget },
+        { label: "Starter packs", value: snapshot.clientWebsiteStudio.starterContentPacks.length, detail: "Local content fixtures", targetTestId: focusTarget },
+        { label: "Preview lanes", value: clientWebsiteStudioLaneValues.length, detail: "No live publish path", targetTestId: focusTarget },
+      ];
+    case "assets":
+      return [
+        { label: "Assets", value: snapshot.assetLibrary.assets.length, detail: "Library records in scope", targetTestId: focusTarget },
+        { label: "Asset kinds", value: snapshot.assetLibrary.kindOptions.length, detail: "Local taxonomy", targetTestId: focusTarget },
+        { label: "Sites", value: snapshot.assetLibrary.siteOptions.length, detail: "Scoped asset targets", targetTestId: focusTarget },
+      ];
+    case "domains":
+      return [
+        { label: "Domains", value: snapshot.domainReadiness.domains.length, detail: "Domain records in scope", targetTestId: focusTarget },
+        { label: "Ready for DNS", value: countStatuses(snapshot.domainReadiness.domains, "pending"), detail: "Provider work remains gated", targetTestId: focusTarget },
+        { label: "Checklist items", value: snapshot.domainReadiness.dnsChecklist.length, detail: "Readiness evidence only", targetTestId: focusTarget },
+      ];
+    case "integrations":
+      return [
+        { label: "Integrations", value: snapshot.integrationReadiness.integrations.length, detail: "Provider records in review", targetTestId: focusTarget },
+        { label: "Provider types", value: snapshot.integrationReadiness.providerOptions.length, detail: "No provider calls enabled", targetTestId: focusTarget },
+        { label: "Safety checks", value: snapshot.integrationReadiness.safetyChecklist.length, detail: "Configuration remains gated", targetTestId: focusTarget },
+      ];
+    case "campaigns":
+      return [
+        { label: "Campaigns", value: snapshot.campaignAutomation.campaigns.length, detail: "Draft automation records", targetTestId: focusTarget },
+        { label: "Channels", value: snapshot.campaignAutomation.channelOptions.length, detail: "Transport choices", targetTestId: focusTarget },
+        { label: "Safety checks", value: snapshot.campaignAutomation.safetyChecklist.length, detail: "Sending remains disabled", targetTestId: focusTarget },
+      ];
+    case "ai-review":
+      return [
+        { label: "AI reviews", value: snapshot.aiReview.records.length, detail: "Review records in scope", targetTestId: focusTarget },
+        { label: "Pending", value: countStatuses(snapshot.aiReview.records, "pending"), detail: "Awaiting human review", targetTestId: focusTarget },
+        { label: "Checklist items", value: snapshot.aiReview.reviewChecklist.length, detail: "Publish remains gated", targetTestId: focusTarget },
+      ];
+    case "content":
+      return [
+        { label: "Content blocks", value: snapshot.contentDraft.blocks.length, detail: "Draft content in scope", targetTestId: focusTarget },
+        { label: "Page options", value: snapshot.contentDraft.pageOptions.length, detail: "Fixture page targets", targetTestId: focusTarget },
+        { label: "Activation evidence", value: snapshot.contentDraft.activationEvidence.length, detail: "Publish remains gated", targetTestId: focusTarget },
+      ];
+    case "templates":
+      return [
+        { label: "Templates", value: snapshot.templates.length, detail: "Starter contracts in scope", targetTestId: focusTarget },
+        { label: "Configurable fields", value: snapshot.templates.reduce((total, template) => total + template.configurableFields.length, 0), detail: "Local configuration surface", targetTestId: focusTarget },
+        { label: "QA checks", value: snapshot.templates.reduce((total, template) => total + template.qaChecks.length, 0), detail: "Launch criteria remain review-only", targetTestId: focusTarget },
+      ];
+    case "crm":
+      return [
+        { label: "Leads", value: snapshot.leads.length, detail: "Scoped records in the queue", targetTestId: "section-kinflo-crm-lead-table" },
+        { label: "Pipeline stages", value: snapshot.pipelineStages.length, detail: "Read-only stage model", targetTestId: "section-kinflo-crm-pipeline" },
+        { label: "Follow-up tasks", value: snapshot.tasks.length, detail: "No persistence enabled", targetTestId: "section-kinflo-crm-follow-up-tasks" },
+      ];
+    case "experience":
+      return [
+        { label: "Experience controls", value: snapshot.experienceControls.length, detail: "Shell defaults in review", targetTestId: focusTarget },
+        { label: "Workflow defaults", value: snapshot.experiencePreferences.workflowDefaults.length, detail: "Scoped preference inputs", targetTestId: focusTarget },
+        { label: "Channels", value: snapshot.experiencePreferences.notificationChannels.length, detail: "Notifications remain gated", targetTestId: focusTarget },
+      ];
+    case "access":
+      return [
+        { label: "Roles", value: snapshot.roles.length, detail: "Current read-only role map", targetTestId: focusTarget },
+        { label: "Role options", value: snapshot.accessDelegation.roleOptions.length, detail: "Delegation remains gated", targetTestId: focusTarget },
+        { label: "Activation evidence", value: snapshot.accessDelegation.activationEvidence.length, detail: "No invite or write action", targetTestId: focusTarget },
+      ];
+    default:
+      return snapshot.metrics.slice(0, 3).map((metric) => ({ label: metric.label, value: metric.value, detail: metric.detail, targetTestId: focusTarget }));
+  }
+}
+
+function KinfloSectionSnapshot({
+  activeTab,
+  snapshot,
+  onFocusMetric,
+}: {
+  activeTab: ShellTabValue;
+  snapshot: KinfloShellSnapshot;
+  onFocusMetric: (targetTestId: string) => void;
+}) {
+  const metrics = getKinfloSectionSnapshotMetrics(activeTab, snapshot);
+  return (
+    <section className="mt-5 rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5" data-testid="section-kinflo-section-snapshot">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Section snapshot</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">{shellTabLabels[activeTab]} at a glance</h2>
+          <p className="mt-1 text-sm leading-5 text-muted-foreground">Start with the scoped totals, then open the detailed read-only view below.</p>
+        </div>
+        <Badge variant="outline" className="w-fit kinflo-pill kinflo-pill-neutral">Read-only</Badge>
+      </div>
+      <div className="mt-4 grid gap-2 sm:grid-cols-3">
+        {metrics.map((metric) => (
+          <button
+            key={metric.label}
+            type="button"
+            className="kinflo-section-metric-card rounded-lg border border-border bg-muted/30 p-3 text-left transition hover:border-primary/50 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            onClick={() => onFocusMetric(metric.targetTestId ?? "section-kinflo-selected-content")}
+            data-filter-target={activeTab}
+            aria-label={`${metric.label}: ${metric.value}. Focus detailed ${shellTabLabels[activeTab]} view.`}
+          >
+            <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{metric.label}</div>
+            <div className="mt-2 text-2xl font-semibold text-foreground">{metric.value}</div>
+            <div className="mt-1 text-xs leading-5 text-muted-foreground">{metric.detail}</div>
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
 
 const workflowNavigationLanes: {
   key: "control" | "build" | "launch" | "growth" | "evidence";
@@ -6354,7 +6543,7 @@ export default function AdminKinfloShell() {
     }, 0);
   };
 
-  const focusSelectedShellSection = (tab: ShellTabValue) => {
+  const focusSelectedShellSection = (tab: ShellTabValue, targetTestId?: string) => {
     if (typeof window === "undefined") {
       return;
     }
@@ -6366,7 +6555,7 @@ export default function AdminKinfloShell() {
         return;
       }
 
-      const selectedSectionContent = document.querySelector('[data-testid="section-kinflo-selected-content"]');
+      const selectedSectionContent = document.querySelector(`[data-testid="${targetTestId ?? "section-kinflo-selected-content"}"]`);
       if (selectedSectionContent instanceof HTMLElement) {
         const top = selectedSectionContent.getBoundingClientRect().top + window.scrollY;
         window.scrollTo({ top: Math.max(0, top - 16), behavior: "auto" });
@@ -7415,6 +7604,14 @@ export default function AdminKinfloShell() {
             }}
           />
         ) : null}
+
+        {activeTab === "overview" ? null : (
+          <KinfloSectionSnapshot
+            activeTab={activeTab}
+            snapshot={snapshot}
+            onFocusMetric={(targetTestId) => focusSelectedShellSection(activeTab, targetTestId)}
+          />
+        )}
 
         {activeTab === "overview" ? null : <Tabs value={activeTab} onValueChange={(value) => selectShellTab(value as ShellTabValue)} className={`${activeTab === "site-studio" ? "mt-1" : "mt-7"} min-w-0`} data-testid="section-kinflo-selected-content">
           <TabsContent value="tenants" className="mt-6">
@@ -15435,39 +15632,46 @@ export default function AdminKinfloShell() {
                     crm.submitLead
                   </Badge>
                 </div>
-                <div className="overflow-hidden rounded-lg border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Lead</TableHead>
-                        <TableHead>Site</TableHead>
-                        <TableHead>Persona</TableHead>
-                        <TableHead>Stage</TableHead>
-                        <TableHead>Owner</TableHead>
-                        <TableHead className="text-right">State</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {snapshot.leads.map((lead) => (
-                        <TableRow key={lead.email}>
-                          <TableCell>
-                            <div className="font-medium">{lead.name}</div>
-                            <div className="text-xs text-muted-foreground">{lead.email}</div>
-                          </TableCell>
-                          <TableCell>{lead.site}</TableCell>
-                          <TableCell>{lead.persona}</TableCell>
-                          <TableCell>{lead.stage}</TableCell>
-                          <TableCell>{lead.owner}</TableCell>
-                          <TableCell className="text-right">{statusBadge(lead.status)}</TableCell>
+                <div className="overflow-hidden rounded-lg border" data-testid="section-kinflo-crm-lead-table">
+                  {snapshot.leads.length > 0 ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Lead</TableHead>
+                          <TableHead>Site</TableHead>
+                          <TableHead>Persona</TableHead>
+                          <TableHead>Stage</TableHead>
+                          <TableHead>Owner</TableHead>
+                          <TableHead className="text-right">State</TableHead>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {snapshot.leads.map((lead) => (
+                          <TableRow key={lead.email}>
+                            <TableCell>
+                              <div className="font-medium">{lead.name}</div>
+                              <div className="text-xs text-muted-foreground">{lead.email}</div>
+                            </TableCell>
+                            <TableCell>{lead.site}</TableCell>
+                            <TableCell>{lead.persona}</TableCell>
+                            <TableCell>{lead.stage}</TableCell>
+                            <TableCell>{lead.owner}</TableCell>
+                            <TableCell className="text-right">{statusBadge(lead.status)}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <div className="border-dashed px-4 py-10 text-center" data-testid="section-kinflo-crm-lead-table-empty">
+                      <div className="text-sm font-semibold text-foreground">No lead records yet</div>
+                      <p className="mt-1 text-sm text-muted-foreground">Public intake is scoped to Vanguard Enterprises, but no lead values are available in this read-only fixture.</p>
+                    </div>
+                  )}
                 </div>
               </div>
 
               <div className="space-y-4">
-                <Card>
+                <Card data-testid="section-kinflo-crm-pipeline">
                   <CardHeader className="flex flex-row items-start gap-3 space-y-0">
                     <div className="rounded-md border bg-background p-2">
                       <FormInput className="h-4 w-4" />
@@ -15498,7 +15702,7 @@ export default function AdminKinfloShell() {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card data-testid="section-kinflo-crm-follow-up-tasks">
                   <CardHeader className="flex flex-row items-start gap-3 space-y-0">
                     <div className="rounded-md border bg-background p-2">
                       <Workflow className="h-4 w-4" />
