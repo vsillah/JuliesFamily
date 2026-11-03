@@ -1,5 +1,5 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { getKinfloConvexRuntime } from "@/lib/kinfloConvexRuntime";
 import { api } from "@kinflo-phase174-generated-api";
 import {
@@ -10,7 +10,7 @@ import {
   type ShellLaunchReadinessStage,
 } from "@/lib/kinfloShellData";
 import { resolveTenantPaletteId } from "@/lib/kinfloPaletteRegistry";
-import KinfloPlatformFeatureCatalog from "@/components/KinfloPlatformFeatureCatalog";
+import KinfloPlatformFeatureCatalog, { type KinfloTenantProvisionRequest } from "@/components/KinfloPlatformFeatureCatalog";
 import {
   resolveKinfloAdminScope,
   scopeFixtureKinfloShellSnapshot,
@@ -114,6 +114,7 @@ const listSitesQuery = api.controlPlane.listSitesForTenant;
 // Keep the reviewed binding visible while platform-wide audit events remain intentionally unmounted in tenant/site views.
 const listAuditEventsQuery = api.controlPlane.listAuditEvents;
 const listPlanCatalogQuery = api.controlPlane.listPlanCatalog;
+const provisionTenantAndSiteMutation = api.controlPlane.provisionTenantAndSite;
 const entitlementUsageQuery = api.entitlements.entitlementUsageSnapshot;
 const checkEntitlementLimitQuery = api.entitlements.checkEntitlementLimit;
 const publicSiteQuery = api.publicSite.resolvePublishedSite;
@@ -427,6 +428,7 @@ export function ReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children
 function EnabledReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children: ReactNode }) {
   const runtime = getKinfloConvexRuntime();
   const enabled = true;
+  const provisionTenantAndSite = useMutation(provisionTenantAndSiteMutation);
   const initialSelection = useMemo(initialScopeSelection, []);
   const [selection, setSelection] = useState(initialSelection);
   const tenants = useQuery(listTenantsQuery, enabled ? {} : "skip");
@@ -678,7 +680,10 @@ function EnabledReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children
 
   if (scope.status !== "ready") {
     if (isKinfloPlatformView()) {
-      return <KinfloPlatformFeatureCatalog />;
+      const onCreateTenant = runtime.canUseLiveData
+        ? (request: KinfloTenantProvisionRequest) => provisionTenantAndSite(request)
+        : undefined;
+      return <KinfloPlatformFeatureCatalog canCreateTenant={runtime.canUseLiveData} onCreateTenant={onCreateTenant} />;
     }
     return (
       <KinfloAdminScopeGate

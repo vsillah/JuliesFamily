@@ -46,15 +46,29 @@ type TenantPlan = {
   name: string;
   slug: string;
   siteName: string;
+  siteSlug: string;
   sourceUrl: string;
   capabilities: string[];
+};
+
+export type KinfloTenantProvisionRequest = {
+  tenantName: string;
+  tenantSlug: string;
+  siteName: string;
+  siteSlug: string;
+  subdomain: string;
+};
+
+type KinfloPlatformFeatureCatalogProps = {
+  canCreateTenant?: boolean;
+  onCreateTenant?: (request: KinfloTenantProvisionRequest) => Promise<unknown>;
 };
 
 function slugify(value: string) {
   return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
-export default function KinfloPlatformFeatureCatalog() {
+export default function KinfloPlatformFeatureCatalog({ canCreateTenant = false, onCreateTenant }: KinfloPlatformFeatureCatalogProps) {
   const [tenantName, setTenantName] = useState("");
   const [tenantSlug, setTenantSlug] = useState("");
   const [siteName, setSiteName] = useState("");
@@ -77,8 +91,20 @@ export default function KinfloPlatformFeatureCatalog() {
       name: tenantName.trim(),
       slug: tenantSlug.trim() || derivedSlug,
       siteName: siteName.trim(),
+      siteSlug: slugify(siteName),
       sourceUrl: sourceUrl.trim(),
       capabilities,
+    });
+  }
+
+  async function createTenantRelationship() {
+    if (!tenantPlan || !canCreateTenant || !onCreateTenant) return;
+    await onCreateTenant({
+      tenantName: tenantPlan.name,
+      tenantSlug: tenantPlan.slug,
+      siteName: tenantPlan.siteName,
+      siteSlug: tenantPlan.siteSlug,
+      subdomain: tenantPlan.siteSlug,
     });
   }
 
@@ -275,9 +301,9 @@ export default function KinfloPlatformFeatureCatalog() {
               </div>
               {tenantPlan.sourceUrl ? <p className="mt-3 break-all text-sm text-slate-600">Website reference: {tenantPlan.sourceUrl}</p> : null}
               <div className="mt-4 flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm leading-6 text-slate-600">Creation is gated in this read-only build. A later approved run can use this draft to call the governed tenant/site provisioning mutation.</p>
-                <button type="button" disabled className="inline-flex h-10 shrink-0 items-center justify-center rounded-md border border-slate-300 bg-slate-100 px-4 text-sm font-semibold text-slate-500" data-testid="button-create-kinflo-tenant-gated">
-                  Create tenant relationship gated
+                <p className="text-sm leading-6 text-slate-600">{canCreateTenant ? "This creates one active tenant, one draft site, and the current owner membership. Capability selections remain a draft until entitlement persistence is approved." : "Creation is gated in this read-only build. The typed mutation seam is wired, but this route will not invoke it until live write readiness is approved."}</p>
+                <button type="button" disabled={!canCreateTenant || !onCreateTenant} onClick={() => void createTenantRelationship()} className="inline-flex h-10 shrink-0 items-center justify-center rounded-md border border-slate-300 bg-slate-100 px-4 text-sm font-semibold text-slate-500 disabled:cursor-not-allowed" data-testid="button-create-kinflo-tenant-gated">
+                  {canCreateTenant ? "Create tenant relationship" : "Create tenant relationship gated"}
                 </button>
               </div>
             </section>

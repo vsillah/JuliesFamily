@@ -1,6 +1,7 @@
 import { anyApi, type DefaultFunctionArgs, type FunctionReference } from "convex/server";
 
 type ReadOnlyReference<Args extends DefaultFunctionArgs = DefaultFunctionArgs, Result = unknown> = FunctionReference<"query", "public", Args, Result>;
+type MutationReference<Args extends DefaultFunctionArgs = DefaultFunctionArgs, Result = unknown> = FunctionReference<"mutation", "public", Args, Result>;
 
 type TenantRow = {
   _id: string;
@@ -91,6 +92,13 @@ type PublicSiteResult = {
 
 type Phase174GeneratedApi = {
   controlPlane: {
+    provisionTenantAndSite: MutationReference<{
+      tenantName: string;
+      tenantSlug: string;
+      siteName: string;
+      siteSlug: string;
+      subdomain?: string;
+    }, { tenantId: string; siteId: string; tenantSlug: string; siteSlug: string; status: "draft" }>;
     listTenants: ReadOnlyReference<Record<string, never>, TenantRow[]>;
     listSitesForTenant: ReadOnlyReference<{ tenantId: string }, SiteRow[]>;
     listAuditEvents: ReadOnlyReference<{ scopeType: "platform"; limit: number }, Array<{ _id: string; action: string; resourceType: string }>>;
