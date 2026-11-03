@@ -185,6 +185,7 @@ const expectedTabs = [
   "launch-readiness",
   "adapter-switch",
   "hosted-activation",
+  "build-analytics",
   "factory",
   "plans",
   "brand",

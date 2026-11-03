@@ -197,6 +197,7 @@ const shellTabValues = [
   "launch-readiness",
   "adapter-switch",
   "hosted-activation",
+  "build-analytics",
   "factory",
   "plans",
   "brand",
@@ -269,6 +270,7 @@ const shellTabLabels: Record<ShellTabValue, string> = {
   "launch-readiness": "Readiness",
   "adapter-switch": "Adapter",
   "hosted-activation": "Activation",
+  "build-analytics": "Analytics",
   factory: "Site factory",
   plans: "Plans",
   brand: "Brand",
@@ -475,6 +477,126 @@ function KinfloSectionSnapshot({
   );
 }
 
+type KinfloBuildAnalyticsSection = {
+  key: string;
+  label: string;
+  detail: string;
+  metrics: KinfloSectionSnapshotMetric[];
+  onOpen: () => void;
+};
+
+function KinfloBuildAnalytics({
+  snapshot,
+  onSelectTab,
+  onSelectStudioSection,
+}: {
+  snapshot: KinfloShellSnapshot;
+  onSelectTab: (tab: ShellTabValue) => void;
+  onSelectStudioSection: (section: ClientWebsiteStudioNavigationKey) => void;
+}) {
+  const focusTarget = "section-kinflo-selected-content";
+  const handoffMetrics: KinfloSectionSnapshotMetric[] = [
+    { label: "Measures tracked", value: vanguardOperationsMetricsFixture.length, detail: "Order-flow, delivery, and capacity signals", targetTestId: "section-kinflo-vanguard-metric-cards" },
+    { label: "Watch signals", value: vanguardOperationsMetricsFixture.filter((metric) => metric.posture === "watch").length, detail: "Review before changing the plan", targetTestId: "section-kinflo-vanguard-metric-cards" },
+    { label: "Action-needed", value: vanguardOperationsMetricsFixture.filter((metric) => metric.posture === "action_needed").length, detail: "Requires an owner review", targetTestId: "section-kinflo-vanguard-metric-cards" },
+  ];
+  const configurationMetrics: KinfloSectionSnapshotMetric[] = [
+    { label: "Profiles", value: snapshot.clientWebsiteStudio.configurationProfiles.profiles.length, detail: "Scoped configuration profiles", targetTestId: focusTarget },
+    { label: "Review packets", value: snapshot.clientWebsiteStudio.configurationReviewPackets.length, detail: "Read-only decisions in scope", targetTestId: focusTarget },
+    { label: "Blocked saves", value: snapshot.clientWebsiteStudio.configurationSaveRequests.length, detail: "Live changes remain gated", targetTestId: focusTarget },
+  ];
+  const sections: KinfloBuildAnalyticsSection[] = [
+    {
+      key: "site-setup",
+      label: "Site setup",
+      detail: "Starting structure, content, brand, navigation, assets, and templates.",
+      metrics: getKinfloSectionSnapshotMetrics("site-studio", snapshot),
+      onOpen: () => onSelectStudioSection("build"),
+    },
+    {
+      key: "configuration",
+      label: "Configuration",
+      detail: "Profiles, approvals, and the read-only change path.",
+      metrics: configurationMetrics,
+      onOpen: () => onSelectStudioSection("configuration"),
+    },
+    {
+      key: "handoff",
+      label: "Handoff",
+      detail: "Permissions, delivery context, and order health signals.",
+      metrics: handoffMetrics,
+      onOpen: () => onSelectStudioSection("handoff"),
+    },
+    ...(["factory", "content", "brand", "navigation", "assets", "templates"] as const).map((tab) => ({
+      key: tab,
+      label: shellTabLabels[tab],
+      detail: `Granular ${shellTabLabels[tab].toLowerCase()} measures for this scoped site.`,
+      metrics: getKinfloSectionSnapshotMetrics(tab, snapshot),
+      onOpen: () => onSelectTab(tab),
+    })),
+  ];
+
+  return (
+    <section className="mt-5 rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5" data-testid="section-kinflo-build-analytics">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Build health</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">Build analytics at a glance</h2>
+          <p className="mt-1 max-w-3xl text-sm leading-5 text-muted-foreground">Review the health of every Build section from one scoped, read-only view. Select a measure to open its source section.</p>
+        </div>
+        <Badge variant="outline" className="w-fit kinflo-pill kinflo-pill-neutral">Vanguard scope · read-only</Badge>
+      </div>
+
+      <div className="mt-4 grid gap-2 sm:grid-cols-3" data-testid="section-kinflo-build-analytics-summary">
+        {[
+          { label: "Build sections", value: sections.length, detail: "Persistent destinations" },
+          { label: "Scoped sites", value: snapshot.clientWebsiteStudio.sites.length, detail: "Available for review" },
+          { label: "Handoff measures", value: vanguardOperationsMetricsFixture.length, detail: "Visible in the Handoff source" },
+        ].map((metric) => (
+          <div key={metric.label} className="rounded-lg border border-border bg-muted/30 p-3">
+            <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{metric.label}</div>
+            <div className="mt-2 text-2xl font-semibold text-foreground">{metric.value}</div>
+            <div className="mt-1 text-xs leading-5 text-muted-foreground">{metric.detail}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-5 space-y-3" data-testid="section-kinflo-build-analytics-sections">
+        {sections.map((section) => (
+          <section key={section.key} className="rounded-lg border border-border bg-muted/20 p-3" data-testid={`section-kinflo-build-analytics-${section.key}`}>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0">
+                <h3 className="text-sm font-semibold text-foreground">{section.label}</h3>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">{section.detail}</p>
+              </div>
+              <Button type="button" variant="outline" size="sm" className="w-fit shrink-0" onClick={section.onOpen}>
+                Open section
+                <ChevronRight className="ml-1 h-3 w-3" aria-hidden="true" />
+              </Button>
+            </div>
+            <div className="mt-3 grid gap-2 sm:grid-cols-3">
+              {section.metrics.map((metric) => (
+                <button
+                  key={metric.label}
+                  type="button"
+                  className="kinflo-section-metric-card rounded-md border border-border bg-card p-3 text-left transition hover:border-primary/50 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  onClick={section.onOpen}
+                  data-filter-target={section.key}
+                  aria-label={`${section.label}, ${metric.label}: ${metric.value}. Open source section.`}
+                >
+                  <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{metric.label}</div>
+                  <div className="mt-2 text-xl font-semibold text-foreground">{metric.value}</div>
+                  <div className="mt-1 text-xs leading-5 text-muted-foreground">{metric.detail}</div>
+                </button>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 const workflowNavigationLanes: {
   key: "control" | "build" | "studio" | "launch" | "growth" | "evidence" | "activation";
   label: string;
@@ -499,11 +621,11 @@ const workflowNavigationLanes: {
   {
     key: "build",
     label: "Build",
-    description: "Build sites, factory packets, content, brand, navigation, assets, and templates",
+    description: "Build sites, review configuration, handoff health, and supporting content",
     icon: Factory,
-    tabs: ["site-studio", "factory", "content", "brand", "navigation", "assets", "templates"],
+    tabs: ["site-studio", "build-analytics", "factory", "content", "brand", "navigation", "assets", "templates"],
     primaryTab: "site-studio",
-    sectionCount: 9,
+    sectionCount: 10,
     status: "ready",
     blockedLiveAction: "live content save gated",
   },
@@ -3126,6 +3248,40 @@ function VanguardBuildOverview({
           <p className="mt-3 text-xs leading-5 text-muted-foreground">The launch decision is still read-only. Use Preview for the public review and Operations for the supporting order context.</p>
         ) : null}
 
+      </div>
+    </section>
+  );
+}
+
+function VanguardOperationsMetricSnapshot({ onOpenDetail }: { onOpenDetail: () => void }) {
+  return (
+    <section className="rounded-lg border border-border bg-card p-3" data-testid="section-kinflo-vanguard-metrics-summary">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Handoff health</div>
+          <h2 className="mt-1 text-base font-semibold text-foreground">Order operations at a glance</h2>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">Ten read-only measures summarize flow, delivery risk, materials, quality, and team capacity.</p>
+        </div>
+        <Badge variant="outline" className="w-fit kinflo-pill kinflo-pill-neutral">Fixture measures · read-only</Badge>
+      </div>
+      <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-5" data-testid="section-kinflo-vanguard-metrics-summary-cards">
+        {vanguardOperationsMetricsFixture.map((metric) => (
+          <button
+            key={metric.key}
+            type="button"
+            className="rounded-md border border-border bg-muted/30 p-3 text-left transition hover:border-primary/50 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            onClick={onOpenDetail}
+            data-filter-target="handoff"
+            aria-label={`${metric.label}: ${metric.value}. Open Handoff metric detail.`}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="text-xs font-semibold text-foreground">{metric.label}</div>
+              <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral shrink-0 text-[10px]">{metric.postureLabel}</Badge>
+            </div>
+            <div className="mt-2 text-lg font-semibold text-foreground">{metric.value}</div>
+            <div className="mt-1 text-[11px] font-medium text-muted-foreground">{metric.windowLabel}</div>
+          </button>
+        ))}
       </div>
     </section>
   );
@@ -8094,7 +8250,7 @@ export default function AdminKinfloShell() {
           </div>
         </section>
 
-        {activeTab === "overview" || activeTab === "hosted-activation" ? null : (
+        {activeTab === "overview" || activeTab === "hosted-activation" || activeTab === "build-analytics" ? null : (
           <KinfloSectionSnapshot
             activeTab={activeTab}
             snapshot={snapshot}
@@ -8221,6 +8377,14 @@ export default function AdminKinfloShell() {
         ) : null}
 
         {activeTab === "overview" ? null : <Tabs value={activeTab} onValueChange={(value) => selectShellTab(value as ShellTabValue)} className={`${activeTab === "site-studio" ? "mt-1" : "mt-7"} min-w-0`} data-testid="section-kinflo-selected-content">
+          <TabsContent value="build-analytics" className="mt-6">
+            <KinfloBuildAnalytics
+              snapshot={snapshot}
+              onSelectTab={selectShellTab}
+              onSelectStudioSection={selectClientWebsiteStudioSection}
+            />
+          </TabsContent>
+
           <TabsContent value="tenants" className="mt-6">
             <section className="space-y-4">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -13102,7 +13266,12 @@ export default function AdminKinfloShell() {
                   data-testid="section-kinflo-client-studio-lane-handoff"
                 >
                   {isVanguardWebsite ? (
-                    <VanguardFulfillmentWorkspace previewHref={clientWebsiteStudioPreviewHref} />
+                    <div className="space-y-3">
+                      <VanguardOperationsMetricSnapshot
+                        onOpenDetail={() => focusSelectedShellSection("site-studio", "section-kinflo-vanguard-metrics-optimization")}
+                      />
+                      <VanguardFulfillmentWorkspace previewHref={clientWebsiteStudioPreviewHref} />
+                    </div>
                   ) : <Tabs
                     value={clientWebsiteHandoffWorkspace}
                     onValueChange={(value) => selectClientWebsiteHandoffWorkspace(value as ClientWebsiteHandoffWorkspace)}
