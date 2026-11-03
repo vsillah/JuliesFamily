@@ -313,28 +313,17 @@ if (
 }
 
 const studioContextGuardIndex = shellContents.indexOf("const shouldShowClientWebsiteStudioContext =");
-const controlRoomClassIndex = shellContents.indexOf(
-  'className={`order-3 ${shouldShowClientWebsiteStudioContext ? "overflow-hidden" : "hidden"} rounded-lg border border-slate-200 bg-white shadow-sm`',
-  siteStudioIndex
-);
-const registryGuardIndex = shellContents.indexOf(
-  'className={`order-3 ${shouldShowClientWebsiteStudioContext ? "block" : "hidden"}`}',
-  siteStudioIndex
-);
-const commandSurfaceGuardIndex = shellContents.indexOf(
-  'order-3 ${shouldShowClientWebsiteStudioContext ? "grid" : "hidden"} gap-2 xl:grid-cols-[minmax(0,0.48fr)_minmax(0,0.52fr)]',
-  siteStudioIndex
-);
+const buildPrimaryIndex = shellContents.indexOf('data-testid="section-kinflo-vanguard-build-primary"', siteStudioIndex);
+const siteDesignDetailsIndex = shellContents.indexOf('data-testid="section-kinflo-vanguard-site-design-details"', siteStudioIndex);
 const queueLaneIndex = shellContents.indexOf('data-testid="section-kinflo-client-studio-lane-queue"', siteStudioIndex);
 
 if (
   studioContextGuardIndex !== -1 &&
-  controlRoomClassIndex !== -1 &&
-  registryGuardIndex !== -1 &&
-  commandSurfaceGuardIndex !== -1 &&
+  buildPrimaryIndex !== -1 &&
+  siteDesignDetailsIndex !== -1 &&
   queueLaneIndex !== -1 &&
   shellContents.includes("order-1 border-b border-border bg-background") &&
-  shellContents.includes('className="order-2 min-w-0"')
+  shellContents.includes('data-testid="section-kinflo-vanguard-build-overview"')
 ) {
   pass("Site Studio active lanes render above the secondary context stack");
 } else {

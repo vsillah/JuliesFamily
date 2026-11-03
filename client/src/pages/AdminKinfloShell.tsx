@@ -226,7 +226,7 @@ const clientWebsiteStudioLaneSectionTestIds: Record<ClientWebsiteStudioLane, str
   handoff: "section-kinflo-client-studio-lane-handoff",
   workbench: "section-kinflo-client-studio-lane-workbench",
 };
-const clientWebsiteWorkbenchStageValues = ["sites", "preview", "launch"] as const;
+const clientWebsiteWorkbenchStageValues = ["sites", "preview", "operations", "launch"] as const;
 type ClientWebsiteWorkbenchStage = (typeof clientWebsiteWorkbenchStageValues)[number];
 const clientWebsiteLaunchDossierValues = ["provisioning", "packets", "qa", "decision"] as const;
 type ClientWebsiteLaunchDossier = (typeof clientWebsiteLaunchDossierValues)[number];
@@ -259,7 +259,7 @@ function getClientWebsiteStudioNavigationKey(
   if (lane === "handoff") {
     return "handoff";
   }
-  return lane === "workbench" && stage !== "sites" ? "preview-launch" : "build";
+  return lane === "workbench" && stage !== "sites" && stage !== "operations" ? "preview-launch" : "build";
 }
 
 const shellTabLabels: Record<ShellTabValue, string> = {
@@ -3039,6 +3039,111 @@ function ClientWebsiteConfigurationCommandSurface({
             </Badge>
           ))}
         </div>
+      </div>
+    </section>
+  );
+}
+
+function VanguardBuildOverview({
+  stage,
+  siteLabel,
+  tenantSlug,
+  readiness,
+  readyCount,
+  previewHref,
+  onStageChange,
+}: {
+  stage: ClientWebsiteWorkbenchStage;
+  siteLabel: string;
+  tenantSlug: string;
+  readiness: Array<{ label: string; done?: boolean }>;
+  readyCount: number;
+  previewHref: string;
+  onStageChange: (stage: ClientWebsiteWorkbenchStage) => void;
+}) {
+  const steps: Array<{ value: ClientWebsiteWorkbenchStage; label: string; detail: string }> = [
+    { value: "sites", label: "Site setup", detail: "Choose the site and confirm its starting structure." },
+    { value: "preview", label: "Preview", detail: "Inspect the public journey before any launch decision." },
+    { value: "operations", label: "Operations", detail: "Review intake, fulfillment, quality, and delivery context." },
+    { value: "launch", label: "Review and launch", detail: "Confirm readiness and keep live actions gated." },
+  ];
+  const activeStep = steps.find((step) => step.value === stage) ?? steps[0];
+
+  return (
+    <section className="rounded-lg border border-border bg-card p-3" data-testid="section-kinflo-vanguard-build-overview">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <div className="text-sm font-semibold text-foreground">Build a site</div>
+          <p className="mt-1 max-w-2xl text-xs leading-5 text-muted-foreground">
+            Follow the site path in order. Operational planning is available when you need it, without taking over the build view.
+          </p>
+        </div>
+        <Badge variant="outline" className="w-fit border-border bg-muted text-foreground">Read only</Badge>
+      </div>
+
+      <ol className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4" aria-label="Build sequence" data-testid="section-kinflo-vanguard-build-stepper">
+        {steps.map((step, index) => {
+          const isActive = step.value === stage;
+          return (
+            <li key={step.value}>
+              <button
+                type="button"
+                onClick={() => onStageChange(step.value)}
+                aria-current={isActive ? "step" : undefined}
+                className={`w-full rounded-md border px-3 py-2 text-left transition ${isActive ? "border-primary bg-primary text-primary-foreground" : "border-border bg-muted text-foreground hover:border-primary/50"}`}
+                data-testid={`button-kinflo-vanguard-build-step-${step.value}`}
+              >
+                <span className="flex items-center gap-2 text-xs font-semibold">
+                  <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] ${isActive ? "bg-primary-foreground/15" : "bg-card text-muted-foreground"}`}>{index + 1}</span>
+                  {step.label}
+                </span>
+                <span className={`mt-1 block text-[11px] leading-4 ${isActive ? "text-primary-foreground/75" : "text-muted-foreground"}`}>{step.detail}</span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+
+      <div className="mt-3 rounded-md border border-border bg-muted p-3" data-testid="section-kinflo-vanguard-build-active-step">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <div className="text-xs font-semibold uppercase tracking-wide text-primary">{activeStep.label}</div>
+            <div className="mt-1 text-base font-semibold text-foreground">{siteLabel}</div>
+            <div className="mt-1 text-xs text-muted-foreground">{tenantSlug} · {readyCount}/{readiness.length} readiness checks recorded</div>
+          </div>
+          {stage === "preview" ? (
+            <a className="inline-flex w-fit items-center rounded-md border border-border bg-card px-3 py-2 text-xs font-semibold text-foreground hover:border-primary/50" href={previewHref} target="_blank" rel="noreferrer" data-testid="link-kinflo-vanguard-build-preview">
+              Open preview
+            </a>
+          ) : null}
+        </div>
+
+        {stage === "sites" ? (
+          <div className="mt-3 grid gap-2 sm:grid-cols-3">
+            {readiness.slice(0, 3).map((item) => (
+              <div key={item.label} className="rounded-md border border-border bg-card px-3 py-2 text-xs">
+                <div className="font-medium text-foreground">{item.label}</div>
+                <div className="mt-1 text-muted-foreground">{item.done ? "Recorded" : "Needs review"}</div>
+              </div>
+            ))}
+          </div>
+        ) : null}
+
+        {stage === "preview" ? (
+          <p className="mt-3 text-xs leading-5 text-muted-foreground">Review the public site and mobile journey here. Client sharing, saving, and provider actions remain disabled.</p>
+        ) : null}
+
+        {stage === "launch" ? (
+          <p className="mt-3 text-xs leading-5 text-muted-foreground">The launch decision is still read-only. Use Preview for the public review and Operations for the supporting order context.</p>
+        ) : null}
+
+        {stage !== "operations" ? (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {stage === "sites" ? <Button type="button" size="sm" onClick={() => onStageChange("preview")} data-testid="button-kinflo-vanguard-build-next-preview">Continue to preview</Button> : null}
+            {stage === "preview" ? <Button type="button" size="sm" variant="outline" onClick={() => onStageChange("operations")} data-testid="button-kinflo-vanguard-build-open-operations">Review operations</Button> : null}
+            {stage === "launch" ? <Button type="button" size="sm" variant="outline" onClick={() => onStageChange("preview")} data-testid="button-kinflo-vanguard-build-return-preview">Return to preview</Button> : null}
+          </div>
+        ) : null}
       </div>
     </section>
   );
@@ -12760,19 +12865,51 @@ export default function AdminKinfloShell() {
             <section className="flex min-w-0 flex-col gap-2 overflow-x-clip" data-testid="section-kinflo-client-studio-compact-shell">
               {clientWebsiteStudioLaneRail}
 
-              <div className={`${shouldShowClientWebsiteStudioContext || websiteStudioRouteScope.status === "blocked" ? "block" : "hidden"} order-2`}>
-                <TenantSiteComposer
-                  siteKey={selectedClientWebsiteStudioSite?.key ?? "julies-family-public"}
-                  tenantSlug={selectedClientWebsiteStudioSite?.tenantSlug ?? adminScope.tenant.slug}
-                  siteLabel={selectedClientWebsiteStudioSite?.label ?? "Tenant site"}
-                  previewPath={clientWebsiteStudioPreviewPath}
-                  routeScope={websiteStudioRouteScope}
-                  onOpenControl={(control) => selectShellTab(control)}
-                />
+              {isVanguardWebsite && clientWebsiteStudioLane === "workbench" ? (
+                <div className="order-2" data-testid="section-kinflo-vanguard-build-primary">
+                  <VanguardBuildOverview
+                    stage={clientWebsiteWorkbenchStage}
+                    siteLabel={selectedClientWebsiteStudioSite?.label ?? "Vanguard site"}
+                    tenantSlug={selectedClientWebsiteStudioSite?.tenantSlug ?? "vanguard-enterprises"}
+                    readiness={clientWebsiteStudioReadiness}
+                    readyCount={clientWebsiteStudioReadyCount}
+                    previewHref={clientWebsiteStudioPreviewHref}
+                    onStageChange={selectClientWebsiteWorkbenchStage}
+                  />
+                </div>
+              ) : null}
+
+              <div className={`${(shouldShowClientWebsiteStudioContext && (!isVanguardWebsite || clientWebsiteWorkbenchStage === "sites")) || websiteStudioRouteScope.status === "blocked" ? "block" : "hidden"} order-3`}>
+                {isVanguardWebsite ? (
+                  <details className="rounded-lg border border-border bg-card p-3" data-testid="section-kinflo-vanguard-site-design-details">
+                    <summary className="cursor-pointer list-none text-sm font-semibold text-foreground">
+                      Site design controls <span className="ml-2 text-xs font-normal text-muted-foreground">Open when editing the public structure</span>
+                    </summary>
+                    <div className="mt-3">
+                      <TenantSiteComposer
+                        siteKey={selectedClientWebsiteStudioSite?.key ?? "julies-family-public"}
+                        tenantSlug={selectedClientWebsiteStudioSite?.tenantSlug ?? adminScope.tenant.slug}
+                        siteLabel={selectedClientWebsiteStudioSite?.label ?? "Tenant site"}
+                        previewPath={clientWebsiteStudioPreviewPath}
+                        routeScope={websiteStudioRouteScope}
+                        onOpenControl={(control) => selectShellTab(control)}
+                      />
+                    </div>
+                  </details>
+                ) : (
+                  <TenantSiteComposer
+                    siteKey={selectedClientWebsiteStudioSite?.key ?? "julies-family-public"}
+                    tenantSlug={selectedClientWebsiteStudioSite?.tenantSlug ?? adminScope.tenant.slug}
+                    siteLabel={selectedClientWebsiteStudioSite?.label ?? "Tenant site"}
+                    previewPath={clientWebsiteStudioPreviewPath}
+                    routeScope={websiteStudioRouteScope}
+                    onOpenControl={(control) => selectShellTab(control)}
+                  />
+                )}
               </div>
 
               <div
-                className={`order-3 ${shouldShowClientWebsiteStudioContext ? "overflow-hidden" : "hidden"} rounded-lg border border-slate-200 bg-white shadow-sm`}
+                className={`order-4 ${shouldShowClientWebsiteStudioContext && (!isVanguardWebsite || clientWebsiteWorkbenchStage === "operations") ? "overflow-hidden" : "hidden"} rounded-lg border border-slate-200 bg-white shadow-sm`}
                 data-testid="section-kinflo-client-control-room-frame"
               >
                 <div className="grid min-w-0 gap-0 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -12856,7 +12993,9 @@ export default function AdminKinfloShell() {
               <div className={`order-3 ${shouldShowClientWebsiteStudioContext ? "grid" : "hidden"} gap-2 xl:grid-cols-[minmax(0,0.48fr)_minmax(0,0.52fr)]`}>
                 {isVanguardWebsite ? (
                   <div className="xl:col-span-2">
-                    <VanguardFulfillmentWorkspace previewHref={clientWebsiteStudioPreviewHref} />
+                    {clientWebsiteWorkbenchStage === "operations" ? (
+                      <VanguardFulfillmentWorkspace previewHref={clientWebsiteStudioPreviewHref} />
+                    ) : null}
                   </div>
                 ) : (
                   <>
@@ -13005,9 +13144,10 @@ export default function AdminKinfloShell() {
                     data-testid="section-kinflo-client-workbench-grid"
                   >
                     <Tabs value={clientWebsiteWorkbenchStage} onValueChange={(value) => selectClientWebsiteWorkbenchStage(value as ClientWebsiteWorkbenchStage)} className={isVanguardWebsite ? "hidden" : "min-w-0"} data-testid="tabs-kinflo-client-workbench-stage">
-                      <TabsList className="grid h-auto w-full grid-cols-3 bg-slate-100 p-1">
+                      <TabsList className="grid h-auto w-full grid-cols-4 bg-slate-100 p-1">
                         <TabsTrigger value="sites" data-testid="tab-kinflo-client-workbench-sites">Sites</TabsTrigger>
                         <TabsTrigger value="preview" data-testid="tab-kinflo-client-workbench-preview">Preview</TabsTrigger>
+                        <TabsTrigger value="operations" data-testid="tab-kinflo-client-workbench-operations">Operations</TabsTrigger>
                         <TabsTrigger value="launch" data-testid="tab-kinflo-client-workbench-launch">Launch</TabsTrigger>
                       </TabsList>
 
@@ -13232,6 +13372,16 @@ export default function AdminKinfloShell() {
                     </div>
                   </CardContent>
                     </Card>
+                  </TabsContent>
+
+                  <TabsContent value="operations" className="mt-4" data-testid="section-kinflo-client-workbench-operations">
+                    <div className="rounded-lg border border-border bg-muted p-4">
+                      <div className="text-sm font-semibold text-foreground">Operations context</div>
+                      <p className="mt-1 max-w-2xl text-xs leading-5 text-muted-foreground">
+                        This step is reserved for order routing, fulfillment evidence, quality checks, and delivery measures when the selected site exposes that workflow.
+                      </p>
+                      <Badge variant="outline" className="mt-3 border-border bg-card text-foreground">No operational workspace for this site</Badge>
+                    </div>
                   </TabsContent>
 
                   <TabsContent value="launch" className="mt-2" data-testid="section-kinflo-client-workbench-launch">

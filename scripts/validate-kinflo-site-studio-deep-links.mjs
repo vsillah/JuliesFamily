@@ -82,7 +82,7 @@ requireIncludes("docs/phase99-site-studio-deep-links.md", [
 
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "const clientWebsiteStudioLaneValues = [\"queue\", \"configuration\", \"handoff\", \"workbench\"] as const",
-  "const clientWebsiteWorkbenchStageValues = [\"sites\", \"preview\", \"launch\"] as const",
+  "const clientWebsiteWorkbenchStageValues = [\"sites\", \"preview\", \"operations\", \"launch\"] as const",
   "readInitialClientWebsiteStudioLane",
   "readInitialClientWebsiteWorkbenchStage",
   "new URLSearchParams(window.location.search).get(\"studioLane\")",
@@ -99,7 +99,7 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "studioStage: stage",
   "Tabs value={clientWebsiteWorkbenchStage}",
   "onValueChange={(value) => selectClientWebsiteWorkbenchStage(value as ClientWebsiteWorkbenchStage)}",
-  "onClick={() => selectClientWebsiteStudioLane(lane.value as ClientWebsiteStudioLane)}",
+  "onSelectStudioSection(section.key as ClientWebsiteStudioNavigationKey)",
 ]);
 
 requireIncludes("docs/phase72-saas-execution-ledger.md", [
