@@ -7166,6 +7166,79 @@ export default function AdminKinfloShell() {
       </div>
 
       <main className={`mx-auto w-full max-w-7xl overflow-x-clip px-4 sm:px-6 lg:px-8 ${activeTab === "site-studio" ? "py-3" : "py-7"}`}>
+        <section className="grid gap-5 lg:grid-cols-[240px_minmax(0,1fr)] lg:items-start" data-testid="section-kinflo-tenant-admin-layout">
+          <aside className="rounded-xl border border-border bg-card p-3 shadow-sm lg:sticky lg:top-4" data-testid="section-kinflo-operator-sidebar">
+            <div className="flex items-start justify-between gap-3 border-b border-border pb-3">
+              <div className="min-w-0">
+                <div className="text-sm font-semibold text-foreground">Tenant admin</div>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                  Shared KinFlo navigation for the selected tenant and site.
+                </p>
+              </div>
+              <Badge variant="outline" className="shrink-0 text-[10px]">
+                {workflowNavigationTabCoverage.length}/{shellTabValues.length}
+              </Badge>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              className="mt-2 w-full justify-start px-2 text-sm text-muted-foreground hover:text-foreground"
+              onClick={() => selectShellTab("tenants")}
+              data-testid="button-kinflo-sidebar-overview"
+            >
+              <ChevronLeft className="mr-2 h-4 w-4" aria-hidden="true" />
+              Tenant overview
+            </Button>
+            <nav className="mt-2 space-y-1" aria-label="KinFlo tenant admin sections" data-testid="section-kinflo-workflow-navigation-lanes">
+              {workflowNavigationLanes.map((lane) => {
+                const LaneIcon = lane.icon;
+                const isActiveLane = lane.tabs.includes(activeTab);
+                const statusTone = lane.status === "blocked"
+                  ? "text-amber-700 dark:text-amber-300"
+                  : lane.status === "ready"
+                    ? "text-emerald-700 dark:text-emerald-300"
+                    : "text-muted-foreground";
+
+                return (
+                  <div key={lane.key} className="rounded-lg" data-testid={`button-kinflo-workflow-lane-${lane.key}`}>
+                    <button
+                      type="button"
+                      onClick={() => selectShellTab(lane.primaryTab)}
+                      aria-current={isActiveLane ? "page" : undefined}
+                      className={`flex w-full items-start gap-2 rounded-lg border border-transparent px-2.5 py-2 text-left transition hover:border-primary/50 hover:bg-muted ${isActiveLane ? "bg-primary text-primary-foreground" : "bg-card text-foreground"}`}
+                    >
+                      <LaneIcon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-sm font-semibold">{lane.label}</span>
+                        <span className={`mt-0.5 block truncate text-[11px] ${isActiveLane ? "text-primary-foreground/75" : statusTone}`}>
+                          {lane.tabs.length} sections · {lane.status}
+                        </span>
+                      </span>
+                    </button>
+                    {isActiveLane ? (
+                      <div className="ml-4 mt-1 space-y-0.5 border-l border-primary/30 pl-2" data-testid={`section-kinflo-workflow-lane-tabs-${lane.key}`}>
+                        <div className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Sections in this workspace</div>
+                        {lane.tabs.map((tabValue) => (
+                          <button
+                            key={tabValue}
+                            type="button"
+                            onClick={() => selectShellTab(tabValue)}
+                            aria-current={activeTab === tabValue ? "page" : undefined}
+                            className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition ${activeTab === tabValue ? "bg-primary/10 font-semibold text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+                            data-testid={`dot-kinflo-workflow-lane-${lane.key}-${tabValue}`}
+                          >
+                            <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${activeTab === tabValue ? "bg-primary" : "bg-muted-foreground/40"}`} />
+                            <span className="truncate">{shellTabLabels[tabValue]}</span>
+                          </button>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </nav>
+          </aside>
+          <div className="min-w-0">
         <section
           className={`grid rounded-lg border border-slate-200 bg-white shadow-sm ${
             activeTab === "site-studio"
@@ -7446,83 +7519,7 @@ export default function AdminKinfloShell() {
         ) : null}
 
         <Tabs value={activeTab} onValueChange={(value) => selectShellTab(value as ShellTabValue)} className={`${activeTab === "site-studio" ? "mt-1" : "mt-7"} min-w-0`}>
-          <section
-            className="grid gap-4 lg:grid-cols-[240px_minmax(0,1fr)] lg:items-start"
-            data-testid="section-kinflo-workflow-navigation-rail"
-          >
-            <aside className="rounded-xl border border-border bg-card p-3 shadow-sm lg:sticky lg:top-4" data-testid="section-kinflo-operator-sidebar">
-              <div className="flex items-start justify-between gap-3 border-b border-border pb-3">
-                <div className="min-w-0">
-                  <div className="text-sm font-semibold text-foreground">Tenant admin</div>
-                  <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                    Shared KinFlo navigation for the selected tenant and site.
-                  </p>
-                </div>
-                <Badge variant="outline" className="shrink-0 text-[10px]">
-                  {workflowNavigationTabCoverage.length}/{shellTabValues.length}
-                </Badge>
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                className="mt-2 w-full justify-start px-2 text-sm text-muted-foreground hover:text-foreground"
-                onClick={() => selectShellTab("tenants")}
-                data-testid="button-kinflo-sidebar-overview"
-              >
-                <ChevronLeft className="mr-2 h-4 w-4" aria-hidden="true" />
-                Tenant overview
-              </Button>
-              <nav className="mt-2 space-y-1" aria-label="KinFlo tenant admin sections" data-testid="section-kinflo-workflow-navigation-lanes">
-                {workflowNavigationLanes.map((lane) => {
-                  const LaneIcon = lane.icon;
-                  const isActiveLane = lane.tabs.includes(activeTab);
-                  const statusTone = lane.status === "blocked"
-                    ? "text-amber-700 dark:text-amber-300"
-                    : lane.status === "ready"
-                      ? "text-emerald-700 dark:text-emerald-300"
-                      : "text-muted-foreground";
-
-                  return (
-                    <div key={lane.key} className="rounded-lg" data-testid={`button-kinflo-workflow-lane-${lane.key}`}>
-                      <button
-                        type="button"
-                        onClick={() => selectShellTab(lane.primaryTab)}
-                        aria-current={isActiveLane ? "page" : undefined}
-                        className={`flex w-full items-start gap-2 rounded-lg border border-transparent px-2.5 py-2 text-left transition hover:border-primary/50 hover:bg-muted ${isActiveLane ? "bg-primary text-primary-foreground" : "bg-card text-foreground"}`}
-                      >
-                        <LaneIcon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate text-sm font-semibold">{lane.label}</span>
-                          <span className={`mt-0.5 block truncate text-[11px] ${isActiveLane ? "text-primary-foreground/75" : statusTone}`}>
-                            {lane.tabs.length} sections · {lane.status}
-                          </span>
-                        </span>
-                      </button>
-                      {isActiveLane ? (
-                        <div className="ml-4 mt-1 space-y-0.5 border-l border-primary/30 pl-2" data-testid={`section-kinflo-workflow-lane-tabs-${lane.key}`}>
-                          <div className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Sections in this workspace</div>
-                          {lane.tabs.map((tabValue) => (
-                            <button
-                              key={tabValue}
-                              type="button"
-                              onClick={() => selectShellTab(tabValue)}
-                              aria-current={activeTab === tabValue ? "page" : undefined}
-                              className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition ${activeTab === tabValue ? "bg-primary/10 font-semibold text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
-                              data-testid={`dot-kinflo-workflow-lane-${lane.key}-${tabValue}`}
-                            >
-                              <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${activeTab === tabValue ? "bg-primary" : "bg-muted-foreground/40"}`} />
-                              <span className="truncate">{shellTabLabels[tabValue]}</span>
-                            </button>
-                          ))}
-                        </div>
-                      ) : null}
-                    </div>
-                  );
-                })}
-              </nav>
-            </aside>
-
-            <div className="min-w-0">
+          <section className="min-w-0" data-testid="section-kinflo-workflow-navigation-rail">
           <div className={`${activeTab === "site-studio" ? "hidden sm:block" : "block"} w-full min-w-0 rounded-md border border-slate-200 bg-white`} data-testid="section-kinflo-contextual-navigation">
             <div className="flex flex-col gap-2 border-b border-slate-200 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -16118,7 +16115,6 @@ export default function AdminKinfloShell() {
               </div>
             </section>
           </TabsContent>
-            </div>
           </section>
         </Tabs>
 
@@ -16134,6 +16130,8 @@ export default function AdminKinfloShell() {
             </Link>
           </Button>
         </div>
+        </div>
+        </section>
       </main>
     </div>
   );
