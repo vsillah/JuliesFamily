@@ -767,7 +767,7 @@ function TenantControlPlaneTable({ tenants }: { tenants: ShellTenant[] }) {
         placeholder="Search tenants, plans, or owners"
         testId="kinflo-tenant-control-plane"
       />
-      <div className="overflow-x-auto rounded-lg border" data-testid="section-kinflo-tenant-control-plane-table">
+      <div className="hidden overflow-x-auto rounded-lg border lg:block" data-testid="section-kinflo-tenant-control-plane-table">
         <Table>
           <TableHeader>
             <TableRow>
@@ -799,6 +799,37 @@ function TenantControlPlaneTable({ tenants }: { tenants: ShellTenant[] }) {
             )}
           </TableBody>
         </Table>
+      </div>
+      <div className="grid gap-2 lg:hidden" data-testid="section-kinflo-tenant-control-plane-cards">
+        {visibleTenants.length > 0 ? visibleTenants.map((tenant) => (
+          <article key={tenant.slug} className="min-w-0 rounded-lg border border-slate-200 bg-white p-3">
+            <div className="flex min-w-0 items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="break-words font-medium text-slate-950">{tenant.name}</div>
+                <div className="mt-0.5 break-all text-xs text-muted-foreground">{tenant.slug}</div>
+              </div>
+              <div className="shrink-0">{statusBadge(tenant.status)}</div>
+            </div>
+            <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+              <div className="min-w-0">
+                <dt className="text-xs text-slate-500">Plan</dt>
+                <dd className="break-words font-medium text-slate-900">{tenant.plan}</dd>
+              </div>
+              <div className="min-w-0">
+                <dt className="text-xs text-slate-500">Sites</dt>
+                <dd className="font-medium text-slate-900">{tenant.sites}</dd>
+              </div>
+              <div className="col-span-2 min-w-0">
+                <dt className="text-xs text-slate-500">Owner</dt>
+                <dd className="break-words font-medium text-slate-900">{tenant.owner}</dd>
+              </div>
+            </dl>
+          </article>
+        )) : (
+          <div className="rounded-lg border border-dashed border-slate-300 px-3 py-8 text-center text-sm text-slate-500" data-testid="section-kinflo-tenant-control-plane-empty-mobile">
+            No tenants match this search.
+          </div>
+        )}
       </div>
     </>
   );
@@ -833,7 +864,7 @@ function SiteFactoryQueueTable({ sites }: { sites: ShellSite[] }) {
         placeholder="Search sites, tenants, domains, or templates"
         testId="kinflo-site-factory-queue"
       />
-      <div className="overflow-x-auto rounded-lg border" data-testid="section-kinflo-site-factory-queue-table">
+      <div className="hidden overflow-x-auto rounded-lg border lg:block" data-testid="section-kinflo-site-factory-queue-table">
         <Table>
           <TableHeader>
             <TableRow>
@@ -874,6 +905,43 @@ function SiteFactoryQueueTable({ sites }: { sites: ShellSite[] }) {
             )}
           </TableBody>
         </Table>
+      </div>
+      <div className="grid gap-2 lg:hidden" data-testid="section-kinflo-site-factory-queue-cards">
+        {visibleSites.length > 0 ? visibleSites.map((site) => (
+          <article key={`${site.tenant}-${site.name}`} className="min-w-0 rounded-lg border border-slate-200 bg-white p-3">
+            <div className="flex min-w-0 items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="break-words font-medium text-slate-950">{site.name}</div>
+                <div className="mt-0.5 break-all text-xs text-muted-foreground">{site.route}</div>
+              </div>
+              <div className="shrink-0">{statusBadge(site.status)}</div>
+            </div>
+            <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+              <div className="min-w-0">
+                <dt className="text-xs text-slate-500">Tenant</dt>
+                <dd className="break-words font-medium text-slate-900">{site.tenant}</dd>
+              </div>
+              <div className="min-w-0">
+                <dt className="text-xs text-slate-500">Template</dt>
+                <dd className="break-words font-medium text-slate-900">{site.template}</dd>
+              </div>
+              <div className="col-span-2 min-w-0">
+                <dt className="text-xs text-slate-500">Domain</dt>
+                <dd className="break-all font-medium text-slate-900">{site.domain}</dd>
+              </div>
+            </dl>
+            <Button size="sm" variant="outline" asChild className="mt-3 w-full">
+              <Link href={site.previewPath}>
+                <ExternalLink className="mr-2 h-3 w-3" />
+                Open preview
+              </Link>
+            </Button>
+          </article>
+        )) : (
+          <div className="rounded-lg border border-dashed border-slate-300 px-3 py-8 text-center text-sm text-slate-500" data-testid="section-kinflo-site-factory-queue-empty-mobile">
+            No sites match this search.
+          </div>
+        )}
       </div>
     </>
   );
