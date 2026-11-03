@@ -157,6 +157,7 @@ export type KinfloPlatformAnalyticsSnapshot = {
       count: number;
       conversionPercent: number;
       dropOffPercent: number;
+      isConnected?: boolean;
       detail: string;
     }[];
     leaks: readonly {
@@ -461,6 +462,7 @@ export function getKinfloPlatformAnalyticsSnapshot(): KinfloPlatformAnalyticsSna
             count: 0,
             conversionPercent: 0,
             dropOffPercent: 100,
+            isConnected: false,
             detail: "No returning-site signal is connected yet",
           },
         ],
@@ -519,7 +521,7 @@ export function getKinfloPlatformAnalyticsSnapshot(): KinfloPlatformAnalyticsSna
           { key: "preview", label: "Preview reviewed", count: 0, conversionPercent: 0, dropOffPercent: 100, detail: "No preview review recorded" },
           { key: "launch", label: "Launch ready", count: 0, conversionPercent: 0, dropOffPercent: 0, detail: "Waiting on preview" },
           { key: "operate", label: "Operating", count: 0, conversionPercent: 0, dropOffPercent: 0, detail: "Waiting on launch" },
-          { key: "renew", label: "Returning", count: 0, conversionPercent: 0, dropOffPercent: 0, detail: "No returning signal" },
+          { key: "renew", label: "Returning", count: 0, conversionPercent: 0, dropOffPercent: 0, isConnected: false, detail: "No returning signal" },
         ],
         leaks: [
           {
@@ -543,7 +545,7 @@ export function getKinfloPlatformAnalyticsSnapshot(): KinfloPlatformAnalyticsSna
           { key: "preview", label: "Preview reviewed", count: 0, conversionPercent: 0, dropOffPercent: 100, detail: "No preview review recorded" },
           { key: "launch", label: "Launch ready", count: 0, conversionPercent: 0, dropOffPercent: 0, detail: "Waiting on preview" },
           { key: "operate", label: "Operating", count: 0, conversionPercent: 0, dropOffPercent: 0, detail: "Waiting on launch" },
-          { key: "renew", label: "Returning", count: 0, conversionPercent: 0, dropOffPercent: 0, detail: "No returning signal" },
+          { key: "renew", label: "Returning", count: 0, conversionPercent: 0, dropOffPercent: 0, isConnected: false, detail: "No returning signal" },
         ],
         leaks: [
           {

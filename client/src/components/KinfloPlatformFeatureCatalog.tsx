@@ -408,6 +408,9 @@ function PlatformAnalyticsWorkspace({
                 total + (tenant.stages[stageIndex - 1]?.count ?? 0),
               0,
             );
+      const isConnected = visibleJourney.every(
+        (tenant) => tenant.stages[stageIndex]?.isConnected !== false,
+      );
       const conversionPercent =
         stageIndex === 0
           ? 100
@@ -420,25 +423,31 @@ function PlatformAnalyticsWorkspace({
         count,
         conversionPercent,
         dropOffPercent:
-          stageIndex === 0 || previousCount === 0
+          !isConnected || stageIndex === 0 || previousCount === 0
             ? 0
             : Math.round(((previousCount - count) / previousCount) * 100),
+        isConnected,
       };
     },
   );
   const journeyEntryCount = journeyStages[0]?.count ?? 0;
   const journeyReturningCount = journeyStages.at(-1)?.count ?? 0;
+  const journeyReturningConnected = journeyStages.at(-1)?.isConnected ?? false;
   const journeyCompletionPercent = journeyEntryCount
     ? Math.round((journeyReturningCount / journeyEntryCount) * 100)
     : 0;
-  const largestJourneyDrop = journeyStages.reduce(
+  const measuredJourneyStages = journeyStages.filter(
+    (stage) => stage.isConnected,
+  );
+  const largestJourneyDrop = measuredJourneyStages.reduce(
     (largest, stage) =>
       stage.dropOffPercent > largest.dropOffPercent ? stage : largest,
-    journeyStages[0] ?? {
+    measuredJourneyStages[0] ?? {
       label: "No stage data",
       count: 0,
       conversionPercent: 0,
       dropOffPercent: 0,
+      isConnected: false,
       detail: "No journey events are available",
     },
   );
@@ -738,8 +747,22 @@ function PlatformAnalyticsWorkspace({
         <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
           {[
             ["Sites entered", `${journeyEntryCount}`, "visible journey"],
-            ["Returning use", `${journeyCompletionPercent}%`, "of sites entered"],
-            ["Largest drop", `${largestJourneyDrop.dropOffPercent}%`, largestJourneyDrop.label],
+            [
+              "Returning use",
+              journeyReturningConnected
+                ? `${journeyCompletionPercent}%`
+                : "Not connected",
+              journeyReturningConnected ? "of sites entered" : "signal pending",
+            ],
+            [
+              "Largest measured drop",
+              measuredJourneyStages.length
+                ? `${largestJourneyDrop.dropOffPercent}%`
+                : "Not connected",
+              measuredJourneyStages.length
+                ? largestJourneyDrop.label
+                : "journey signal pending",
+            ],
             ["Open detectors", `${journeyLeaks.length}`, "needs review"],
           ].map(([label, value, detail]) => (
             <div key={label} className="border border-slate-200 px-3 py-3">
@@ -778,7 +801,7 @@ function PlatformAnalyticsWorkspace({
                       {stage.label}
                     </span>
                     <span className="shrink-0 text-slate-500">
-                      {stage.count} · {stage.conversionPercent}% from prior
+                      {stage.count} · {stage.isConnected ? `${stage.conversionPercent}% from prior` : "Not connected"}
                     </span>
                   </div>
                   <div
@@ -797,7 +820,7 @@ function PlatformAnalyticsWorkspace({
                     {selectedTenant
                       ? stage.detail
                       : `${stage.count} sites across the visible tenant set`}
-                    {stage.dropOffPercent > 0
+                    {stage.isConnected && stage.dropOffPercent > 0
                       ? ` · ${stage.dropOffPercent}% drop-off here`
                       : ""}
                   </div>
