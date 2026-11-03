@@ -61,6 +61,8 @@ if (existsSync(shellPath)) {
     "label: \"Activation\"",
     "Hosted activation, read-only smokes, and cutover gates",
     "dot-kinflo-workflow-lane-activation-hosted-activation",
+    "onClick={() => onSelectTab(isActiveLane ? \"overview\" : lane.primaryTab)}",
+    "aria-expanded={isActiveLane}",
   ]) {
     check(shell.includes(marker), `admin shell includes ${marker}`, "The read-only navigation/theme contract is incomplete.");
   }
