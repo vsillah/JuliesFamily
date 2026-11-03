@@ -75,6 +75,10 @@ if (existsSync(cssPath)) {
   const css = read(cssPath);
   for (const marker of [
     ".kinflo-admin-shell",
+    "[class~=\"bg-slate-50/70\"]",
+    "[class~=\"bg-slate-50/95\"]",
+    ".kinflo-admin-shell .bg-slate-100",
+    "[class~=\"bg-white/70\"]",
     ".kinflo-admin-shell .kinflo-pill-success",
     ".kinflo-admin-shell .kinflo-pill-info",
     ".kinflo-admin-shell .kinflo-pill-warning",
