@@ -13,6 +13,7 @@ import {
   type KinfloOperationsScope,
   type KinfloTaskStatus,
 } from "@/lib/kinfloOperations";
+import { getKinfloPlatformAnalyticsSnapshot } from "@/lib/kinfloPlatformAnalytics";
 
 type KinfloOperationsWorkspaceProps = {
   activeView: "operations" | "communications" | "analytics";
@@ -37,6 +38,29 @@ const toneForTaskStatus: Record<KinfloTaskStatus, string> = {
   complete: "border-emerald-200 bg-emerald-50 text-emerald-700",
 };
 
+const analyticsModuleLabels: Record<string, { label: string; detail: string }> = {
+  crm_comms: {
+    label: "CRM and communications",
+    detail: "Relationships, outreach, and engagement signals.",
+  },
+  content_experimentation: {
+    label: "Content and experimentation",
+    detail: "Content performance and controlled experience tests.",
+  },
+  admin_governance: {
+    label: "Administrative governance",
+    detail: "Access, approvals, and operating policy posture.",
+  },
+  program_outcomes: {
+    label: "Program outcomes",
+    detail: "Participation, progress, and returning-use signals.",
+  },
+  platform_health: {
+    label: "Platform health",
+    detail: "Capacity, latency, errors, and load distribution.",
+  },
+};
+
 function PreviewBoundary({ children }: { children: React.ReactNode }) {
   return (
     <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-950" data-testid="kinflo-operations-preview-boundary">
@@ -56,6 +80,10 @@ function AnalyticsPreview({ scope }: { scope: KinfloOperationsScope }) {
   if (resolution.status === "invalid") {
     return <div className="rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800" data-testid="kinflo-analytics-blocked">Analytics blocked: {resolution.reason}</div>;
   }
+  const tenantProfile = getKinfloPlatformAnalyticsSnapshot().tenantCoverage.find(
+    (tenant) => tenant.tenantSlug === scope.tenantSlug,
+  );
+  const analyticsModules = tenantProfile?.analyticsModules ?? [];
   return (
     <Card data-testid="section-kinflo-analytics-preview">
       <CardHeader className="space-y-2">
@@ -66,6 +94,27 @@ function AnalyticsPreview({ scope }: { scope: KinfloOperationsScope }) {
         <p className="text-sm leading-6 text-slate-600">A scoped read model for admin review. Freshness and source stay visible so fixture values cannot be mistaken for live telemetry.</p>
       </CardHeader>
       <CardContent className="space-y-4">
+        <section className="rounded-lg border border-slate-200 bg-slate-50 p-3" data-testid="section-kinflo-analytics-profile">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Tenant analytics profile</div>
+              <div className="mt-1 text-sm font-semibold text-slate-950">{tenantProfile?.profileLabel ?? "Scoped tenant profile"}</div>
+            </div>
+            <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">Profile surfaced</Badge>
+          </div>
+          <p className="mt-2 text-xs leading-5 text-slate-600">These analytics families are surfaced for this tenant. Platform health stays available across profiles.</p>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2" data-testid="grid-kinflo-analytics-profile-modules">
+            {analyticsModules.map((moduleKey) => {
+              const module = analyticsModuleLabels[moduleKey];
+              return (
+                <div key={moduleKey} className="border border-slate-200 bg-white p-3">
+                  <div className="text-sm font-semibold text-slate-950">{module?.label ?? moduleKey}</div>
+                  <div className="mt-1 text-xs leading-5 text-slate-500">{module?.detail ?? "Profile-scoped analytics surface."}</div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
         <div className="grid gap-3 sm:grid-cols-3" data-testid="grid-kinflo-analytics-metrics">
           {resolution.preview.metrics.map((metric) => (
             <div key={metric.key} className="rounded-lg border border-slate-200 bg-slate-50 p-3">

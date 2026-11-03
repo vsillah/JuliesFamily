@@ -1,3 +1,5 @@
+import { getKinfloPlatformAnalyticsSnapshot } from "./kinfloPlatformAnalytics";
+
 export type KinfloOperationsScope = {
   tenantSlug: string;
   siteSlug: string;
@@ -142,7 +144,10 @@ export function resolveKinfloAnalyticsPreview(scope: KinfloOperationsScope): Kin
   if (!scope.tenantSlug.trim() || !scope.siteSlug.trim()) {
     return { status: "invalid", reason: "Analytics preview requires both tenant and site scope." };
   }
-  if (!isKinfloOperationsScopeMatch(scope, { tenantSlug: "vanguard-enterprises", siteSlug: "vanguard-enterprises" })) {
+  const tenantProfile = getKinfloPlatformAnalyticsSnapshot().tenantCoverage.find(
+    (tenant) => tenant.tenantSlug === normalize(scope.tenantSlug),
+  );
+  if (!tenantProfile) {
     return { status: "invalid", reason: "No analytics preview is registered for this tenant/site scope." };
   }
   return {
