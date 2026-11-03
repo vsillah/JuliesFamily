@@ -395,17 +395,96 @@
   background-color: hsl(172 28% 16%) !important;
 }
 
+.dark .kinflo-admin-shell .bg-violet-50 {
+  background-color: hsl(262 30% 18%) !important;
+}
+
+.dark .kinflo-admin-shell .bg-violet-100 {
+  background-color: hsl(262 32% 23%) !important;
+}
+
+.dark .kinflo-admin-shell .bg-rose-50 {
+  background-color: hsl(350 30% 18%) !important;
+}
+
 .dark .kinflo-admin-shell .text-amber-950,
 .dark .kinflo-admin-shell .text-amber-900,
 .dark .kinflo-admin-shell .text-amber-800,
 .dark .kinflo-admin-shell .text-amber-700,
+.dark .kinflo-admin-shell .text-emerald-950,
 .dark .kinflo-admin-shell .text-emerald-900,
 .dark .kinflo-admin-shell .text-emerald-800,
 .dark .kinflo-admin-shell .text-emerald-700,
 .dark .kinflo-admin-shell .text-sky-950,
+.dark .kinflo-admin-shell .text-blue-950,
 .dark .kinflo-admin-shell .text-blue-800,
-.dark .kinflo-admin-shell .text-teal-800 {
+.dark .kinflo-admin-shell .text-blue-900,
+.dark .kinflo-admin-shell .text-blue-700,
+.dark .kinflo-admin-shell .text-teal-950,
+.dark .kinflo-admin-shell .text-teal-900,
+.dark .kinflo-admin-shell .text-teal-800,
+.dark .kinflo-admin-shell .text-teal-700,
+.dark .kinflo-admin-shell .text-violet-950,
+.dark .kinflo-admin-shell .text-violet-900,
+.dark .kinflo-admin-shell .text-violet-800,
+.dark .kinflo-admin-shell .text-violet-700,
+.dark .kinflo-admin-shell .text-violet-600,
+.dark .kinflo-admin-shell .text-rose-900,
+.dark .kinflo-admin-shell .text-rose-800,
+.dark .kinflo-admin-shell .text-rose-700 {
   color: hsl(var(--foreground)) !important;
+}
+
+.dark .kinflo-admin-shell .border-amber-100,
+.dark .kinflo-admin-shell .border-amber-200,
+.dark .kinflo-admin-shell .border-amber-300,
+.dark .kinflo-admin-shell .border-blue-100,
+.dark .kinflo-admin-shell .border-blue-200,
+.dark .kinflo-admin-shell .border-blue-300,
+.dark .kinflo-admin-shell .border-emerald-100,
+.dark .kinflo-admin-shell .border-emerald-200,
+.dark .kinflo-admin-shell .border-rose-100,
+.dark .kinflo-admin-shell .border-rose-200,
+.dark .kinflo-admin-shell .border-teal-200,
+.dark .kinflo-admin-shell .border-teal-300,
+.dark .kinflo-admin-shell .border-violet-200,
+.dark .kinflo-admin-shell .border-violet-300 {
+  border-color: hsl(var(--border)) !important;
+}
+
+/* Public preview frames intentionally retain their light client-site palette. */
+.kinflo-admin-shell .kinflo-preview-artifact .bg-white {
+  background-color: hsl(0 0% 100%) !important;
+}
+
+.kinflo-admin-shell .kinflo-preview-artifact .bg-slate-50 {
+  background-color: hsl(210 40% 98%) !important;
+}
+
+.kinflo-admin-shell .kinflo-preview-artifact .bg-slate-100 {
+  background-color: hsl(210 40% 96%) !important;
+}
+
+.kinflo-admin-shell .kinflo-preview-artifact.bg-slate-100 {
+  background-color: hsl(210 40% 96%) !important;
+}
+
+.kinflo-admin-shell .kinflo-preview-artifact .border-slate-200,
+.kinflo-admin-shell .kinflo-preview-artifact .border-slate-100 {
+  border-color: hsl(214 32% 91%) !important;
+}
+
+.kinflo-admin-shell .kinflo-preview-artifact .text-slate-950,
+.kinflo-admin-shell .kinflo-preview-artifact .text-slate-900,
+.kinflo-admin-shell .kinflo-preview-artifact .text-slate-800 {
+  color: hsl(222 47% 11%) !important;
+}
+
+.kinflo-admin-shell .kinflo-preview-artifact .text-slate-700,
+.kinflo-admin-shell .kinflo-preview-artifact .text-slate-600,
+.kinflo-admin-shell .kinflo-preview-artifact .text-slate-500,
+.kinflo-admin-shell .kinflo-preview-artifact .text-slate-400 {
+  color: hsl(215 16% 47%) !important;
 }
 
 .dark .kinflo-admin-shell .kinflo-pill-success {
