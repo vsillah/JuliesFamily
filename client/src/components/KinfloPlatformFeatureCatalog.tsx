@@ -272,15 +272,25 @@ function PlatformAnalyticsWorkspace({
       ).length,
     }),
   );
-  const tenantDenominator = Math.max(1, visibleTenants.length);
-  const radarPoints = visibleCapabilityAdoption
-    .map((capability, index) => {
-      const angle =
-        -Math.PI / 2 + (index * Math.PI * 2) / visibleCapabilityAdoption.length;
-      const radius = 32 + (capability.tenantCount / tenantDenominator) * 58;
-      return `${120 + Math.cos(angle) * radius},${105 + Math.sin(angle) * radius}`;
-    })
-    .join(" ");
+  const radarColors = ["#020617", "#334155", "#64748b", "#cbd5e1"];
+  const radarWebs = visibleTenants.map((tenant, tenantIndex) => {
+    const points = visibleCapabilityAdoption
+      .map(({ key }, capabilityIndex) => {
+        const angle =
+          -Math.PI / 2 +
+          (capabilityIndex * Math.PI * 2) / visibleCapabilityAdoption.length;
+        const enabled = tenant.capabilityKeys.includes(key);
+        const radius = enabled ? 90 : 30;
+        return `${120 + Math.cos(angle) * radius},${105 + Math.sin(angle) * radius}`;
+      })
+      .join(" ");
+
+    return {
+      tenant,
+      points,
+      color: radarColors[tenantIndex % radarColors.length],
+    };
+  });
   const selectedTenant =
     selectedTenantSlug === "all" ? undefined : visibleTenants[0];
   const visibleSessionStarts = visibleTenants.reduce(
@@ -507,7 +517,7 @@ function PlatformAnalyticsWorkspace({
               viewBox="0 0 240 210"
               className="h-52 w-full max-w-xs text-slate-300"
               role="img"
-              aria-label="Capability mix radar chart from the selected tenant lens"
+              aria-label={`Capability mix radar chart with ${radarWebs.length} tenant web${radarWebs.length === 1 ? "" : "s"}`}
             >
               <polygon
                 points="120,18 205,80 172,175 68,175 35,80"
@@ -521,13 +531,17 @@ function PlatformAnalyticsWorkspace({
                 stroke="currentColor"
                 strokeWidth="1"
               />
-              <polygon
-                points={radarPoints}
-                fill="currentColor"
-                fillOpacity="0.12"
-                stroke="currentColor"
-                strokeWidth="2"
-              />
+              {radarWebs.map((web) => (
+                <polygon
+                  key={web.tenant.tenantSlug}
+                  points={web.points}
+                  fill={web.color}
+                  fillOpacity="0.08"
+                  stroke={web.color}
+                  strokeOpacity="0.9"
+                  strokeWidth="1.5"
+                />
+              ))}
               <line
                 x1="120"
                 y1="18"
@@ -558,19 +572,19 @@ function PlatformAnalyticsWorkspace({
                 textAnchor="middle"
                 className="fill-slate-500 text-[9px]"
               >
-                Tenant reach
+                Control
               </text>
               <text x="214" y="82" className="fill-slate-500 text-[9px]">
-                Sessions
-              </text>
-              <text x="176" y="193" className="fill-slate-500 text-[9px]">
                 Build
               </text>
-              <text x="39" y="193" className="fill-slate-500 text-[9px]">
+              <text x="176" y="193" className="fill-slate-500 text-[9px]">
                 Launch
               </text>
-              <text x="2" y="82" className="fill-slate-500 text-[9px]">
+              <text x="39" y="193" className="fill-slate-500 text-[9px]">
                 Growth
+              </text>
+              <text x="2" y="82" className="fill-slate-500 text-[9px]">
+                Evidence
               </text>
               <text
                 x="120"
@@ -578,9 +592,24 @@ function PlatformAnalyticsWorkspace({
                 textAnchor="middle"
                 className="fill-slate-700 text-[10px]"
               >
-                Fixture
+                {radarWebs.length} web{radarWebs.length === 1 ? "" : "s"}
               </text>
             </svg>
+          </div>
+          <div className="mt-1 flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs text-slate-500">
+            {radarWebs.map((web) => (
+              <span
+                key={web.tenant.tenantSlug}
+                className="inline-flex items-center gap-2"
+              >
+                <span
+                  className="h-2.5 w-2.5"
+                  style={{ backgroundColor: web.color }}
+                  aria-hidden="true"
+                />
+                {web.tenant.tenant}
+              </span>
+            ))}
           </div>
           <div className="mt-1 flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs text-slate-500">
             {visibleCapabilityAdoption.map((capability) => (
