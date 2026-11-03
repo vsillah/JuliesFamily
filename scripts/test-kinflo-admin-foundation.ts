@@ -72,6 +72,10 @@ test("platform view is tenant-independent and offers a scoped entry point", () =
   assert.match(catalog, /Platform control plane/);
   assert.match(catalog, /tenant and site workspaces are children/i);
   assert.match(catalog, /href="\/admin\/kinflo-os"/);
+  assert.match(catalog, /input-kinflo-source-website-url/);
+  assert.match(catalog, /button-review-kinflo-tenant-plan/);
+  assert.match(catalog, /button-create-kinflo-tenant-gated/);
+  assert.match(catalog, /never starts scraping or creates records/i);
 });
 
 test("KinFlo public controls do not link to Julie's legacy admin route", () => {
