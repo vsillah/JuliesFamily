@@ -823,7 +823,6 @@ function PlatformLaneView({
 }) {
   const lane = platformSections.find((item) => item.key === section)!;
   const Icon = lane.icon;
-  const childLabels = lane.children.split(" · ");
   return (
     <section data-testid={`section-kinflo-platform-${section}`}>
       <div className="flex items-start gap-3 border-b border-slate-300 pb-5">
@@ -843,33 +842,24 @@ function PlatformLaneView({
         </div>
       </div>
       <PlatformLaneAnalytics section={section} snapshot={snapshot} />
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        {childLabels.map((child, index) => (
-          <div
-            key={child}
-            className="border border-slate-300 bg-white px-4 py-4 shadow-sm"
-          >
-            <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-              {String(index + 1).padStart(2, "0")}
-            </div>
-            <h3 className="mt-3 text-base font-semibold text-slate-950">
-              {child}
-            </h3>
-            <p className="mt-2 text-sm leading-5 text-slate-600">
-              Available within the {lane.label.toLowerCase()} workspace when a
-              tenant scope is selected.
-            </p>
+      <div className="mt-5 flex flex-col gap-4 border-l-4 border-slate-950 bg-white px-5 py-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <div className="text-sm font-semibold text-slate-950">
+            Continue in a tenant/site workspace
           </div>
-        ))}
-      </div>
-      <div className="mt-5 border-l-4 border-slate-950 bg-white px-5 py-4 shadow-sm">
-        <div className="text-sm font-semibold text-slate-950">
-          Tenant-scoped work begins after entry
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+            This platform lane defines what KinFlo provides. Open a consumer
+            scope to inspect records, configuration, and operations.
+          </p>
         </div>
-        <p className="mt-2 text-sm leading-6 text-slate-600">
-          This platform lane defines what KinFlo provides. The tenant or site
-          workspace carries the operational records and actions.
-        </p>
+        <a
+          href="/admin/kinflo-os"
+          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-md bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+          data-testid={`link-kinflo-${section}-tenant-scope`}
+        >
+          Open tenant/site scope
+          <ArrowRight className="h-4 w-4" aria-hidden="true" />
+        </a>
       </div>
     </section>
   );
