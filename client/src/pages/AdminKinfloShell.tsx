@@ -12969,7 +12969,7 @@ export default function AdminKinfloShell() {
                 </div>
               </div>
 
-              <div className={`order-3 ${shouldShowClientWebsiteStudioContext ? "block" : "hidden"}`}>
+              <div className={`order-3 ${shouldShowClientWebsiteStudioContext && (!isVanguardWebsite || clientWebsiteWorkbenchStage === "operations") ? "block" : "hidden"}`}>
                 <ClientWebsitePortfolioRegistry
                   registry={snapshot.clientWebsiteStudio.portfolioRegistry}
                   selectedSiteKey={clientWebsiteStudioSiteKey}
@@ -12979,7 +12979,7 @@ export default function AdminKinfloShell() {
               </div>
 
               <div
-                className={`order-3 ${shouldShowClientWebsiteStudioContext ? "hidden lg:grid" : "hidden"} grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm lg:grid-cols-4`}
+                className={`order-3 ${shouldShowClientWebsiteStudioContext && (!isVanguardWebsite || clientWebsiteWorkbenchStage === "operations") ? "hidden lg:grid" : "hidden"} grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm lg:grid-cols-4`}
                 data-testid="section-kinflo-client-studio-operating-frame"
               >
                 {clientWebsiteStudioReviewStats.map((stat) => (
@@ -12990,7 +12990,7 @@ export default function AdminKinfloShell() {
                 ))}
               </div>
 
-              <div className={`order-3 ${shouldShowClientWebsiteStudioContext ? "grid" : "hidden"} gap-2 xl:grid-cols-[minmax(0,0.48fr)_minmax(0,0.52fr)]`}>
+              <div className={`order-3 ${shouldShowClientWebsiteStudioContext && (!isVanguardWebsite || clientWebsiteWorkbenchStage === "operations") ? "grid" : "hidden"} gap-2 xl:grid-cols-[minmax(0,0.48fr)_minmax(0,0.52fr)]`}>
                 {isVanguardWebsite ? (
                   <div className="xl:col-span-2">
                     {clientWebsiteWorkbenchStage === "operations" ? (
@@ -13015,7 +13015,7 @@ export default function AdminKinfloShell() {
               </div>
 
               <div
-                className={`order-3 ${shouldShowClientWebsiteStudioContext ? "hidden lg:grid" : "hidden"} grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm lg:grid-cols-4`}
+                className={`order-3 ${shouldShowClientWebsiteStudioContext && (!isVanguardWebsite || clientWebsiteWorkbenchStage === "operations") ? "hidden lg:grid" : "hidden"} grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm lg:grid-cols-4`}
                 data-testid="section-kinflo-client-workbench-grid-contract"
               >
                 {clientWebsiteWorkbenchGridContract.map((item) => (
