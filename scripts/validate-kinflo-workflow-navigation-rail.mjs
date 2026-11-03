@@ -110,10 +110,10 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "Review adapter mapping",
   "Review launch evidence",
   "Choose a workspace or return to the overview",
-  "label: \"Evidence & Activation\"",
+  "label: \"Evidence\"",
   "client sharing gated",
   "provider writes gated",
-  "hosted deployment gated",
+  "hosted activation gated",
   "shellTabLabels[tabValue]",
   "section-kinflo-tenant-control-plane-cards",
   "section-kinflo-site-factory-queue-cards",
@@ -166,7 +166,7 @@ requireIncludes("package.json", [
   "\"kinflo:validate-workflow-navigation-rail\"",
 ]);
 
-const expectedLanes = ["control", "build", "launch", "growth", "evidence"];
+const expectedLanes = ["control", "build", "studio", "launch", "growth", "evidence", "activation"];
 for (const lane of expectedLanes) {
   requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
     `key: "${lane}"`,
