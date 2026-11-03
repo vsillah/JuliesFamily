@@ -1579,7 +1579,7 @@ function ClientWebsiteSideBySideMobilePreview({
   const pageItems = defaultPages.slice(0, 5);
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-100" data-testid="section-kinflo-client-preview-canvas">
+    <div className="kinflo-preview-artifact overflow-hidden rounded-xl border border-slate-200 bg-slate-100" data-testid="section-kinflo-client-preview-canvas">
       <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 text-xs text-slate-500">
         <div className="flex min-w-0 items-center gap-2">
           <Globe2 className="h-3.5 w-3.5 shrink-0" />
