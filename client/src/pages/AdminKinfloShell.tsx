@@ -227,6 +227,18 @@ const clientWebsiteStudioLaneSectionTestIds: Record<ClientWebsiteStudioLane, str
 };
 const clientWebsiteWorkbenchStageValues = ["sites", "preview", "launch"] as const;
 type ClientWebsiteWorkbenchStage = (typeof clientWebsiteWorkbenchStageValues)[number];
+const clientWebsiteStudioBuildStepValues = ["site", "content", "structure", "review"] as const;
+type ClientWebsiteStudioBuildStep = (typeof clientWebsiteStudioBuildStepValues)[number];
+const clientWebsiteStudioBuildSteps: Array<{
+  key: ClientWebsiteStudioBuildStep;
+  label: string;
+  detail: string;
+}> = [
+  { key: "site", label: "Site", detail: "Choose the site and starting point." },
+  { key: "content", label: "Content", detail: "Confirm the content and brand inputs." },
+  { key: "structure", label: "Structure", detail: "Resolve navigation, assets, and templates." },
+  { key: "review", label: "Review", detail: "Check the packet before Preview & Launch." },
+];
 const clientWebsiteLaunchDossierValues = ["provisioning", "packets", "qa", "decision"] as const;
 type ClientWebsiteLaunchDossier = (typeof clientWebsiteLaunchDossierValues)[number];
 const clientWebsiteProvisioningViewValues = ["order", "dry-run"] as const;
@@ -911,6 +923,16 @@ function readInitialClientWebsiteWorkbenchStage(): ClientWebsiteWorkbenchStage {
   return clientWebsiteWorkbenchStageValues.includes(stage as ClientWebsiteWorkbenchStage)
     ? (stage as ClientWebsiteWorkbenchStage)
     : "preview";
+}
+
+function readInitialClientWebsiteStudioBuildStep(): ClientWebsiteStudioBuildStep {
+  if (typeof window === "undefined") {
+    return "site";
+  }
+  const step = new URLSearchParams(window.location.search).get("studioBuildStep");
+  return clientWebsiteStudioBuildStepValues.includes(step as ClientWebsiteStudioBuildStep)
+    ? (step as ClientWebsiteStudioBuildStep)
+    : "site";
 }
 
 function readInitialClientWebsiteLaunchDossier(): ClientWebsiteLaunchDossier {
@@ -5786,6 +5808,7 @@ export default function AdminKinfloShell() {
       })
     : { status: "ready" as const, scope: { tenantSlug: adminScope.tenant.slug, siteKey: clientWebsiteStudioSiteKey } };
   const [clientWebsiteWorkbenchStage, setClientWebsiteWorkbenchStage] = useState<ClientWebsiteWorkbenchStage>(readInitialClientWebsiteWorkbenchStage);
+  const [clientWebsiteStudioBuildStep, setClientWebsiteStudioBuildStep] = useState<ClientWebsiteStudioBuildStep>(readInitialClientWebsiteStudioBuildStep);
   const [clientWebsiteLaunchDossier, setClientWebsiteLaunchDossier] = useState<ClientWebsiteLaunchDossier>(readInitialClientWebsiteLaunchDossier);
   const [clientWebsiteProvisioningView, setClientWebsiteProvisioningView] = useState<ClientWebsiteProvisioningView>(readInitialClientWebsiteProvisioningView);
   const [clientWebsiteHandoffWorkspace, setClientWebsiteHandoffWorkspace] = useState<ClientWebsiteHandoffWorkspace>(readInitialClientWebsiteHandoffWorkspace);
@@ -6288,6 +6311,12 @@ export default function AdminKinfloShell() {
       ?? undefined,
     [selectedClientWebsiteStudioSite, snapshot.clientWebsiteStudio.starterContentPacks],
   );
+  const clientWebsiteStudioBuildStepStatus: Record<ClientWebsiteStudioBuildStep, boolean> = {
+    site: Boolean(selectedClientWebsiteStudioSite),
+    content: Boolean(selectedClientWebsiteStarterContentPack),
+    structure: Boolean(selectedClientWebsiteLaunchBlueprint?.defaultPages.length),
+    review: clientWebsiteStudioReadinessPercent >= 80,
+  };
   const clientWebsiteStudioPreviewRoute = selectedClientWebsiteStarterContentPack?.pages[0]?.route ?? "/";
   const clientWebsiteStudioPreviewPersona = selectedClientWebsiteStarterContentPack?.persona ?? selectedClientWebsiteStudioSite?.audience;
   const clientWebsiteStudioPreviewJourneyStage = selectedClientWebsiteStarterContentPack?.journeyStage ?? "review";
@@ -6351,8 +6380,11 @@ export default function AdminKinfloShell() {
     : "/admin/kinflo-os";
   const isClientWebsiteLaunchWorkbench =
     clientWebsiteStudioLane === "workbench" && clientWebsiteWorkbenchStage === "launch" && !isVanguardWebsite;
+  const isClientWebsiteBuildWorkbench =
+    clientWebsiteStudioLane === "workbench" && clientWebsiteWorkbenchStage === "sites";
   const shouldShowClientWebsiteStudioContext =
     clientWebsiteStudioLane === "workbench"
+    && !isClientWebsiteBuildWorkbench
     && !isClientWebsiteLaunchWorkbench
     && websiteStudioRouteScope.status === "ready";
   const clientWebsitePreviewReviewContext = selectedClientWebsitePreviewReviewPacket?.context ?? [];
@@ -7043,6 +7075,9 @@ export default function AdminKinfloShell() {
     const shouldKeepDossier = tab === "site-studio"
       && clientWebsiteStudioLane === "workbench"
       && clientWebsiteWorkbenchStage === "launch";
+    const shouldKeepBuildStep = tab === "site-studio"
+      && clientWebsiteStudioLane === "workbench"
+      && clientWebsiteWorkbenchStage === "sites";
     const shouldKeepProvisioningView = shouldKeepDossier && clientWebsiteLaunchDossier === "provisioning";
     const shouldKeepHandoffWorkspace = tab === "site-studio" && clientWebsiteStudioLane === "handoff";
     const shouldKeepHandoffMatrixFilter = shouldKeepHandoffWorkspace && clientWebsiteHandoffWorkspace === "matrix";
@@ -7057,6 +7092,7 @@ export default function AdminKinfloShell() {
       workspace: workspaceKey,
       studioLane: tab === "site-studio" ? clientWebsiteStudioLane : undefined,
       studioStage: tab === "site-studio" && clientWebsiteStudioLane === "workbench" ? clientWebsiteWorkbenchStage : undefined,
+      studioBuildStep: shouldKeepBuildStep ? clientWebsiteStudioBuildStep : undefined,
       studioDossier: shouldKeepDossier ? clientWebsiteLaunchDossier : undefined,
       studioProvisioning: shouldKeepProvisioningView ? clientWebsiteProvisioningView : undefined,
       studioHandoff: shouldKeepHandoffWorkspace ? clientWebsiteHandoffWorkspace : undefined,
@@ -7087,6 +7123,9 @@ export default function AdminKinfloShell() {
       studioSite: siteKey,
       studioLane: clientWebsiteStudioLane,
       studioStage: clientWebsiteStudioLane === "workbench" ? clientWebsiteWorkbenchStage : undefined,
+      studioBuildStep: clientWebsiteStudioLane === "workbench" && clientWebsiteWorkbenchStage === "sites"
+        ? clientWebsiteStudioBuildStep
+        : undefined,
       studioDossier: clientWebsiteStudioLane === "workbench" && clientWebsiteWorkbenchStage === "launch" ? clientWebsiteLaunchDossier : undefined,
       studioProvisioning: clientWebsiteStudioLane === "workbench" && clientWebsiteWorkbenchStage === "launch" && clientWebsiteLaunchDossier === "provisioning"
         ? clientWebsiteProvisioningView
@@ -7121,6 +7160,9 @@ export default function AdminKinfloShell() {
       studioSite: clientWebsiteStudioSiteKey,
       studioLane: lane,
       studioStage: lane === "workbench" ? clientWebsiteWorkbenchStage : undefined,
+      studioBuildStep: lane === "workbench" && clientWebsiteWorkbenchStage === "sites"
+        ? clientWebsiteStudioBuildStep
+        : undefined,
       studioDossier: lane === "workbench" && clientWebsiteWorkbenchStage === "launch" ? clientWebsiteLaunchDossier : undefined,
       studioProvisioning: lane === "workbench" && clientWebsiteWorkbenchStage === "launch" && clientWebsiteLaunchDossier === "provisioning"
         ? clientWebsiteProvisioningView
@@ -7335,6 +7377,7 @@ export default function AdminKinfloShell() {
       studioSite: clientWebsiteStudioSiteKey,
       studioLane: "workbench",
       studioStage: stage,
+      studioBuildStep: stage === "sites" ? clientWebsiteStudioBuildStep : undefined,
       studioDossier: stage === "launch" ? clientWebsiteLaunchDossier : undefined,
       studioProvisioning: stage === "launch" && clientWebsiteLaunchDossier === "provisioning" ? clientWebsiteProvisioningView : undefined,
       studioHandoff: undefined,
@@ -7353,6 +7396,38 @@ export default function AdminKinfloShell() {
       cutoverReview: undefined,
       cutoverBatch: undefined,
     });
+  };
+
+  const selectClientWebsiteStudioBuildStep = (step: ClientWebsiteStudioBuildStep) => {
+    setActiveTab("site-studio");
+    setClientWebsiteStudioLane("workbench");
+    setClientWebsiteWorkbenchStage("sites");
+    setClientWebsiteStudioBuildStep(step);
+    updateKinfloShellRoute({
+      tab: "site-studio",
+      studioSite: clientWebsiteStudioSiteKey,
+      studioLane: "workbench",
+      studioStage: "sites",
+      studioBuildStep: step,
+      studioDossier: undefined,
+      studioProvisioning: undefined,
+      studioHandoff: undefined,
+      studioMatrix: undefined,
+      studioConfigure: undefined,
+      studioConfig: undefined,
+      studioChange: undefined,
+      studioApproval: undefined,
+      studioSave: undefined,
+      adapterBatch: undefined,
+      adapterSurface: undefined,
+      activationStep: undefined,
+      smokeEvidence: undefined,
+      preflightEvidence: undefined,
+      preflightResult: undefined,
+      cutoverReview: undefined,
+      cutoverBatch: undefined,
+    });
+    scrollClientWebsiteStudioLaneToTop("workbench");
   };
 
   const selectClientWebsiteStudioSection = (section: ClientWebsiteStudioNavigationKey) => {
@@ -13004,6 +13079,8 @@ export default function AdminKinfloShell() {
                   className={`${clientWebsiteStudioLane === "workbench" ? "block" : "hidden"} mt-2 ${
                     isClientWebsiteLaunchWorkbench
                       ? "max-h-[calc(100vh-14rem)] overflow-hidden pr-0"
+                      : clientWebsiteWorkbenchStage === "sites"
+                        ? "max-h-none overflow-visible pr-0"
                       : "max-h-[min(540px,calc(100vh-15rem))] overflow-y-auto overflow-x-hidden pr-1"
                   }`}
                   data-testid="section-kinflo-client-studio-lane-workbench"
@@ -13012,15 +13089,99 @@ export default function AdminKinfloShell() {
                     className="min-w-0 rounded-lg border border-slate-200 bg-white p-2 shadow-sm sm:p-3"
                     data-testid="section-kinflo-client-workbench-grid"
                   >
-                    <Tabs value={clientWebsiteWorkbenchStage} onValueChange={(value) => selectClientWebsiteWorkbenchStage(value as ClientWebsiteWorkbenchStage)} className={isVanguardWebsite ? "hidden" : "min-w-0"} data-testid="tabs-kinflo-client-workbench-stage">
-                      <TabsList className="grid h-auto w-full grid-cols-3 bg-slate-100 p-1">
+                    <Tabs value={clientWebsiteWorkbenchStage} onValueChange={(value) => selectClientWebsiteWorkbenchStage(value as ClientWebsiteWorkbenchStage)} className={isVanguardWebsite ? "contents" : "min-w-0"} data-testid="tabs-kinflo-client-workbench-stage">
+                      <TabsList className={`${isVanguardWebsite ? "hidden" : "grid"} h-auto w-full grid-cols-3 bg-slate-100 p-1`}>
                         <TabsTrigger value="sites" data-testid="tab-kinflo-client-workbench-sites">Sites</TabsTrigger>
                         <TabsTrigger value="preview" data-testid="tab-kinflo-client-workbench-preview">Preview</TabsTrigger>
                         <TabsTrigger value="launch" data-testid="tab-kinflo-client-workbench-launch">Launch</TabsTrigger>
                       </TabsList>
 
                   <TabsContent value="sites" className="mt-4" data-testid="section-kinflo-client-workbench-sites">
-                    <div className="max-h-[calc(100vh-18rem)] overflow-y-auto rounded-xl border border-slate-200 bg-white p-3" data-testid="section-kinflo-client-site-rail">
+                    <section className="mb-3 rounded-xl border border-border bg-card p-3" data-testid="section-kinflo-client-build-sequence">
+                      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="min-w-0">
+                          <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Build sequence</div>
+                          <h3 className="mt-1 text-base font-semibold text-foreground">Finish the site packet in four steps</h3>
+                          <p className="mt-1 max-w-2xl text-xs leading-5 text-muted-foreground">
+                            Build ends at Review. Preview &amp; Launch, Configuration, and Handoff are separate Studio sections.
+                          </p>
+                        </div>
+                        <Badge variant="outline" className="w-fit border-border bg-muted text-foreground">Read only</Badge>
+                      </div>
+
+                      <div className="mt-3 grid gap-2 sm:grid-cols-4" role="tablist" aria-label="Studio build sequence">
+                        {clientWebsiteStudioBuildSteps.map((step, index) => {
+                          const isActive = clientWebsiteStudioBuildStep === step.key;
+                          const isDone = clientWebsiteStudioBuildStepStatus[step.key];
+                          return (
+                            <button
+                              key={step.key}
+                              type="button"
+                              role="tab"
+                              aria-selected={isActive}
+                              aria-current={isActive ? "step" : undefined}
+                              onClick={() => selectClientWebsiteStudioBuildStep(step.key)}
+                              className={`min-w-0 rounded-lg border px-3 py-2 text-left transition ${
+                                isActive
+                                  ? "border-primary bg-primary text-primary-foreground"
+                                  : "border-border bg-muted/30 text-foreground hover:bg-muted"
+                              }`}
+                              data-testid={`tab-kinflo-client-build-step-${step.key}`}
+                            >
+                              <div className="flex items-center gap-2">
+                                {isDone ? <CheckCircle2 className="h-4 w-4 shrink-0" /> : <CircleDashed className="h-4 w-4 shrink-0" />}
+                                <span className="truncate text-sm font-semibold">{index + 1}. {step.label}</span>
+                              </div>
+                              <span className={`mt-1 block text-[11px] leading-4 ${isActive ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
+                                {step.detail}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <div className="mt-3 flex flex-col gap-3 rounded-lg border border-border bg-muted/30 p-3 sm:flex-row sm:items-center sm:justify-between" data-testid="section-kinflo-client-build-step-detail">
+                        <div className="min-w-0">
+                          <div className="text-sm font-semibold text-foreground">
+                            Step {clientWebsiteStudioBuildSteps.findIndex((step) => step.key === clientWebsiteStudioBuildStep) + 1}: {clientWebsiteStudioBuildSteps.find((step) => step.key === clientWebsiteStudioBuildStep)?.label}
+                          </div>
+                          <p className="mt-1 text-xs leading-5 text-muted-foreground">
+                            {clientWebsiteStudioBuildSteps.find((step) => step.key === clientWebsiteStudioBuildStep)?.detail}
+                          </p>
+                        </div>
+                        <div className="flex shrink-0 flex-wrap gap-2">
+                          {clientWebsiteStudioBuildStep === "content" ? (
+                            <Button type="button" variant="outline" size="sm" onClick={() => selectShellTab("content")} data-testid="button-kinflo-client-build-open-content">
+                              Open Content
+                              <ChevronRight className="ml-1 h-4 w-4" />
+                            </Button>
+                          ) : null}
+                          {clientWebsiteStudioBuildStep === "structure" ? (
+                            <Button type="button" variant="outline" size="sm" onClick={() => selectShellTab("navigation")} data-testid="button-kinflo-client-build-open-structure">
+                              Open Navigation
+                              <ChevronRight className="ml-1 h-4 w-4" />
+                            </Button>
+                          ) : null}
+                          {clientWebsiteStudioBuildStep === "review" ? (
+                            <Button type="button" variant="outline" size="sm" onClick={() => selectClientWebsiteWorkbenchStage("preview")} data-testid="button-kinflo-client-build-open-preview">
+                              Open Preview
+                              <ChevronRight className="ml-1 h-4 w-4" />
+                            </Button>
+                          ) : null}
+                        </div>
+                      </div>
+                    </section>
+
+                    {clientWebsiteStudioBuildStep !== "site" ? (
+                      <div className="mb-3 rounded-xl border border-border bg-muted/20 p-3 text-sm text-muted-foreground" data-testid="section-kinflo-client-build-step-guidance">
+                        {clientWebsiteStudioBuildStep === "content" ? "Content and Brand remain in the Build sidebar. Review those inputs there, then return to this sequence." : null}
+                        {clientWebsiteStudioBuildStep === "structure" ? "Navigation, Assets, and Templates remain in the Build sidebar. Resolve the public structure there, then return for Review." : null}
+                        {clientWebsiteStudioBuildStep === "review" ? "The build packet is complete when the readiness checks below are understood. Continue in Preview & Launch for visual review." : null}
+                      </div>
+                    ) : null}
+
+                    {clientWebsiteStudioBuildStep === "site" ? (
+                      <div className="rounded-xl border border-slate-200 bg-white p-3" data-testid="section-kinflo-client-site-rail">
                   <div className="flex items-center justify-between gap-3 px-1">
                     <div>
                       <div className="text-sm font-semibold">Client sites</div>
@@ -13080,7 +13241,28 @@ export default function AdminKinfloShell() {
                       ))}
                     </div>
                   </div>
-                    </div>
+                      </div>
+                    ) : clientWebsiteStudioBuildStep === "review" ? (
+                      <div className="rounded-xl border border-border bg-card p-3" data-testid="section-kinflo-client-build-review">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="min-w-0">
+                            <div className="text-sm font-semibold text-foreground">Review the build packet</div>
+                            <p className="mt-1 max-w-2xl text-xs leading-5 text-muted-foreground">
+                              Use this checkpoint to decide whether the site is ready to leave Build. No publish or provider action is available here.
+                            </p>
+                          </div>
+                          <Badge variant="outline" className="w-fit border-border bg-muted text-foreground">{clientWebsiteStudioReadinessPercent}% reviewed</Badge>
+                        </div>
+                        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                          {clientWebsiteStudioReadiness.map((item) => (
+                            <div key={item.label} className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2 text-xs text-foreground">
+                              {item.done ? <CheckCircle2 className="h-4 w-4 shrink-0" /> : <CircleDashed className="h-4 w-4 shrink-0 text-muted-foreground" />}
+                              <span>{item.label}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
                   </TabsContent>
 
                   <TabsContent value="preview" className="mt-4" data-testid="section-kinflo-client-workbench-preview">

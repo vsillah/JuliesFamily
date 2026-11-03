@@ -46,6 +46,12 @@ for (const pattern of [
   "getClientWebsiteStudioNavigationKey",
   'studioLane: lane',
   'studioStage: stage',
+  'clientWebsiteStudioBuildStepValues',
+  'studioBuildStep: step',
+  'data-testid="section-kinflo-client-build-sequence"',
+  'Build ends at Review.',
+  'data-testid="section-kinflo-client-build-step-detail"',
+  'data-testid="section-kinflo-client-build-review"',
   'isActiveLane ? "text-foreground/75" : statusTone',
 ]) {
   if (shell.includes(pattern)) {
