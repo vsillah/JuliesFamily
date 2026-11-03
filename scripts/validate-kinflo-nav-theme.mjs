@@ -50,6 +50,13 @@ if (existsSync(shellPath)) {
     "Next table page",
     "No tenants match this search.",
     "No sites match this search.",
+    "section-kinflo-hosted-activation-overview",
+    "section-kinflo-hosted-activation-overview-metrics",
+    "section-kinflo-sidebar-activation-stepper",
+    "section-kinflo-hosted-activation-selected-gate",
+    "section-kinflo-hosted-activation-technical-evidence",
+    "Technical evidence and audit trail",
+    "Follow the steps in the sidebar.",
   ]) {
     check(shell.includes(marker), `admin shell includes ${marker}`, "The read-only navigation/theme contract is incomplete.");
   }
