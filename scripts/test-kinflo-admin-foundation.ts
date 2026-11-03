@@ -68,7 +68,7 @@ test("platform view is tenant-independent and offers a scoped entry point", () =
   const context = readFileSync("client/src/contexts/KinfloShellSnapshotContext.tsx", "utf8");
   const catalog = readFileSync("client/src/components/KinfloPlatformFeatureCatalog.tsx", "utf8");
   assert.match(context, /get\("view"\) === "platform"/);
-  assert.match(context, /<KinfloPlatformFeatureCatalog \/>/);
+  assert.match(context, /<KinfloPlatformFeatureCatalog/);
   assert.match(catalog, /Platform control plane/);
   assert.match(catalog, /tenant and site workspaces are children/i);
   assert.match(catalog, /href="\/admin\/kinflo-os"/);
@@ -79,7 +79,9 @@ test("platform view is tenant-independent and offers a scoped entry point", () =
   assert.match(context, /provisionTenantAndSiteMutation/);
   assert.match(context, /runtime\.canUseLiveData/);
   assert.match(catalog, /tenantPlan\.sourceUrl/);
-  assert.match(catalog, /onCreateTenant\(\{\s*tenantName: tenantPlan\.name,[\s\S]*subdomain: tenantPlan\.siteSlug/);
+  assert.match(catalog, /onCreateTenant\(\{\s*tenantName: tenantPlan\.name,[\s\S]*capabilityKeys: tenantPlan\.capabilities/);
+  assert.match(readFileSync("convex/controlPlane.ts", "utf8"), /capabilityKeys: v\.optional\(v\.array\(v\.string\(\)\)\)/);
+  assert.match(readFileSync("convex/controlPlane.ts", "utf8"), /tenantEntitlements/);
 });
 
 test("KinFlo public controls do not link to Julie's legacy admin route", () => {

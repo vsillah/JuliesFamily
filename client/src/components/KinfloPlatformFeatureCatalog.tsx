@@ -57,6 +57,7 @@ export type KinfloTenantProvisionRequest = {
   siteName: string;
   siteSlug: string;
   subdomain: string;
+  capabilityKeys: string[];
 };
 
 type KinfloPlatformFeatureCatalogProps = {
@@ -105,6 +106,7 @@ export default function KinfloPlatformFeatureCatalog({ canCreateTenant = false, 
       siteName: tenantPlan.siteName,
       siteSlug: tenantPlan.siteSlug,
       subdomain: tenantPlan.siteSlug,
+      capabilityKeys: tenantPlan.capabilities,
     });
   }
 

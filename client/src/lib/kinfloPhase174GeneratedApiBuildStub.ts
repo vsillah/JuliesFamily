@@ -98,6 +98,7 @@ type Phase174GeneratedApi = {
       siteName: string;
       siteSlug: string;
       subdomain?: string;
+      capabilityKeys?: string[];
     }, { tenantId: string; siteId: string; tenantSlug: string; siteSlug: string; status: "draft" }>;
     listTenants: ReadOnlyReference<Record<string, never>, TenantRow[]>;
     listSitesForTenant: ReadOnlyReference<{ tenantId: string }, SiteRow[]>;
