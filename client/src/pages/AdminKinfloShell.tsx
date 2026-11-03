@@ -582,8 +582,9 @@ function KinfloTenantAdminSidebar({
             <div key={lane.key} className="rounded-lg" data-testid={`button-kinflo-workflow-lane-${lane.key}`}>
               <button
                 type="button"
-                onClick={() => onSelectTab(lane.primaryTab)}
+                onClick={() => onSelectTab(isActiveLane ? "overview" : lane.primaryTab)}
                 aria-current={isActiveLane ? "page" : undefined}
+                aria-expanded={isActiveLane}
                 className={`flex w-full items-start gap-2 rounded-lg border border-transparent px-2.5 py-2 text-left transition hover:border-primary/50 hover:bg-muted ${isActiveLane ? "bg-primary text-primary-foreground" : "bg-card text-foreground"}`}
               >
                 <LaneIcon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
