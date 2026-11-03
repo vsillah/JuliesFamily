@@ -1,7 +1,55 @@
 export type KinfloPlatformAnalyticsMode = "fixture_only" | "live";
 
+export type KinfloPlatformAnalyticsSourceKey =
+  | "tenant_relationships"
+  | "activity_events"
+  | "session_events"
+  | "capability_usage"
+  | "billing_usage";
+
+export type KinfloPlatformAnalyticsReadiness = {
+  mode: KinfloPlatformAnalyticsMode;
+  status: "fixture_ready" | "live_not_connected";
+  sourceKeys: readonly KinfloPlatformAnalyticsSourceKey[];
+  blockedActions: readonly string[];
+  reason: string;
+};
+
+export const kinfloPlatformAnalyticsSourceContract = {
+  activityEvents: [
+    "eventId",
+    "tenantSlug",
+    "siteSlug",
+    "lane",
+    "eventName",
+    "occurredAt",
+    "sessionId",
+  ],
+  sessionEvents: [
+    "sessionId",
+    "tenantSlug",
+    "siteSlug",
+    "stage",
+    "startedAt",
+    "endedAt",
+  ],
+  capabilityUsage: ["tenantSlug", "capabilityKey", "activeAt", "usageCount"],
+  billingUsage: [
+    "tenantSlug",
+    "usageUnit",
+    "quantity",
+    "unitPrice",
+    "currency",
+    "periodStart",
+    "periodEnd",
+  ],
+  privacyBoundary:
+    "No content payloads, provider secrets, raw URLs, or private records belong in this analytics contract.",
+} as const;
+
 export type KinfloPlatformAnalyticsSnapshot = {
   mode: KinfloPlatformAnalyticsMode;
+  readiness: KinfloPlatformAnalyticsReadiness;
   sourceLabel: string;
   tenantCount: number;
   siteCount: number;
@@ -93,6 +141,24 @@ export function getKinfloPlatformAnalyticsSnapshot(): KinfloPlatformAnalyticsSna
 
   return {
     mode: "fixture_only",
+    readiness: {
+      mode: "fixture_only",
+      status: "fixture_ready",
+      sourceKeys: [
+        "tenant_relationships",
+        "activity_events",
+        "session_events",
+        "capability_usage",
+        "billing_usage",
+      ],
+      blockedActions: [
+        "connect live telemetry",
+        "calculate live price per usage",
+        "publish cross-tenant operational metrics",
+      ],
+      reason:
+        "Only local fixture values are available until an approved read-only source is bound.",
+    },
     sourceLabel: "Local fixture snapshot",
     tenantCount,
     siteCount,
