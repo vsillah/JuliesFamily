@@ -77,7 +77,7 @@ test("platform view is tenant-independent and offers a scoped entry point", () =
   assert.match(catalog, /button-create-kinflo-tenant-gated/);
   assert.match(catalog, /never starts scraping or creates records/i);
   assert.match(context, /provisionTenantAndSiteMutation/);
-  assert.match(context, /runtime\.canUseLiveData/);
+  assert.match(context, /runtime\.canUseLiveProvisioning/);
   assert.match(catalog, /tenantPlan\.sourceUrl/);
   assert.match(catalog, /onCreateTenant\(\{\s*tenantName: tenantPlan\.name,[\s\S]*capabilityKeys: tenantPlan\.capabilities/);
   assert.match(readFileSync("convex/controlPlane.ts", "utf8"), /capabilityKeys: v\.optional\(v\.array\(v\.string\(\)\)\)/);

@@ -118,6 +118,7 @@ export type KinfloConvexRuntimeSnapshot = {
   readOnlySmokeVerified: boolean;
   canUseReadOnlyLiveData: boolean;
   canUseLiveData: boolean;
+  canUseLiveProvisioning: boolean;
   preferencesAdapterSelected: boolean;
   preferencesSmokeVerified: boolean;
   canUseLivePreferences: boolean;
@@ -131,6 +132,7 @@ export type KinfloConvexRuntimeSnapshot = {
   canUseLiveThemeWrites: boolean;
   themeWriteActivationGate: string;
   activationGate: string;
+  provisioningGate: string;
   functionNames: KinfloConvexFunctionName[];
 };
 
@@ -186,6 +188,11 @@ function readPublicConvexUrl() {
 export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
   const publicUrl = readPublicConvexUrl();
   const urlConfigured = Boolean(publicUrl);
+  const provisioningMutationEnabled = readBooleanEnv(import.meta.env.VITE_KINFLO_PROVISIONING_MUTATION_ENABLED);
+  const canUseLiveProvisioning = Boolean(publicUrl && provisioningMutationEnabled);
+  const provisioningGate = canUseLiveProvisioning
+    ? "The reviewed provisioning mutation is enabled for one explicit tenant/site request."
+    : "Tenant provisioning remains gated until the approved Infisical provisioning flag and Convex URL are present.";
   const {
     readOnlyGeneratedApiAvailable,
     readOnlyAdapterSelected,
@@ -243,7 +250,9 @@ export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
       readOnlySmokeVerified,
       canUseReadOnlyLiveData: false,
       canUseLiveData: false,
+      canUseLiveProvisioning,
       activationGate: "Set VITE_CONVEX_URL through the approved environment path before reviewing the read-only adapter gate.",
+      provisioningGate,
       functionNames: Object.values(KINFLO_CONVEX_FUNCTIONS),
     };
   }
@@ -262,7 +271,9 @@ export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
       readOnlySmokeVerified,
       canUseReadOnlyLiveData: false,
       canUseLiveData: false,
+      canUseLiveProvisioning,
       activationGate: "Set VITE_KINFLO_READ_ONLY_GENERATED_API_AVAILABLE=true only after the ignored generated bindings and read-only function contract are reviewed.",
+      provisioningGate,
       functionNames: Object.values(KINFLO_CONVEX_FUNCTIONS),
     };
   }
@@ -281,7 +292,9 @@ export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
       readOnlySmokeVerified,
       canUseReadOnlyLiveData: false,
       canUseLiveData: false,
+      canUseLiveProvisioning,
       activationGate: "Keep fixtures selected until the read-only hosted smoke is verified and VITE_KINFLO_READ_ONLY_ADAPTER_MODE=live_verified is explicitly set.",
+      provisioningGate,
       functionNames: Object.values(KINFLO_CONVEX_FUNCTIONS),
     };
   }
@@ -300,7 +313,9 @@ export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
       readOnlySmokeVerified,
       canUseReadOnlyLiveData,
       canUseLiveData: false,
+      canUseLiveProvisioning,
       activationGate: "The verified read-only core batch is live. Mutation and provider-write surfaces remain fixture-backed and blocked.",
+      provisioningGate,
       functionNames: Object.values(KINFLO_CONVEX_FUNCTIONS),
     };
   }
@@ -318,7 +333,9 @@ export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
     readOnlySmokeVerified,
     canUseReadOnlyLiveData: false,
     canUseLiveData: false,
+    canUseLiveProvisioning,
     activationGate: "The full live adapter remains blocked; no mutation or provider-write cutover is authorized.",
+    provisioningGate,
     functionNames: Object.values(KINFLO_CONVEX_FUNCTIONS),
   };
 }

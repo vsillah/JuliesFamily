@@ -672,6 +672,7 @@ function EnabledReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children
     runtime.activationGate,
     runtime.label,
     runtime.mode,
+    runtime.canUseLiveProvisioning,
     runtime.themeWriteActivationGate,
     siteLimit,
     sites,
@@ -680,10 +681,10 @@ function EnabledReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children
 
   if (scope.status !== "ready") {
     if (isKinfloPlatformView()) {
-      const onCreateTenant = runtime.canUseLiveData
+      const onCreateTenant = runtime.canUseLiveProvisioning
         ? (request: KinfloTenantProvisionRequest) => provisionTenantAndSite(request)
         : undefined;
-      return <KinfloPlatformFeatureCatalog canCreateTenant={runtime.canUseLiveData} onCreateTenant={onCreateTenant} />;
+      return <KinfloPlatformFeatureCatalog canCreateTenant={runtime.canUseLiveProvisioning} onCreateTenant={onCreateTenant} />;
     }
     return (
       <KinfloAdminScopeGate
