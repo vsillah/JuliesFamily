@@ -138,20 +138,13 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "ownerTestId: string;",
   "Reason blocked",
   "Unblock path",
-  "section-kinflo-persistent-identity-gate",
-  "text-kinflo-persistent-identity-gate",
-  "text-kinflo-persistent-identity-gate-reason",
-  "text-kinflo-persistent-identity-gate-unblock",
-  "text-kinflo-persistent-identity-gate-owner",
-  "button-kinflo-persistent-identity-gated",
-  "section-kinflo-active-object-unblock-condition",
-  "text-kinflo-active-object-gate-state",
-  "text-kinflo-active-object-disabled-reason",
-  "text-kinflo-active-object-unblock-path",
-  "text-kinflo-active-object-gate-owner",
-  "button-active-object-live-gated",
-  "persistentIdentity.unblockPath",
-  "persistentIdentity.owner",
+  "section-kinflo-decision-rail",
+  "section-kinflo-next-actions",
+  "section-kinflo-readiness-snapshot",
+  "section-kinflo-linked-data",
+  "Open activation checklist",
+  "Review adapter mapping",
+  "Review launch evidence",
   "snapshot.activeObjectSignal.unblockCondition",
   "snapshot.activeObjectSignal.owner",
 ]);
@@ -178,6 +171,18 @@ if (shellContents.includes("useMutation(") || shellContents.includes("useAction(
   fail("GateCard pattern does not execute live Convex", "Live Convex execution must remain blocked.");
 } else {
   pass("GateCard pattern does not execute live Convex");
+}
+
+for (const pattern of [
+  "section-kinflo-persistent-identity-gate",
+  "section-kinflo-active-object-unblock-condition",
+  "button-active-object-live-gated",
+]) {
+  if (shellContents.includes(pattern)) {
+    fail(`GateCard pattern excludes ${pattern}`, "The operator shell should use the consolidated read-only decision rail instead of duplicate gate surfaces.");
+  } else {
+    pass(`GateCard pattern excludes ${pattern}`);
+  }
 }
 
 const failed = checks.filter((check) => !check.ok);

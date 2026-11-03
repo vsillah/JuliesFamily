@@ -98,14 +98,13 @@ requireIncludes("client/src/lib/kinfloShellData.ts", [
 ]);
 
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
-  "section-kinflo-active-object-signal",
-  "text-kinflo-active-object-name",
-  "text-kinflo-active-object-next-decision",
-  "button-active-object-live-gated",
-  "text-kinflo-active-object-disabled-reason",
-  "section-kinflo-active-object-unblock-condition",
+  "section-kinflo-decision-rail",
+  "section-kinflo-next-actions",
+  "section-kinflo-readiness-snapshot",
+  "Open activation checklist",
+  "Review adapter mapping",
+  "Review launch evidence",
   "snapshot.activeObjectSignal.environment",
-  "snapshot.activeObjectSignal.disabledActionReason",
   "snapshot.activeObjectSignal.unblockCondition",
 ]);
 
@@ -136,6 +135,18 @@ if (dataImportsGeneratedApi) {
   fail("active object data does not import generated API", "Fixture data must not import generated API.");
 } else {
   pass("active object data does not import generated API");
+}
+
+for (const pattern of [
+  "section-kinflo-active-object-signal",
+  "button-active-object-live-gated",
+  "section-kinflo-active-object-unblock-condition",
+]) {
+  if (shellContents.includes(pattern)) {
+    fail(`active object signal excludes ${pattern}`, "The active-object gate is represented by the consolidated decision rail.");
+  } else {
+    pass(`active object signal excludes ${pattern}`);
+  }
 }
 
 const failed = checks.filter((check) => !check.ok);

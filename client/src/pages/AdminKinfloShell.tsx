@@ -137,15 +137,10 @@ import {
   getTenantOrderQueueOptions,
   summarizeTenantOrderQueue,
 } from "@/lib/kinfloOrderOperationsWorkbench";
-import KinfloDashboardShell from "@/components/KinfloDashboardShell";
 import VanguardOperatorPortal from "@/components/VanguardOperatorPortal";
 import KinfloOperationsWorkspace from "@/components/KinfloOperationsWorkspace";
 import KinfloReleaseReadinessPanel from "@/components/KinfloReleaseReadinessPanel";
 import KinfloHostedActivationReadinessPanel from "@/components/KinfloHostedActivationReadinessPanel";
-import {
-  type KinfloDashboardWorkspace,
-  type KinfloDashboardShellTab,
-} from "@/lib/kinfloDashboardShell";
 import {
   buildKinfloAudiencePreviewHref,
   resolveKinfloAudienceContract,
@@ -5202,35 +5197,8 @@ export default function AdminKinfloShell() {
       blocker: primarySite?.blockerSummary ?? snapshot.dataMode.activationGate,
       nextGate: snapshot.hostedActivationRunbook.steps.find((step) => step.status === "blocked_provider_gate")
         ?? snapshot.hostedActivationRunbook.steps[0],
-      proof: [
-        {
-          label: "Launch readiness",
-          value: `${launchReadinessCounts.ready}/${launchReadinessCounts.total}`,
-          detail: "checks ready",
-          tone: launchReadinessCounts.ready === launchReadinessCounts.total ? "ready" : "review",
-          icon: Rocket,
-        },
-        {
-          label: "Adapter coverage",
-          value: `${adapterSwitchTotals.total}`,
-          detail: "surfaces mapped",
-          tone: "mapped",
-          icon: Workflow,
-        },
-        {
-          label: "Hosted activation",
-          value: `${hostedActivationTotals.providerGated}`,
-          detail: "gates blocked",
-          tone: hostedActivationTotals.providerGated > 0 ? "blocked" : "ready",
-          icon: ShieldCheck,
-        },
-      ],
     };
   }, [
-    adapterSwitchTotals.total,
-    hostedActivationTotals.providerGated,
-    launchReadinessCounts.ready,
-    launchReadinessCounts.total,
     snapshot.dataMode.activationGate,
     snapshot.hostedActivationRunbook.steps,
     snapshot.launchReadiness.sites,
@@ -5635,25 +5603,6 @@ export default function AdminKinfloShell() {
   const clientWebsiteLaunchDecisionTone = selectedClientWebsiteLaunchDecisionPacket?.launchDecision === "no_go"
     ? "border-rose-200 bg-rose-50 text-rose-700"
     : "border-amber-200 bg-amber-50 text-amber-700";
-  const persistentIdentity = {
-    objectType: activeTab === "site-studio" ? "Client site" : snapshot.activeObjectSignal.objectType,
-    label: activeTab === "site-studio"
-      ? selectedClientWebsiteStudioSite?.label ?? snapshot.activeObjectSignal.label
-      : snapshot.activeObjectSignal.label,
-    tenantSlug: activeTab === "site-studio"
-      ? selectedClientWebsiteStudioSite?.tenantSlug ?? snapshot.activeObjectSignal.tenantSlug
-      : snapshot.activeObjectSignal.tenantSlug,
-    siteKey: activeTab === "site-studio"
-      ? selectedClientWebsiteStudioSite?.key ?? snapshot.activeObjectSignal.siteKey
-      : snapshot.activeObjectSignal.siteKey,
-    environment: snapshot.activeObjectSignal.environment,
-    lastVerifiedLabel: snapshot.activeObjectSignal.lastVerifiedLabel,
-    launchPosture: activeTab === "site-studio" ? clientWebsiteLaunchDecisionLabel : snapshot.activeObjectSignal.launchPosture,
-    gateLabel: snapshot.activeObjectSignal.disabledActionLabel,
-    gateReason: snapshot.activeObjectSignal.disabledActionReason,
-    unblockPath: snapshot.activeObjectSignal.unblockCondition,
-    owner: snapshot.activeObjectSignal.owner,
-  };
   const clientWebsiteAdminHref = selectedClientWebsiteStudioSite
     ? buildKinfloAdminSiteHref(selectedClientWebsiteStudioSite)
     : "/admin/kinflo-os";
@@ -6353,10 +6302,6 @@ export default function AdminKinfloShell() {
       cutoverReview: tab === "hosted-activation" ? generatedApiCutoverReviewItemId : undefined,
       cutoverBatch: tab === "hosted-activation" ? generatedApiCutoverBatchId : undefined,
     });
-  };
-
-  const selectDashboardWorkspace = (tab: KinfloDashboardShellTab, workspace: KinfloDashboardWorkspace) => {
-    selectShellTab(tab as ShellTabValue, workspace.key);
   };
 
   const selectClientWebsiteStudioSite = (siteKey: string) => {
@@ -7089,247 +7034,111 @@ export default function AdminKinfloShell() {
               Change scope
             </Button>
           </div>
-          <div
-            className={`${activeTab === "site-studio" ? "hidden" : "grid"} min-w-0 gap-2 rounded-lg border border-slate-200 bg-slate-50 p-2 shadow-sm lg:grid-cols-[minmax(0,1fr)_auto]`}
-            data-testid="section-kinflo-persistent-identity-strip"
-          >
-            <div className="min-w-0">
-              <KinfloPillCluster className="lg:ml-auto">
-                <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">
-                  {persistentIdentity.objectType}
-                </Badge>
-                <Badge variant="outline" className="kinflo-pill kinflo-pill-warning" data-testid="text-kinflo-persistent-identity-environment">
-                  {persistentIdentity.environment}
-                </Badge>
-                <Badge variant="outline" className="kinflo-pill kinflo-pill-success">
-                  {snapshot.dataMode.runtimeLabel}
-                </Badge>
-              </KinfloPillCluster>
-              <div className="mt-2 grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)_minmax(0,0.8fr)]">
-                <div className="min-w-0">
-                  <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Active object</div>
-                  <div className="mt-0.5 truncate text-sm font-semibold text-slate-950" data-testid="text-kinflo-persistent-identity-site">
-                    {persistentIdentity.label}
-                  </div>
-                </div>
-                <div className="min-w-0">
-                  <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Tenant</div>
-                  <div className="mt-0.5 truncate text-sm font-semibold text-slate-950" data-testid="text-kinflo-persistent-identity-tenant">
-                    {persistentIdentity.tenantSlug}
-                  </div>
-                </div>
-                <div className="min-w-0">
-                  <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Verified</div>
-                  <div className="mt-0.5 truncate text-sm font-semibold text-slate-950" data-testid="text-kinflo-persistent-identity-last-verified">
-                    {persistentIdentity.lastVerifiedLabel}
-                  </div>
-                </div>
-              </div>
-            </div>
-            <GateCard
-              title="Gate"
-              state={persistentIdentity.launchPosture}
-              reason={persistentIdentity.gateReason}
-              unblockPath={persistentIdentity.unblockPath}
-              owner={persistentIdentity.owner}
-              actionLabel={persistentIdentity.gateLabel}
-              testId="section-kinflo-persistent-identity-gate"
-              stateTestId="text-kinflo-persistent-identity-gate"
-              reasonTestId="text-kinflo-persistent-identity-gate-reason"
-              unblockTestId="text-kinflo-persistent-identity-gate-unblock"
-              ownerTestId="text-kinflo-persistent-identity-gate-owner"
-              actionTestId="button-kinflo-persistent-identity-gated"
-            />
-          </div>
-          <div
-            className={`${activeTab === "site-studio" ? "hidden" : "grid"} min-w-0 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 lg:grid-cols-[minmax(0,1fr)_minmax(240px,320px)]`}
-            data-testid="section-kinflo-active-object-signal"
-          >
-            <div className="min-w-0">
-              <KinfloPillCluster className="lg:ml-auto">
-                <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">
-                  {snapshot.activeObjectSignal.objectType}
-                </Badge>
-                <Badge variant="outline" className="kinflo-pill kinflo-pill-warning">
-                  {snapshot.activeObjectSignal.environment}
-                </Badge>
-                <Badge variant="outline" className="kinflo-pill kinflo-pill-success">
-                  {snapshot.activeObjectSignal.readinessLabel}
-                </Badge>
-                <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">
-                  Owner: {snapshot.activeObjectSignal.owner}
-                </Badge>
-              </KinfloPillCluster>
-              <div className="mt-2 truncate text-base font-semibold leading-tight text-slate-950" data-testid="text-kinflo-active-object-name">
-                {snapshot.activeObjectSignal.label}
-              </div>
-              <p className="mt-1 text-sm leading-6 text-slate-600" data-testid="text-kinflo-active-object-next-decision">
-                {snapshot.activeObjectSignal.nextDecision}
-              </p>
-            </div>
-            <GateCard
-              title="Active object gate"
-              state={snapshot.activeObjectSignal.launchPosture}
-              reason={snapshot.activeObjectSignal.disabledActionReason}
-              unblockPath={snapshot.activeObjectSignal.unblockCondition}
-              owner={snapshot.activeObjectSignal.owner}
-              actionLabel={snapshot.activeObjectSignal.disabledActionLabel}
-              testId="section-kinflo-active-object-unblock-condition"
-              stateTestId="text-kinflo-active-object-gate-state"
-              reasonTestId="text-kinflo-active-object-disabled-reason"
-              unblockTestId="text-kinflo-active-object-unblock-path"
-              ownerTestId="text-kinflo-active-object-gate-owner"
-              actionTestId="button-active-object-live-gated"
-            />
-          </div>
         </div>
       </div>
 
       <main className={`mx-auto w-full max-w-7xl overflow-x-clip px-4 sm:px-6 lg:px-8 ${activeTab === "site-studio" ? "py-3" : "py-7"}`}>
         <section
-          className={`grid rounded-lg border border-slate-200 bg-white shadow-sm ${
-            activeTab === "site-studio"
-              ? "hidden"
-              : "gap-5 p-5 lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)] lg:p-6"
-          }`}
-          data-testid="section-kinflo-command-brief"
+          className={`${activeTab === "site-studio" ? "hidden" : "mt-5"} rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5`}
+          data-testid="section-kinflo-decision-rail"
         >
-          <div className="min-w-0">
-            <KinfloPillCluster>
-              <Badge variant="secondary" className="kinflo-pill kinflo-pill-success">Command Brief</Badge>
-              <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">{snapshot.dataMode.runtimeLabel}</Badge>
-              <Badge variant="outline" className="kinflo-pill kinflo-pill-warning">{snapshot.activeObjectSignal.environment}</Badge>
-            </KinfloPillCluster>
-            <h2 className={`${activeTab === "site-studio" ? "mt-2 text-lg" : "mt-4 text-2xl md:text-3xl"} max-w-3xl font-semibold leading-tight tracking-normal`}>
-              {commandBrief.decision}
-            </h2>
-            <p className={`${activeTab === "site-studio" ? "hidden" : "mt-3"} max-w-3xl text-sm leading-6 text-slate-600`}>
-              {commandBrief.headline}: {commandBrief.blocker}
-            </p>
-            <div className={`${activeTab === "site-studio" ? "hidden" : "mt-5 rounded-md border border-slate-200 bg-slate-50 p-4"}`} data-testid="section-kinflo-active-object-detail">
-              <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                <div className="min-w-0">
-                  <div className="text-xs font-medium uppercase tracking-normal text-slate-500">{snapshot.activeObjectSignal.objectType}</div>
-                  <div className="mt-1 truncate text-lg font-semibold leading-tight text-slate-950">
-                    {snapshot.activeObjectSignal.label}
-                  </div>
-                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-                    {snapshot.activeObjectSignal.environmentDetail}
-                  </p>
-                </div>
-                <div className="grid shrink-0 grid-cols-2 gap-2 sm:min-w-72">
-                  <div className="rounded-md border border-slate-200 bg-white px-3 py-2">
-                    <div className="text-[11px] font-medium uppercase tracking-normal text-slate-500">Readiness</div>
-                    <div className="mt-1 text-sm font-semibold text-slate-950">{snapshot.activeObjectSignal.readinessLabel}</div>
-                  </div>
-                  <div className="rounded-md border border-slate-200 bg-white px-3 py-2">
-                    <div className="text-[11px] font-medium uppercase tracking-normal text-slate-500">Owner</div>
-                    <div className="mt-1 truncate text-sm font-semibold text-slate-950">{snapshot.activeObjectSignal.owner}</div>
-                  </div>
-                </div>
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="outline" className="kinflo-pill kinflo-pill-warning">Next actions</Badge>
+                <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">{snapshot.dataMode.runtimeLabel}</Badge>
+                <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">{snapshot.activeObjectSignal.environment}</Badge>
               </div>
-              <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(220px,280px)]">
-                <div className="min-w-0">
-                  <div className="text-xs font-medium uppercase tracking-normal text-slate-500">Next decision</div>
-                  <p className="mt-1 text-sm leading-6 text-slate-700">
-                    {snapshot.activeObjectSignal.nextDecision}
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {snapshot.activeObjectSignal.requiredEvidence.map((item) => (
-                      <Badge key={item} variant="outline" className="border-slate-200 bg-white text-slate-700">
-                        {item}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-                <div className="min-w-0 rounded-md border border-amber-200 bg-amber-50 p-3">
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    className="w-full border-amber-300 bg-white text-amber-900 hover:bg-white hover:text-amber-900"
-                    disabled
-                    data-testid="button-active-object-live-detail-gated"
-                  >
-                    <ShieldCheck className="mr-2 h-3 w-3" />
-                    {snapshot.activeObjectSignal.disabledActionLabel}
-                  </Button>
-                  <p className="mt-2 text-xs leading-5 text-amber-900">
-                    {snapshot.activeObjectSignal.disabledActionReason}
-                  </p>
-                </div>
-              </div>
+              <h2 className="mt-3 text-xl font-semibold leading-tight text-foreground sm:text-2xl">{commandBrief.decision}</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+                Resolve the current gate in order. Each action opens a read-only review surface; irreversible actions remain gated.
+              </p>
             </div>
-            <div className={`${activeTab === "site-studio" ? "mt-2" : "mt-4"} rounded-xl border border-slate-200 bg-white p-3`} data-testid="section-kinflo-launch-summary">
-              <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
-                <div className="text-xs font-semibold uppercase tracking-normal text-slate-500">Launch summary</div>
-                <div className="text-xs text-slate-500">Current read-only review state</div>
-              </div>
-              <div className="mt-3 grid gap-2 sm:grid-cols-3">
-                {commandBrief.proof.map((item) => {
-                  const ProofIcon = item.icon;
-                  const toneClass = item.tone === "ready"
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-                    : item.tone === "blocked"
-                      ? "border-amber-200 bg-amber-50 text-amber-950"
-                      : item.tone === "mapped"
-                        ? "border-sky-200 bg-sky-50 text-sky-950"
-                        : "border-slate-200 bg-slate-50 text-slate-900";
-                  return (
-                    <div key={item.label} className={`rounded-lg border p-3 ${toneClass}`}>
-                      <div className="flex items-center gap-2">
-                        <ProofIcon className="h-4 w-4" aria-hidden="true" />
-                        <div className="text-xs font-semibold uppercase tracking-normal">{item.label}</div>
-                      </div>
-                      <div className="mt-2 flex items-baseline gap-1">
-                        <span className="text-xl font-semibold">{item.value}</span>
-                        <span className="text-xs">{item.detail}</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral w-fit shrink-0">Owner: {snapshot.activeObjectSignal.owner}</Badge>
           </div>
 
-          <div className="rounded-md border border-amber-200 bg-white p-4 text-slate-950 shadow-sm">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="text-sm font-medium text-amber-700">Next gate</div>
-                <p className="mt-1 text-lg font-semibold leading-tight">{commandBrief.nextGate?.label}</p>
+          <div className="mt-5 grid gap-2" data-testid="section-kinflo-next-actions">
+            {[
+              {
+                key: "activation",
+                label: commandBrief.nextGate?.label ?? "Hosted Convex ownership",
+                detail: commandBrief.nextGate?.evidenceTarget ?? snapshot.activeObjectSignal.unblockCondition ?? commandBrief.blocker,
+                status: commandBrief.nextGate?.status,
+                icon: KeyRound,
+                actionLabel: "Open activation checklist",
+                tab: "hosted-activation" as ShellTabValue,
+              },
+              {
+                key: "adapter",
+                label: "Generated API and adapter review",
+                detail: "Confirm the generated read-only contract before switching away from fixtures.",
+                status: undefined,
+                icon: Workflow,
+                actionLabel: "Review adapter mapping",
+                tab: "adapter-switch" as ShellTabValue,
+              },
+              {
+                key: "launch",
+                label: "Launch evidence",
+                detail: "Review visual QA, domain readiness, and the launch decision packet.",
+                status: undefined,
+                icon: Rocket,
+                actionLabel: "Review launch evidence",
+                tab: "launch-readiness" as ShellTabValue,
+              },
+            ].map((action) => {
+              const ActionIcon = action.icon;
+              return (
+                <div key={action.key} className="flex flex-col gap-3 rounded-xl border border-border bg-muted/40 p-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <span className="mt-0.5 rounded-lg border border-border bg-card p-2 text-primary">
+                      <ActionIcon className="h-4 w-4" aria-hidden="true" />
+                    </span>
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <div className="font-semibold text-foreground">{action.label}</div>
+                        {action.status ? hostedActivationStatusBadge(action.status) : <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">Review</Badge>}
+                      </div>
+                      <p className="mt-1 text-sm leading-5 text-muted-foreground">{action.detail}</p>
+                    </div>
+                  </div>
+                  <Button type="button" size="sm" variant="outline" className="shrink-0" onClick={() => selectShellTab(action.tab)}>
+                    {action.actionLabel}
+                    <ChevronRight className="ml-2 h-3 w-3" aria-hidden="true" />
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-4 rounded-xl border border-border bg-muted/50 p-3" data-testid="section-kinflo-readiness-snapshot">
+            <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Readiness snapshot</div>
+            <div className="mt-3 grid gap-2 sm:grid-cols-3">
+              <div className="rounded-lg border border-border bg-card px-3 py-2">
+                <div className="text-xl font-semibold text-foreground">{launchReadinessCounts.ready}/{launchReadinessCounts.total}</div>
+                <div className="text-xs text-muted-foreground">launch checks ready</div>
               </div>
-              {commandBrief.nextGate ? hostedActivationStatusBadge(commandBrief.nextGate.status) : null}
-            </div>
-            <p className={`${activeTab === "site-studio" ? "hidden" : "mt-3"} text-sm leading-6 text-slate-600`}>{commandBrief.nextGate?.evidenceTarget}</p>
-            <div className={`${activeTab === "site-studio" ? "hidden" : "mt-4 rounded-md border border-amber-200 bg-amber-50 p-3"}`} data-testid="section-kinflo-active-object-unblock-detail">
-              <div className="text-xs font-medium uppercase tracking-normal text-amber-700">Unblock condition</div>
-              <p className="mt-1 text-sm leading-6 text-amber-950">{snapshot.activeObjectSignal.unblockCondition}</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {snapshot.activeObjectSignal.blockedLiveActions.map((action) => (
-                  <Badge key={action} variant="outline" className="border-amber-200 bg-white text-amber-900">
-                    {action}
-                  </Badge>
-                ))}
+              <div className="rounded-lg border border-border bg-card px-3 py-2">
+                <div className="text-xl font-semibold text-foreground">{adapterSwitchTotals.total}</div>
+                <div className="text-xs text-muted-foreground">adapter surfaces mapped</div>
               </div>
-            </div>
-            <div className={`${activeTab === "site-studio" ? "mt-3 grid-cols-3" : "mt-4 sm:grid-cols-3"} grid gap-2`}>
-              <Button size="sm" variant="outline" className="border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-950" onClick={() => selectShellTab("launch-readiness")}>
-                <Rocket className="mr-2 h-3 w-3" />
-                Launch
-              </Button>
-              <Button size="sm" variant="outline" className="border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-950" onClick={() => selectShellTab("adapter-switch")}>
-                <Workflow className="mr-2 h-3 w-3" />
-                Switch
-              </Button>
-              <Button size="sm" variant="outline" className="border-amber-300 bg-amber-50 text-amber-950 hover:bg-amber-100 hover:text-amber-950" onClick={() => selectShellTab("hosted-activation")}>
-                <KeyRound className="mr-2 h-3 w-3" />
-                Activation
-              </Button>
+              <div className="rounded-lg border border-border bg-card px-3 py-2">
+                <div className="text-xl font-semibold text-foreground">{hostedActivationTotals.providerGated}</div>
+                <div className="text-xs text-muted-foreground">hosted gates blocked</div>
+              </div>
             </div>
           </div>
         </section>
 
-        <div className={`${activeTab === "site-studio" ? "hidden" : "mt-5 grid"} gap-3 md:grid-cols-2 xl:grid-cols-5`}>
+        <section
+          className={`${activeTab === "site-studio" ? "hidden" : "mt-5"} rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5`}
+          data-testid="section-kinflo-linked-data"
+        >
+          <div>
+            <h2 className="text-base font-semibold text-foreground">Linked data</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Use a metric to open the underlying scoped section.</p>
+          </div>
+          <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-5">
           {snapshot.metrics.map((metric) => {
             const Icon = metricIcons[metric.iconKey];
             const filterTarget = metricFilterTargets[metric.iconKey];
@@ -7355,9 +7164,10 @@ export default function AdminKinfloShell() {
               </button>
             );
           })}
-        </div>
+          </div>
+        </section>
 
-        <Card className={`${activeTab === "site-studio" ? "hidden" : "mt-5"} border-slate-200 bg-white shadow-none`}>
+        <Card className={`${activeWorkflowLane.key === "evidence" ? "mt-5" : "hidden"} border-border bg-card shadow-none`}>
           <CardHeader className="flex flex-col gap-3 space-y-0 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <div className="flex flex-wrap items-center gap-2">
@@ -7462,19 +7272,6 @@ export default function AdminKinfloShell() {
             </details>
           </CardContent>
         </Card>
-
-        <KinfloDashboardShell
-          activeTab={activeTab as KinfloDashboardShellTab}
-          activeWorkspaceKey={activeWorkspaceKey}
-          scope={{
-            tenantSlug: clientWebsiteAdminScope.tenantSlug
-              ?? clientWebsiteStudioScopeOptions.find((site) => site.key === snapshot.clientWebsiteStudio.defaultSiteKey)?.tenantSlug
-              ?? "vanguard-enterprises",
-            siteKey: clientWebsiteAdminScope.siteKey ?? snapshot.clientWebsiteStudio.defaultSiteKey,
-            label: clientWebsiteAdminScope.label ?? "Current KinFlo scope",
-          }}
-          onSelectTab={selectDashboardWorkspace}
-        />
 
         {activeWorkspaceKey === "operations" || activeWorkspaceKey === "communications" || activeWorkspaceKey === "analytics" ? (
           <KinfloOperationsWorkspace
