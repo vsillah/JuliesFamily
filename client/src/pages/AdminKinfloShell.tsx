@@ -7015,7 +7015,7 @@ export default function AdminKinfloShell() {
         <div className={`mx-auto flex max-w-7xl flex-col px-4 sm:px-6 lg:px-8 ${activeTab === "site-studio" ? "gap-2 py-3" : "gap-5 py-6"}`}>
           <Breadcrumbs
             items={[
-              { label: "KinFlo platform", href: "/admin/kinflo-os?view=platform" },
+              { label: "KinFlo platform" },
               { label: `${adminScope.tenant.name} workspace` },
             ]}
             showHome={false}
