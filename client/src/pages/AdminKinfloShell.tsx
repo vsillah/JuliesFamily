@@ -238,6 +238,8 @@ const clientAdminHandoffMatrixFilterValues = ["all", "blocked", "ready", "platfo
 type ClientAdminHandoffMatrixFilter = (typeof clientAdminHandoffMatrixFilterValues)[number];
 const clientConfigurationWorkspaceValues = ["review", "change", "approval", "save"] as const;
 type ClientConfigurationWorkspace = (typeof clientConfigurationWorkspaceValues)[number];
+const clientConfigurationSectionValues = ["overview", "site-setup", "navigation-brand", "domain", "integrations", "review"] as const;
+type ClientConfigurationSection = (typeof clientConfigurationSectionValues)[number];
 const clientConfigurationReviewDetailValues = ["blockers", "evidence", "functions"] as const;
 type ClientConfigurationReviewDetail = (typeof clientConfigurationReviewDetailValues)[number];
 const clientConfigurationChangeDetailValues = ["blockers", "evidence", "functions"] as const;
@@ -969,6 +971,20 @@ function readInitialClientConfigurationWorkspace(): ClientConfigurationWorkspace
     return "save";
   }
   return "review";
+}
+
+function readInitialClientConfigurationSection(): ClientConfigurationSection {
+  if (typeof window === "undefined") {
+    return "overview";
+  }
+  const params = new URLSearchParams(window.location.search);
+  const section = params.get("studioSection");
+  if (clientConfigurationSectionValues.includes(section as ClientConfigurationSection)) {
+    return section as ClientConfigurationSection;
+  }
+  return params.has("studioConfigure") || params.has("studioConfig") || params.has("studioChange") || params.has("studioApproval") || params.has("studioSave")
+    ? "review"
+    : "overview";
 }
 
 function readInitialClientConfigurationReviewDetail(): ClientConfigurationReviewDetail {
@@ -3836,6 +3852,9 @@ function ClientWebsiteConfigurationProfiles({
   selectedPermissionPreset,
   selectedSiteKey,
   onSiteChange,
+  vanguardPreviewHref,
+  configurationSection,
+  onConfigurationSectionChange,
   workspace,
   onWorkspaceChange,
   reviewDetail,
@@ -3862,6 +3881,9 @@ function ClientWebsiteConfigurationProfiles({
   selectedPermissionPreset?: ShellClientWebsiteAdminPermissionPreset;
   selectedSiteKey: string;
   onSiteChange: (siteKey: string) => void;
+  vanguardPreviewHref?: string;
+  configurationSection: ClientConfigurationSection;
+  onConfigurationSectionChange: (section: ClientConfigurationSection) => void;
   workspace: ClientConfigurationWorkspace;
   onWorkspaceChange: (workspace: ClientConfigurationWorkspace) => void;
   reviewDetail: ClientConfigurationReviewDetail;
@@ -3887,23 +3909,36 @@ function ClientWebsiteConfigurationProfiles({
     { value: "save", label: "Save", count: selectedSaveRequest?.payloadCount ?? 0, testId: "tab-kinflo-client-configuration-workspace-save" },
   ];
   const selectedProfile = profiles.profiles.find((profile) => profile.siteKey === selectedSiteKey);
+  const configurationSteps: { value: ClientConfigurationSection; label: string; description: string; count: number }[] = [
+    { value: "overview", label: "Overview", description: "Scope and readiness", count: profiles.blockedProfiles },
+    { value: "site-setup", label: "Site setup", description: "Permissions and access", count: selectedPermissionPreset?.permissionSet.length ?? 0 },
+    { value: "navigation-brand", label: "Navigation and brand", description: "Public-site foundations", count: selectedProfile ? 2 : 0 },
+    { value: "domain", label: "Domain", description: "Hostname and SSL", count: selectedDomainReadiness?.dnsChecklist.length ?? 0 },
+    { value: "integrations", label: "Integrations", description: "Provider-light readiness", count: selectedSaveRequest?.blockerCount ?? 0 },
+    { value: "review", label: "Review", description: "Evidence and approval", count: selectedReviewPacket?.saveBlockerCount ?? 0 },
+  ];
+  const hasFocusedTechnicalDetails = workspace !== "review"
+    || reviewDetail !== "blockers"
+    || changeDetail !== "blockers"
+    || approvalDetail !== "blockers"
+    || saveDetail !== "blockers";
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm" data-testid={testIds.root}>
+    <section className="rounded-2xl border border-border bg-card p-3 text-card-foreground shadow-sm" data-testid={testIds.root}>
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline" className="border-slate-300 bg-slate-50">
+            <Badge variant="outline" className="border-border bg-muted">
               Configuration profiles
             </Badge>
-            <Badge className="bg-slate-950 hover:bg-slate-950">{profiles.status.replaceAll("_", " ")}</Badge>
+            <Badge className="bg-primary text-primary-foreground hover:bg-primary">{profiles.status.replaceAll("_", " ")}</Badge>
           </div>
-          <h3 className="mt-3 text-base font-semibold text-slate-950">Client site configuration profiles</h3>
-          <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
-            Compare each site's template, brand, navigation, starter content, admin preset, CRM pipeline, and locked surfaces before any live save or publish action is enabled.
+          <h3 className="mt-3 text-base font-semibold text-foreground">Configuration workspace</h3>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">
+            Work through one configuration step at a time for the selected Vanguard site. Live saves and provider actions remain gated.
           </p>
         </div>
-        <Button disabled variant="outline" data-testid={testIds.gatedAction}>
+        <Button disabled variant="outline" className="border-border bg-muted text-muted-foreground" data-testid={testIds.gatedAction}>
           <SlidersHorizontal className="mr-2 h-4 w-4" />
           Configuration save gated
         </Button>
@@ -3911,25 +3946,25 @@ function ClientWebsiteConfigurationProfiles({
 
       <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-4" data-testid={testIds.summary}>
         {summaryItems.map((item) => (
-          <div key={item.label} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-            <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
-            <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
+          <div key={item.label} className="rounded-lg border border-border bg-muted px-3 py-2">
+            <div className="text-[10px] font-medium uppercase tracking-normal text-muted-foreground">{item.label}</div>
+            <div className="mt-1 text-lg font-semibold text-foreground">{item.value}</div>
           </div>
         ))}
       </div>
 
       <div
-        className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-2"
+        className="mt-4 rounded-xl border border-border bg-muted p-2"
         data-testid="section-kinflo-client-configuration-profile-switcher"
       >
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Selected configuration profile</div>
-            <div className="mt-1 truncate text-sm font-semibold text-slate-950" data-testid="text-kinflo-client-configuration-selected-profile">
+            <div className="text-[10px] font-medium uppercase tracking-normal text-muted-foreground">Selected configuration profile</div>
+            <div className="mt-1 truncate text-sm font-semibold text-foreground" data-testid="text-kinflo-client-configuration-selected-profile">
               {selectedProfile?.label ?? selectedSiteKey}
             </div>
           </div>
-          <Badge variant="outline" className="self-start bg-white">
+          <Badge variant="outline" className="self-start border-border bg-card">
             {selectedProfile?.adminPresetLabel ?? "permission preset pending"}
           </Badge>
         </div>
@@ -3950,17 +3985,17 @@ function ClientWebsiteConfigurationProfiles({
                 onClick={() => onSiteChange(profile.siteKey)}
                 className={`min-w-0 rounded-lg border px-3 py-2 text-left text-xs transition ${
                   isSelected
-                    ? "border-slate-950 bg-white shadow-sm"
-                    : "border-slate-200 bg-white/70 hover:border-slate-300 hover:bg-white"
+                    ? "border-primary bg-card shadow-sm"
+                    : "border-border bg-card/70 hover:border-primary/50 hover:bg-card"
                 }`}
                 data-testid={`button-kinflo-client-configuration-profile-${profile.siteKey}`}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <div className="truncate font-semibold text-slate-950">{profile.label}</div>
-                    <div className="mt-1 truncate text-[11px] text-slate-500">{profile.tenantSlug} · {profile.templateKey}</div>
+                    <div className="truncate font-semibold text-foreground">{profile.label}</div>
+                    <div className="mt-1 truncate text-[11px] text-muted-foreground">{profile.tenantSlug} · {profile.templateKey}</div>
                   </div>
-                  <Badge variant={profile.configurationStatus === "ready_for_review" ? "secondary" : "outline"} className="shrink-0 bg-white text-[10px]">
+                  <Badge variant="outline" className="shrink-0 border-border bg-card text-[10px]">
                     {profile.configurationStatus.replaceAll("_", " ")}
                   </Badge>
                 </div>
@@ -3974,6 +4009,195 @@ function ClientWebsiteConfigurationProfiles({
         </div>
       </div>
 
+      <div
+        className="mt-4 rounded-xl border border-border bg-muted p-2"
+        role="tablist"
+        aria-label="Configuration steps"
+        data-testid="tabs-kinflo-client-configuration-steps"
+      >
+        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-6">
+          {configurationSteps.map((step) => {
+            const isActive = configurationSection === step.value;
+            return (
+              <button
+                key={step.value}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                onClick={() => onConfigurationSectionChange(step.value)}
+                className={`min-w-0 rounded-lg border px-3 py-2 text-left transition ${
+                  isActive
+                    ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                    : "border-border bg-card text-foreground hover:border-primary/50"
+                }`}
+                data-testid={`tab-kinflo-client-configuration-step-${step.value}`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <span className="truncate text-xs font-semibold">{step.label}</span>
+                  <span className={`shrink-0 text-[10px] ${isActive ? "text-primary-foreground/75" : "text-muted-foreground"}`}>{step.count}</span>
+                </div>
+                <span className={`mt-1 block truncate text-[10px] ${isActive ? "text-primary-foreground/75" : "text-muted-foreground"}`}>{step.description}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-xl border border-border bg-card p-4" data-testid="section-kinflo-client-configuration-active-step">
+        {configurationSection === "overview" ? (
+          <div data-testid="section-kinflo-client-configuration-overview">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <div className="text-sm font-semibold text-foreground">Configuration overview</div>
+                <p className="mt-1 max-w-2xl text-xs leading-5 text-muted-foreground">Start with the selected site, then move through each configuration step. The numbers above are read-only readiness signals, not action controls.</p>
+              </div>
+              <Badge variant="outline" className="w-fit border-border bg-muted">{profiles.blockedProfiles} items need review</Badge>
+            </div>
+            <div className="mt-3 grid gap-2 sm:grid-cols-3">
+              {[
+                { label: "Selected site", value: selectedProfile?.label ?? selectedSiteKey },
+                { label: "Configuration status", value: selectedProfile?.configurationStatus.replaceAll("_", " ") ?? "pending" },
+                { label: "Next step", value: "Site setup" },
+              ].map((item) => (
+                <div key={item.label} className="rounded-lg border border-border bg-muted p-3">
+                  <div className="text-[10px] font-medium uppercase tracking-normal text-muted-foreground">{item.label}</div>
+                  <div className="mt-1 truncate text-sm font-semibold text-foreground">{item.value}</div>
+                </div>
+              ))}
+            </div>
+            <Button type="button" variant="outline" className="mt-3 border-border" onClick={() => onConfigurationSectionChange("site-setup")} data-testid="button-kinflo-client-configuration-continue">
+              Continue to site setup <ChevronRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        ) : null}
+
+        {configurationSection === "site-setup" ? (
+          <div data-testid="section-kinflo-client-configuration-site-setup">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <div className="text-sm font-semibold text-foreground">Site setup</div>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">Confirm the selected site’s admin access and permission posture before reviewing public-site settings.</p>
+              </div>
+              <Button disabled variant="outline" className="border-border bg-muted text-muted-foreground" data-testid="button-client-configuration-site-setup-gated"><UserRoundCog className="mr-2 h-4 w-4" /> Access changes gated</Button>
+            </div>
+            <div className="mt-3 grid gap-2 lg:grid-cols-2">
+              <div className="rounded-lg border border-border bg-muted p-3">
+                <div className="text-[10px] font-medium uppercase tracking-normal text-muted-foreground">Selected profile</div>
+                <div className="mt-1 text-sm font-semibold text-foreground">{selectedProfile?.label ?? selectedSiteKey}</div>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">{selectedProfile?.tenantSlug} · {selectedProfile?.ownerRole} · {selectedProfile?.inviteRole}</p>
+              </div>
+              <div className="rounded-lg border border-border bg-muted p-3">
+                <div className="text-[10px] font-medium uppercase tracking-normal text-muted-foreground">Permission posture</div>
+                <div className="mt-1 text-sm font-semibold text-foreground">{selectedPermissionPreset?.label ?? "Permission preset pending"}</div>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">{selectedPermissionPreset?.description ?? "Select a site profile to review its access posture."}</p>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {configurationSection === "navigation-brand" ? (
+          <div data-testid="section-kinflo-client-configuration-navigation-brand">
+            <div className="text-sm font-semibold text-foreground">Navigation and brand</div>
+            <p className="mt-1 text-xs leading-5 text-muted-foreground">Review the public-site foundations together. Each value is fixture-backed and read-only in this workspace.</p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+              {[
+                { label: "Brand", value: selectedProfile?.brandProfile },
+                { label: "Navigation", value: selectedProfile?.navigationProfile },
+                { label: "Content", value: selectedProfile?.contentPack },
+                { label: "CRM", value: selectedProfile?.crmPipeline },
+              ].map((item) => (
+                <div key={item.label} className="rounded-lg border border-border bg-muted p-3">
+                  <div className="text-[10px] font-medium uppercase tracking-normal text-muted-foreground">{item.label}</div>
+                  <div className="mt-1 truncate text-sm font-semibold text-foreground" title={item.value}>{item.value ?? "pending"}</div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 rounded-lg border border-border bg-muted p-3 text-xs leading-5 text-muted-foreground">Live navigation, brand, and content saves remain disabled until the hosted and approval gates are complete.</div>
+          </div>
+        ) : null}
+
+        {configurationSection === "domain" ? (
+          <div data-testid="section-kinflo-client-configuration-domain-step">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <div className="text-sm font-semibold text-foreground">Domain</div>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">Review hostname, SSL, and the next approval gate without opening a nested checklist.</p>
+              </div>
+              <Button disabled variant="outline" className="border-border bg-muted text-muted-foreground" data-testid="button-client-configuration-domain-step-gated"><Globe2 className="mr-2 h-4 w-4" /> Domain attach gated</Button>
+            </div>
+            <div className="mt-3 grid gap-2 sm:grid-cols-3">
+              {[
+                { label: "Hostname", value: selectedDomainReadiness?.hostname ?? "pending" },
+                { label: "SSL", value: selectedDomainReadiness?.sslStatus.replaceAll("_", " ") ?? "pending" },
+                { label: "Next gate", value: selectedDomainReadiness?.nextGate ?? "Domain review pending" },
+              ].map((item) => (
+                <div key={item.label} className="rounded-lg border border-border bg-muted p-3">
+                  <div className="text-[10px] font-medium uppercase tracking-normal text-muted-foreground">{item.label}</div>
+                  <div className="mt-1 break-words text-sm font-semibold text-foreground">{item.value}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {configurationSection === "integrations" ? (
+          <div data-testid="section-kinflo-client-configuration-integrations-step">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <div className="text-sm font-semibold text-foreground">Integrations</div>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">See the provider-light readiness posture and remaining blockers in one place.</p>
+              </div>
+              <Button disabled variant="outline" className="border-border bg-muted text-muted-foreground" data-testid="button-client-configuration-integrations-gated"><LockKeyhole className="mr-2 h-4 w-4" /> Provider actions gated</Button>
+            </div>
+            <div className="mt-3 grid gap-2 sm:grid-cols-3">
+              {[
+                { label: "Change items", value: selectedChangeSet?.draftChangeCount ?? 0 },
+                { label: "Approval items", value: selectedApprovalMatrix?.requiredApprovalCount ?? 0 },
+                { label: "Writes", value: 0 },
+              ].map((item) => (
+                <div key={item.label} className="rounded-lg border border-border bg-muted p-3">
+                  <div className="text-[10px] font-medium uppercase tracking-normal text-muted-foreground">{item.label}</div>
+                  <div className="mt-1 text-lg font-semibold text-foreground">{item.value}</div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 rounded-lg border border-border bg-muted p-3 text-xs leading-5 text-muted-foreground">{selectedSaveRequest?.blockerCount ?? 0} blockers remain before a save request can be reviewed. No provider write is invoked from this surface.</div>
+          </div>
+        ) : null}
+
+        {configurationSection === "review" ? (
+          <div data-testid="section-kinflo-client-configuration-review-step">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <div className="text-sm font-semibold text-foreground">Review</div>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">Review blockers and approval posture first. Technical evidence is available below only when needed.</p>
+              </div>
+              <Badge variant="outline" className="w-fit border-border bg-muted">{selectedReviewPacket?.saveBlockerCount ?? 0} blockers</Badge>
+            </div>
+            <div className="mt-3 grid gap-2 sm:grid-cols-3">
+              {[
+                { label: "Editable surfaces", value: selectedReviewPacket?.editableSurfaceCount ?? 0 },
+                { label: "Locked surfaces", value: selectedReviewPacket?.lockedSurfaceCount ?? 0 },
+                { label: "Required evidence", value: selectedReviewPacket?.requiredEvidenceCount ?? 0 },
+              ].map((item) => (
+                <div key={item.label} className="rounded-lg border border-border bg-muted p-3">
+                  <div className="text-[10px] font-medium uppercase tracking-normal text-muted-foreground">{item.label}</div>
+                  <div className="mt-1 text-lg font-semibold text-foreground">{item.value}</div>
+                </div>
+              ))}
+            </div>
+            <div className="mt-3 rounded-lg border border-border bg-muted p-3 text-xs leading-5 text-muted-foreground">{selectedReviewPacket?.nextGate ?? "Review remains gated until the required evidence and approvals are complete."}</div>
+          </div>
+        ) : null}
+      </div>
+
+      {configurationSection === "review" ? (
+        <details className="mt-4 rounded-xl border border-border bg-muted p-3" open={hasFocusedTechnicalDetails} data-testid="section-kinflo-client-configuration-technical-evidence">
+          <summary className="cursor-pointer list-none text-sm font-semibold text-foreground">Technical evidence <span className="ml-2 text-xs font-normal text-muted-foreground">Open only when reviewing details</span></summary>
+          <div className="mt-3">
+      {vanguardPreviewHref ? <VanguardFulfillmentWorkspace previewHref={vanguardPreviewHref} /> : null}
+      {!vanguardPreviewHref ? (
+        <>
       {selectedPermissionPreset ? (
         <div
           className="mt-3 rounded-xl border border-slate-200 bg-white p-3"
@@ -4973,6 +5197,11 @@ function ClientWebsiteConfigurationProfiles({
       <p className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600">
         {profiles.providerBoundary}
       </p>
+        </>
+      ) : null}
+          </div>
+        </details>
+      ) : null}
     </section>
   );
 }
@@ -5554,6 +5783,7 @@ export default function AdminKinfloShell() {
   const [clientWebsiteProvisioningView, setClientWebsiteProvisioningView] = useState<ClientWebsiteProvisioningView>(readInitialClientWebsiteProvisioningView);
   const [clientWebsiteHandoffWorkspace, setClientWebsiteHandoffWorkspace] = useState<ClientWebsiteHandoffWorkspace>(readInitialClientWebsiteHandoffWorkspace);
   const [clientAdminHandoffMatrixFilter, setClientAdminHandoffMatrixFilter] = useState<ClientAdminHandoffMatrixFilter>(readInitialClientAdminHandoffMatrixFilter);
+  const [clientConfigurationSection, setClientConfigurationSection] = useState<ClientConfigurationSection>(readInitialClientConfigurationSection);
   const [clientConfigurationWorkspace, setClientConfigurationWorkspace] = useState<ClientConfigurationWorkspace>(readInitialClientConfigurationWorkspace);
   const [clientConfigurationReviewDetail, setClientConfigurationReviewDetail] = useState<ClientConfigurationReviewDetail>(readInitialClientConfigurationReviewDetail);
   const [clientConfigurationChangeDetail, setClientConfigurationChangeDetail] = useState<ClientConfigurationChangeDetail>(readInitialClientConfigurationChangeDetail);
@@ -6558,6 +6788,7 @@ export default function AdminKinfloShell() {
     const nextDossier = readInitialClientWebsiteLaunchDossier();
     const nextHandoffWorkspace = readInitialClientWebsiteHandoffWorkspace();
     const nextHandoffMatrixFilter = readInitialClientAdminHandoffMatrixFilter();
+    const nextConfigurationSection = readInitialClientConfigurationSection();
     const nextConfigurationWorkspace = readInitialClientConfigurationWorkspace();
     const nextConfigurationReviewDetail = readInitialClientConfigurationReviewDetail();
     const nextConfigurationChangeDetail = readInitialClientConfigurationChangeDetail();
@@ -6605,6 +6836,7 @@ export default function AdminKinfloShell() {
     setClientWebsiteLaunchDossier((current) => (current === nextDossier ? current : nextDossier));
     setClientWebsiteHandoffWorkspace((current) => (current === nextHandoffWorkspace ? current : nextHandoffWorkspace));
     setClientAdminHandoffMatrixFilter((current) => (current === nextHandoffMatrixFilter ? current : nextHandoffMatrixFilter));
+    setClientConfigurationSection((current) => (current === nextConfigurationSection ? current : nextConfigurationSection));
     setClientConfigurationWorkspace((current) => (current === nextConfigurationWorkspace ? current : nextConfigurationWorkspace));
     setClientConfigurationReviewDetail((current) => (current === nextConfigurationReviewDetail ? current : nextConfigurationReviewDetail));
     setClientConfigurationChangeDetail((current) => (current === nextConfigurationChangeDetail ? current : nextConfigurationChangeDetail));
@@ -6822,6 +7054,7 @@ export default function AdminKinfloShell() {
       studioProvisioning: shouldKeepProvisioningView ? clientWebsiteProvisioningView : undefined,
       studioHandoff: shouldKeepHandoffWorkspace ? clientWebsiteHandoffWorkspace : undefined,
       studioMatrix: shouldKeepHandoffMatrixFilter ? clientAdminHandoffMatrixFilter : undefined,
+      studioSection: shouldKeepConfigurationWorkspace ? clientConfigurationSection : undefined,
       studioConfigure: shouldKeepConfigurationWorkspace ? clientConfigurationWorkspace : undefined,
       studioConfig: shouldKeepConfigurationReviewDetail ? clientConfigurationReviewDetail : undefined,
       studioChange: shouldKeepConfigurationChangeDetail ? clientConfigurationChangeDetail : undefined,
@@ -6855,6 +7088,7 @@ export default function AdminKinfloShell() {
       studioMatrix: clientWebsiteStudioLane === "handoff" && clientWebsiteHandoffWorkspace === "matrix"
         ? clientAdminHandoffMatrixFilter
         : undefined,
+      studioSection: clientWebsiteStudioLane === "configuration" ? clientConfigurationSection : undefined,
       studioConfigure: clientWebsiteStudioLane === "configuration" ? clientConfigurationWorkspace : undefined,
       studioConfig: clientWebsiteStudioLane === "configuration" ? clientConfigurationReviewDetail : undefined,
       studioChange: clientWebsiteStudioLane === "configuration" ? clientConfigurationChangeDetail : undefined,
@@ -6888,6 +7122,7 @@ export default function AdminKinfloShell() {
       studioMatrix: lane === "handoff" && clientWebsiteHandoffWorkspace === "matrix"
         ? clientAdminHandoffMatrixFilter
         : undefined,
+      studioSection: lane === "configuration" ? clientConfigurationSection : undefined,
       studioConfigure: lane === "configuration" ? clientConfigurationWorkspace : undefined,
       studioConfig: lane === "configuration" ? clientConfigurationReviewDetail : undefined,
       studioChange: lane === "configuration" ? clientConfigurationChangeDetail : undefined,
@@ -6902,6 +7137,37 @@ export default function AdminKinfloShell() {
       cutoverReview: undefined,
       cutoverBatch: undefined,
     });
+  };
+
+  const selectClientConfigurationSection = (section: ClientConfigurationSection) => {
+    setActiveTab("site-studio");
+    setClientWebsiteStudioLane("configuration");
+    setClientConfigurationSection(section);
+    updateKinfloShellRoute({
+      tab: "site-studio",
+      studioSite: clientWebsiteStudioSiteKey,
+      studioLane: "configuration",
+      studioSection: section,
+      studioConfigure: section === "review" ? clientConfigurationWorkspace : undefined,
+      studioConfig: section === "review" ? clientConfigurationReviewDetail : undefined,
+      studioChange: section === "review" ? clientConfigurationChangeDetail : undefined,
+      studioApproval: section === "review" ? clientConfigurationApprovalDetail : undefined,
+      studioSave: section === "review" ? clientConfigurationSaveDetail : undefined,
+      studioStage: undefined,
+      studioDossier: undefined,
+      studioProvisioning: undefined,
+      studioHandoff: undefined,
+      studioMatrix: undefined,
+      adapterBatch: undefined,
+      adapterSurface: undefined,
+      activationStep: undefined,
+      smokeEvidence: undefined,
+      preflightEvidence: undefined,
+      preflightResult: undefined,
+      cutoverReview: undefined,
+      cutoverBatch: undefined,
+    });
+    window.setTimeout(() => window.scrollTo({ top: 0, behavior: "auto" }), 0);
   };
 
   const selectClientConfigurationReviewDetail = (detail: ClientConfigurationReviewDetail) => {
@@ -12641,9 +12907,7 @@ export default function AdminKinfloShell() {
                   className={`${clientWebsiteStudioLane === "configuration" ? "block" : "hidden"} mt-2 max-h-[min(540px,calc(100vh-15rem))] overflow-y-auto overflow-x-hidden pr-1`}
                   data-testid="section-kinflo-client-studio-lane-configuration"
                 >
-                  {isVanguardWebsite ? (
-                    <VanguardFulfillmentWorkspace previewHref={clientWebsiteStudioPreviewHref} />
-                  ) : <ClientWebsiteConfigurationProfiles
+                  <ClientWebsiteConfigurationProfiles
                     profiles={snapshot.clientWebsiteStudio.configurationProfiles}
                     selectedReviewPacket={selectedClientWebsiteConfigurationReviewPacket}
                     selectedChangeSet={selectedClientWebsiteConfigurationChangeSet}
@@ -12658,6 +12922,9 @@ export default function AdminKinfloShell() {
                     selectedPermissionPreset={selectedClientWebsiteAdminPermissionPreset}
                     selectedSiteKey={clientWebsiteStudioSiteKey}
                     onSiteChange={selectClientWebsiteStudioSite}
+                    vanguardPreviewHref={isVanguardWebsite ? clientWebsiteStudioPreviewHref : undefined}
+                    configurationSection={clientConfigurationSection}
+                    onConfigurationSectionChange={selectClientConfigurationSection}
                     workspace={clientConfigurationWorkspace}
                     onWorkspaceChange={selectClientConfigurationWorkspace}
                     reviewDetail={clientConfigurationReviewDetail}
@@ -12669,7 +12936,7 @@ export default function AdminKinfloShell() {
                     saveDetail={clientConfigurationSaveDetail}
                     onSaveDetailChange={selectClientConfigurationSaveDetail}
                     testIds={clientWebsiteConfigurationProfileTestIds}
-                  />}
+                  />
                 </div>
 
                 <div
