@@ -62,6 +62,11 @@ for (const pattern of [
   'data-testid="section-kinflo-vanguard-handoff-sequence"',
   'Move from the client request to delivery review one stage at a time.',
   'data-testid={`tab-kinflo-vanguard-handoff-stage-${stage.value}`}',
+  'data-testid="section-kinflo-adapter-switch-sequence"',
+  'Review readiness, acceptance, and cutover in order.',
+  'data-testid={`tab-kinflo-adapter-switch-stage-${stage.value}`}',
+  'data-testid="section-kinflo-adapter-switch-technical-evidence"',
+  'data-testid="section-kinflo-adapter-switch-supporting-evidence"',
   'isActiveLane ? "text-foreground/75" : statusTone',
 ]) {
   if (shell.includes(pattern)) {

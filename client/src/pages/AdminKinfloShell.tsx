@@ -5719,6 +5719,7 @@ export default function AdminKinfloShell() {
     snapshot.adapterSwitchReadiness.defaultBatchId,
     adapterSwitchBatchIds,
   ));
+  const [adapterSwitchStage, setAdapterSwitchStage] = useState<"overview" | "runway" | "acceptance" | "cutover">("overview");
   const defaultAdapterSwitchSurfaceIds = snapshot.adapterSwitchReadiness.batches
     .find((batch) => batch.id === snapshot.adapterSwitchReadiness.defaultBatchId)
     ?.surfaces.map((surface) => surface.id) ?? [];
@@ -8451,6 +8452,47 @@ export default function AdminKinfloShell() {
           </TabsContent>
 
           <TabsContent value="adapter-switch" className="mt-6">
+            <section className="mb-4 rounded-xl border border-border bg-card p-3" data-testid="section-kinflo-adapter-switch-sequence">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Adapter review sequence</div>
+                  <div className="mt-0.5 text-xs text-muted-foreground">Review readiness, acceptance, and cutover in order. Live switching remains gated.</div>
+                </div>
+                <Badge variant="outline" className="w-fit">Read only</Badge>
+              </div>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4" role="tablist" aria-label="Adapter review sequence">
+                {[
+                  { value: "overview" as const, label: "Readiness", detail: "Select the batch and inspect its current surface." },
+                  { value: "runway" as const, label: "Runway", detail: "Review the gated order for each batch." },
+                  { value: "acceptance" as const, label: "Acceptance", detail: "Check contracts, smoke evidence, and owners." },
+                  { value: "cutover" as const, label: "Cutover", detail: "Review entry criteria and rollback controls." },
+                ].map((stage, index) => {
+                  const isActive = adapterSwitchStage === stage.value;
+                  return (
+                    <button
+                      key={stage.value}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      aria-current={isActive ? "step" : undefined}
+                      onClick={() => setAdapterSwitchStage(stage.value)}
+                      className={`min-w-0 rounded-lg border px-3 py-2 text-left transition ${
+                        isActive
+                          ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                          : "border-border bg-muted/30 text-foreground hover:border-primary/50 hover:bg-muted"
+                      }`}
+                      data-testid={`tab-kinflo-adapter-switch-stage-${stage.value}`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-current text-[10px] font-semibold">{index + 1}</span>
+                        <span className="truncate text-xs font-semibold">{stage.label}</span>
+                      </div>
+                      <span className={`mt-1 block text-[10px] leading-4 ${isActive ? "text-primary-foreground/75" : "text-muted-foreground"}`}>{stage.detail}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
             <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
               <div className="min-w-0 space-y-4">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -8544,15 +8586,15 @@ export default function AdminKinfloShell() {
                       </div>
                     </div>
 
-                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-4" data-testid="section-kinflo-adapter-switch-surface-focus">
+                    <div className={`rounded-lg border border-border bg-muted/30 p-4 ${adapterSwitchStage === "overview" ? "" : "hidden"}`} data-testid="section-kinflo-adapter-switch-surface-focus">
                       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-2">
-                            <MonitorSmartphone className="h-4 w-4 text-slate-500" />
-                            <h3 className="text-sm font-semibold text-slate-950">{selectedAdapterSwitchSurface?.surface}</h3>
+                            <MonitorSmartphone className="h-4 w-4 text-muted-foreground" />
+                            <h3 className="text-sm font-semibold text-foreground">{selectedAdapterSwitchSurface?.surface}</h3>
                             {selectedAdapterSwitchSurface ? liveAdapterStatusBadge(selectedAdapterSwitchSurface.status) : null}
                           </div>
-                          <p className="mt-1 text-xs leading-5 text-slate-600" data-testid="text-kinflo-adapter-switch-surface-focus">
+                          <p className="mt-1 text-xs leading-5 text-muted-foreground" data-testid="text-kinflo-adapter-switch-surface-focus">
                             {selectedAdapterSwitchSurface?.fixtureSource}
                           </p>
                         </div>
@@ -8563,8 +8605,8 @@ export default function AdminKinfloShell() {
                       </div>
 
                       <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-                        <div className="min-w-0 rounded-md border border-white bg-white p-3">
-                          <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Generated API contract</div>
+                        <div className="min-w-0 rounded-md border border-border bg-card p-3">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-muted-foreground">Generated API contract</div>
                           <div className="mt-2 flex flex-wrap gap-1">
                             {(selectedAdapterSwitchSurface?.convexFunctions ?? []).map((functionName) => (
                               <Badge key={functionName} variant="secondary" className="max-w-full whitespace-normal break-all text-left text-[11px]">
@@ -8573,8 +8615,8 @@ export default function AdminKinfloShell() {
                             ))}
                           </div>
                         </div>
-                        <div className="min-w-0 rounded-md border border-white bg-white p-3">
-                          <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Smoke evidence required</div>
+                        <div className="min-w-0 rounded-md border border-border bg-card p-3">
+                          <div className="text-[10px] font-medium uppercase tracking-normal text-muted-foreground">Smoke evidence required</div>
                           <div className="mt-2 flex flex-wrap gap-1">
                             {(selectedAdapterSwitchSurface?.requiredSmokeEvidence ?? []).map((item) => (
                               <Badge key={item} variant="outline" className="max-w-full whitespace-normal break-words text-left text-[11px]">
@@ -8586,80 +8628,80 @@ export default function AdminKinfloShell() {
                       </div>
 
                       <div className="mt-3 grid gap-2 text-xs sm:grid-cols-3">
-                        <div className="rounded-md border border-slate-200 bg-white px-3 py-2">
-                          <div className="text-slate-500">Switch allowed</div>
-                          <div className="mt-1 font-semibold text-slate-950">{selectedAdapterSwitchSurface?.switchAllowed ? "yes" : "no"}</div>
+                        <div className="rounded-md border border-border bg-card px-3 py-2">
+                          <div className="text-muted-foreground">Switch allowed</div>
+                          <div className="mt-1 font-semibold text-foreground">{selectedAdapterSwitchSurface?.switchAllowed ? "yes" : "no"}</div>
                         </div>
-                        <div className="rounded-md border border-slate-200 bg-white px-3 py-2">
-                          <div className="text-slate-500">Provider writes</div>
-                          <div className="mt-1 font-semibold text-slate-950">{selectedAdapterSwitchSurface?.providerWrites ? "yes" : "no"}</div>
+                        <div className="rounded-md border border-border bg-card px-3 py-2">
+                          <div className="text-muted-foreground">Provider writes</div>
+                          <div className="mt-1 font-semibold text-foreground">{selectedAdapterSwitchSurface?.providerWrites ? "yes" : "no"}</div>
                         </div>
-                        <div className="rounded-md border border-slate-200 bg-white px-3 py-2">
-                          <div className="text-slate-500">Live Convex</div>
-                          <div className="mt-1 font-semibold text-slate-950">{selectedAdapterSwitchSurface?.liveConvexExecution ? "yes" : "no"}</div>
+                        <div className="rounded-md border border-border bg-card px-3 py-2">
+                          <div className="text-muted-foreground">Live Convex</div>
+                          <div className="mt-1 font-semibold text-foreground">{selectedAdapterSwitchSurface?.liveConvexExecution ? "yes" : "no"}</div>
                         </div>
                       </div>
 
-                      <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900">
-                        <span className="font-medium text-amber-950">Rollback: </span>
+                      <div className="mt-3 rounded-md border border-border bg-muted p-3 text-xs leading-5 text-muted-foreground">
+                        <span className="font-medium text-foreground">Rollback: </span>
                         {selectedAdapterSwitchSurface?.rollback}
                       </div>
                     </div>
 
-                    <div className="rounded-lg border border-slate-200 bg-white p-4" data-testid="section-kinflo-adapter-switch-runway">
+                    <div className={`${adapterSwitchStage === "runway" ? "" : "hidden"} rounded-lg border border-border bg-card p-4`} data-testid="section-kinflo-adapter-switch-runway">
                       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                           <div className="flex items-center gap-2">
-                            <Workflow className="h-4 w-4 text-slate-500" />
+                            <Workflow className="h-4 w-4 text-muted-foreground" />
                             <h3 className="text-sm font-semibold">Fixture-to-live runway</h3>
                           </div>
-                          <p className="mt-1 text-xs leading-5 text-slate-600" data-testid="text-kinflo-adapter-switch-runway">
+                          <p className="mt-1 text-xs leading-5 text-muted-foreground" data-testid="text-kinflo-adapter-switch-runway">
                             Every batch remains fixture-backed until its entry gate, smoke evidence, and rollback owner are accepted.
                           </p>
                         </div>
                         <Badge variant="outline">{snapshot.adapterSwitchReadiness.runwaySteps.length} gated steps</Badge>
                       </div>
 
-                      <div className="mt-4 grid max-h-[520px] gap-3 overflow-y-auto pr-1 md:grid-cols-2 xl:grid-cols-3" data-testid="section-kinflo-adapter-switch-runway-scroll">
+                      <div className="mt-4 grid gap-3 pr-1 md:grid-cols-2 xl:grid-cols-3" data-testid="section-kinflo-adapter-switch-runway-scroll">
                         {snapshot.adapterSwitchReadiness.runwaySteps.map((step) => (
                           <div
                             key={step.batchId}
-                            className={`rounded-md border p-3 ${step.batchId === selectedAdapterSwitchBatch?.id ? "border-slate-900 bg-slate-50" : "border-slate-200"}`}
+                            className={`rounded-md border p-3 ${step.batchId === selectedAdapterSwitchBatch?.id ? "border-primary bg-primary/5" : "border-border"}`}
                             data-testid={`card-adapter-switch-runway-${step.batchId}`}
                           >
                             <div className="flex items-start justify-between gap-3">
                               <div className="min-w-0">
-                                <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Step {step.order}</div>
-                                <div className="mt-1 text-sm font-semibold text-slate-950">{step.label}</div>
-                                <div className="mt-1 text-xs text-slate-600">{step.stage}</div>
+                                <div className="text-[10px] font-medium uppercase tracking-normal text-muted-foreground">Step {step.order}</div>
+                                <div className="mt-1 text-sm font-semibold text-foreground">{step.label}</div>
+                                <div className="mt-1 text-xs text-muted-foreground">{step.stage}</div>
                               </div>
                               <Badge variant={step.canAdvance ? "secondary" : "outline"} className="shrink-0">
                                 {step.canAdvance ? "ready" : "gated"}
                               </Badge>
                             </div>
 
-                            <div className="mt-3 rounded-md bg-slate-50 px-3 py-2 text-xs leading-5 text-slate-600">
-                              <span className="font-medium text-slate-900">Gate: </span>
+                            <div className="mt-3 rounded-md bg-muted px-3 py-2 text-xs leading-5 text-muted-foreground">
+                              <span className="font-medium text-foreground">Gate: </span>
                               {step.entryGate}
                             </div>
 
                             <div className="mt-3 space-y-2">
                               {step.exitEvidence.slice(0, 2).map((item) => (
-                                <div key={item} className="flex items-start gap-2 text-xs leading-5 text-slate-600">
-                                  <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                                <div key={item} className="flex items-start gap-2 text-xs leading-5 text-muted-foreground">
+                                  <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                                   <span>{item}</span>
                                 </div>
                               ))}
                             </div>
 
                             <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                              <div className="rounded-md border border-slate-100 px-2 py-1">
-                                <div className="text-slate-500">Live Convex</div>
-                                <div className="font-medium text-slate-900">{step.liveConvexExecution ? "yes" : "no"}</div>
+                              <div className="rounded-md border border-border px-2 py-1">
+                                <div className="text-muted-foreground">Live Convex</div>
+                                <div className="font-medium text-foreground">{step.liveConvexExecution ? "yes" : "no"}</div>
                               </div>
-                              <div className="rounded-md border border-slate-100 px-2 py-1">
-                                <div className="text-slate-500">Provider writes</div>
-                                <div className="font-medium text-slate-900">{step.providerWrites ? "yes" : "no"}</div>
+                              <div className="rounded-md border border-border px-2 py-1">
+                                <div className="text-muted-foreground">Provider writes</div>
+                                <div className="font-medium text-foreground">{step.providerWrites ? "yes" : "no"}</div>
                               </div>
                             </div>
                           </div>
@@ -8667,14 +8709,14 @@ export default function AdminKinfloShell() {
                       </div>
                     </div>
 
-                    <div className="rounded-lg border border-slate-200 bg-white p-4" data-testid="section-kinflo-adapter-switch-acceptance-matrix">
+                    <div className={`${adapterSwitchStage === "acceptance" ? "" : "hidden"} rounded-lg border border-border bg-card p-4`} data-testid="section-kinflo-adapter-switch-acceptance-matrix">
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div>
                           <div className="flex items-center gap-2">
-                            <ListChecks className="h-4 w-4 text-slate-500" />
+                            <ListChecks className="h-4 w-4 text-muted-foreground" />
                             <h3 className="text-sm font-semibold">Switch Acceptance Matrix</h3>
                           </div>
-                          <p className="mt-1 text-xs leading-5 text-slate-600" data-testid="text-kinflo-adapter-switch-acceptance-matrix">
+                          <p className="mt-1 text-xs leading-5 text-muted-foreground" data-testid="text-kinflo-adapter-switch-acceptance-matrix">
                             Each batch must have generated contract coverage, hosted smoke coverage, rollback proof, and owner approval before the fixture adapter can be replaced.
                           </p>
                         </div>
@@ -8684,44 +8726,44 @@ export default function AdminKinfloShell() {
                       </div>
 
                       <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,280px)_minmax(0,1fr)]">
-                        <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900" data-testid="card-adapter-switch-selected-acceptance">
+                        <div className="rounded-md border border-border bg-muted p-3 text-xs leading-5 text-muted-foreground" data-testid="card-adapter-switch-selected-acceptance">
                           <div className="font-semibold">{selectedAdapterSwitchAcceptance?.label}</div>
                           <div className="mt-2 grid grid-cols-2 gap-2">
-                            <div className="rounded-md border border-amber-200 bg-white px-2 py-1">
-                              <div className="text-amber-700">Functions</div>
-                              <div className="font-semibold text-amber-950">{selectedAdapterSwitchAcceptance?.functionCount}</div>
+                            <div className="rounded-md border border-border bg-card px-2 py-1">
+                              <div className="text-muted-foreground">Functions</div>
+                              <div className="font-semibold text-foreground">{selectedAdapterSwitchAcceptance?.functionCount}</div>
                             </div>
-                            <div className="rounded-md border border-amber-200 bg-white px-2 py-1">
-                              <div className="text-amber-700">Smoke gaps</div>
-                              <div className="font-semibold text-amber-950">{selectedAdapterSwitchAcceptance?.smokeMissingFunctions.length}</div>
+                            <div className="rounded-md border border-border bg-card px-2 py-1">
+                              <div className="text-muted-foreground">Smoke gaps</div>
+                              <div className="font-semibold text-foreground">{selectedAdapterSwitchAcceptance?.smokeMissingFunctions.length}</div>
                             </div>
-                            <div className="rounded-md border border-amber-200 bg-white px-2 py-1">
-                              <div className="text-amber-700">Contract</div>
-                              <div className="font-semibold text-amber-950">{selectedAdapterSwitchAcceptance?.generatedContractCoverage}</div>
+                            <div className="rounded-md border border-border bg-card px-2 py-1">
+                              <div className="text-muted-foreground">Contract</div>
+                              <div className="font-semibold text-foreground">{selectedAdapterSwitchAcceptance?.generatedContractCoverage}</div>
                             </div>
-                            <div className="rounded-md border border-amber-200 bg-white px-2 py-1">
-                              <div className="text-amber-700">Switch</div>
-                              <div className="font-semibold text-amber-950">{selectedAdapterSwitchAcceptance?.canSwitch ? "ready" : "blocked"}</div>
+                            <div className="rounded-md border border-border bg-card px-2 py-1">
+                              <div className="text-muted-foreground">Switch</div>
+                              <div className="font-semibold text-foreground">{selectedAdapterSwitchAcceptance?.canSwitch ? "ready" : "blocked"}</div>
                             </div>
                           </div>
-                          <div className="mt-3 rounded-md bg-white p-2">
-                            <span className="font-medium text-amber-950">Next gate: </span>
+                          <div className="mt-3 rounded-md bg-card p-2">
+                            <span className="font-medium text-foreground">Next gate: </span>
                             {selectedAdapterSwitchAcceptance?.nextHumanGate}
                           </div>
                         </div>
 
-                        <div className="grid max-h-[420px] gap-3 overflow-y-auto pr-1 md:grid-cols-2" data-testid="section-kinflo-adapter-switch-acceptance-scroll">
+                        <div className="grid gap-3 pr-1 md:grid-cols-2" data-testid="section-kinflo-adapter-switch-acceptance-scroll">
                           {snapshot.adapterSwitchReadiness.acceptanceMatrix.map((batch) => (
                             <div
                               key={batch.batchId}
-                              className={`rounded-md border p-3 ${batch.batchId === selectedAdapterSwitchBatch?.id ? "border-slate-900 bg-slate-50" : "border-slate-200 bg-white"}`}
+                              className={`rounded-md border p-3 ${batch.batchId === selectedAdapterSwitchBatch?.id ? "border-primary bg-primary/5" : "border-border bg-card"}`}
                               data-testid={`card-adapter-switch-acceptance-${batch.batchId}`}
                             >
                               <div className="flex items-start justify-between gap-3">
                                 <div className="min-w-0">
-                                  <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Batch {batch.order}</div>
-                                  <div className="mt-1 text-sm font-semibold text-slate-950">{batch.label}</div>
-                                  <div className="mt-1 text-xs text-slate-600">{batch.surfaceCount} surfaces · {batch.functionCount} functions</div>
+                                  <div className="text-[10px] font-medium uppercase tracking-normal text-muted-foreground">Batch {batch.order}</div>
+                                  <div className="mt-1 text-sm font-semibold text-foreground">{batch.label}</div>
+                                  <div className="mt-1 text-xs text-muted-foreground">{batch.surfaceCount} surfaces · {batch.functionCount} functions</div>
                                 </div>
                                 <Badge variant={batch.canSwitch ? "secondary" : "outline"} className="shrink-0">
                                   {batch.canSwitch ? "ready" : batch.acceptancePosture.replaceAll("_", " ")}
@@ -8729,17 +8771,17 @@ export default function AdminKinfloShell() {
                               </div>
 
                               <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
-                                <div className="rounded-md border border-slate-100 px-2 py-1">
-                                  <div className="text-slate-500">Contract</div>
-                                  <div className="font-medium text-slate-950">{batch.generatedContractCoverage}</div>
+                                <div className="rounded-md border border-border px-2 py-1">
+                                  <div className="text-muted-foreground">Contract</div>
+                                  <div className="font-medium text-foreground">{batch.generatedContractCoverage}</div>
                                 </div>
-                                <div className="rounded-md border border-slate-100 px-2 py-1">
-                                  <div className="text-slate-500">Covered</div>
-                                  <div className="font-medium text-slate-950">{batch.smokeCoveredFunctions}</div>
+                                <div className="rounded-md border border-border px-2 py-1">
+                                  <div className="text-muted-foreground">Covered</div>
+                                  <div className="font-medium text-foreground">{batch.smokeCoveredFunctions}</div>
                                 </div>
-                                <div className="rounded-md border border-slate-100 px-2 py-1">
-                                  <div className="text-slate-500">Gaps</div>
-                                  <div className="font-medium text-slate-950">{batch.smokeMissingFunctions.length}</div>
+                                <div className="rounded-md border border-border px-2 py-1">
+                                  <div className="text-muted-foreground">Gaps</div>
+                                  <div className="font-medium text-foreground">{batch.smokeMissingFunctions.length}</div>
                                 </div>
                               </div>
 
@@ -8756,8 +8798,8 @@ export default function AdminKinfloShell() {
                                 ) : null}
                               </div>
 
-                              <div className="mt-3 rounded-md bg-slate-50 p-2 text-xs leading-5 text-slate-600">
-                                <span className="font-medium text-slate-900">Rollback: </span>
+                              <div className="mt-3 rounded-md bg-muted p-2 text-xs leading-5 text-muted-foreground">
+                                <span className="font-medium text-foreground">Rollback: </span>
                                 {batch.rollbackGate}
                               </div>
                             </div>
@@ -8766,14 +8808,14 @@ export default function AdminKinfloShell() {
                       </div>
                     </div>
 
-                    <div className="rounded-lg border border-slate-200 bg-white p-4" data-testid="section-kinflo-adapter-switch-cutover-checklist">
+                    <div className={`${adapterSwitchStage === "cutover" ? "" : "hidden"} rounded-lg border border-border bg-card p-4`} data-testid="section-kinflo-adapter-switch-cutover-checklist">
                       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                         <div>
                           <div className="flex items-center gap-2">
-                            <Command className="h-4 w-4 text-slate-500" />
+                            <Command className="h-4 w-4 text-muted-foreground" />
                             <h3 className="text-sm font-semibold">Fixture-to-Live Cutover Checklist</h3>
                           </div>
-                          <p className="mt-1 text-xs leading-5 text-slate-600" data-testid="text-kinflo-adapter-switch-cutover-checklist">
+                          <p className="mt-1 text-xs leading-5 text-muted-foreground" data-testid="text-kinflo-adapter-switch-cutover-checklist">
                             {snapshot.adapterSwitchReadiness.cutoverChecklist.approvalGate}
                           </p>
                         </div>
@@ -8791,60 +8833,60 @@ export default function AdminKinfloShell() {
                           { label: "Ready", value: snapshot.adapterSwitchReadiness.cutoverChecklist.readyBatches },
                           { label: "Blocked", value: snapshot.adapterSwitchReadiness.cutoverChecklist.blockedBatches },
                         ].map((item) => (
-                          <div key={item.label} className="rounded-md border border-slate-200 bg-slate-50 p-3">
-                            <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
-                            <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
+                          <div key={item.label} className="rounded-md border border-border bg-muted p-3">
+                            <div className="text-[10px] font-medium uppercase tracking-normal text-muted-foreground">{item.label}</div>
+                            <div className="mt-1 text-lg font-semibold text-foreground">{item.value}</div>
                           </div>
                         ))}
                       </div>
 
-                      <div className="mt-4 grid max-h-[560px] gap-3 overflow-y-auto pr-1 xl:grid-cols-2" data-testid="section-kinflo-adapter-switch-cutover-scroll">
+                      <div className="mt-4 grid gap-3 pr-1 xl:grid-cols-2" data-testid="section-kinflo-adapter-switch-cutover-scroll">
                         {snapshot.adapterSwitchReadiness.cutoverChecklist.steps.map((step) => (
-                          <div key={step.batchId} className="rounded-md border border-slate-200 bg-white p-3" data-testid={`card-adapter-switch-cutover-${step.batchId}`}>
+                          <div key={step.batchId} className="rounded-md border border-border bg-card p-3" data-testid={`card-adapter-switch-cutover-${step.batchId}`}>
                             <div className="flex items-start justify-between gap-3">
                               <div className="min-w-0">
-                                <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Batch {step.order}</div>
-                                <div className="mt-1 text-sm font-semibold text-slate-950">{step.label}</div>
-                                <div className="mt-1 text-xs text-slate-600">{step.surfaceCount} surfaces · {step.functionCount} functions</div>
+                                <div className="text-[10px] font-medium uppercase tracking-normal text-muted-foreground">Batch {step.order}</div>
+                                <div className="mt-1 text-sm font-semibold text-foreground">{step.label}</div>
+                                <div className="mt-1 text-xs text-muted-foreground">{step.surfaceCount} surfaces · {step.functionCount} functions</div>
                               </div>
-                              <Badge variant="outline" className="shrink-0 border-rose-200 bg-rose-50 text-rose-700">
+                              <Badge variant="outline" className="shrink-0">
                                 {step.canCutover ? "ready" : "blocked"}
                               </Badge>
                             </div>
 
                             <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
-                              <div className="rounded-md border border-slate-100 px-2 py-1">
-                                <div className="text-slate-500">Import API</div>
-                                <div className="font-medium text-slate-950">{step.canImportGeneratedApi ? "yes" : "no"}</div>
+                              <div className="rounded-md border border-border px-2 py-1">
+                                <div className="text-muted-foreground">Import API</div>
+                                <div className="font-medium text-foreground">{step.canImportGeneratedApi ? "yes" : "no"}</div>
                               </div>
-                              <div className="rounded-md border border-slate-100 px-2 py-1">
-                                <div className="text-slate-500">API flag</div>
-                                <div className="font-medium text-slate-950">{step.generatedApiAvailable ? "true" : "false"}</div>
+                              <div className="rounded-md border border-border px-2 py-1">
+                                <div className="text-muted-foreground">API flag</div>
+                                <div className="font-medium text-foreground">{step.generatedApiAvailable ? "true" : "false"}</div>
                               </div>
-                              <div className="rounded-md border border-slate-100 px-2 py-1">
-                                <div className="text-slate-500">Live calls</div>
-                                <div className="font-medium text-slate-950">{step.liveConvexExecution ? "yes" : "no"}</div>
+                              <div className="rounded-md border border-border px-2 py-1">
+                                <div className="text-muted-foreground">Live calls</div>
+                                <div className="font-medium text-foreground">{step.liveConvexExecution ? "yes" : "no"}</div>
                               </div>
                             </div>
 
                             <div className="mt-3 grid gap-3 lg:grid-cols-2">
-                              <div className="rounded-md border border-slate-100 bg-slate-50 p-3">
-                                <div className="text-xs font-medium text-slate-900">Entry criteria</div>
+                              <div className="rounded-md border border-border bg-muted p-3">
+                                <div className="text-xs font-medium text-foreground">Entry criteria</div>
                                 <div className="mt-2 space-y-1">
                                   {step.entryCriteria.map((item) => (
-                                    <div key={item} className="flex items-start gap-2 text-xs leading-5 text-slate-600">
-                                      <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
+                                    <div key={item} className="flex items-start gap-2 text-xs leading-5 text-muted-foreground">
+                                      <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                                       <span>{item}</span>
                                     </div>
                                   ))}
                                 </div>
                               </div>
 
-                              <div className="rounded-md border border-emerald-100 bg-emerald-50 p-3">
-                                <div className="text-xs font-medium text-emerald-900">Post-switch verification</div>
+                              <div className="rounded-md border border-border bg-muted p-3">
+                                <div className="text-xs font-medium text-foreground">Post-switch verification</div>
                                 <div className="mt-2 space-y-1">
                                   {step.postSwitchVerification.map((item) => (
-                                    <div key={item} className="flex items-start gap-2 text-xs leading-5 text-emerald-800">
+                                    <div key={item} className="flex items-start gap-2 text-xs leading-5 text-muted-foreground">
                                       <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                                       <span>{item}</span>
                                     </div>
@@ -8853,11 +8895,11 @@ export default function AdminKinfloShell() {
                               </div>
                             </div>
 
-                            <div className="mt-3 rounded-md border border-rose-100 bg-rose-50 p-3">
-                              <div className="text-xs font-medium text-rose-900">Rollback controls</div>
+                            <div className="mt-3 rounded-md border border-border bg-muted p-3">
+                              <div className="text-xs font-medium text-foreground">Rollback controls</div>
                               <div className="mt-2 space-y-1">
                                 {step.rollbackControls.map((item) => (
-                                  <div key={item} className="flex items-start gap-2 text-xs leading-5 text-rose-700">
+                                  <div key={item} className="flex items-start gap-2 text-xs leading-5 text-muted-foreground">
                                     <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                                     <span>{item}</span>
                                   </div>
@@ -8865,8 +8907,8 @@ export default function AdminKinfloShell() {
                               </div>
                             </div>
 
-                            <div className="mt-3 rounded-md border border-slate-100 bg-slate-50 p-2 text-xs leading-5 text-slate-600">
-                              <span className="font-medium text-slate-900">Blocked until: </span>
+                            <div className="mt-3 rounded-md border border-border bg-muted p-2 text-xs leading-5 text-muted-foreground">
+                              <span className="font-medium text-foreground">Blocked until: </span>
                               {step.blockedUntil}
                             </div>
                           </div>
@@ -8875,7 +8917,7 @@ export default function AdminKinfloShell() {
 
                       <div className="mt-4 grid gap-2 sm:grid-cols-2">
                         {snapshot.adapterSwitchReadiness.cutoverChecklist.sourceDocuments.map((documentPath) => (
-                          <div key={documentPath} className="rounded-md border border-slate-200 px-3 py-2 text-xs">
+                          <div key={documentPath} className="rounded-md border border-border px-3 py-2 text-xs">
                             <span className="break-all">{documentPath}</span>
                           </div>
                         ))}
@@ -8886,11 +8928,18 @@ export default function AdminKinfloShell() {
                       </p>
                     </div>
 
-                    <div className="grid gap-3">
+                    <details className="rounded-lg border border-border bg-muted p-3" data-testid="section-kinflo-adapter-switch-technical-evidence">
+                      <summary className="cursor-pointer list-none text-sm font-semibold text-foreground">
+                        <span className="flex items-center justify-between gap-3">
+                          <span>Technical surface evidence</span>
+                          <span className="text-xs font-normal text-muted-foreground">All batch surfaces and rollback notes</span>
+                        </span>
+                      </summary>
+                    <div className="mt-3 grid gap-3">
                       {(selectedAdapterSwitchBatch?.surfaces ?? []).map((surface) => (
                         <div
                           key={surface.id}
-                          className={`rounded-md border p-4 ${surface.id === selectedAdapterSwitchSurface?.id ? "border-slate-900 bg-slate-50" : "bg-white"}`}
+                          className={`rounded-md border p-4 ${surface.id === selectedAdapterSwitchSurface?.id ? "border-primary bg-primary/5" : "bg-card"}`}
                           data-testid={`card-adapter-switch-${surface.id}`}
                         >
                           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
@@ -8952,6 +9001,7 @@ export default function AdminKinfloShell() {
                         </div>
                       ))}
                     </div>
+                    </details>
                   </CardContent>
                 </Card>
               </div>
@@ -8969,6 +9019,14 @@ export default function AdminKinfloShell() {
                   testId="section-kinflo-adapter-switch-decision-gate-rail"
                 />
 
+                <details className="rounded-lg border border-border bg-muted p-3" data-testid="section-kinflo-adapter-switch-supporting-evidence">
+                  <summary className="cursor-pointer list-none text-sm font-semibold text-foreground">
+                    <span className="flex items-center justify-between gap-3">
+                      <span>Supporting evidence</span>
+                      <span className="text-xs font-normal text-muted-foreground">Gate evidence, source documents, and provider boundary</span>
+                    </span>
+                  </summary>
+                  <div className="mt-3 space-y-4">
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-base">Switch Gate Evidence</CardTitle>
@@ -9016,6 +9074,8 @@ export default function AdminKinfloShell() {
                     </div>
                   </CardContent>
                 </Card>
+                  </div>
+                </details>
               </div>
             </section>
           </TabsContent>
