@@ -7487,6 +7487,14 @@ export default function AdminKinfloShell() {
           </div>
         </section>
 
+        {activeTab === "overview" ? null : (
+          <KinfloSectionSnapshot
+            activeTab={activeTab}
+            snapshot={snapshot}
+            onFocusMetric={(targetTestId) => focusSelectedShellSection(activeTab, targetTestId)}
+          />
+        )}
+
         <Card className={`${activeWorkflowLane.key === "evidence" ? "mt-5" : "hidden"} border-border bg-card shadow-none`}>
           <CardHeader className="flex flex-col gap-3 space-y-0 lg:flex-row lg:items-start lg:justify-between">
             <div>
@@ -7604,14 +7612,6 @@ export default function AdminKinfloShell() {
             }}
           />
         ) : null}
-
-        {activeTab === "overview" ? null : (
-          <KinfloSectionSnapshot
-            activeTab={activeTab}
-            snapshot={snapshot}
-            onFocusMetric={(targetTestId) => focusSelectedShellSection(activeTab, targetTestId)}
-          />
-        )}
 
         {activeTab === "overview" ? null : <Tabs value={activeTab} onValueChange={(value) => selectShellTab(value as ShellTabValue)} className={`${activeTab === "site-studio" ? "mt-1" : "mt-7"} min-w-0`} data-testid="section-kinflo-selected-content">
           <TabsContent value="tenants" className="mt-6">
