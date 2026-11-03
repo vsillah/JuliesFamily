@@ -5188,9 +5188,27 @@ export default function AdminKinfloShell() {
       nextGate: snapshot.hostedActivationRunbook.steps.find((step) => step.status === "blocked_provider_gate")
         ?? snapshot.hostedActivationRunbook.steps[0],
       proof: [
-        `${launchReadinessCounts.ready}/${launchReadinessCounts.total} launch checks ready`,
-        `${adapterSwitchTotals.total} adapter surfaces mapped`,
-        `${hostedActivationTotals.providerGated} hosted gates blocked`,
+        {
+          label: "Launch readiness",
+          value: `${launchReadinessCounts.ready}/${launchReadinessCounts.total}`,
+          detail: "checks ready",
+          tone: launchReadinessCounts.ready === launchReadinessCounts.total ? "ready" : "review",
+          icon: Rocket,
+        },
+        {
+          label: "Adapter coverage",
+          value: `${adapterSwitchTotals.total}`,
+          detail: "surfaces mapped",
+          tone: "mapped",
+          icon: Workflow,
+        },
+        {
+          label: "Hosted activation",
+          value: `${hostedActivationTotals.providerGated}`,
+          detail: "gates blocked",
+          tone: hostedActivationTotals.providerGated > 0 ? "blocked" : "ready",
+          icon: ShieldCheck,
+        },
       ],
     };
   }, [
@@ -5202,6 +5220,7 @@ export default function AdminKinfloShell() {
     snapshot.hostedActivationRunbook.steps,
     snapshot.launchReadiness.sites,
   ]);
+  const activeWorkflowLane = workflowNavigationLanes.find((lane) => lane.tabs.includes(activeTab)) ?? workflowNavigationLanes[0];
   const selectedWizardTemplate = useMemo(
     () => snapshot.templates.find((template) => template.key === wizardTemplateKey) ?? snapshot.templates[0],
     [snapshot.templates, wizardTemplateKey],
@@ -7225,12 +7244,35 @@ export default function AdminKinfloShell() {
                 </div>
               </div>
             </div>
-            <div className={`${activeTab === "site-studio" ? "mt-2" : "mt-4"} flex flex-wrap gap-2`}>
-              {commandBrief.proof.map((item) => (
-                <Badge key={item} variant="outline" className="border-slate-200 bg-slate-50 text-slate-700">
-                  {item}
-                </Badge>
-              ))}
+            <div className={`${activeTab === "site-studio" ? "mt-2" : "mt-4"} rounded-xl border border-slate-200 bg-white p-3`} data-testid="section-kinflo-launch-summary">
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+                <div className="text-xs font-semibold uppercase tracking-normal text-slate-500">Launch summary</div>
+                <div className="text-xs text-slate-500">Current read-only review state</div>
+              </div>
+              <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                {commandBrief.proof.map((item) => {
+                  const ProofIcon = item.icon;
+                  const toneClass = item.tone === "ready"
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+                    : item.tone === "blocked"
+                      ? "border-amber-200 bg-amber-50 text-amber-950"
+                      : item.tone === "mapped"
+                        ? "border-sky-200 bg-sky-50 text-sky-950"
+                        : "border-slate-200 bg-slate-50 text-slate-900";
+                  return (
+                    <div key={item.label} className={`rounded-lg border p-3 ${toneClass}`}>
+                      <div className="flex items-center gap-2">
+                        <ProofIcon className="h-4 w-4" aria-hidden="true" />
+                        <div className="text-xs font-semibold uppercase tracking-normal">{item.label}</div>
+                      </div>
+                      <div className="mt-2 flex items-baseline gap-1">
+                        <span className="text-xl font-semibold">{item.value}</span>
+                        <span className="text-xs">{item.detail}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
@@ -7427,16 +7469,16 @@ export default function AdminKinfloShell() {
           >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <div className={`${activeTab === "site-studio" ? "text-xs" : "text-sm"} font-semibold text-slate-950`}>Workflow navigation</div>
+                <div className={`${activeTab === "site-studio" ? "text-xs" : "text-sm"} font-semibold text-slate-950`}>Workspaces</div>
                 <p className={`${activeTab === "site-studio" ? "hidden" : "mt-1"} text-xs leading-5 text-slate-500`}>
-                  Five workspaces group every existing tab by work mode, with technical activation details kept under Evidence &amp; Activation.
+                  Choose a work area first. The section tabs below change within that workspace.
                 </p>
               </div>
               <Badge variant="outline" className={`${activeTab === "site-studio" ? "text-[11px]" : ""} self-start border-amber-200 bg-amber-50 text-amber-700`}>
                 {workflowNavigationTabCoverage.length}/{shellTabValues.length} tabs reachable
               </Badge>
             </div>
-            <div className={`${activeTab === "site-studio" ? "hidden" : "mt-3 grid"} gap-2 md:grid-cols-2 xl:grid-cols-3`} data-testid="section-kinflo-workflow-navigation-lanes">
+            <div className={`${activeTab === "site-studio" ? "hidden" : "mt-3 grid"} gap-2 md:grid-cols-2 xl:grid-cols-3`} role="tablist" aria-label="KinFlo workspaces" data-testid="section-kinflo-workflow-navigation-lanes">
               {workflowNavigationLanes.map((lane) => {
                 const LaneIcon = lane.icon;
                 const isActiveLane = lane.tabs.includes(activeTab);
@@ -7451,7 +7493,8 @@ export default function AdminKinfloShell() {
                     key={lane.key}
                     type="button"
                     onClick={() => selectShellTab(lane.primaryTab)}
-                    aria-pressed={isActiveLane}
+                    role="tab"
+                    aria-selected={isActiveLane}
                     className={`min-w-0 rounded-xl border p-3 text-left transition ${
                       isActiveLane
                         ? "border-slate-900 bg-slate-950 text-white shadow-sm"
@@ -7478,7 +7521,9 @@ export default function AdminKinfloShell() {
                         {lane.tabs.length}
                       </Badge>
                     </div>
-                    <div className="mt-3 flex flex-wrap gap-1.5" data-testid={`section-kinflo-workflow-lane-tabs-${lane.key}`}>
+                    <div className={`mt-3 border-t pt-3 ${isActiveLane ? "border-white/10" : "border-slate-200"}`} data-testid={`section-kinflo-workflow-lane-tabs-${lane.key}`}>
+                      <div className={`mb-2 text-[10px] font-semibold uppercase tracking-wider ${isActiveLane ? "text-slate-400" : "text-slate-500"}`}>Sections in this workspace</div>
+                      <div className="flex flex-wrap gap-1.5">
                       {lane.tabs.map((tabValue) => (
                         <span
                           key={tabValue}
@@ -7501,6 +7546,7 @@ export default function AdminKinfloShell() {
                           {shellTabLabels[tabValue]}
                         </span>
                       ))}
+                      </div>
                     </div>
                     <div className={`mt-3 text-xs leading-5 ${isActiveLane ? "text-amber-100" : "text-amber-700"}`}>
                       {lane.blockedLiveAction}
@@ -7511,13 +7557,20 @@ export default function AdminKinfloShell() {
             </div>
           </section>
 
-          <div className={`${activeTab === "site-studio" ? "hidden sm:block" : "block"} w-full min-w-0 overflow-x-auto rounded-md border border-slate-200 bg-white`}>
-            <TabsList className={`${activeTab === "site-studio" ? "p-0.5" : "p-1"} flex h-auto min-w-max justify-start gap-1 bg-white`}>
-            {shellTabValues.map((tabValue) => (
-              <TabsTrigger key={tabValue} className="shrink-0" value={tabValue}>
-                {shellTabLabels[tabValue]}
-              </TabsTrigger>
-            ))}
+          <div className={`${activeTab === "site-studio" ? "hidden sm:block" : "block"} w-full min-w-0 rounded-md border border-slate-200 bg-white`} data-testid="section-kinflo-contextual-navigation">
+            <div className="flex flex-col gap-2 border-b border-slate-200 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">Sections</div>
+                <div className="text-sm font-semibold text-slate-950">{activeWorkflowLane.label}</div>
+              </div>
+              <div className="text-xs text-slate-500">{activeWorkflowLane.tabs.length} sections</div>
+            </div>
+            <TabsList className={`${activeTab === "site-studio" ? "p-0.5" : "p-1"} flex h-auto w-full flex-wrap justify-start gap-1 bg-white`}>
+              {activeWorkflowLane.tabs.map((tabValue) => (
+                <TabsTrigger key={tabValue} className="shrink-0" value={tabValue}>
+                  {shellTabLabels[tabValue]}
+                </TabsTrigger>
+              ))}
             </TabsList>
           </div>
 
