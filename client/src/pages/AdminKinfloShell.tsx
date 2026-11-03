@@ -1614,7 +1614,7 @@ function ConfigurationAffordanceStrip({
 
   return (
     <section
-      className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50/70 p-3 text-sm lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.8fr)_minmax(220px,0.9fr)]"
+      className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50/70 p-3 text-sm 2xl:grid-cols-[minmax(0,1fr)_minmax(220px,0.8fr)_minmax(220px,0.9fr)]"
       data-testid={testId}
     >
       <div className="min-w-0">
@@ -11478,7 +11478,7 @@ export default function AdminKinfloShell() {
           </TabsContent>
 
           <TabsContent value="factory" className="mt-6">
-            <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
+            <section className={`grid gap-6 ${selectedLaunchPacket ? "xl:grid-cols-[minmax(0,1fr)_420px]" : ""}`}>
               <div className="space-y-4">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div>
