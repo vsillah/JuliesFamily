@@ -78,7 +78,6 @@ requireIncludes("docs/phase81-workflow-navigation-rail.md", [
   "button-kinflo-workflow-lane-launch",
   "button-kinflo-workflow-lane-growth",
   "button-kinflo-workflow-lane-evidence",
-  "button-kinflo-workflow-lane-hosted-activation",
   "No live Convex query, mutation, or action is executed.",
 ]);
 
@@ -92,7 +91,7 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "workflowNavigationTabCoverage",
   "section-kinflo-workflow-navigation-rail",
   "section-kinflo-workflow-navigation-lanes",
-  "Control, Build, Launch, Growth, Evidence, and Hosted Activation",
+  "label: \"Evidence & Activation\"",
   "client sharing gated",
   "provider writes gated",
   "hosted deployment gated",
@@ -104,7 +103,7 @@ requireIncludes("package.json", [
 ]);
 
 const shellContents = read("client/src/pages/AdminKinfloShell.tsx");
-const expectedLanes = ["control", "build", "launch", "growth", "evidence", "hosted-activation"];
+const expectedLanes = ["control", "build", "launch", "growth", "evidence"];
 for (const lane of expectedLanes) {
   requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
     `key: "${lane}"`,
