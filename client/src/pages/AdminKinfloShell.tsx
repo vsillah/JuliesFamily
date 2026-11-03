@@ -3051,7 +3051,6 @@ function VanguardBuildOverview({
   readiness,
   readyCount,
   previewHref,
-  onStageChange,
 }: {
   stage: ClientWebsiteWorkbenchStage;
   siteLabel: string;
@@ -3059,7 +3058,6 @@ function VanguardBuildOverview({
   readiness: Array<{ label: string; done?: boolean }>;
   readyCount: number;
   previewHref: string;
-  onStageChange: (stage: ClientWebsiteWorkbenchStage) => void;
 }) {
   const steps: Array<{ value: ClientWebsiteWorkbenchStage; label: string; detail: string }> = [
     { value: "sites", label: "Site setup", detail: "Choose the site and confirm its starting structure." },
@@ -3081,24 +3079,22 @@ function VanguardBuildOverview({
         <Badge variant="outline" className="w-fit border-border bg-muted text-foreground">Read only</Badge>
       </div>
 
+      <p className="mt-3 text-xs leading-5 text-muted-foreground">Use the sidebar to change sections. This sequence shows where the selected section fits in the site path.</p>
       <ol className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4" aria-label="Build sequence" data-testid="section-kinflo-vanguard-build-stepper">
         {steps.map((step, index) => {
           const isActive = step.value === stage;
           return (
-            <li key={step.value}>
-              <button
-                type="button"
-                onClick={() => onStageChange(step.value)}
-                aria-current={isActive ? "step" : undefined}
-                className={`w-full rounded-md border px-3 py-2 text-left transition ${isActive ? "border-primary bg-primary text-primary-foreground" : "border-border bg-muted text-foreground hover:border-primary/50"}`}
-                data-testid={`button-kinflo-vanguard-build-step-${step.value}`}
-              >
+            <li
+              key={step.value}
+              aria-current={isActive ? "step" : undefined}
+              className={`rounded-md border px-3 py-2 ${isActive ? "border-primary bg-primary text-primary-foreground" : "border-border bg-muted text-foreground"}`}
+              data-testid={`step-kinflo-vanguard-build-${step.value}`}
+            >
                 <span className="flex items-center gap-2 text-xs font-semibold">
                   <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] ${isActive ? "bg-primary-foreground/15" : "bg-card text-muted-foreground"}`}>{index + 1}</span>
                   {step.label}
                 </span>
                 <span className={`mt-1 block text-[11px] leading-4 ${isActive ? "text-primary-foreground/75" : "text-muted-foreground"}`}>{step.detail}</span>
-              </button>
             </li>
           );
         })}
@@ -3137,13 +3133,6 @@ function VanguardBuildOverview({
           <p className="mt-3 text-xs leading-5 text-muted-foreground">The launch decision is still read-only. Use Preview for the public review and Operations for the supporting order context.</p>
         ) : null}
 
-        {stage !== "operations" ? (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {stage === "sites" ? <Button type="button" size="sm" onClick={() => onStageChange("preview")} data-testid="button-kinflo-vanguard-build-next-preview">Continue to preview</Button> : null}
-            {stage === "preview" ? <Button type="button" size="sm" variant="outline" onClick={() => onStageChange("operations")} data-testid="button-kinflo-vanguard-build-open-operations">Review operations</Button> : null}
-            {stage === "launch" ? <Button type="button" size="sm" variant="outline" onClick={() => onStageChange("preview")} data-testid="button-kinflo-vanguard-build-return-preview">Return to preview</Button> : null}
-          </div>
-        ) : null}
       </div>
     </section>
   );
@@ -12874,7 +12863,6 @@ export default function AdminKinfloShell() {
                     readiness={clientWebsiteStudioReadiness}
                     readyCount={clientWebsiteStudioReadyCount}
                     previewHref={clientWebsiteStudioPreviewHref}
-                    onStageChange={selectClientWebsiteWorkbenchStage}
                   />
                 </div>
               ) : null}
