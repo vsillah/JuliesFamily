@@ -86,13 +86,22 @@ requireIncludes("docs/kinflo-design-frame-adoption-backlog.json", [
   "\"validationGate\": \"Static validator confirms lane labels, existing tabs remain reachable, and no live action is enabled.\"",
 ]);
 
+const shellContents = read("client/src/pages/AdminKinfloShell.tsx");
+
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "workflowNavigationLanes",
   "workflowNavigationTabCoverage",
   "section-kinflo-workflow-navigation-rail",
   "section-kinflo-workflow-navigation-lanes",
   "section-kinflo-contextual-navigation",
-  "section-kinflo-launch-summary",
+  "section-kinflo-decision-rail",
+  "section-kinflo-next-actions",
+  "section-kinflo-readiness-snapshot",
+  "section-kinflo-linked-data",
+  "Resolve the current gate in order",
+  "Open activation checklist",
+  "Review adapter mapping",
+  "Review launch evidence",
   "Choose a work area first",
   "Sections in this workspace",
   "label: \"Evidence & Activation\"",
@@ -106,11 +115,24 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "className=\"grid gap-2 lg:hidden\"",
 ]);
 
+for (const pattern of [
+  "<KinfloDashboardShell",
+  "section-kinflo-command-brief",
+  "section-kinflo-launch-summary",
+  "section-kinflo-active-object-detail",
+  "section-kinflo-active-object-unblock-detail",
+]) {
+  if (shellContents.includes(pattern)) {
+    fail(`admin shell excludes ${pattern}`, "The consolidated operator hierarchy must not render duplicate command or workspace surfaces.");
+  } else {
+    pass(`admin shell excludes ${pattern}`);
+  }
+}
+
 requireIncludes("package.json", [
   "\"kinflo:validate-workflow-navigation-rail\"",
 ]);
 
-const shellContents = read("client/src/pages/AdminKinfloShell.tsx");
 const expectedLanes = ["control", "build", "launch", "growth", "evidence"];
 for (const lane of expectedLanes) {
   requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
