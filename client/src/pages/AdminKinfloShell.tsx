@@ -4871,9 +4871,15 @@ export default function AdminKinfloShell() {
   const adminScope = useKinfloAdminScope();
   const preferencesAdapter = useKinfloPreferencesAdapter();
   const themeWriteAdapter = useKinfloThemeWriteAdapter();
+  const scopedFixtureExperiencePreferences = {
+    ...snapshot.experiencePreferences,
+    scopeLabel: `${adminScope.tenant.name} site admin`,
+    tenant: adminScope.tenant.name,
+    site: adminScope.site.name,
+  };
   const activeExperiencePreferences = preferencesAdapter.preferences
     ? {
-        ...snapshot.experiencePreferences,
+        ...scopedFixtureExperiencePreferences,
         ...preferencesAdapter.preferences,
         scopeLabel: "my KinFlo admin profile",
         scopeKind: "user" as const,
@@ -4881,7 +4887,7 @@ export default function AdminKinfloShell() {
         site: "All authorized KinFlo surfaces",
         providerBoundary: "Only the verified preferences adapter is live. Every non-preferences mutation and provider write remains blocked.",
       }
-    : snapshot.experiencePreferences;
+    : scopedFixtureExperiencePreferences;
   const [activeTab, setActiveTab] = useState<ShellTabValue>(readInitialShellTab);
   const [activeWorkspaceKey, setActiveWorkspaceKey] = useState<string | null>(() => (
     typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("workspace")

@@ -1,6 +1,5 @@
 import { BarChart3, Blocks, FlaskConical, Gauge, Globe2, LockKeyhole, Mail, Rocket, Settings2, UsersRound } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { buildVanguardOperatorHref, isVanguardOperatorScope } from "@/lib/kinfloVanguardOperatorPortal";
 import { Button } from "@/components/ui/button";
 import {
   buildKinfloDashboardWorkspaceHref,
@@ -47,20 +46,13 @@ export default function KinfloDashboardShell({ activeTab, activeWorkspaceKey, sc
             <h2 className="text-sm font-semibold text-slate-950">Dashboard workspaces</h2>
           </div>
           <p className="mt-1 text-xs leading-5 text-slate-500">
-            Universal KinFlo controls for <span className="font-medium text-slate-700">{scope.label}</span>. Every link preserves this tenant/site scope.
+            Shared KinFlo admin structure for <span className="font-medium text-slate-700">{scope.label}</span>. Site-specific configuration stays inside Website Configuration.
           </p>
         </div>
         <Badge variant="outline" data-testid="badge-kinflo-dashboard-scope">
           {scope.tenantSlug} / {scope.siteKey}
         </Badge>
       </div>
-
-      {isVanguardOperatorScope({ tenantSlug: scope.tenantSlug, siteKey: scope.siteKey }) ? (
-        <a href={buildVanguardOperatorHref()} className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-300 bg-slate-950 px-4 py-3 text-sm font-medium text-white hover:bg-slate-800" data-testid="link-vanguard-operator-portal">
-          <span>Vanguard Operator Portal <span className="ml-2 font-normal text-slate-300">Scoped demo home for Mark</span></span>
-          <span aria-hidden="true">Open →</span>
-        </a>
-      ) : null}
 
       <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4" data-testid="nav-kinflo-dashboard-workspaces">
         {kinfloDashboardWorkspaceGroups.map((group) => (
