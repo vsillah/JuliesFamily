@@ -524,9 +524,15 @@ const workflowNavigationTabCoverage = workflowNavigationLanes.flatMap((lane) => 
 function KinfloTenantAdminSidebar({
   activeTab,
   onSelectTab,
+  activationSteps,
+  activeActivationStepId,
+  onSelectActivationStep,
 }: {
   activeTab: ShellTabValue;
   onSelectTab: (tab: ShellTabValue) => void;
+  activationSteps: KinfloShellSnapshot["hostedActivationRunbook"]["steps"];
+  activeActivationStepId: string;
+  onSelectActivationStep: (stepId: string) => void;
 }) {
   return (
     <aside className="border-y border-r border-border bg-card p-3 md:sticky md:top-4 md:min-h-[calc(100vh-12rem)]" data-testid="section-kinflo-operator-sidebar">
@@ -581,7 +587,7 @@ function KinfloTenantAdminSidebar({
               {isActiveLane ? (
                 <div className="ml-4 mt-1 space-y-0.5 border-l border-primary/30 pl-2" data-testid={`section-kinflo-workflow-lane-tabs-${lane.key}`}>
                   <div className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Sections in this workspace</div>
-                  {lane.tabs.map((tabValue) => (
+                  {lane.tabs.filter((tabValue) => tabValue !== "hosted-activation").map((tabValue) => (
                     <button
                       key={tabValue}
                       type="button"
@@ -594,6 +600,43 @@ function KinfloTenantAdminSidebar({
                       <span className="truncate">{shellTabLabels[tabValue]}</span>
                     </button>
                   ))}
+                  {lane.key === "evidence" ? (
+                    <div className="mt-1 border-t border-border/70 pt-1" data-testid="section-kinflo-sidebar-activation-steps">
+                      <button
+                        type="button"
+                        onClick={() => onSelectTab("hosted-activation")}
+                        aria-current={activeTab === "hosted-activation" ? "page" : undefined}
+                        className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition ${activeTab === "hosted-activation" ? "bg-primary/10 font-semibold text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+                        data-testid="dot-kinflo-workflow-lane-evidence-hosted-activation"
+                      >
+                        <KeyRound className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        <span className="truncate">Hosted activation</span>
+                      </button>
+                      {activeTab === "hosted-activation" ? (
+                        <div className="mt-1 space-y-0.5 border-l border-primary/20 pl-3" data-testid="section-kinflo-sidebar-activation-stepper">
+                          <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Activation steps</div>
+                          {activationSteps.map((step) => {
+                            const isActiveStep = step.id === activeActivationStepId;
+                            return (
+                              <button
+                                key={step.id}
+                                type="button"
+                                onClick={() => onSelectActivationStep(step.id)}
+                                aria-current={isActiveStep ? "step" : undefined}
+                                className={`flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left text-[11px] leading-4 transition ${isActiveStep ? "bg-primary/10 font-semibold text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+                                data-testid={`dot-kinflo-sidebar-activation-step-${step.id}`}
+                              >
+                                <span className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] ${isActiveStep ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                                  {step.order}
+                                </span>
+                                <span className="min-w-0 truncate">{step.label}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
             </div>
@@ -1260,6 +1303,99 @@ function hostedActivationStatusBadge(status: ShellHostedActivationStepStatus) {
     return <Badge variant="destructive">Provider gate</Badge>;
   }
   return <Badge variant="outline">Pending approval</Badge>;
+}
+
+function HostedActivationOverview({
+  runbook,
+  selectedStep,
+}: {
+  runbook: KinfloShellSnapshot["hostedActivationRunbook"];
+  selectedStep?: KinfloShellSnapshot["hostedActivationRunbook"]["steps"][number];
+}) {
+  const pendingApproval = runbook.steps.filter((step) => step.status === "pending_approval").length;
+  const providerGated = runbook.steps.filter((step) => step.status === "blocked_provider_gate").length;
+  const liveBlocked = runbook.steps.filter((step) => !step.liveConvexExecution).length;
+
+  return (
+    <section className="space-y-4" data-testid="section-kinflo-hosted-activation-overview">
+      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="outline" className="kinflo-pill kinflo-pill-warning">Review-only</Badge>
+              <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">Vanguard scope</Badge>
+              <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">Fixture-only</Badge>
+            </div>
+            <h2 className="mt-3 text-xl font-semibold text-foreground sm:text-2xl">Activation overview</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
+              Follow the steps in the sidebar. The selected gate below shows the next review decision; live activation stays unavailable until its evidence is approved.
+            </p>
+          </div>
+          <Button disabled variant="outline" className="shrink-0" data-testid="button-hosted-activation-overview-gated">
+            <ShieldCheck className="mr-2 h-4 w-4" />
+            Live activation unavailable
+          </Button>
+        </div>
+
+        <div className="mt-4 grid gap-2 sm:grid-cols-4" data-testid="section-kinflo-hosted-activation-overview-metrics">
+          {[
+            { label: "Steps", value: runbook.steps.length },
+            { label: "Awaiting owner", value: pendingApproval },
+            { label: "Provider checks", value: providerGated },
+            { label: "Live actions blocked", value: liveBlocked },
+          ].map((item) => (
+            <div key={item.label} className="rounded-lg border border-border bg-muted/40 px-3 py-2">
+              <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{item.label}</div>
+              <div className="mt-1 text-xl font-semibold text-foreground">{item.value}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card p-4" data-testid="section-kinflo-hosted-activation-active-gate">
+        <div data-testid="section-kinflo-hosted-activation-selected-gate">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Selected gate</div>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <h3 className="text-lg font-semibold text-foreground">{selectedStep?.label ?? "Activation step pending"}</h3>
+                {selectedStep ? hostedActivationStatusBadge(selectedStep.status) : null}
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">Owner: {selectedStep?.owner ?? "Assigned owner pending"} · before {selectedStep?.requiredBefore ?? "next approval"}</p>
+            </div>
+            <Button disabled variant="outline" className="shrink-0" data-testid="button-hosted-activation-selected-gate">
+              <LockKeyhole className="mr-2 h-4 w-4" />
+              Gate unavailable
+            </Button>
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-400/40 dark:bg-amber-950/30">
+              <div className="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">What happens next</div>
+              <p className="mt-2 text-sm leading-6 text-amber-950 dark:text-amber-100">{selectedStep?.commandOrAction ?? "Select a gate from the sidebar."}</p>
+            </div>
+            <div className="rounded-xl border border-border bg-muted/40 p-3">
+              <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Evidence needed</div>
+              <p className="mt-2 text-sm leading-6 text-foreground">{selectedStep?.evidenceTarget ?? "No evidence target is available yet."}</p>
+            </div>
+          </div>
+
+          <div className="mt-3 grid gap-2 text-xs sm:grid-cols-3">
+            {[
+              ["Provider writes", selectedStep?.providerWrites ? "Allowed after approval" : "Blocked"],
+              ["Live Convex", selectedStep?.liveConvexExecution ? "Read-only" : "Blocked"],
+              ["Rollback", selectedStep?.rollback ?? "Keep fixture data active"],
+            ].map(([label, value]) => (
+              <div key={label} className="rounded-lg border border-border bg-background px-3 py-2">
+                <div className="font-semibold uppercase tracking-wide text-muted-foreground">{label}</div>
+                <div className="mt-1 leading-5 text-foreground">{value}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }
 
 function HostedActivationOwnerChecklist({
@@ -7305,7 +7441,13 @@ export default function AdminKinfloShell() {
   return (
     <div className="kinflo-admin-shell min-h-screen overflow-x-clip bg-background text-foreground">
       <div className="mx-auto grid max-w-7xl gap-5 px-4 sm:px-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:items-start lg:px-8">
-        <KinfloTenantAdminSidebar activeTab={activeTab} onSelectTab={selectShellTab} />
+        <KinfloTenantAdminSidebar
+          activeTab={activeTab}
+          onSelectTab={selectShellTab}
+          activationSteps={snapshot.hostedActivationRunbook.steps}
+          activeActivationStepId={hostedActivationStepId}
+          onSelectActivationStep={selectHostedActivationStep}
+        />
         <div className="min-w-0">
       <div className="border-b border-border bg-card/95">
         <div className={`mx-auto flex max-w-7xl flex-col px-4 sm:px-6 lg:px-8 ${activeTab === "site-studio" ? "gap-2 py-3" : "gap-5 py-6"}`}>
@@ -7508,7 +7650,7 @@ export default function AdminKinfloShell() {
           </div>
         </section>
 
-        {activeTab === "overview" ? null : (
+        {activeTab === "overview" || activeTab === "hosted-activation" ? null : (
           <KinfloSectionSnapshot
             activeTab={activeTab}
             snapshot={snapshot}
@@ -7516,7 +7658,7 @@ export default function AdminKinfloShell() {
           />
         )}
 
-        <Card className={`${activeWorkflowLane.key === "evidence" ? "mt-5" : "hidden"} border-border bg-card shadow-none`}>
+        <Card className={`${activeWorkflowLane.key === "evidence" && activeTab !== "hosted-activation" ? "mt-5" : "hidden"} border-border bg-card shadow-none`}>
           <CardHeader className="flex flex-col gap-3 space-y-0 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <div className="flex flex-wrap items-center gap-2">
@@ -8406,13 +8548,28 @@ export default function AdminKinfloShell() {
           </TabsContent>
 
           <TabsContent value="hosted-activation" className="mt-6">
-            <KinfloHostedActivationReadinessPanel
-              scope={{
-                tenantSlug: adminScope.tenant.slug,
-                siteSlug: adminScope.site.key,
-              }}
+            <HostedActivationOverview
+              runbook={snapshot.hostedActivationRunbook}
+              selectedStep={selectedHostedActivationStep}
             />
-            <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+            <details
+              className="mt-5 rounded-2xl border border-border bg-card p-4 shadow-sm"
+              data-testid="section-kinflo-hosted-activation-technical-evidence"
+            >
+              <summary className="cursor-pointer list-none text-sm font-semibold text-foreground">
+                <span className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                  <span>Technical evidence and audit trail</span>
+                  <span className="text-xs font-normal text-muted-foreground">Open for repository paths, ledgers, and policy detail</span>
+                </span>
+              </summary>
+              <div className="mt-4 space-y-6">
+                <KinfloHostedActivationReadinessPanel
+                  scope={{
+                    tenantSlug: adminScope.tenant.slug,
+                    siteSlug: adminScope.site.key,
+                  }}
+                />
+                <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
               <div className="min-w-0 space-y-4">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div>
@@ -10988,7 +11145,9 @@ export default function AdminKinfloShell() {
                   </div>
                 </details>
               </div>
-            </section>
+                </section>
+              </div>
+            </details>
           </TabsContent>
 
           <TabsContent value="factory" className="mt-6">
