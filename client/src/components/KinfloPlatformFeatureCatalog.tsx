@@ -313,9 +313,14 @@ function PlatformAnalyticsWorkspace({
         : `${selectedTenantSlugs.length} tenants selected`;
 
   function toggleTenant(tenantSlug: string) {
-    const nextSelection = selectedTenantSlugs.includes(tenantSlug)
-      ? selectedTenantSlugs.filter((slug) => slug !== tenantSlug)
-      : [...selectedTenantSlugs, tenantSlug];
+    const nextSelection =
+      selectedTenantSlugs.length === 0
+        ? allTenants
+            .filter((tenant) => tenant.tenantSlug !== tenantSlug)
+            .map((tenant) => tenant.tenantSlug)
+        : selectedTenantSlugs.includes(tenantSlug)
+          ? selectedTenantSlugs.filter((slug) => slug !== tenantSlug)
+          : [...selectedTenantSlugs, tenantSlug];
     onTenantChange(
       nextSelection.length === allTenants.length ? [] : nextSelection,
     );
@@ -547,7 +552,10 @@ function PlatformAnalyticsWorkspace({
                 >
                   <input
                     type="checkbox"
-                    checked={selectedTenantSlugs.includes(tenant.tenantSlug)}
+                    checked={
+                      selectedTenantSlugs.length === 0 ||
+                      selectedTenantSlugs.includes(tenant.tenantSlug)
+                    }
                     onChange={() => toggleTenant(tenant.tenantSlug)}
                     className="mt-0.5 h-4 w-4 accent-slate-950"
                   />
