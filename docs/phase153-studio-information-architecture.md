@@ -8,12 +8,12 @@ npm run kinflo:validate-studio-information-architecture
 
 ## Change
 
-Build is the persistent operator sidebar parent for site construction and its four child destinations:
+Build is the persistent operator sidebar parent for site construction. Its primary Site setup destination contains two lifecycle sections:
 
-- Build: sites and starting points
 - Configuration: profiles and approvals
 - Handoff: permissions and delivery
-- Preview & Launch: review and release
+
+Launch is the next top-level operator parent for the release path. Its sections are Preview, Readiness, and Domains; this keeps public review and release gates out of the Build lifecycle.
 
 The existing `studioLane`, `studioStage`, and related deep-link parameters remain the routing contract. The prior horizontal lane rail is now a non-interactive context summary. `site-studio` remains a supported route, but it is presented as **Build a site** under the Build parent so site construction does not compete with its own top-level navigation lane.
 

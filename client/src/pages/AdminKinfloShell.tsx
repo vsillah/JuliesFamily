@@ -266,15 +266,15 @@ const shellTabLabels: Record<ShellTabValue, string> = {
   overview: "Overview",
   tenants: "Tenants",
   sites: "Sites",
-  "launch-readiness": "Launch",
+  "launch-readiness": "Readiness",
   "adapter-switch": "Adapter",
   "hosted-activation": "Activation",
-  factory: "Website setup",
+  factory: "Site factory",
   plans: "Plans",
   brand: "Brand",
   navigation: "Navigation",
   preview: "Preview",
-  "site-studio": "Build a site",
+  "site-studio": "Site setup",
   assets: "Assets",
   domains: "Domains",
   integrations: "Integrations",
@@ -508,7 +508,7 @@ const workflowNavigationLanes: {
   {
     key: "launch",
     label: "Launch",
-    description: "Readiness, preview, domains, and handoff gates",
+    description: "Preview, readiness, domains, and release gates",
     icon: Rocket,
     tabs: ["launch-readiness", "preview", "domains"],
     primaryTab: "launch-readiness",
@@ -633,12 +633,10 @@ function KinfloOperatorSidebar({
                   )) : null}
                   {lane.key === "build" && activeTab === "site-studio" ? (
                     <div className="mt-1 space-y-0.5 border-t border-border/70 pt-1" data-testid="section-kinflo-sidebar-build-site-sections">
-                      <div className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Site build sections</div>
+                      <div className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Site lifecycle</div>
                       {[
-                        { key: "build", label: "Build", detail: "Sites and starting points" },
                         { key: "configuration", label: "Configuration", detail: "Profiles and approvals" },
                         { key: "handoff", label: "Handoff", detail: "Permissions and delivery" },
-                        { key: "preview-launch", label: "Preview & Launch", detail: "Review and release" },
                       ].map((section) => {
                         const isActiveSection = activeStudioSection === section.key;
                         return (
@@ -3051,9 +3049,7 @@ function VanguardBuildOverview({
 }) {
   const steps: Array<{ value: ClientWebsiteWorkbenchStage; label: string; detail: string }> = [
     { value: "sites", label: "Site setup", detail: "Choose the site and confirm its starting structure." },
-    { value: "preview", label: "Preview", detail: "Inspect the public journey before any launch decision." },
-    { value: "operations", label: "Operations", detail: "Review intake, fulfillment, quality, and delivery context." },
-    { value: "launch", label: "Review and launch", detail: "Confirm readiness and keep live actions gated." },
+    { value: "operations", label: "Handoff", detail: "Review permissions and delivery context before release." },
   ];
   const activeStep = steps.find((step) => step.value === stage) ?? steps[0];
 
@@ -3063,14 +3059,14 @@ function VanguardBuildOverview({
         <div className="min-w-0">
           <div className="text-sm font-semibold text-foreground">Build a site</div>
           <p className="mt-1 max-w-2xl text-xs leading-5 text-muted-foreground">
-            Follow the site path in order. Operational planning is available when you need it, without taking over the build view.
+            Build covers site setup and handoff. Preview, readiness, and domains continue in Launch.
           </p>
         </div>
         <Badge variant="outline" className="w-fit border-border bg-muted text-foreground">Read only</Badge>
       </div>
 
       <p className="mt-3 text-xs leading-5 text-muted-foreground">Use the sidebar to change sections. This sequence shows where the selected section fits in the site path.</p>
-      <ol className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4" aria-label="Build sequence" data-testid="section-kinflo-vanguard-build-stepper">
+      <ol className="mt-4 grid gap-2 sm:grid-cols-2" aria-label="Build sequence" data-testid="section-kinflo-vanguard-build-stepper">
         {steps.map((step, index) => {
           const isActive = step.value === stage;
           return (
@@ -12844,7 +12840,7 @@ export default function AdminKinfloShell() {
             <section className="flex min-w-0 flex-col gap-2 overflow-x-clip" data-testid="section-kinflo-client-studio-compact-shell">
               {clientWebsiteStudioLaneRail}
 
-              {isVanguardWebsite && clientWebsiteStudioLane === "workbench" ? (
+              {isVanguardWebsite && clientWebsiteStudioLane === "workbench" && clientWebsiteWorkbenchStage === "sites" ? (
                 <div className="order-2" data-testid="section-kinflo-vanguard-build-primary">
                   <VanguardBuildOverview
                     stage={clientWebsiteWorkbenchStage}

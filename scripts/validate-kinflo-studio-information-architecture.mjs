@@ -40,12 +40,11 @@ for (const pattern of [
   'data-testid="section-kinflo-sidebar-build-site-sections"',
   'data-testid={`button-kinflo-studio-section-${section.key}`}',
   'data-testid="section-kinflo-client-studio-context"',
-  'Site build sections',
-  'site-studio": "Build a site"',
-  'Build", detail: "Sites and starting points"',
+  'Site lifecycle',
+  'site-studio": "Site setup"',
+  'factory: "Site factory"',
   'Configuration", detail: "Profiles and approvals"',
   'Handoff", detail: "Permissions and delivery"',
-  'Preview & Launch", detail: "Review and release"',
   "getClientWebsiteStudioNavigationKey",
   'studioLane: lane',
   'studioStage: stage',
@@ -56,6 +55,12 @@ for (const pattern of [
   } else {
     fail(`shell includes ${pattern}`, "Expected Studio navigation contract was not found.");
   }
+}
+
+if (shell.includes('Preview & Launch", detail: "Review and release"')) {
+  fail("Build does not duplicate Launch navigation", "Preview and release belong to the top-level Launch parent, not the Build lifecycle.");
+} else {
+  pass("Build does not duplicate Launch navigation");
 }
 
 if (shell.includes('key: "studio"')) {
