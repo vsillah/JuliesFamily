@@ -577,10 +577,145 @@ function PlatformAnalyticsWorkspace() {
   );
 }
 
+function PlatformLaneAnalytics({
+  section,
+  snapshot,
+}: {
+  section: Exclude<PlatformSection, "overview">;
+  snapshot: ReturnType<typeof getKinfloPlatformAnalyticsSnapshot>;
+}) {
+  const lane = platformSections.find((item) => item.key === section)!;
+  const capabilityCount = (key: string) =>
+    snapshot.capabilityAdoption.find((capability) => capability.key === key)
+      ?.tenantCount ?? 0;
+  const metrics = {
+    control: [
+      [
+        "Tenant relationships",
+        String(snapshot.tenantCount),
+        "Local tenant snapshot",
+      ],
+      ["Sites", String(snapshot.siteCount), "Across all fixture tenants"],
+      [
+        "Active tenants",
+        String(snapshot.activeTenantCount),
+        "Read-only relationship status",
+      ],
+    ],
+    build: [
+      [
+        "Sites represented",
+        String(snapshot.siteCount),
+        "Available in the local snapshot",
+      ],
+      [
+        "Build-enabled tenants",
+        String(capabilityCount("build")),
+        "Capability adoption",
+      ],
+      [
+        "Draft tenants",
+        String(snapshot.draftTenantCount),
+        "Awaiting live readiness",
+      ],
+    ],
+    launch: [
+      [
+        "Launch-enabled tenants",
+        String(capabilityCount("launch")),
+        "Capability adoption",
+      ],
+      [
+        "Sessions at launch",
+        String(snapshot.sessionFlow[2].sessions),
+        "Fixture flow reaches review",
+      ],
+      ["Live release posture", "Gated", "Hosted activation remains disabled"],
+    ],
+    growth: [
+      [
+        "Growth-enabled tenants",
+        String(capabilityCount("growth")),
+        "Capability adoption",
+      ],
+      [
+        "Fixture events",
+        String(
+          snapshot.activityTrend.reduce((total, day) => total + day.events, 0),
+        ),
+        "Illustrative 7-day snapshot",
+      ],
+      [
+        "Operating sessions",
+        String(snapshot.sessionFlow[3].sessions),
+        "Fixture flow reaches operation",
+      ],
+    ],
+    evidence: [
+      [
+        "Evidence-enabled tenants",
+        String(capabilityCount("evidence")),
+        "Capability adoption",
+      ],
+      [
+        "Review sessions",
+        String(snapshot.sessionFlow[2].sessions),
+        "Fixture readiness path",
+      ],
+      ["Live actions", "Gated", "Activation and provider writes disabled"],
+    ],
+  }[section];
+
+  return (
+    <section
+      className="mt-6 border-y border-slate-300 py-6"
+      aria-labelledby={`platform-${section}-analytics-heading`}
+      data-testid={`section-kinflo-platform-${section}-analytics`}
+    >
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+            {lane.label} analytics
+          </div>
+          <h3
+            id={`platform-${section}-analytics-heading`}
+            className="mt-2 text-xl font-semibold tracking-tight text-slate-950"
+          >
+            {lane.label} operating signal
+          </h3>
+        </div>
+        <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+          Local fixture snapshot
+        </span>
+      </div>
+      <div className="mt-4 grid gap-3 sm:grid-cols-3">
+        {metrics.map(([label, value, detail]) => (
+          <div
+            key={label}
+            className="border border-slate-300 bg-white px-4 py-4 shadow-sm"
+          >
+            <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+              {label}
+            </div>
+            <div className="mt-3 text-xl font-semibold text-slate-950">
+              {value}
+            </div>
+            <div className="mt-2 text-sm leading-5 text-slate-600">
+              {detail}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function PlatformLaneView({
   section,
+  snapshot,
 }: {
   section: Exclude<PlatformSection, "overview" | "control">;
+  snapshot: ReturnType<typeof getKinfloPlatformAnalyticsSnapshot>;
 }) {
   const lane = platformSections.find((item) => item.key === section)!;
   const Icon = lane.icon;
@@ -603,6 +738,7 @@ function PlatformLaneView({
           </p>
         </div>
       </div>
+      <PlatformLaneAnalytics section={section} snapshot={snapshot} />
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         {childLabels.map((child, index) => (
           <div
@@ -1089,14 +1225,20 @@ export default function KinfloPlatformFeatureCatalog({
               </>
             ) : activeSection === "control" ? (
               <>
-                <PlatformMetricGrid snapshot={platformAnalyticsSnapshot} />
+                <PlatformLaneAnalytics
+                  section="control"
+                  snapshot={platformAnalyticsSnapshot}
+                />
                 <TenantRelationshipForm
                   canCreateTenant={canCreateTenant}
                   onCreateTenant={onCreateTenant}
                 />
               </>
             ) : (
-              <PlatformLaneView section={activeSection} />
+              <PlatformLaneView
+                section={activeSection}
+                snapshot={platformAnalyticsSnapshot}
+              />
             )}
           </div>
         </div>
