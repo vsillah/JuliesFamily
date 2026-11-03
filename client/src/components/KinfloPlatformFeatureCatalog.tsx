@@ -12,6 +12,7 @@ import {
   LockKeyhole,
   Settings2,
 } from "lucide-react";
+import { getKinfloPlatformAnalyticsSnapshot } from "../lib/kinfloPlatformAnalytics";
 
 type PlatformSection =
   "overview" | "control" | "build" | "launch" | "growth" | "evidence";
@@ -99,29 +100,6 @@ const capabilityOptions = [
   },
 ] as const;
 
-const overviewMetrics = [
-  {
-    label: "Tenant relationships",
-    value: "0",
-    detail: "No live tenant data loaded",
-  },
-  {
-    label: "Sites",
-    value: "0",
-    detail: "Available after a tenant entry point is opened",
-  },
-  {
-    label: "Capability lanes",
-    value: "5",
-    detail: "Platform areas available to configure",
-  },
-  {
-    label: "Capacity posture",
-    value: "Read only",
-    detail: "Live usage requires activation",
-  },
-] as const;
-
 type TenantPlan = {
   name: string;
   slug: string;
@@ -163,7 +141,34 @@ function initialPlatformSection(): PlatformSection {
     : "overview";
 }
 
-function PlatformMetricGrid() {
+function PlatformMetricGrid({
+  snapshot,
+}: {
+  snapshot: ReturnType<typeof getKinfloPlatformAnalyticsSnapshot>;
+}) {
+  const overviewMetrics = [
+    {
+      label: "Tenant relationships",
+      value: String(snapshot.tenantCount),
+      detail: `${snapshot.activeTenantCount} active, ${snapshot.draftTenantCount} draft fixture tenants`,
+    },
+    {
+      label: "Sites",
+      value: String(snapshot.siteCount),
+      detail: "Across the local tenant relationship snapshot",
+    },
+    {
+      label: "Capability lanes",
+      value: "5",
+      detail: "Platform areas available to configure",
+    },
+    {
+      label: "Capacity posture",
+      value: "Fixture only",
+      detail: "Live usage requires activation",
+    },
+  ] as const;
+
   return (
     <section
       aria-labelledby="platform-snapshot-heading"
@@ -208,14 +213,6 @@ function PlatformMetricGrid() {
   );
 }
 
-const analyticsDimensions = [
-  "Tenant reach",
-  "Sessions",
-  "Build usage",
-  "Launch usage",
-  "Growth usage",
-] as const;
-
 const flowStages = [
   { label: "Tenant entry", detail: "Opened consumer workspace" },
   { label: "Build", detail: "Configured site experience" },
@@ -224,6 +221,20 @@ const flowStages = [
 ] as const;
 
 function PlatformAnalyticsWorkspace() {
+  const snapshot = getKinfloPlatformAnalyticsSnapshot();
+  const maxActivity = Math.max(
+    ...snapshot.activityTrend.map((day) => day.events),
+  );
+  const radarPoints = snapshot.capabilityAdoption
+    .map((capability, index) => {
+      const angle =
+        -Math.PI / 2 +
+        (index * Math.PI * 2) / snapshot.capabilityAdoption.length;
+      const radius = 32 + (capability.tenantCount / snapshot.tenantCount) * 58;
+      return `${120 + Math.cos(angle) * radius},${105 + Math.sin(angle) * radius}`;
+    })
+    .join(" ");
+
   return (
     <section
       className="mt-8 border-t border-slate-300 pt-8"
@@ -243,22 +254,34 @@ function PlatformAnalyticsWorkspace() {
           </h2>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
             One place for tenant activity, capability adoption, end-to-end
-            sessions, and usage economics. Live telemetry is not connected in
-            this read-only build.
+            sessions, and usage economics. These values are a local fixture
+            snapshot; live telemetry is not connected in this read-only build.
           </p>
         </div>
         <span className="inline-flex items-center gap-2 text-sm font-medium text-slate-500">
-          <Gauge className="h-4 w-4" aria-hidden="true" /> Awaiting live
-          telemetry
+          <Gauge className="h-4 w-4" aria-hidden="true" />{" "}
+          {snapshot.sourceLabel}
         </span>
       </div>
 
       <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[
-          ["Activity over time", "No live events", "7-day event trend"],
-          ["End-to-end sessions", "Not connected", "Entry to operation"],
+          [
+            "Activity over time",
+            `${snapshot.activityTrend.reduce((total, day) => total + day.events, 0)} fixture events`,
+            "7-day snapshot",
+          ],
+          [
+            "End-to-end sessions",
+            `${snapshot.sessionFlow[0].sessions} started`,
+            "Entry to operation",
+          ],
           ["Usage economics", "Not connected", "Price per usage unit"],
-          ["Tenant coverage", "No live tenants", "Cross-tenant comparison"],
+          [
+            "Tenant coverage",
+            `${snapshot.tenantCount} tenants`,
+            "Cross-tenant snapshot",
+          ],
         ].map(([label, value, detail]) => (
           <div
             key={label}
@@ -299,19 +322,32 @@ function PlatformAnalyticsWorkspace() {
             </span>
           </div>
           <div
-            className="mt-5 flex h-44 items-center justify-center border border-dashed border-slate-300 bg-slate-50 px-5 text-center"
-            data-testid="panel-kinflo-activity-empty"
+            className="mt-5 flex h-44 items-end gap-2 border border-slate-300 bg-slate-50 px-5 pb-5 pt-8"
+            data-testid="panel-kinflo-activity-chart"
           >
-            <div>
-              <div className="text-sm font-semibold text-slate-700">
-                No live activity events loaded
+            {snapshot.activityTrend.map((day) => (
+              <div
+                key={day.label}
+                className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-2"
+              >
+                <div className="text-xs font-semibold text-slate-700">
+                  {day.events}
+                </div>
+                <div
+                  className="w-full bg-slate-950"
+                  style={{
+                    height: `${Math.max(18, (day.events / maxActivity) * 100)}%`,
+                  }}
+                  title={`${day.label}: ${day.events} fixture events`}
+                />
+                <div className="text-xs text-slate-500">{day.label}</div>
               </div>
-              <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">
-                This view will plot tenant sessions, workflow transitions, and
-                platform events once telemetry is connected.
-              </p>
-            </div>
+            ))}
           </div>
+          <p className="mt-3 text-xs leading-5 text-slate-500">
+            Illustrative local fixture events. Live tenant sessions and workflow
+            transitions are not connected.
+          </p>
         </section>
 
         <section
@@ -337,7 +373,7 @@ function PlatformAnalyticsWorkspace() {
               viewBox="0 0 240 210"
               className="h-52 w-full max-w-xs text-slate-300"
               role="img"
-              aria-label="Capability mix radar chart awaiting live telemetry"
+              aria-label="Capability mix radar chart from local fixture snapshot"
             >
               <polygon
                 points="120,18 205,80 172,175 68,175 35,80"
@@ -350,6 +386,13 @@ function PlatformAnalyticsWorkspace() {
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="1"
+              />
+              <polygon
+                points={radarPoints}
+                fill="currentColor"
+                fillOpacity="0.12"
+                stroke="currentColor"
+                strokeWidth="2"
               />
               <line
                 x1="120"
@@ -401,13 +444,15 @@ function PlatformAnalyticsWorkspace() {
                 textAnchor="middle"
                 className="fill-slate-700 text-[10px]"
               >
-                No live data
+                Fixture
               </text>
             </svg>
           </div>
           <div className="mt-1 flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs text-slate-500">
-            {analyticsDimensions.map((dimension) => (
-              <span key={dimension}>{dimension}</span>
+            {snapshot.capabilityAdoption.map((capability) => (
+              <span key={capability.key}>
+                {capability.label}: {capability.tenantCount}
+              </span>
             ))}
           </div>
         </section>
@@ -446,8 +491,8 @@ function PlatformAnalyticsWorkspace() {
             ))}
           </div>
           <p className="mt-4 text-sm leading-6 text-slate-500">
-            Conversion and drop-off rates will appear here when session events
-            are available.
+            Conversion and drop-off rates will use live session events when
+            telemetry is connected. Current counts are fixture-only.
           </p>
         </section>
         <section
@@ -480,6 +525,54 @@ function PlatformAnalyticsWorkspace() {
           </div>
         </section>
       </div>
+
+      <section
+        className="mt-4 border border-slate-300 bg-white p-5 shadow-sm"
+        aria-labelledby="platform-coverage-heading"
+      >
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+              Cross-tenant coverage
+            </div>
+            <h3
+              id="platform-coverage-heading"
+              className="mt-2 text-lg font-semibold text-slate-950"
+            >
+              Tenant activity at a glance
+            </h3>
+          </div>
+          <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+            Fixture snapshot
+          </span>
+        </div>
+        <div className="mt-4 overflow-x-auto border border-slate-200">
+          <table className="w-full min-w-[640px] text-left text-sm">
+            <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-[0.1em] text-slate-500">
+              <tr>
+                <th className="px-3 py-3 font-semibold">Tenant</th>
+                <th className="px-3 py-3 font-semibold">Sites</th>
+                <th className="px-3 py-3 font-semibold">Status</th>
+                <th className="px-3 py-3 font-semibold">Capabilities</th>
+                <th className="px-3 py-3 font-semibold">Activity</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 text-slate-700">
+              {snapshot.tenantCoverage.map((tenant) => (
+                <tr key={tenant.tenant}>
+                  <td className="px-3 py-3 font-semibold text-slate-900">
+                    {tenant.tenant}
+                  </td>
+                  <td className="px-3 py-3">{tenant.sites}</td>
+                  <td className="px-3 py-3 capitalize">{tenant.status}</td>
+                  <td className="px-3 py-3">{tenant.capabilities} of 5</td>
+                  <td className="px-3 py-3">{tenant.activity}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </section>
   );
 }
@@ -795,6 +888,7 @@ export default function KinfloPlatformFeatureCatalog({
   canCreateTenant = false,
   onCreateTenant,
 }: KinfloPlatformFeatureCatalogProps) {
+  const platformAnalyticsSnapshot = getKinfloPlatformAnalyticsSnapshot();
   const [activeSection, setActiveSection] = useState<PlatformSection>(
     initialPlatformSection,
   );
@@ -914,7 +1008,7 @@ export default function KinfloPlatformFeatureCatalog({
             </div>
             {activeSection === "overview" ? (
               <>
-                <PlatformMetricGrid />
+                <PlatformMetricGrid snapshot={platformAnalyticsSnapshot} />
                 <PlatformAnalyticsWorkspace />
                 <section
                   className="mt-8"
@@ -995,7 +1089,7 @@ export default function KinfloPlatformFeatureCatalog({
               </>
             ) : activeSection === "control" ? (
               <>
-                <PlatformMetricGrid />
+                <PlatformMetricGrid snapshot={platformAnalyticsSnapshot} />
                 <TenantRelationshipForm
                   canCreateTenant={canCreateTenant}
                   onCreateTenant={onCreateTenant}
