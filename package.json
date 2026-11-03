@@ -177,6 +177,7 @@
     "kinflo:validate-gate-card-pattern": "node scripts/validate-kinflo-gate-card-pattern.mjs",
     "kinflo:validate-workos-identity-spike": "node scripts/validate-kinflo-workos-identity-spike.mjs",
     "kinflo:validate-client-studio-lane-anchor": "node scripts/validate-kinflo-client-studio-lane-anchor.mjs",
+    "kinflo:validate-studio-information-architecture": "node scripts/validate-kinflo-studio-information-architecture.mjs",
     "kinflo:validate-primary-configure-metric": "node scripts/validate-kinflo-primary-configure-metric.mjs",
     "kinflo:validate-side-by-side-mobile-preview": "node scripts/validate-kinflo-side-by-side-mobile-preview.mjs",
     "kinflo:validate-handoff-readiness-checklist": "node scripts/validate-kinflo-handoff-readiness-checklist.mjs",
