@@ -31,14 +31,17 @@ requireFile("scripts/validate-kinflo-studio-information-architecture.mjs");
 requireFile("docs/phase153-studio-information-architecture.md");
 
 for (const pattern of [
-  'key: "studio"',
-  'label: "Studio"',
-  'tabs: ["site-studio"]',
+  'key: "build"',
+  'label: "Build"',
+  'tabs: ["site-studio", "factory", "content", "brand", "navigation", "assets", "templates"]',
+  'primaryTab: "site-studio"',
   "activeStudioSection",
   "onSelectStudioSection",
-  'data-testid="section-kinflo-sidebar-studio-sections"',
+  'data-testid="section-kinflo-sidebar-build-site-sections"',
   'data-testid={`button-kinflo-studio-section-${section.key}`}',
   'data-testid="section-kinflo-client-studio-context"',
+  'Site build sections',
+  'site-studio": "Build a site"',
   'Build", detail: "Sites and starting points"',
   'Configuration", detail: "Profiles and approvals"',
   'Handoff", detail: "Permissions and delivery"',
@@ -55,10 +58,10 @@ for (const pattern of [
   }
 }
 
-if (shell.includes('tabs: ["factory", "site-studio"')) {
-  fail("Build lane no longer absorbs Studio", "Studio must own its own sidebar parent instead of living inside Build.");
+if (shell.includes('key: "studio"')) {
+  fail("Studio is not a competing parent lane", "The site-builder route must live under Build instead of a separate Studio parent.");
 } else {
-  pass("Build lane no longer absorbs Studio");
+  pass("Studio is not a competing parent lane");
 }
 
 if (shell.includes('role="tablist" aria-label="Client studio lanes"') || shell.includes('role="tab" aria-label="Client studio lanes"')) {

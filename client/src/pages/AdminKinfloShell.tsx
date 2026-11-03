@@ -274,7 +274,7 @@ const shellTabLabels: Record<ShellTabValue, string> = {
   brand: "Brand",
   navigation: "Navigation",
   preview: "Preview",
-  "site-studio": "Studio",
+  "site-studio": "Build a site",
   assets: "Assets",
   domains: "Domains",
   integrations: "Integrations",
@@ -366,7 +366,7 @@ function getKinfloSectionSnapshotMetrics(
       ];
     case "site-studio":
       return [
-        { label: "Studio sites", value: snapshot.clientWebsiteStudio.sites.length, detail: "Scoped workspace targets", targetTestId: focusTarget },
+        { label: "Build sites", value: snapshot.clientWebsiteStudio.sites.length, detail: "Scoped build targets", targetTestId: focusTarget },
         { label: "Starter packs", value: snapshot.clientWebsiteStudio.starterContentPacks.length, detail: "Local content fixtures", targetTestId: focusTarget },
         { label: "Preview lanes", value: clientWebsiteStudioLaneValues.length, detail: "No live publish path", targetTestId: focusTarget },
       ];
@@ -498,22 +498,12 @@ const workflowNavigationLanes: {
   {
     key: "build",
     label: "Build",
-    description: "Factory, content, brand, navigation, assets, and templates",
+    description: "Build sites, factory packets, content, brand, navigation, assets, and templates",
     icon: Factory,
-    tabs: ["factory", "content", "brand", "navigation", "assets", "templates"],
-    primaryTab: "factory",
-    status: "ready",
-    blockedLiveAction: "live content save gated",
-  },
-  {
-    key: "studio",
-    label: "Studio",
-    description: "Build, configure, hand off, preview, and launch client sites",
-    icon: LayoutDashboard,
-    tabs: ["site-studio"],
+    tabs: ["site-studio", "factory", "content", "brand", "navigation", "assets", "templates"],
     primaryTab: "site-studio",
     status: "ready",
-    blockedLiveAction: "studio actions gated",
+    blockedLiveAction: "live content save gated",
   },
   {
     key: "launch",
@@ -628,7 +618,7 @@ function KinfloOperatorSidebar({
               {isActiveLane ? (
                 <div className="ml-4 mt-1 space-y-0.5 border-l border-primary/30 pl-2" data-testid={`section-kinflo-workflow-lane-tabs-${lane.key}`}>
                   <div className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Sections in this workspace</div>
-                  {lane.key !== "activation" && lane.key !== "studio" ? lane.tabs.map((tabValue) => (
+                  {lane.key !== "activation" ? lane.tabs.map((tabValue) => (
                     <button
                       key={tabValue}
                       type="button"
@@ -641,9 +631,9 @@ function KinfloOperatorSidebar({
                       <span className="truncate">{shellTabLabels[tabValue]}</span>
                     </button>
                   )) : null}
-                  {lane.key === "studio" ? (
-                    <div className="mt-1 space-y-0.5 border-t border-border/70 pt-1" data-testid="section-kinflo-sidebar-studio-sections">
-                      <div className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Studio sections</div>
+                  {lane.key === "build" && activeTab === "site-studio" ? (
+                    <div className="mt-1 space-y-0.5 border-t border-border/70 pt-1" data-testid="section-kinflo-sidebar-build-site-sections">
+                      <div className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Site build sections</div>
                       {[
                         { key: "build", label: "Build", detail: "Sites and starting points" },
                         { key: "configuration", label: "Configuration", detail: "Profiles and approvals" },
@@ -7833,7 +7823,7 @@ export default function AdminKinfloShell() {
     >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between" data-testid="section-kinflo-client-studio-context">
         <div className="min-w-0">
-          <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Studio workspace</div>
+          <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Build workspace</div>
           <div className="mt-0.5 truncate text-sm font-semibold text-foreground">
             {clientWebsiteStudioNavigationValues.includes(getClientWebsiteStudioNavigationKey(clientWebsiteStudioLane, clientWebsiteWorkbenchStage))
               ? {
@@ -7844,7 +7834,7 @@ export default function AdminKinfloShell() {
               }[getClientWebsiteStudioNavigationKey(clientWebsiteStudioLane, clientWebsiteWorkbenchStage)]
               : "Build"}
           </div>
-          <p className="mt-0.5 text-xs text-muted-foreground">Choose a Studio section from the sidebar. The active workspace opens here.</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">Choose a build section from the sidebar. The active workspace opens here.</p>
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2 text-xs text-muted-foreground">
           <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">{clientWebsiteStudioStatusLabel}</Badge>

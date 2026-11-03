@@ -8,14 +8,14 @@ npm run kinflo:validate-studio-information-architecture
 
 ## Change
 
-Studio is a persistent operator sidebar parent with four child destinations:
+Build is the persistent operator sidebar parent for site construction and its four child destinations:
 
 - Build: sites and starting points
 - Configuration: profiles and approvals
 - Handoff: permissions and delivery
 - Preview & Launch: review and release
 
-The existing `studioLane`, `studioStage`, and related deep-link parameters remain the routing contract. The prior horizontal lane rail is now a non-interactive context summary so Studio has one navigation owner and the selected child opens directly below the sidebar.
+The existing `studioLane`, `studioStage`, and related deep-link parameters remain the routing contract. The prior horizontal lane rail is now a non-interactive context summary. `site-studio` remains a supported route, but it is presented as **Build a site** under the Build parent so site construction does not compete with its own top-level navigation lane.
 
 ## Boundaries
 
