@@ -6,6 +6,7 @@ import {
   ChartNoAxesCombined,
   Check,
   ClipboardCheck,
+  ChevronDown,
   Gauge,
   Globe2,
   LayoutDashboard,
@@ -142,23 +143,35 @@ function initialPlatformSection(): PlatformSection {
     : "overview";
 }
 
-function initialPlatformTenant() {
-  if (typeof window === "undefined") return "all";
+function initialPlatformTenants(): string[] {
+  if (typeof window === "undefined") return [];
+  const searchParams = new URLSearchParams(window.location.search);
+  const selectedTenants = searchParams.get("platformTenants");
+  if (selectedTenants) {
+    return selectedTenants.split(",").filter(Boolean);
+  }
+  const selectedTenant = searchParams.get("platformTenant");
+  return selectedTenant && selectedTenant !== "all" ? [selectedTenant] : [];
+}
+
+function tenantIsVisible(
+  tenantSlug: string,
+  selectedTenantSlugs: readonly string[],
+) {
   return (
-    new URLSearchParams(window.location.search).get("platformTenant") || "all"
+    selectedTenantSlugs.length === 0 || selectedTenantSlugs.includes(tenantSlug)
   );
 }
 
 function PlatformMetricGrid({
   snapshot,
-  selectedTenantSlug,
+  selectedTenantSlugs,
 }: {
   snapshot: ReturnType<typeof getKinfloPlatformAnalyticsSnapshot>;
-  selectedTenantSlug: string;
+  selectedTenantSlugs: readonly string[];
 }) {
   const visibleTenants = snapshot.tenantCoverage.filter(
-    (tenant) =>
-      selectedTenantSlug === "all" || tenant.tenantSlug === selectedTenantSlug,
+    (tenant) => tenantIsVisible(tenant.tenantSlug, selectedTenantSlugs),
   );
   const siteCount = visibleTenants.reduce(
     (total, tenant) => total + tenant.sites,
@@ -180,7 +193,7 @@ function PlatformMetricGrid({
       label: "Sites",
       value: String(siteCount),
       detail:
-        selectedTenantSlug === "all"
+        selectedTenantSlugs.length === 0
           ? "Across the local tenant relationship snapshot"
           : "Within the selected tenant lens",
     },
@@ -241,20 +254,19 @@ function PlatformMetricGrid({
 }
 
 function PlatformAnalyticsWorkspace({
-  selectedTenantSlug,
+  selectedTenantSlugs,
   onTenantChange,
 }: {
-  selectedTenantSlug: string;
-  onTenantChange: (tenantSlug: string) => void;
+  selectedTenantSlugs: readonly string[];
+  onTenantChange: (tenantSlugs: string[]) => void;
 }) {
   const snapshot = getKinfloPlatformAnalyticsSnapshot();
+  const allTenants = snapshot.tenantCoverage;
   const visibleTenants = snapshot.tenantCoverage.filter(
-    (tenant) =>
-      selectedTenantSlug === "all" || tenant.tenantSlug === selectedTenantSlug,
+    (tenant) => tenantIsVisible(tenant.tenantSlug, selectedTenantSlugs),
   );
   const visibleSeries = snapshot.activityByTenant.filter(
-    (series) =>
-      selectedTenantSlug === "all" || series.tenantSlug === selectedTenantSlug,
+    (series) => tenantIsVisible(series.tenantSlug, selectedTenantSlugs),
   );
   const activityDays = snapshot.activityTrend.map((day, index) => ({
     label: day.label,
@@ -292,7 +304,22 @@ function PlatformAnalyticsWorkspace({
     };
   });
   const selectedTenant =
-    selectedTenantSlug === "all" ? undefined : visibleTenants[0];
+    selectedTenantSlugs.length === 1 ? visibleTenants[0] : undefined;
+  const tenantLensLabel =
+    selectedTenantSlugs.length === 0
+      ? "All tenants"
+      : selectedTenant
+        ? selectedTenant.tenant
+        : `${selectedTenantSlugs.length} tenants selected`;
+
+  function toggleTenant(tenantSlug: string) {
+    const nextSelection = selectedTenantSlugs.includes(tenantSlug)
+      ? selectedTenantSlugs.filter((slug) => slug !== tenantSlug)
+      : [...selectedTenantSlugs, tenantSlug];
+    onTenantChange(
+      nextSelection.length === allTenants.length ? [] : nextSelection,
+    );
+  }
   const visibleSessionStarts = visibleTenants.reduce(
     (total, tenant) => total + tenant.sessions,
     0,
@@ -338,8 +365,7 @@ function PlatformAnalyticsWorkspace({
     "bg-slate-300",
   ];
   const visibleInfrastructure = snapshot.infrastructureByTenant.filter(
-    (tenant) =>
-      selectedTenantSlug === "all" || tenant.tenantSlug === selectedTenantSlug,
+    (tenant) => tenantIsVisible(tenant.tenantSlug, selectedTenantSlugs),
   );
   const infrastructureDenominator = Math.max(1, visibleInfrastructure.length);
   const averageNetworkUtilization = Math.round(
@@ -391,8 +417,7 @@ function PlatformAnalyticsWorkspace({
     0,
   );
   const visibleJourney = snapshot.journeyByTenant.filter(
-    (tenant) =>
-      selectedTenantSlug === "all" || tenant.tenantSlug === selectedTenantSlug,
+    (tenant) => tenantIsVisible(tenant.tenantSlug, selectedTenantSlugs),
   );
   const journeyStages = (visibleJourney[0]?.stages ?? []).map(
     (stage, stageIndex) => {
@@ -497,26 +522,47 @@ function PlatformAnalyticsWorkspace({
       </div>
 
       <div className="mt-5 flex flex-col gap-3 border border-slate-300 bg-white p-4 sm:flex-row sm:items-end sm:justify-between">
-        <label className="grid gap-2 text-sm font-semibold text-slate-800">
-          Tenant lens
-          <select
-            value={selectedTenantSlug}
-            onChange={(event) => onTenantChange(event.target.value)}
-            className="h-10 min-w-64 rounded-md border border-slate-300 bg-white px-3 font-normal text-slate-950 outline-none ring-slate-950 focus:ring-2"
-            data-testid="select-kinflo-platform-tenant-lens"
-          >
-            <option value="all">All tenants</option>
-            {visibleTenants.map((tenant) => (
-              <option key={tenant.tenantSlug} value={tenant.tenantSlug}>
-                {tenant.tenant}
-              </option>
-            ))}
-          </select>
-        </label>
+        <div className="grid gap-2 text-sm font-semibold text-slate-800">
+          <span>Tenant lens</span>
+          <details className="relative min-w-64" data-testid="select-kinflo-platform-tenant-lens">
+            <summary className="flex h-10 cursor-pointer list-none items-center justify-between rounded-md border border-slate-300 bg-white px-3 font-normal text-slate-950 outline-none ring-slate-950 focus:ring-2 [&::-webkit-details-marker]:hidden">
+              <span>{tenantLensLabel}</span>
+              <ChevronDown className="h-4 w-4 text-slate-500" aria-hidden="true" />
+            </summary>
+            <div className="absolute left-0 top-full z-20 mt-2 w-full min-w-72 border border-slate-300 bg-white p-2 font-normal text-slate-800 shadow-lg">
+              <label className="flex cursor-pointer items-center gap-3 px-3 py-2 hover:bg-slate-50">
+                <input
+                  type="checkbox"
+                  checked={selectedTenantSlugs.length === 0}
+                  onChange={() => onTenantChange([])}
+                  className="h-4 w-4 accent-slate-950"
+                />
+                <span>All tenants</span>
+              </label>
+              <div className="my-1 border-t border-slate-200" />
+              {allTenants.map((tenant) => (
+                <label
+                  key={tenant.tenantSlug}
+                  className="flex cursor-pointer items-start gap-3 px-3 py-2 hover:bg-slate-50"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedTenantSlugs.includes(tenant.tenantSlug)}
+                    onChange={() => toggleTenant(tenant.tenantSlug)}
+                    className="mt-0.5 h-4 w-4 accent-slate-950"
+                  />
+                  <span>{tenant.tenant}</span>
+                </label>
+              ))}
+            </div>
+          </details>
+        </div>
         <div className="text-sm text-slate-600">
           {selectedTenant
             ? `Showing ${selectedTenant.tenant}`
-            : `Showing all ${snapshot.tenantCount} fixture tenants`}
+            : selectedTenantSlugs.length === 0
+              ? `Showing all ${snapshot.tenantCount} fixture tenants`
+              : `Showing ${visibleTenants.length} selected fixture tenants`}
         </div>
       </div>
 
@@ -1752,8 +1798,8 @@ export default function KinfloPlatformFeatureCatalog({
   const [activeSection, setActiveSection] = useState<PlatformSection>(
     initialPlatformSection,
   );
-  const [selectedTenantSlug, setSelectedTenantSlug] = useState(
-    initialPlatformTenant,
+  const [selectedTenantSlugs, setSelectedTenantSlugs] = useState(
+    initialPlatformTenants,
   );
   function selectSection(section: PlatformSection) {
     setActiveSection(section);
@@ -1765,12 +1811,17 @@ export default function KinfloPlatformFeatureCatalog({
       window.history.replaceState({}, "", url);
     }
   }
-  function selectTenant(tenantSlug: string) {
-    setSelectedTenantSlug(tenantSlug);
+  function selectTenants(tenantSlugs: string[]) {
+    const nextSelection = Array.from(new Set(tenantSlugs));
+    setSelectedTenantSlugs(nextSelection);
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
-      if (tenantSlug === "all") url.searchParams.delete("platformTenant");
-      else url.searchParams.set("platformTenant", tenantSlug);
+      url.searchParams.delete("platformTenant");
+      if (nextSelection.length === 0) {
+        url.searchParams.delete("platformTenants");
+      } else {
+        url.searchParams.set("platformTenants", nextSelection.join(","));
+      }
       window.history.replaceState({}, "", url);
     }
   }
@@ -1882,11 +1933,11 @@ export default function KinfloPlatformFeatureCatalog({
               <>
                 <PlatformMetricGrid
                   snapshot={platformAnalyticsSnapshot}
-                  selectedTenantSlug={selectedTenantSlug}
+                  selectedTenantSlugs={selectedTenantSlugs}
                 />
                 <PlatformAnalyticsWorkspace
-                  selectedTenantSlug={selectedTenantSlug}
-                  onTenantChange={selectTenant}
+                  selectedTenantSlugs={selectedTenantSlugs}
+                  onTenantChange={selectTenants}
                 />
                 <section
                   className="mt-8"
