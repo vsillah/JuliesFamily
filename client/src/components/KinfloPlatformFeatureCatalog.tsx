@@ -163,6 +163,72 @@ function tenantIsVisible(
   );
 }
 
+type PlatformTimeRange = "7d" | "30d" | "90d";
+
+const platformTimeRanges: readonly {
+  key: PlatformTimeRange;
+  label: string;
+  chartLabel: string;
+}[] = [
+  { key: "7d", label: "Last 7 days", chartLabel: "Last 7 days" },
+  { key: "30d", label: "Last 30 days", chartLabel: "Last 30 days" },
+  { key: "90d", label: "Last 90 days", chartLabel: "Last 90 days" },
+];
+
+const platformActivityFixtures: Record<
+  PlatformTimeRange,
+  { labels: readonly string[]; values: Record<string, readonly number[]> }
+> = {
+  "7d": {
+    labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    values: {
+      "julies-family": [3, 4, 2, 5, 4, 5, 4],
+      "vanguard-enterprises": [2, 3, 3, 4, 3, 5, 4],
+      "advisor-client-starter": [1, 2, 2, 2, 2, 3, 2],
+      "campaign-microsite-lab": [2, 2, 2, 3, 3, 3, 3],
+    },
+  },
+  "30d": {
+    labels: ["Wk 1", "Wk 2", "Wk 3", "Wk 4", "Wk 5", "Wk 6"],
+    values: {
+      "julies-family": [12, 15, 14, 18, 20, 22],
+      "vanguard-enterprises": [8, 11, 10, 13, 15, 17],
+      "advisor-client-starter": [4, 6, 7, 8, 9, 10],
+      "campaign-microsite-lab": [6, 8, 7, 9, 10, 12],
+    },
+  },
+  "90d": {
+    labels: ["M 1", "M 2", "M 3", "M 4", "M 5", "M 6"],
+    values: {
+      "julies-family": [28, 33, 35, 40, 44, 51],
+      "vanguard-enterprises": [18, 22, 25, 28, 32, 36],
+      "advisor-client-starter": [9, 12, 14, 16, 18, 21],
+      "campaign-microsite-lab": [12, 15, 18, 20, 23, 28],
+    },
+  },
+};
+
+function initialPlatformTimeRange(): PlatformTimeRange {
+  if (typeof window === "undefined") return "7d";
+  const value = new URLSearchParams(window.location.search).get(
+    "platformTimeRange",
+  );
+  return platformTimeRanges.some((range) => range.key === value)
+    ? (value as PlatformTimeRange)
+    : "7d";
+}
+
+function activitySeriesForRange(
+  snapshot: ReturnType<typeof getKinfloPlatformAnalyticsSnapshot>,
+  timeRange: PlatformTimeRange,
+) {
+  const fixture = platformActivityFixtures[timeRange];
+  return snapshot.activityByTenant.map((series) => ({
+    ...series,
+    events: fixture.values[series.tenantSlug] ?? series.events,
+  }));
+}
+
 function PlatformMetricGrid({
   snapshot,
   selectedTenantSlugs,
@@ -255,21 +321,26 @@ function PlatformMetricGrid({
 
 function PlatformAnalyticsWorkspace({
   selectedTenantSlugs,
+  timeRange,
   onTenantChange,
+  onTimeRangeChange,
 }: {
   selectedTenantSlugs: readonly string[];
+  timeRange: PlatformTimeRange;
   onTenantChange: (tenantSlugs: string[]) => void;
+  onTimeRangeChange: (timeRange: PlatformTimeRange) => void;
 }) {
   const snapshot = getKinfloPlatformAnalyticsSnapshot();
   const allTenants = snapshot.tenantCoverage;
   const visibleTenants = snapshot.tenantCoverage.filter(
     (tenant) => tenantIsVisible(tenant.tenantSlug, selectedTenantSlugs),
   );
-  const visibleSeries = snapshot.activityByTenant.filter(
+  const visibleSeries = activitySeriesForRange(snapshot, timeRange).filter(
     (series) => tenantIsVisible(series.tenantSlug, selectedTenantSlugs),
   );
-  const activityDays = snapshot.activityTrend.map((day, index) => ({
-    label: day.label,
+  const activityFixture = platformActivityFixtures[timeRange];
+  const activityDays = activityFixture.labels.map((label, index) => ({
+    label,
     events: visibleSeries.reduce(
       (total, series) => total + series.events[index],
       0,
@@ -311,6 +382,9 @@ function PlatformAnalyticsWorkspace({
       : selectedTenant
         ? selectedTenant.tenant
         : `${selectedTenantSlugs.length} tenants selected`;
+  const timeRangeLabel = platformTimeRanges.find(
+    (range) => range.key === timeRange,
+  )?.label;
 
   function toggleTenant(tenantSlug: string) {
     const nextSelection =
@@ -526,10 +600,11 @@ function PlatformAnalyticsWorkspace({
         </span>
       </div>
 
-      <div className="mt-5 flex flex-col gap-3 border border-slate-300 bg-white p-4 sm:flex-row sm:items-end sm:justify-between">
-        <div className="grid gap-2 text-sm font-semibold text-slate-800">
-          <span>Tenant lens</span>
-          <details className="relative min-w-64" data-testid="select-kinflo-platform-tenant-lens">
+      <div className="mt-5 flex flex-col gap-4 border border-slate-300 bg-white p-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <div className="grid gap-2 text-sm font-semibold text-slate-800">
+            <span>Tenant lens</span>
+            <details className="relative min-w-64" data-testid="select-kinflo-platform-tenant-lens">
             <summary className="flex h-10 cursor-pointer list-none items-center justify-between rounded-md border border-slate-300 bg-white px-3 font-normal text-slate-950 outline-none ring-slate-950 focus:ring-2 [&::-webkit-details-marker]:hidden">
               <span>{tenantLensLabel}</span>
               <ChevronDown className="h-4 w-4 text-slate-500" aria-hidden="true" />
@@ -563,14 +638,37 @@ function PlatformAnalyticsWorkspace({
                 </label>
               ))}
             </div>
-          </details>
+            </details>
+          </div>
+          <label className="grid gap-2 text-sm font-semibold text-slate-800">
+            <span>Time range</span>
+            <select
+              value={timeRange}
+              onChange={(event) =>
+                onTimeRangeChange(event.target.value as PlatformTimeRange)
+              }
+              className="h-10 min-w-44 rounded-md border border-slate-300 bg-white px-3 font-normal text-slate-950 outline-none ring-slate-950 focus:ring-2"
+              data-testid="select-kinflo-platform-time-range"
+            >
+              {platformTimeRanges.map((range) => (
+                <option key={range.key} value={range.key}>
+                  {range.label}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
-        <div className="text-sm text-slate-600">
-          {selectedTenant
-            ? `Showing ${selectedTenant.tenant}`
-            : selectedTenantSlugs.length === 0
-              ? `Showing all ${snapshot.tenantCount} fixture tenants`
-              : `Showing ${visibleTenants.length} selected fixture tenants`}
+        <div className="grid gap-1 text-sm text-slate-600 sm:text-right">
+          <span>
+            {selectedTenant
+              ? `Showing ${selectedTenant.tenant}`
+              : selectedTenantSlugs.length === 0
+                ? `Showing all ${snapshot.tenantCount} fixture tenants`
+                : `Showing ${visibleTenants.length} selected fixture tenants`}
+          </span>
+          <span className="text-xs text-slate-500">
+            Activity: {timeRangeLabel} fixture window
+          </span>
         </div>
       </div>
 
@@ -579,7 +677,7 @@ function PlatformAnalyticsWorkspace({
           [
             "Activity over time",
             `${activityDays.reduce((total, day) => total + day.events, 0)} fixture events`,
-            "7-day snapshot",
+            `${timeRangeLabel} fixture snapshot`,
           ],
           [
             "End-to-end sessions",
@@ -960,7 +1058,7 @@ function PlatformAnalyticsWorkspace({
               </h3>
             </div>
             <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
-              Last 7 days
+              {timeRangeLabel}
             </span>
           </div>
           <div
@@ -1809,6 +1907,9 @@ export default function KinfloPlatformFeatureCatalog({
   const [selectedTenantSlugs, setSelectedTenantSlugs] = useState(
     initialPlatformTenants,
   );
+  const [timeRange, setTimeRange] = useState<PlatformTimeRange>(
+    initialPlatformTimeRange,
+  );
   function selectSection(section: PlatformSection) {
     setActiveSection(section);
     if (typeof window !== "undefined") {
@@ -1829,6 +1930,18 @@ export default function KinfloPlatformFeatureCatalog({
         url.searchParams.delete("platformTenants");
       } else {
         url.searchParams.set("platformTenants", nextSelection.join(","));
+      }
+      window.history.replaceState({}, "", url);
+    }
+  }
+  function selectTimeRange(nextTimeRange: PlatformTimeRange) {
+    setTimeRange(nextTimeRange);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (nextTimeRange === "7d") {
+        url.searchParams.delete("platformTimeRange");
+      } else {
+        url.searchParams.set("platformTimeRange", nextTimeRange);
       }
       window.history.replaceState({}, "", url);
     }
@@ -1945,7 +2058,9 @@ export default function KinfloPlatformFeatureCatalog({
                 />
                 <PlatformAnalyticsWorkspace
                   selectedTenantSlugs={selectedTenantSlugs}
+                  timeRange={timeRange}
                   onTenantChange={selectTenants}
+                  onTimeRangeChange={selectTimeRange}
                 />
                 <section
                   className="mt-8"
