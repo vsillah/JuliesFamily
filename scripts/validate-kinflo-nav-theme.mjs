@@ -57,6 +57,10 @@ if (existsSync(shellPath)) {
     "section-kinflo-hosted-activation-technical-evidence",
     "Technical evidence and audit trail",
     "Follow the steps in the sidebar.",
+    "label: \"Evidence\"",
+    "label: \"Activation\"",
+    "Hosted activation, read-only smokes, and cutover gates",
+    "dot-kinflo-workflow-lane-activation-hosted-activation",
   ]) {
     check(shell.includes(marker), `admin shell includes ${marker}`, "The read-only navigation/theme contract is incomplete.");
   }
