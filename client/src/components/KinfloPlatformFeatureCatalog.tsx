@@ -331,6 +331,65 @@ function PlatformAnalyticsWorkspace({
     "bg-slate-500",
     "bg-slate-300",
   ];
+  const infrastructureColors = [
+    "bg-slate-950",
+    "bg-slate-700",
+    "bg-slate-500",
+    "bg-slate-300",
+  ];
+  const visibleInfrastructure = snapshot.infrastructureByTenant.filter(
+    (tenant) =>
+      selectedTenantSlug === "all" || tenant.tenantSlug === selectedTenantSlug,
+  );
+  const infrastructureDenominator = Math.max(1, visibleInfrastructure.length);
+  const averageNetworkUtilization = Math.round(
+    visibleInfrastructure.reduce(
+      (total, tenant) => total + tenant.networkUtilizationPercent,
+      0,
+    ) / infrastructureDenominator,
+  );
+  const averageNetworkHeadroom = Math.round(
+    visibleInfrastructure.reduce(
+      (total, tenant) => total + tenant.networkHeadroomPercent,
+      0,
+    ) / infrastructureDenominator,
+  );
+  const totalIngress = visibleInfrastructure.reduce(
+    (total, tenant) => total + tenant.ingressMbps,
+    0,
+  );
+  const totalEgress = visibleInfrastructure.reduce(
+    (total, tenant) => total + tenant.egressMbps,
+    0,
+  );
+  const totalConcurrentSessions = visibleInfrastructure.reduce(
+    (total, tenant) => total + tenant.concurrentSessions,
+    0,
+  );
+  const averageLatency = Math.round(
+    visibleInfrastructure.reduce(
+      (total, tenant) => total + tenant.p95LatencyMs,
+      0,
+    ) / infrastructureDenominator,
+  );
+  const averageErrorRate = (
+    visibleInfrastructure.reduce(
+      (total, tenant) => total + tenant.errorRatePercent,
+      0,
+    ) / infrastructureDenominator
+  ).toFixed(1);
+  const healthyNodes = visibleInfrastructure.reduce(
+    (total, tenant) => total + tenant.healthyNodes,
+    0,
+  );
+  const totalNodes = visibleInfrastructure.reduce(
+    (total, tenant) => total + tenant.totalNodes,
+    0,
+  );
+  const queueDepth = visibleInfrastructure.reduce(
+    (total, tenant) => total + tenant.queueDepth,
+    0,
+  );
 
   return (
     <section
@@ -419,6 +478,168 @@ function PlatformAnalyticsWorkspace({
             </div>
           </div>
         ))}
+      </div>
+
+      <div
+        className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]"
+        data-testid="section-kinflo-infrastructure-analytics"
+      >
+        <section
+          className="border border-slate-300 bg-white p-5 shadow-sm"
+          aria-labelledby="platform-network-heading"
+          data-testid="panel-kinflo-network-capacity"
+        >
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                Infrastructure health
+              </div>
+              <h3
+                id="platform-network-heading"
+                className="mt-2 text-lg font-semibold text-slate-950"
+              >
+                Network capacity
+              </h3>
+            </div>
+            <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+              Fixture snapshot
+            </span>
+          </div>
+          <div className="mt-4 grid gap-2 sm:grid-cols-3">
+            {[
+              ["Utilization", `${averageNetworkUtilization}%`, "average"],
+              ["Headroom", `${averageNetworkHeadroom}%`, "available"],
+              ["Connections", `${totalConcurrentSessions}`, "concurrent"],
+            ].map(([label, value, detail]) => (
+              <div key={label} className="border border-slate-200 px-3 py-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">
+                  {label}
+                </div>
+                <div className="mt-2 text-lg font-semibold text-slate-900">
+                  {value}
+                </div>
+                <div className="mt-1 text-xs text-slate-500">{detail}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 space-y-3">
+            {visibleInfrastructure.map((tenant) => (
+              <div key={tenant.tenantSlug}>
+                <div className="flex items-center justify-between gap-3 text-xs text-slate-600">
+                  <span className="truncate font-semibold text-slate-800">
+                    {tenant.tenant}
+                  </span>
+                  <span className="shrink-0">
+                    {tenant.networkUtilizationPercent}% used · {tenant.networkHeadroomPercent}% headroom
+                  </span>
+                </div>
+                <div
+                  className="mt-2 h-3 overflow-hidden bg-slate-100"
+                  role="img"
+                  aria-label={`${tenant.tenant} network utilization ${tenant.networkUtilizationPercent} percent`}
+                >
+                  <div
+                    className="h-full bg-slate-700"
+                    style={{ width: `${tenant.networkUtilizationPercent}%` }}
+                  />
+                </div>
+                <div className="mt-1 flex justify-between text-[11px] text-slate-500">
+                  <span>{tenant.ingressMbps} Mbps in</span>
+                  <span>{tenant.egressMbps} Mbps out</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-4 text-xs leading-5 text-slate-500">
+            Network samples are fixture-only. Live bandwidth, connection, and
+            site-level telemetry are not connected.
+          </p>
+        </section>
+
+        <section
+          className="border border-slate-300 bg-white p-5 shadow-sm"
+          aria-labelledby="platform-load-balancing-heading"
+          data-testid="panel-kinflo-load-balancing"
+        >
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                Runtime health
+              </div>
+              <h3
+                id="platform-load-balancing-heading"
+                className="mt-2 text-lg font-semibold text-slate-950"
+              >
+                Load balancing
+              </h3>
+            </div>
+            <span className="text-sm font-semibold text-slate-700">
+              {healthyNodes}/{totalNodes} nodes healthy
+            </span>
+          </div>
+          <div className="mt-4 grid gap-2 sm:grid-cols-3">
+            {[
+              ["p95 latency", `${averageLatency} ms`],
+              ["Error rate", `${averageErrorRate}%`],
+              ["Queue depth", `${queueDepth}`],
+            ].map(([label, value]) => (
+              <div key={label} className="border border-slate-200 px-3 py-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">
+                  {label}
+                </div>
+                <div className="mt-2 text-lg font-semibold text-slate-900">
+                  {value}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 space-y-4">
+            {visibleInfrastructure.map((tenant) => (
+              <div key={tenant.tenantSlug}>
+                <div className="flex items-center justify-between gap-3 text-xs">
+                  <span className="truncate font-semibold text-slate-800">
+                    {tenant.tenant}
+                  </span>
+                  <span className="shrink-0 text-slate-500">
+                    {tenant.healthyNodes}/{tenant.totalNodes} healthy · queue {tenant.queueDepth}
+                  </span>
+                </div>
+                <div
+                  className="mt-2 flex h-4 overflow-hidden bg-slate-100"
+                  role="img"
+                  aria-label={`${tenant.tenant} load distribution across ${tenant.loadDistribution.length} nodes`}
+                >
+                  {tenant.loadDistribution.map((segment, index) => (
+                    <div
+                      key={segment.label}
+                      className={infrastructureColors[index % infrastructureColors.length]}
+                      style={{ width: `${segment.percent}%` }}
+                      title={`${segment.label}: ${segment.percent}%`}
+                    />
+                  ))}
+                </div>
+                <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-slate-500">
+                  {tenant.loadDistribution.map((segment, index) => (
+                    <span
+                      key={segment.label}
+                      className="inline-flex items-center gap-1"
+                    >
+                      <span
+                        className={`h-2 w-2 ${infrastructureColors[index % infrastructureColors.length]}`}
+                        aria-hidden="true"
+                      />
+                      {segment.label} {segment.percent}%
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-4 text-xs leading-5 text-slate-500">
+            Load shares and node health are fixture-only. Failover controls and
+            live routing changes remain unavailable.
+          </p>
+        </section>
       </div>
 
       <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.65fr)]">

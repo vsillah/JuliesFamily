@@ -5,7 +5,10 @@ export type KinfloPlatformAnalyticsSourceKey =
   | "activity_events"
   | "session_events"
   | "capability_usage"
-  | "billing_usage";
+  | "billing_usage"
+  | "network_capacity"
+  | "service_health"
+  | "load_balancing";
 
 export type KinfloPlatformAnalyticsReadiness = {
   mode: KinfloPlatformAnalyticsMode;
@@ -42,6 +45,31 @@ export const kinfloPlatformAnalyticsSourceContract = {
     "currency",
     "periodStart",
     "periodEnd",
+  ],
+  networkCapacity: [
+    "tenantSlug",
+    "siteSlug",
+    "sampledAt",
+    "ingressMbps",
+    "egressMbps",
+    "utilizationPercent",
+    "connectionCount",
+  ],
+  serviceHealth: [
+    "tenantSlug",
+    "siteSlug",
+    "sampledAt",
+    "p95LatencyMs",
+    "errorRatePercent",
+  ],
+  loadBalancing: [
+    "tenantSlug",
+    "siteSlug",
+    "nodeId",
+    "sampledAt",
+    "healthy",
+    "requestSharePercent",
+    "queueDepth",
   ],
   privacyBoundary:
     "No content payloads, provider secrets, raw URLs, or private records belong in this analytics contract.",
@@ -80,6 +108,24 @@ export type KinfloPlatformAnalyticsSnapshot = {
     sessions: number;
     operatingSessions: number;
     activity: string;
+  }[];
+  infrastructureByTenant: readonly {
+    tenantSlug: string;
+    tenant: string;
+    networkUtilizationPercent: number;
+    networkHeadroomPercent: number;
+    ingressMbps: number;
+    egressMbps: number;
+    concurrentSessions: number;
+    p95LatencyMs: number;
+    errorRatePercent: number;
+    healthyNodes: number;
+    totalNodes: number;
+    queueDepth: number;
+    loadDistribution: readonly {
+      label: string;
+      percent: number;
+    }[];
   }[];
   sessionFlow: readonly {
     label: string;
@@ -164,10 +210,14 @@ export function getKinfloPlatformAnalyticsSnapshot(): KinfloPlatformAnalyticsSna
         "session_events",
         "capability_usage",
         "billing_usage",
+        "network_capacity",
+        "service_health",
+        "load_balancing",
       ],
       blockedActions: [
         "connect live telemetry",
         "calculate live price per usage",
+        "connect infrastructure telemetry",
         "publish cross-tenant operational metrics",
       ],
       reason:
@@ -235,6 +285,84 @@ export function getKinfloPlatformAnalyticsSnapshot(): KinfloPlatformAnalyticsSna
           : 0,
       activity: tenant.activity,
     })),
+    infrastructureByTenant: [
+      {
+        tenantSlug: "julies-family",
+        tenant: "Julie\'s Family Learning Program",
+        networkUtilizationPercent: 62,
+        networkHeadroomPercent: 38,
+        ingressMbps: 18,
+        egressMbps: 26,
+        concurrentSessions: 12,
+        p95LatencyMs: 184,
+        errorRatePercent: 0.6,
+        healthyNodes: 3,
+        totalNodes: 3,
+        queueDepth: 4,
+        loadDistribution: [
+          { label: "Site 1", percent: 44 },
+          { label: "Site 2", percent: 36 },
+          { label: "Shared worker pool", percent: 20 },
+        ],
+      },
+      {
+        tenantSlug: "vanguard-enterprises",
+        tenant: "Vanguard Enterprises",
+        networkUtilizationPercent: 48,
+        networkHeadroomPercent: 52,
+        ingressMbps: 12,
+        egressMbps: 18,
+        concurrentSessions: 8,
+        p95LatencyMs: 132,
+        errorRatePercent: 0.3,
+        healthyNodes: 4,
+        totalNodes: 4,
+        queueDepth: 2,
+        loadDistribution: [
+          { label: "Primary", percent: 25 },
+          { label: "Secondary", percent: 25 },
+          { label: "Worker 1", percent: 25 },
+          { label: "Worker 2", percent: 25 },
+        ],
+      },
+      {
+        tenantSlug: "advisor-client-starter",
+        tenant: "Advisor Client Starter",
+        networkUtilizationPercent: 21,
+        networkHeadroomPercent: 79,
+        ingressMbps: 5,
+        egressMbps: 7,
+        concurrentSessions: 3,
+        p95LatencyMs: 250,
+        errorRatePercent: 1.2,
+        healthyNodes: 2,
+        totalNodes: 2,
+        queueDepth: 1,
+        loadDistribution: [
+          { label: "Primary", percent: 50 },
+          { label: "Secondary", percent: 50 },
+        ],
+      },
+      {
+        tenantSlug: "campaign-microsite-lab",
+        tenant: "Campaign Microsite Lab",
+        networkUtilizationPercent: 34,
+        networkHeadroomPercent: 66,
+        ingressMbps: 8,
+        egressMbps: 10,
+        concurrentSessions: 5,
+        p95LatencyMs: 210,
+        errorRatePercent: 0.8,
+        healthyNodes: 2,
+        totalNodes: 3,
+        queueDepth: 3,
+        loadDistribution: [
+          { label: "Primary", percent: 46 },
+          { label: "Secondary", percent: 32 },
+          { label: "Worker", percent: 22 },
+        ],
+      },
+    ],
     sessionFlow: [
       {
         label: "Tenant entry",
