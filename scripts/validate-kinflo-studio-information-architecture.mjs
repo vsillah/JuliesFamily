@@ -56,6 +56,9 @@ for (const pattern of [
   'data-testid="section-kinflo-client-preview-launch-sequence"',
   'Preview &amp; Launch ends at Decision.',
   'data-testid="section-kinflo-client-preview-evidence-collapsed"',
+  'Configuration sequence',
+  'data-testid="section-kinflo-client-configuration-advanced-workspace"',
+  'Overview first, then one active step at a time.',
   'isActiveLane ? "text-foreground/75" : statusTone',
 ]) {
   if (shell.includes(pattern)) {

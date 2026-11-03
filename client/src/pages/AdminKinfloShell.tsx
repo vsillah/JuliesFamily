@@ -3933,7 +3933,6 @@ function ClientWebsiteConfigurationProfiles({
   ];
   const selectedProfile = profiles.profiles.find((profile) => profile.siteKey === selectedSiteKey);
   const configurationSteps: { value: ClientConfigurationSection; label: string; description: string; count: number }[] = [
-    { value: "overview", label: "Overview", description: "Scope and readiness", count: profiles.blockedProfiles },
     { value: "site-setup", label: "Site setup", description: "Permissions and access", count: selectedPermissionPreset?.permissionSet.length ?? 0 },
     { value: "navigation-brand", label: "Navigation and brand", description: "Public-site foundations", count: selectedProfile ? 2 : 0 },
     { value: "domain", label: "Domain", description: "Hostname and SSL", count: selectedDomainReadiness?.dnsChecklist.length ?? 0 },
@@ -4038,7 +4037,14 @@ function ClientWebsiteConfigurationProfiles({
         aria-label="Configuration steps"
         data-testid="tabs-kinflo-client-configuration-steps"
       >
-        <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-6">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0 px-1">
+            <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Configuration sequence</div>
+            <div className="mt-0.5 text-xs text-muted-foreground">Overview first, then one active step at a time.</div>
+          </div>
+          <Badge variant="outline" className="w-fit border-border bg-card text-foreground">{configurationSteps.length} steps</Badge>
+        </div>
+        <div className="mt-2 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
           {configurationSteps.map((step) => {
             const isActive = configurationSection === step.value;
             return (
@@ -4213,6 +4219,39 @@ function ClientWebsiteConfigurationProfiles({
           </div>
         ) : null}
       </div>
+
+      <details
+        className="mt-4 rounded-xl border border-border bg-muted p-3"
+        open={workspace !== "review"}
+        data-testid="section-kinflo-client-configuration-advanced-workspace"
+      >
+        <summary className="cursor-pointer list-none text-sm font-semibold text-foreground">
+          <span className="flex items-center justify-between gap-3">
+            <span>Advanced review workspace</span>
+            <span className="text-xs font-normal text-muted-foreground">Review, changes, approvals, and save</span>
+          </span>
+        </summary>
+        <Tabs
+          value={workspace}
+          onValueChange={(value) => onWorkspaceChange(value as ClientConfigurationWorkspace)}
+          className="mt-3"
+          data-testid="tabs-kinflo-client-configuration-workspace"
+        >
+          <TabsList className="grid h-auto w-full grid-cols-4 bg-slate-100 p-1">
+            {workspaceItems.map((item) => (
+              <TabsTrigger
+                key={item.value}
+                value={item.value}
+                className="min-w-0 px-1 py-1.5 text-[11px] sm:text-xs"
+                data-testid={item.testId}
+              >
+                <span className="truncate">{item.label}</span>
+                <span className="ml-1 hidden text-[10px] text-slate-500 sm:inline">{item.count}</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+      </details>
 
       {configurationSection === "review" ? (
         <details className="mt-4 rounded-xl border border-border bg-muted p-3" open={hasFocusedTechnicalDetails} data-testid="section-kinflo-client-configuration-technical-evidence">
@@ -4505,27 +4544,6 @@ function ClientWebsiteConfigurationProfiles({
           </div>
         </div>
       ) : null}
-
-      <Tabs
-        value={workspace}
-        onValueChange={(value) => onWorkspaceChange(value as ClientConfigurationWorkspace)}
-        className="mt-4"
-        data-testid="tabs-kinflo-client-configuration-workspace"
-      >
-        <TabsList className="grid h-auto w-full grid-cols-4 bg-slate-100 p-1">
-          {workspaceItems.map((item) => (
-            <TabsTrigger
-              key={item.value}
-              value={item.value}
-              className="min-w-0 px-1 py-1.5 text-[11px] sm:text-xs"
-              data-testid={item.testId}
-            >
-              <span className="truncate">{item.label}</span>
-              <span className="ml-1 hidden text-[10px] text-slate-500 sm:inline">{item.count}</span>
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
 
       {selectedReviewPacket && workspace === "review" ? (
         <div
