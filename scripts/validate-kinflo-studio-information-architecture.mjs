@@ -59,6 +59,9 @@ for (const pattern of [
   'Configuration sequence',
   'data-testid="section-kinflo-client-configuration-advanced-workspace"',
   'Overview first, then one active step at a time.',
+  'data-testid="section-kinflo-vanguard-handoff-sequence"',
+  'Move from the client request to delivery review one stage at a time.',
+  'data-testid={`tab-kinflo-vanguard-handoff-stage-${stage.value}`}',
   'isActiveLane ? "text-foreground/75" : statusTone',
 ]) {
   if (shell.includes(pattern)) {

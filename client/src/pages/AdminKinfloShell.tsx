@@ -3072,6 +3072,13 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
   const [operationsRisk, setOperationsRisk] = useState("all");
   const [operationsState, setOperationsState] = useState("all");
   const [selectedOperationsOrder, setSelectedOperationsOrder] = useState("");
+  const [handoffStage, setHandoffStage] = useState<"intake" | "operations" | "fulfillment" | "review">("intake");
+  const handoffStages = [
+    { value: "intake" as const, label: "Intake and access", detail: "Confirm the request, portal, and consent posture." },
+    { value: "operations" as const, label: "Operations", detail: "Review capacity, routing, and queue risk." },
+    { value: "fulfillment" as const, label: "Fulfillment", detail: "Review materials, checks, and delivery evidence." },
+    { value: "review" as const, label: "Review", detail: "Inspect measures, blockers, and the next gate." },
+  ];
   const statusTone = {
     ready: "border-border bg-muted text-foreground",
     active: "border-border bg-muted text-foreground",
@@ -3157,7 +3164,44 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
         </div>
       </div>
 
-      <div className="mt-4 rounded-lg border border-border bg-muted p-3" data-testid="section-kinflo-vanguard-reversr-handoff">
+      <div className="mt-4 rounded-lg border border-border bg-muted p-2" data-testid="section-kinflo-vanguard-handoff-sequence">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0 px-1">
+            <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Handoff sequence</div>
+            <div className="mt-0.5 text-xs text-muted-foreground">Move from the client request to delivery review one stage at a time.</div>
+          </div>
+          <Badge variant="outline" className="w-fit border-border bg-card text-foreground">Read only</Badge>
+        </div>
+        <div className="mt-2 grid gap-2 sm:grid-cols-2 xl:grid-cols-4" role="tablist" aria-label="Handoff sequence">
+          {handoffStages.map((stage, index) => {
+            const isActive = handoffStage === stage.value;
+            return (
+              <button
+                key={stage.value}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                aria-current={isActive ? "step" : undefined}
+                onClick={() => setHandoffStage(stage.value)}
+                className={`min-w-0 rounded-lg border px-3 py-2 text-left transition ${
+                  isActive
+                    ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                    : "border-border bg-card text-foreground hover:border-primary/50"
+                }`}
+                data-testid={`tab-kinflo-vanguard-handoff-stage-${stage.value}`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-current text-[10px] font-semibold">{index + 1}</span>
+                  <span className="truncate text-xs font-semibold">{stage.label}</span>
+                </div>
+                <span className={`mt-1 block text-[10px] leading-4 ${isActive ? "text-primary-foreground/75" : "text-muted-foreground"}`}>{stage.detail}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className={`mt-4 rounded-lg border border-border bg-muted p-3 ${handoffStage === "intake" ? "" : "hidden"}`} data-testid="section-kinflo-vanguard-reversr-handoff">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <div className="text-sm font-semibold text-foreground">Build request overview</div>
@@ -3178,7 +3222,7 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
         </div>
       </div>
 
-      <div className="mt-4 rounded-lg border border-border bg-card p-3" data-testid="section-kinflo-vanguard-order-portal-handoff">
+      <div className={`mt-4 rounded-lg border border-border bg-card p-3 ${handoffStage === "intake" ? "" : "hidden"}`} data-testid="section-kinflo-vanguard-order-portal-handoff">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <div className="flex flex-wrap items-center gap-2">
@@ -3211,7 +3255,7 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
         </div>
       </div>
 
-      <div className="mt-4 rounded-lg border border-border bg-muted p-3" data-testid="section-kinflo-vanguard-assist-queue">
+      <div className={`mt-4 rounded-lg border border-border bg-muted p-3 ${handoffStage === "intake" ? "" : "hidden"}`} data-testid="section-kinflo-vanguard-assist-queue">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <div className="flex flex-wrap items-center gap-2">
@@ -3291,7 +3335,7 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
         </div>
       </div>
 
-      <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3" data-testid="section-kinflo-vanguard-operations-workbench">
+      <div className={`mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 ${handoffStage === "operations" ? "" : "hidden"}`} data-testid="section-kinflo-vanguard-operations-workbench">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <div className="flex flex-wrap items-center gap-2">
@@ -3528,7 +3572,7 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
         </div>
       </div>
 
-      <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3" data-testid="section-kinflo-vanguard-fulfillment-evidence">
+      <div className={`mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 ${handoffStage === "fulfillment" ? "" : "hidden"}`} data-testid="section-kinflo-vanguard-fulfillment-evidence">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <div className="flex flex-wrap items-center gap-2">
@@ -3682,7 +3726,7 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
         </div>
       </div>
 
-      <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3" data-testid="section-kinflo-vanguard-metrics-optimization">
+      <div className={`mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3 ${handoffStage === "review" ? "" : "hidden"}`} data-testid="section-kinflo-vanguard-metrics-optimization">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <div className="flex flex-wrap items-center gap-2">
@@ -3750,7 +3794,7 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
         </div>
       </div>
 
-      <div className="mt-4 flex flex-col gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center" data-testid="section-kinflo-vanguard-brand-asset">
+      <div className={`mt-4 flex flex-col gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 sm:flex-row sm:items-center ${handoffStage === "review" ? "" : "hidden"}`} data-testid="section-kinflo-vanguard-brand-asset">
         <div className="flex shrink-0 items-center justify-center rounded-md border border-slate-200 bg-white p-2">
           <img
             src={vanguardWorkflow.company.logo.image}
@@ -3764,7 +3808,7 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
         </div>
       </div>
 
-      <div id="vanguard-source-parity-readiness" className="mt-4 rounded-lg border border-border bg-muted p-3" data-testid="section-kinflo-vanguard-source-parity-readiness">
+      <div id="vanguard-source-parity-readiness" className={`mt-4 rounded-lg border border-border bg-muted p-3 ${handoffStage === "review" ? "" : "hidden"}`} data-testid="section-kinflo-vanguard-source-parity-readiness">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <div className="text-sm font-semibold text-foreground">Public website coverage</div>
@@ -3795,7 +3839,7 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
         </div>
       </div>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className={`mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4 ${handoffStage === "review" ? "" : "hidden"}`}>
         {[
           { label: "Order", value: vanguardWorkflow.sampleOrder.id },
           { label: "Request", value: vanguardWorkflow.sampleOrder.requestType },
@@ -3809,7 +3853,7 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
         ))}
       </div>
 
-      <div className="mt-3 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(300px,0.34fr)]">
+      <div className={`mt-3 grid gap-3 xl:grid-cols-[minmax(0,1fr)_minmax(300px,0.34fr)] ${handoffStage === "review" ? "" : "hidden"}`}>
         <div className="rounded-lg border border-slate-200 p-3">
           <div className="flex items-center justify-between gap-3">
             <div className="text-sm font-semibold text-slate-950">Fulfillment stages</div>
@@ -3852,7 +3896,7 @@ function VanguardFulfillmentWorkspace({ previewHref }: { previewHref: string }) 
         </div>
       </div>
 
-      <div className="mt-3 grid gap-3 lg:grid-cols-2">
+      <div className={`mt-3 grid gap-3 lg:grid-cols-2 ${handoffStage === "review" ? "" : "hidden"}`}>
         <p className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600"><span className="font-semibold">Order actions:</span> Request saving and status changes are not available in this release.</p>
         <p className="rounded-lg border border-border bg-muted p-3 text-xs leading-5 text-muted-foreground"><span className="font-semibold text-foreground">Private files:</span> Uploads are not available. Associates can review the material categories listed by the client.</p>
       </div>
@@ -13050,7 +13094,7 @@ export default function AdminKinfloShell() {
                 </div>
 
                 <div
-                  className={`${clientWebsiteStudioLane === "handoff" ? "block" : "hidden"} mt-2 max-h-[min(540px,calc(100vh-15rem))] overflow-y-auto overflow-x-hidden pr-1`}
+                  className={`${clientWebsiteStudioLane === "handoff" ? "block" : "hidden"} mt-2 overflow-visible pr-1`}
                   data-testid="section-kinflo-client-studio-lane-handoff"
                 >
                   {isVanguardWebsite ? (
