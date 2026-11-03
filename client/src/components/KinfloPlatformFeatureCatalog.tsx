@@ -390,6 +390,73 @@ function PlatformAnalyticsWorkspace({
     (total, tenant) => total + tenant.queueDepth,
     0,
   );
+  const visibleJourney = snapshot.journeyByTenant.filter(
+    (tenant) =>
+      selectedTenantSlug === "all" || tenant.tenantSlug === selectedTenantSlug,
+  );
+  const journeyStages = (visibleJourney[0]?.stages ?? []).map(
+    (stage, stageIndex) => {
+      const count = visibleJourney.reduce(
+        (total, tenant) => total + (tenant.stages[stageIndex]?.count ?? 0),
+        0,
+      );
+      const previousCount =
+        stageIndex === 0
+          ? count
+          : visibleJourney.reduce(
+              (total, tenant) =>
+                total + (tenant.stages[stageIndex - 1]?.count ?? 0),
+              0,
+            );
+      const conversionPercent =
+        stageIndex === 0
+          ? 100
+          : previousCount > 0
+            ? Math.round((count / previousCount) * 100)
+            : 0;
+
+      return {
+        ...stage,
+        count,
+        conversionPercent,
+        dropOffPercent:
+          stageIndex === 0 || previousCount === 0
+            ? 0
+            : Math.round(((previousCount - count) / previousCount) * 100),
+      };
+    },
+  );
+  const journeyEntryCount = journeyStages[0]?.count ?? 0;
+  const journeyReturningCount = journeyStages.at(-1)?.count ?? 0;
+  const journeyCompletionPercent = journeyEntryCount
+    ? Math.round((journeyReturningCount / journeyEntryCount) * 100)
+    : 0;
+  const largestJourneyDrop = journeyStages.reduce(
+    (largest, stage) =>
+      stage.dropOffPercent > largest.dropOffPercent ? stage : largest,
+    journeyStages[0] ?? {
+      label: "No stage data",
+      count: 0,
+      conversionPercent: 0,
+      dropOffPercent: 0,
+      detail: "No journey events are available",
+    },
+  );
+  const journeyLeaks = visibleJourney.flatMap((tenant) =>
+    tenant.leaks.map((leak) => ({
+      ...leak,
+      tenant: tenant.tenant,
+      tenantSlug: tenant.tenantSlug,
+    })),
+  );
+  const nextJourneyAction =
+    journeyLeaks.find((leak) => leak.priority === "high") ?? journeyLeaks[0];
+  const journeyBarDenominator = Math.max(
+    1,
+    journeyStages.reduce((max, stage) => Math.max(max, stage.count), 0),
+  );
+  const platformLaneHref = (tenantSlug: string, lane: string) =>
+    `/admin/kinflo-os?view=platform&platformTenant=${tenantSlug}&platformSection=${lane}`;
 
   return (
     <section
@@ -641,6 +708,162 @@ function PlatformAnalyticsWorkspace({
           </p>
         </section>
       </div>
+
+      <section
+        className="mt-5 border border-slate-300 bg-white p-5 shadow-sm"
+        aria-labelledby="platform-journey-heading"
+        data-testid="section-kinflo-journey-analytics"
+      >
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+              Journey health
+            </div>
+            <h3
+              id="platform-journey-heading"
+              className="mt-2 text-lg font-semibold text-slate-950"
+            >
+              From site entry to returning use
+            </h3>
+          </div>
+          <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+            Fixture journey snapshot
+          </span>
+        </div>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+          The journey view shows where sites move forward, where a handoff
+          loses momentum, and which owner has the next review.
+        </p>
+
+        <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+          {[
+            ["Sites entered", `${journeyEntryCount}`, "visible journey"],
+            ["Returning use", `${journeyCompletionPercent}%`, "of sites entered"],
+            ["Largest drop", `${largestJourneyDrop.dropOffPercent}%`, largestJourneyDrop.label],
+            ["Open detectors", `${journeyLeaks.length}`, "needs review"],
+          ].map(([label, value, detail]) => (
+            <div key={label} className="border border-slate-200 px-3 py-3">
+              <div className="text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">
+                {label}
+              </div>
+              <div className="mt-2 text-lg font-semibold text-slate-900">
+                {value}
+              </div>
+              <div className="mt-1 text-xs text-slate-500">{detail}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(280px,0.85fr)]">
+          <section
+            aria-labelledby="platform-journey-funnel-heading"
+            data-testid="panel-kinflo-journey-funnel"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <h4
+                id="platform-journey-funnel-heading"
+                className="text-sm font-semibold text-slate-900"
+              >
+                Journey stages
+              </h4>
+              <span className="text-xs text-slate-500">
+                {selectedTenant ? selectedTenant.tenant : "All visible tenants"}
+              </span>
+            </div>
+            <div className="mt-3 space-y-3">
+              {journeyStages.map((stage) => (
+                <div key={stage.key}>
+                  <div className="flex items-center justify-between gap-3 text-xs">
+                    <span className="font-semibold text-slate-800">
+                      {stage.label}
+                    </span>
+                    <span className="shrink-0 text-slate-500">
+                      {stage.count} · {stage.conversionPercent}% from prior
+                    </span>
+                  </div>
+                  <div
+                    className="mt-2 h-3 bg-slate-100"
+                    role="img"
+                    aria-label={`${stage.label}: ${stage.count} sites, ${stage.conversionPercent} percent from prior stage`}
+                  >
+                    <div
+                      className="h-full bg-slate-700"
+                      style={{
+                        width: `${Math.max(3, (stage.count / journeyBarDenominator) * 100)}%`,
+                      }}
+                    />
+                  </div>
+                  <div className="mt-1 text-[11px] text-slate-500">
+                    {selectedTenant
+                      ? stage.detail
+                      : `${stage.count} sites across the visible tenant set`}
+                    {stage.dropOffPercent > 0
+                      ? ` · ${stage.dropOffPercent}% drop-off here`
+                      : ""}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section
+            aria-labelledby="platform-journey-leaks-heading"
+            data-testid="panel-kinflo-journey-leaks"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <h4
+                id="platform-journey-leaks-heading"
+                className="text-sm font-semibold text-slate-900"
+              >
+                Journey leak register
+              </h4>
+              <span className="text-xs text-slate-500">
+                {nextJourneyAction
+                  ? `Next: ${nextJourneyAction.nextAction}`
+                  : "No open detectors"}
+              </span>
+            </div>
+            <div className="mt-3 divide-y divide-slate-200 border border-slate-200">
+              {journeyLeaks.length ? (
+                journeyLeaks.map((leak) => (
+                  <div key={`${leak.tenantSlug}-${leak.key}`} className="p-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="text-sm font-semibold text-slate-900">
+                          {leak.label}
+                        </div>
+                        <div className="mt-1 text-xs text-slate-500">
+                          {leak.tenant} · {leak.affectedCount} affected · {leak.sharePercent}% of tenant sites
+                        </div>
+                      </div>
+                      <span className="shrink-0 text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">
+                        {leak.priority}
+                      </span>
+                    </div>
+                    <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-xs">
+                      <span className="text-slate-500">Owner: {leak.owner}</span>
+                      <a
+                        className="font-semibold text-slate-800 underline decoration-slate-300 underline-offset-2 hover:text-slate-950"
+                        href={platformLaneHref(leak.tenantSlug, leak.lane)}
+                      >
+                        {leak.nextAction}
+                      </a>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="p-3 text-sm text-slate-500">
+                  No journey detectors are open in this lens.
+                </div>
+              )}
+            </div>
+            <p className="mt-3 text-xs leading-5 text-slate-500">
+              Detectors are fixture-only. Live journey events, owners, and
+              task completion are not connected.
+            </p>
+          </section>
+        </div>
+      </section>
 
       <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.65fr)]">
         <section

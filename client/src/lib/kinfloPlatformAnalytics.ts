@@ -8,7 +8,10 @@ export type KinfloPlatformAnalyticsSourceKey =
   | "billing_usage"
   | "network_capacity"
   | "service_health"
-  | "load_balancing";
+  | "load_balancing"
+  | "journey_events"
+  | "journey_leaks"
+  | "ownership";
 
 export type KinfloPlatformAnalyticsReadiness = {
   mode: KinfloPlatformAnalyticsMode;
@@ -71,6 +74,24 @@ export const kinfloPlatformAnalyticsSourceContract = {
     "requestSharePercent",
     "queueDepth",
   ],
+  journeyEvents: [
+    "tenantSlug",
+    "siteSlug",
+    "stage",
+    "occurredAt",
+    "status",
+  ],
+  journeyLeaks: [
+    "tenantSlug",
+    "siteSlug",
+    "detectorKey",
+    "affectedCount",
+    "sharePercent",
+    "owner",
+    "nextAction",
+    "priority",
+  ],
+  ownership: ["tenantSlug", "scope", "owner", "role", "lastReviewedAt"],
   privacyBoundary:
     "No content payloads, provider secrets, raw URLs, or private records belong in this analytics contract.",
 } as const;
@@ -125,6 +146,28 @@ export type KinfloPlatformAnalyticsSnapshot = {
     loadDistribution: readonly {
       label: string;
       percent: number;
+    }[];
+  }[];
+  journeyByTenant: readonly {
+    tenantSlug: string;
+    tenant: string;
+    stages: readonly {
+      key: string;
+      label: string;
+      count: number;
+      conversionPercent: number;
+      dropOffPercent: number;
+      detail: string;
+    }[];
+    leaks: readonly {
+      key: string;
+      label: string;
+      affectedCount: number;
+      sharePercent: number;
+      owner: string;
+      nextAction: string;
+      priority: "high" | "medium" | "low";
+      lane: "build" | "launch" | "growth";
     }[];
   }[];
   sessionFlow: readonly {
@@ -213,11 +256,15 @@ export function getKinfloPlatformAnalyticsSnapshot(): KinfloPlatformAnalyticsSna
         "network_capacity",
         "service_health",
         "load_balancing",
+        "journey_events",
+        "journey_leaks",
+        "ownership",
       ],
       blockedActions: [
         "connect live telemetry",
         "calculate live price per usage",
         "connect infrastructure telemetry",
+        "connect journey stage events",
         "publish cross-tenant operational metrics",
       ],
       reason:
@@ -360,6 +407,155 @@ export function getKinfloPlatformAnalyticsSnapshot(): KinfloPlatformAnalyticsSna
           { label: "Primary", percent: 46 },
           { label: "Secondary", percent: 32 },
           { label: "Worker", percent: 22 },
+        ],
+      },
+    ],
+    journeyByTenant: [
+      {
+        tenantSlug: "julies-family",
+        tenant: "Julie\'s Family Learning Program",
+        stages: [
+          {
+            key: "entry",
+            label: "Site entry",
+            count: 2,
+            conversionPercent: 100,
+            dropOffPercent: 0,
+            detail: "Two sites in the tenant workspace",
+          },
+          {
+            key: "configured",
+            label: "Configured",
+            count: 2,
+            conversionPercent: 100,
+            dropOffPercent: 0,
+            detail: "Starting structure and settings reviewed",
+          },
+          {
+            key: "preview",
+            label: "Preview reviewed",
+            count: 1,
+            conversionPercent: 50,
+            dropOffPercent: 50,
+            detail: "One site still needs a preview review",
+          },
+          {
+            key: "launch",
+            label: "Launch ready",
+            count: 1,
+            conversionPercent: 100,
+            dropOffPercent: 0,
+            detail: "One site reached launch review",
+          },
+          {
+            key: "operate",
+            label: "Operating",
+            count: 1,
+            conversionPercent: 100,
+            dropOffPercent: 0,
+            detail: "One site has an operating session",
+          },
+          {
+            key: "renew",
+            label: "Returning",
+            count: 0,
+            conversionPercent: 0,
+            dropOffPercent: 100,
+            detail: "No returning-site signal is connected yet",
+          },
+        ],
+        leaks: [
+          {
+            key: "preview-review",
+            label: "One site has no preview review",
+            affectedCount: 1,
+            sharePercent: 50,
+            owner: "Studio owner",
+            nextAction: "Review preview lane",
+            priority: "high",
+            lane: "build",
+          },
+          {
+            key: "launch-handoff",
+            label: "One site is waiting for launch handoff",
+            affectedCount: 1,
+            sharePercent: 50,
+            owner: "Launch owner",
+            nextAction: "Open launch review",
+            priority: "high",
+            lane: "launch",
+          },
+          {
+            key: "operating-session",
+            label: "One site has no recent operating session",
+            affectedCount: 1,
+            sharePercent: 50,
+            owner: "Operations",
+            nextAction: "Inspect session path",
+            priority: "medium",
+            lane: "growth",
+          },
+        ],
+      },
+      {
+        tenantSlug: "vanguard-enterprises",
+        tenant: "Vanguard Enterprises",
+        stages: [
+          { key: "entry", label: "Site entry", count: 1, conversionPercent: 100, dropOffPercent: 0, detail: "Pilot site in the tenant workspace" },
+          { key: "configured", label: "Configured", count: 1, conversionPercent: 100, dropOffPercent: 0, detail: "Starting structure and settings reviewed" },
+          { key: "preview", label: "Preview reviewed", count: 1, conversionPercent: 100, dropOffPercent: 0, detail: "Public journey reviewed" },
+          { key: "launch", label: "Launch ready", count: 1, conversionPercent: 100, dropOffPercent: 0, detail: "Reached launch review" },
+          { key: "operate", label: "Operating", count: 1, conversionPercent: 100, dropOffPercent: 0, detail: "Operating session recorded" },
+          { key: "renew", label: "Returning", count: 1, conversionPercent: 100, dropOffPercent: 0, detail: "Returning workflow signal recorded" },
+        ],
+        leaks: [],
+      },
+      {
+        tenantSlug: "advisor-client-starter",
+        tenant: "Advisor Client Starter",
+        stages: [
+          { key: "entry", label: "Site entry", count: 1, conversionPercent: 100, dropOffPercent: 0, detail: "Draft site workspace" },
+          { key: "configured", label: "Configured", count: 1, conversionPercent: 100, dropOffPercent: 0, detail: "Starting structure is present" },
+          { key: "preview", label: "Preview reviewed", count: 0, conversionPercent: 0, dropOffPercent: 100, detail: "No preview review recorded" },
+          { key: "launch", label: "Launch ready", count: 0, conversionPercent: 0, dropOffPercent: 0, detail: "Waiting on preview" },
+          { key: "operate", label: "Operating", count: 0, conversionPercent: 0, dropOffPercent: 0, detail: "Waiting on launch" },
+          { key: "renew", label: "Returning", count: 0, conversionPercent: 0, dropOffPercent: 0, detail: "No returning signal" },
+        ],
+        leaks: [
+          {
+            key: "preview-review",
+            label: "Draft site has no preview review",
+            affectedCount: 1,
+            sharePercent: 100,
+            owner: "Studio owner",
+            nextAction: "Review preview lane",
+            priority: "high",
+            lane: "build",
+          },
+        ],
+      },
+      {
+        tenantSlug: "campaign-microsite-lab",
+        tenant: "Campaign Microsite Lab",
+        stages: [
+          { key: "entry", label: "Site entry", count: 2, conversionPercent: 100, dropOffPercent: 0, detail: "Two draft sites in the workspace" },
+          { key: "configured", label: "Configured", count: 1, conversionPercent: 50, dropOffPercent: 50, detail: "One site has configuration evidence" },
+          { key: "preview", label: "Preview reviewed", count: 0, conversionPercent: 0, dropOffPercent: 100, detail: "No preview review recorded" },
+          { key: "launch", label: "Launch ready", count: 0, conversionPercent: 0, dropOffPercent: 0, detail: "Waiting on preview" },
+          { key: "operate", label: "Operating", count: 0, conversionPercent: 0, dropOffPercent: 0, detail: "Waiting on launch" },
+          { key: "renew", label: "Returning", count: 0, conversionPercent: 0, dropOffPercent: 0, detail: "No returning signal" },
+        ],
+        leaks: [
+          {
+            key: "configuration-evidence",
+            label: "One site has no configuration evidence",
+            affectedCount: 1,
+            sharePercent: 50,
+            owner: "Build owner",
+            nextAction: "Review build lane",
+            priority: "medium",
+            lane: "build",
+          },
         ],
       },
     ],
