@@ -167,6 +167,14 @@ const metricIcons: Record<ShellMetricIconKey, typeof Boxes> = {
   launchGates: Rocket,
 };
 
+const metricFilterTargets: Record<ShellMetricIconKey, { tab: ShellTabValue; label: string }> = {
+  tenants: { tab: "tenants", label: "Filter tenants" },
+  sites: { tab: "sites", label: "Filter sites" },
+  templates: { tab: "templates", label: "Filter templates" },
+  leads: { tab: "crm", label: "Filter leads" },
+  launchGates: { tab: "launch-readiness", label: "Filter launch gates" },
+};
+
 const experienceIcons: Record<ExperienceIconKey, typeof Palette> = {
   theme: Palette,
   navigation: LayoutDashboard,
@@ -7406,17 +7414,27 @@ export default function AdminKinfloShell() {
         <div className={`${activeTab === "site-studio" ? "hidden" : "mt-5 grid"} gap-3 md:grid-cols-2 xl:grid-cols-5`}>
           {snapshot.metrics.map((metric) => {
             const Icon = metricIcons[metric.iconKey];
+            const filterTarget = metricFilterTargets[metric.iconKey];
+            const isActiveFilter = activeTab === filterTarget.tab;
             return (
-              <Card key={metric.label} className="border-slate-200 bg-white shadow-none">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-xs font-medium uppercase tracking-normal text-slate-500">{metric.label}</CardTitle>
-                  <Icon className="h-4 w-4 text-slate-400" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-semibold tracking-normal">{metric.value}</div>
-                  <p className="mt-1 text-xs leading-5 text-slate-500">{metric.detail}</p>
-                </CardContent>
-              </Card>
+              <button
+                key={metric.label}
+                type="button"
+                className={`kinflo-metric-card rounded-lg border p-4 text-left shadow-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${isActiveFilter ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/50 hover:bg-muted"}`}
+                onClick={() => selectShellTab(filterTarget.tab)}
+                aria-label={`${metric.label}: ${metric.value}. ${filterTarget.label}.`}
+                aria-pressed={isActiveFilter}
+                data-filter-target={filterTarget.tab}
+                data-testid={`kinflo-metric-card-${metric.iconKey}`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-xs font-medium uppercase tracking-normal text-muted-foreground">{metric.label}</span>
+                  <Icon className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+                </div>
+                <div className="mt-2 text-2xl font-semibold tracking-normal text-foreground">{metric.value}</div>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">{metric.detail}</p>
+                <span className="mt-3 inline-flex items-center text-xs font-medium text-primary">{filterTarget.label} <ChevronRight className="ml-1 h-3 w-3" aria-hidden="true" /></span>
+              </button>
             );
           })}
         </div>
@@ -7541,8 +7559,8 @@ export default function AdminKinfloShell() {
 
         <Tabs value={activeTab} onValueChange={(value) => selectShellTab(value as ShellTabValue)} className={`${activeTab === "site-studio" ? "mt-1" : "mt-7"} min-w-0`}>
           <section className="min-w-0" data-testid="section-kinflo-workflow-navigation-rail">
-          <div className={`${activeTab === "site-studio" ? "hidden sm:block" : "block"} w-full min-w-0 rounded-md border border-slate-200 bg-white`} data-testid="section-kinflo-contextual-navigation">
-            <div className="flex flex-col gap-2 border-b border-slate-200 px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className={`${activeTab === "site-studio" ? "hidden sm:block" : "block"} w-full min-w-0 rounded-md border border-border bg-card`} data-testid="section-kinflo-contextual-navigation">
+            <div className="flex flex-col gap-2 border-b border-border px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">Sections</div>
                 <div className="text-sm font-semibold text-slate-950">{activeWorkflowLane.label}</div>
