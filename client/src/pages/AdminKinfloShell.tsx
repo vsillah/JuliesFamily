@@ -7056,6 +7056,44 @@ export default function AdminKinfloShell() {
     navigate(query ? `/admin/kinflo-os?${query}` : "/admin/kinflo-os");
   };
 
+  useEffect(() => {
+    if (typeof window === "undefined" || activeTab !== "site-studio") {
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("studioLane") !== "workbench") {
+      return;
+    }
+
+    const legacyStage = params.get("studioStage");
+    const nextTab = legacyStage === "preview"
+      ? "preview"
+      : legacyStage === "launch"
+        ? "launch-readiness"
+        : null;
+    if (!nextTab) {
+      return;
+    }
+
+    params.set("tab", nextTab);
+    [
+      "studioLane",
+      "studioStage",
+      "studioDossier",
+      "studioProvisioning",
+      "studioHandoff",
+      "studioMatrix",
+      "studioSection",
+      "studioConfigure",
+      "studioConfig",
+      "studioChange",
+      "studioApproval",
+      "studioSave",
+    ].forEach((key) => params.delete(key));
+    navigate(`/admin/kinflo-os?${params.toString()}`);
+  }, [activeTab, navigate]);
+
   const scrollClientWebsiteStudioLaneToTop = (lane: ClientWebsiteStudioLane) => {
     if (typeof window === "undefined") {
       return;
