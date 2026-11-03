@@ -1095,17 +1095,17 @@ function HostedActivationOwnerChecklist({
   ];
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm" data-testid={testIds.root}>
+    <section className="rounded-2xl border border-border bg-card p-3 shadow-sm" data-testid={testIds.root}>
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline" className="border-slate-300 bg-slate-50">
+            <Badge variant="outline" className="border-border bg-muted text-foreground">
               Owner gate
             </Badge>
-            <Badge className="bg-slate-950 hover:bg-slate-950">prepare only</Badge>
+            <Badge className="bg-primary text-primary-foreground hover:bg-primary">prepare only</Badge>
           </div>
-          <h3 className="mt-3 text-base font-semibold text-slate-950">Hosted activation owner checklist</h3>
-          <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600" data-testid={testIds.nextGate}>
+          <h3 className="mt-2 text-base font-semibold text-foreground">Hosted activation owner checklist</h3>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground" data-testid={testIds.nextGate}>
             {nextHumanGate}
           </p>
         </div>
@@ -1115,48 +1115,56 @@ function HostedActivationOwnerChecklist({
         </Button>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-4" data-testid={testIds.summary}>
+      <div className="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-4" data-testid={testIds.summary}>
         {summaryItems.map((item) => (
-          <div key={item.label} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-            <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
-            <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
+          <div key={item.label} className="rounded-lg border border-border bg-muted/40 px-3 py-2">
+            <div className="text-[10px] font-medium uppercase tracking-normal text-muted-foreground">{item.label}</div>
+            <div className="mt-1 text-lg font-semibold text-foreground">{item.value}</div>
           </div>
         ))}
       </div>
 
-      <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.38fr)]">
-        <div className="max-h-[360px] space-y-3 overflow-y-auto pr-1" data-testid={testIds.scroll}>
-          {decisions.map((decision) => (
-            <div key={decision.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3" data-testid={`card-hosted-activation-owner-checklist-${decision.id}`}>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                <div className="min-w-0">
-                  <div className="text-sm font-semibold text-slate-950">{decision.label}</div>
-                  <div className="mt-1 text-xs text-slate-500">
-                    {decision.owner} · before {decision.requiredBefore}
+      <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.38fr)]">
+        <ol className="space-y-1.5" data-testid={testIds.scroll}>
+          {decisions.map((decision, index) => {
+            const isNext = decision.id === nextDecision?.id;
+            return (
+              <li key={decision.id} data-testid={`card-hosted-activation-owner-checklist-${decision.id}`}>
+                <div className={`rounded-lg border p-2.5 ${isNext ? "border-primary/40 bg-primary/5" : "border-border bg-muted/20"}`}>
+                  <div className="flex items-center gap-2">
+                    <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${isNext ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                      {index + 1}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-semibold text-foreground">{decision.label}</div>
+                      <div className="truncate text-xs text-muted-foreground">{decision.owner} · before {decision.requiredBefore}</div>
+                    </div>
+                    <Badge variant={decision.status === "pending_owner_decision" ? "secondary" : "outline"} className="shrink-0 whitespace-nowrap">
+                      {decision.status.replaceAll("_", " ")}
+                    </Badge>
                   </div>
+                  {isNext ? (
+                    <div className="mt-2 ml-8 space-y-2 text-xs leading-5 text-muted-foreground">
+                      <p>{decision.decisionNeeded}</p>
+                      <p><span className="font-medium text-foreground">Evidence:</span> {decision.evidenceTarget}</p>
+                    </div>
+                  ) : null}
                 </div>
-                <Badge variant={decision.status === "pending_owner_decision" ? "secondary" : "outline"} className="self-start whitespace-nowrap">
-                  {decision.status.replaceAll("_", " ")}
-                </Badge>
-              </div>
-              <p className="mt-3 text-xs leading-5 text-slate-600">{decision.decisionNeeded}</p>
-              <div className="mt-3 rounded-lg border border-white bg-white p-2 text-xs leading-5 text-slate-600">
-                <span className="font-medium text-slate-900">Evidence: </span>
-                {decision.evidenceTarget}
-              </div>
-            </div>
-          ))}
-        </div>
+              </li>
+            );
+          })}
+        </ol>
 
-        <aside className="rounded-xl border border-amber-200 bg-amber-50 p-3">
-          <div className="text-[11px] font-medium uppercase tracking-normal text-amber-700">Next owner action</div>
-          <div className="mt-2 text-sm font-semibold text-amber-950">{nextDecision?.label ?? "Owner decision pending"}</div>
-          <p className="mt-2 text-xs leading-5 text-amber-900">
+        <aside className="rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-400/40 dark:bg-amber-950/30">
+          <div className="text-[11px] font-medium uppercase tracking-normal text-amber-700 dark:text-amber-300">Next owner action</div>
+          <div className="mt-1 text-sm font-semibold text-amber-950 dark:text-amber-100">{nextDecision?.label ?? "Owner decision pending"}</div>
+          <p className="mt-1 text-xs leading-5 text-amber-900 dark:text-amber-100">
             {nextDecision?.blockedUntil ?? "Owner approval is required before hosted activation can move forward."}
           </p>
-          <div className="mt-3 rounded-lg border border-amber-200 bg-white/70 p-2 text-xs leading-5 text-amber-900">
-            {providerBoundary}
-          </div>
+          <details className="mt-2 rounded-lg border border-amber-200 bg-white/70 p-2 text-xs leading-5 text-amber-900 dark:border-amber-400/40 dark:bg-black/10 dark:text-amber-100">
+            <summary className="cursor-pointer font-medium">Provider boundary</summary>
+            <p className="mt-1">{providerBoundary}</p>
+          </details>
         </aside>
       </div>
     </section>
@@ -10633,40 +10641,59 @@ export default function AdminKinfloShell() {
                       </div>
                     </div>
 
-                    <div className="grid gap-3 lg:grid-cols-2">
-                      {snapshot.hostedActivationRunbook.steps.map((step) => (
-                        <div key={step.id} className="rounded-md border p-3" data-testid={`card-hosted-activation-${step.id}`}>
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                              <div className="text-sm font-medium">{step.order}. {step.label}</div>
-                              <p className="mt-1 text-xs text-muted-foreground">{step.requiredBefore}</p>
-                            </div>
-                            {hostedActivationStatusBadge(step.status)}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    <ol className="space-y-1.5" data-testid="section-kinflo-hosted-activation-stepper">
+                      {snapshot.hostedActivationRunbook.steps.map((step) => {
+                        const isSelected = step.id === hostedActivationStepId;
+                        return (
+                          <li key={step.id} data-testid={`card-hosted-activation-${step.id}`}>
+                            <button
+                              type="button"
+                              onClick={() => selectHostedActivationStep(step.id)}
+                              aria-current={isSelected ? "step" : undefined}
+                              className={`flex w-full items-center gap-3 rounded-lg border p-2.5 text-left transition ${isSelected ? "border-primary/40 bg-primary/5" : "border-border bg-muted/20 hover:bg-muted/50"}`}
+                            >
+                              <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${isSelected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                                {step.order}
+                              </span>
+                              <span className="min-w-0 flex-1">
+                                <span className="block truncate text-sm font-medium text-foreground">{step.label}</span>
+                                <span className="mt-0.5 block truncate text-xs text-muted-foreground">Before: {step.requiredBefore}</span>
+                              </span>
+                              {hostedActivationStatusBadge(step.status)}
+                              <ChevronRight className={`h-4 w-4 shrink-0 ${isSelected ? "text-primary" : "text-muted-foreground/50"}`} aria-hidden="true" />
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ol>
                   </CardContent>
                 </Card>
               </div>
 
-              <div className="space-y-4">
-                <DecisionGateRail
-                  title="Hosted activation decision gate"
-                  owner={selectedHostedActivationStep?.owner ?? "Vambah"}
-                  posture={snapshot.hostedActivationRunbook.activationConsole.nextHumanGate}
-                  evidence={[
-                    selectedHostedActivationStep?.evidenceTarget ?? "Hosted activation evidence target is pending.",
-                    ...snapshot.hostedActivationRunbook.activationConsole.evidenceSummary,
-                  ]}
-                  rollback={selectedHostedActivationStep?.rollback
-                    ?? "Keep all shell surfaces on fixtures and do not run hosted Convex commands."}
-                  blockedActions={snapshot.hostedActivationRunbook.activationConsole.blockedLiveActions}
-                  disabledActionLabel="Hosted activation remains gated"
-                  testId="section-kinflo-hosted-activation-decision-gate-rail"
-                />
+              <div className="space-y-3">
+                <div className="rounded-xl border border-border bg-muted/30 p-3">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Evidence and policy</div>
+                  <p className="mt-1 text-sm leading-5 text-foreground">The active gate stays in the main column. Supporting evidence is available here when you need it.</p>
+                </div>
+                <details className="rounded-xl border border-border bg-card p-3" data-testid="section-kinflo-hosted-activation-supporting-evidence">
+                  <summary className="cursor-pointer list-none text-sm font-semibold text-foreground">Open supporting evidence</summary>
+                  <div className="mt-3 space-y-4">
+                    <DecisionGateRail
+                      title="Hosted activation decision gate"
+                      owner={selectedHostedActivationStep?.owner ?? "Vambah"}
+                      posture={snapshot.hostedActivationRunbook.activationConsole.nextHumanGate}
+                      evidence={[
+                        selectedHostedActivationStep?.evidenceTarget ?? "Hosted activation evidence target is pending.",
+                        ...snapshot.hostedActivationRunbook.activationConsole.evidenceSummary,
+                      ]}
+                      rollback={selectedHostedActivationStep?.rollback
+                        ?? "Keep all shell surfaces on fixtures and do not run hosted Convex commands."}
+                      blockedActions={snapshot.hostedActivationRunbook.activationConsole.blockedLiveActions}
+                      disabledActionLabel="Hosted activation remains gated"
+                      testId="section-kinflo-hosted-activation-decision-gate-rail"
+                    />
 
-                <Card>
+                    <Card>
                   <CardHeader>
                     <CardTitle className="text-base">Completion Rules</CardTitle>
                     <p className="text-sm text-muted-foreground">These rules prevent local evidence from being mistaken for hosted activation.</p>
@@ -10679,9 +10706,9 @@ export default function AdminKinfloShell() {
                       </div>
                     ))}
                   </CardContent>
-                </Card>
+                    </Card>
 
-                <Card>
+                    <Card>
                   <CardHeader>
                     <CardTitle className="text-base">Evidence Targets</CardTitle>
                   </CardHeader>
@@ -10692,9 +10719,9 @@ export default function AdminKinfloShell() {
                       </div>
                     ))}
                   </CardContent>
-                </Card>
+                    </Card>
 
-                <Card>
+                    <Card>
                   <CardHeader>
                     <CardTitle className="text-base">Source Documents</CardTitle>
                   </CardHeader>
@@ -10705,9 +10732,9 @@ export default function AdminKinfloShell() {
                       </div>
                     ))}
                   </CardContent>
-                </Card>
+                    </Card>
 
-                <Card>
+                    <Card>
                   <CardHeader>
                     <CardTitle className="text-base">Provider Boundary</CardTitle>
                   </CardHeader>
@@ -10725,7 +10752,9 @@ export default function AdminKinfloShell() {
                       <span>No live Convex query, mutation, or action is executed.</span>
                     </div>
                   </CardContent>
-                </Card>
+                    </Card>
+                  </div>
+                </details>
               </div>
             </section>
           </TabsContent>
