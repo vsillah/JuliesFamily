@@ -197,7 +197,6 @@ const shellTabValues = [
   "launch-readiness",
   "adapter-switch",
   "hosted-activation",
-  "build-analytics",
   "factory",
   "plans",
   "brand",
@@ -270,7 +269,6 @@ const shellTabLabels: Record<ShellTabValue, string> = {
   "launch-readiness": "Readiness",
   "adapter-switch": "Adapter",
   "hosted-activation": "Activation",
-  "build-analytics": "Analytics",
   factory: "Site factory",
   plans: "Plans",
   brand: "Brand",
@@ -477,135 +475,14 @@ function KinfloSectionSnapshot({
   );
 }
 
-type KinfloBuildAnalyticsSection = {
-  key: string;
-  label: string;
-  detail: string;
-  metrics: KinfloSectionSnapshotMetric[];
-  onOpen: () => void;
-};
-
-function KinfloBuildAnalytics({
-  snapshot,
-  onSelectTab,
-  onSelectStudioSection,
-}: {
-  snapshot: KinfloShellSnapshot;
-  onSelectTab: (tab: ShellTabValue) => void;
-  onSelectStudioSection: (section: ClientWebsiteStudioNavigationKey) => void;
-}) {
-  const focusTarget = "section-kinflo-selected-content";
-  const handoffMetrics: KinfloSectionSnapshotMetric[] = [
-    { label: "Measures tracked", value: vanguardOperationsMetricsFixture.length, detail: "Order-flow, delivery, and capacity signals", targetTestId: "section-kinflo-vanguard-metric-cards" },
-    { label: "Watch signals", value: vanguardOperationsMetricsFixture.filter((metric) => metric.posture === "watch").length, detail: "Review before changing the plan", targetTestId: "section-kinflo-vanguard-metric-cards" },
-    { label: "Action-needed", value: vanguardOperationsMetricsFixture.filter((metric) => metric.posture === "action_needed").length, detail: "Requires an owner review", targetTestId: "section-kinflo-vanguard-metric-cards" },
-  ];
-  const configurationMetrics: KinfloSectionSnapshotMetric[] = [
-    { label: "Profiles", value: snapshot.clientWebsiteStudio.configurationProfiles.profiles.length, detail: "Scoped configuration profiles", targetTestId: focusTarget },
-    { label: "Review packets", value: snapshot.clientWebsiteStudio.configurationReviewPackets.length, detail: "Read-only decisions in scope", targetTestId: focusTarget },
-    { label: "Blocked saves", value: snapshot.clientWebsiteStudio.configurationSaveRequests.length, detail: "Live changes remain gated", targetTestId: focusTarget },
-  ];
-  const sections: KinfloBuildAnalyticsSection[] = [
-    {
-      key: "site-setup",
-      label: "Site setup",
-      detail: "Starting structure, content, brand, navigation, assets, and templates.",
-      metrics: getKinfloSectionSnapshotMetrics("site-studio", snapshot),
-      onOpen: () => onSelectStudioSection("build"),
-    },
-    {
-      key: "configuration",
-      label: "Configuration",
-      detail: "Profiles, approvals, and the read-only change path.",
-      metrics: configurationMetrics,
-      onOpen: () => onSelectStudioSection("configuration"),
-    },
-    {
-      key: "handoff",
-      label: "Handoff",
-      detail: "Permissions, delivery context, and order health signals.",
-      metrics: handoffMetrics,
-      onOpen: () => onSelectStudioSection("handoff"),
-    },
-    ...(["factory", "content", "brand", "navigation", "assets", "templates"] as const).map((tab) => ({
-      key: tab,
-      label: shellTabLabels[tab],
-      detail: `Granular ${shellTabLabels[tab].toLowerCase()} measures for this scoped site.`,
-      metrics: getKinfloSectionSnapshotMetrics(tab, snapshot),
-      onOpen: () => onSelectTab(tab),
-    })),
-  ];
-
-  return (
-    <section className="mt-5 rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5" data-testid="section-kinflo-build-analytics">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Build health</div>
-          <h2 className="mt-1 text-lg font-semibold text-foreground">Build analytics at a glance</h2>
-          <p className="mt-1 max-w-3xl text-sm leading-5 text-muted-foreground">Review the health of every Build section from one scoped, read-only view. Select a measure to open its source section.</p>
-        </div>
-        <Badge variant="outline" className="w-fit kinflo-pill kinflo-pill-neutral">Vanguard scope · read-only</Badge>
-      </div>
-
-      <div className="mt-4 grid gap-2 sm:grid-cols-3" data-testid="section-kinflo-build-analytics-summary">
-        {[
-          { label: "Build sections", value: sections.length, detail: "Persistent destinations" },
-          { label: "Scoped sites", value: snapshot.clientWebsiteStudio.sites.length, detail: "Available for review" },
-          { label: "Handoff measures", value: vanguardOperationsMetricsFixture.length, detail: "Visible in the Handoff source" },
-        ].map((metric) => (
-          <div key={metric.label} className="rounded-lg border border-border bg-muted/30 p-3">
-            <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{metric.label}</div>
-            <div className="mt-2 text-2xl font-semibold text-foreground">{metric.value}</div>
-            <div className="mt-1 text-xs leading-5 text-muted-foreground">{metric.detail}</div>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-5 space-y-3" data-testid="section-kinflo-build-analytics-sections">
-        {sections.map((section) => (
-          <section key={section.key} className="rounded-lg border border-border bg-muted/20 p-3" data-testid={`section-kinflo-build-analytics-${section.key}`}>
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-              <div className="min-w-0">
-                <h3 className="text-sm font-semibold text-foreground">{section.label}</h3>
-                <p className="mt-1 text-xs leading-5 text-muted-foreground">{section.detail}</p>
-              </div>
-              <Button type="button" variant="outline" size="sm" className="w-fit shrink-0" onClick={section.onOpen}>
-                Open section
-                <ChevronRight className="ml-1 h-3 w-3" aria-hidden="true" />
-              </Button>
-            </div>
-            <div className="mt-3 grid gap-2 sm:grid-cols-3">
-              {section.metrics.map((metric) => (
-                <button
-                  key={metric.label}
-                  type="button"
-                  className="kinflo-section-metric-card rounded-md border border-border bg-card p-3 text-left transition hover:border-primary/50 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  onClick={section.onOpen}
-                  data-filter-target={section.key}
-                  aria-label={`${section.label}, ${metric.label}: ${metric.value}. Open source section.`}
-                >
-                  <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{metric.label}</div>
-                  <div className="mt-2 text-xl font-semibold text-foreground">{metric.value}</div>
-                  <div className="mt-1 text-xs leading-5 text-muted-foreground">{metric.detail}</div>
-                </button>
-              ))}
-            </div>
-          </section>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 const workflowNavigationLanes: {
-  key: "control" | "build" | "analytics" | "studio" | "launch" | "growth" | "evidence" | "activation";
+  key: "control" | "build" | "studio" | "launch" | "growth" | "evidence" | "activation";
   label: string;
   description: string;
   icon: typeof Boxes;
   tabs: ShellTabValue[];
   primaryTab: ShellTabValue;
   sectionCount?: number;
-  standalone?: boolean;
   status: "ready" | "review" | "blocked";
   blockedLiveAction: string;
 }[] = [
@@ -629,18 +506,6 @@ const workflowNavigationLanes: {
     sectionCount: 9,
     status: "ready",
     blockedLiveAction: "live content save gated",
-  },
-  {
-    key: "analytics",
-    label: "Analytics",
-    description: "Cross-section Build and Handoff health",
-    icon: ListChecks,
-    tabs: ["build-analytics"],
-    primaryTab: "build-analytics",
-    sectionCount: 1,
-    standalone: true,
-    status: "ready",
-    blockedLiveAction: "live analytics reads gated",
   },
   {
     key: "launch",
@@ -685,6 +550,117 @@ const workflowNavigationLanes: {
 ];
 
 const workflowNavigationTabCoverage = workflowNavigationLanes.flatMap((lane) => lane.tabs);
+
+type KinfloWorkflowLane = (typeof workflowNavigationLanes)[number];
+
+function getKinfloWorkflowLaneMetrics(
+  lane: KinfloWorkflowLane,
+  snapshot: KinfloShellSnapshot,
+): KinfloSectionSnapshotMetric[] {
+  if (lane.key === "build") {
+    return [
+      { label: "Build sections", value: 9, detail: "Persistent site setup and lifecycle destinations", targetTestId: "section-kinflo-selected-content" },
+      { label: "Scoped sites", value: snapshot.clientWebsiteStudio.sites.length, detail: "Available in this operator scope", targetTestId: "section-kinflo-selected-content" },
+      { label: "Handoff measures", value: vanguardOperationsMetricsFixture.length, detail: "Order health signals in Handoff", targetTestId: "section-kinflo-selected-content" },
+    ];
+  }
+  return getKinfloSectionSnapshotMetrics(lane.primaryTab, snapshot);
+}
+
+function KinfloWorkflowLaneSnapshot({
+  lane,
+  snapshot,
+  onSelectTab,
+}: {
+  lane: KinfloWorkflowLane;
+  snapshot: KinfloShellSnapshot;
+  onSelectTab: (tab: ShellTabValue) => void;
+}) {
+  const metrics = getKinfloWorkflowLaneMetrics(lane, snapshot);
+  return (
+    <section className="mt-5 rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5" data-testid={`section-kinflo-lane-snapshot-${lane.key}`}>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">L1 workspace health</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">{lane.label} at a glance</h2>
+          <p className="mt-1 text-sm leading-5 text-muted-foreground">Review this workspace&apos;s scoped signals, then open a section below.</p>
+        </div>
+        <Badge variant="outline" className="w-fit kinflo-pill kinflo-pill-neutral">Vanguard scope · read-only</Badge>
+      </div>
+      <div className="mt-4 grid gap-2 sm:grid-cols-3">
+        {metrics.map((metric) => (
+          <button
+            key={metric.label}
+            type="button"
+            className="kinflo-section-metric-card rounded-lg border border-border bg-muted/30 p-3 text-left transition hover:border-primary/50 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            onClick={() => onSelectTab(lane.primaryTab)}
+            data-filter-target={lane.key}
+            aria-label={`${lane.label}, ${metric.label}: ${metric.value}. Open ${shellTabLabels[lane.primaryTab]}.`}
+          >
+            <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{metric.label}</div>
+            <div className="mt-2 text-2xl font-semibold text-foreground">{metric.value}</div>
+            <div className="mt-1 text-xs leading-5 text-muted-foreground">{metric.detail}</div>
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function KinfloOverviewAnalytics({
+  snapshot,
+  onSelectTab,
+}: {
+  snapshot: KinfloShellSnapshot;
+  onSelectTab: (tab: ShellTabValue) => void;
+}) {
+  return (
+    <section className="mt-5 rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5" data-testid="section-kinflo-overview-analytics">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">L0 operating health</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">Workspace health at a glance</h2>
+          <p className="mt-1 max-w-3xl text-sm leading-5 text-muted-foreground">Compare the six operator workspaces, then open a lane to inspect its scoped sections and inform the next best action.</p>
+        </div>
+        <Badge variant="outline" className="w-fit kinflo-pill kinflo-pill-neutral">Vanguard scope · read-only</Badge>
+      </div>
+      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        {workflowNavigationLanes.map((lane) => {
+          const metrics = getKinfloWorkflowLaneMetrics(lane, snapshot);
+          return (
+            <section key={lane.key} className="rounded-lg border border-border bg-muted/20 p-3" data-testid={`section-kinflo-overview-analytics-${lane.key}`}>
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <h3 className="text-sm font-semibold text-foreground">{lane.label}</h3>
+                  <p className="mt-1 text-xs leading-5 text-muted-foreground">{lane.description}</p>
+                </div>
+                <Button type="button" variant="outline" size="sm" className="shrink-0" onClick={() => onSelectTab(lane.primaryTab)}>
+                  Open lane
+                  <ChevronRight className="ml-1 h-3 w-3" aria-hidden="true" />
+                </Button>
+              </div>
+              <div className="mt-3 grid grid-cols-3 gap-2">
+                {metrics.map((metric) => (
+                  <button
+                    key={metric.label}
+                    type="button"
+                    className="kinflo-section-metric-card min-w-0 rounded-md border border-border bg-card p-2 text-left transition hover:border-primary/50 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    onClick={() => onSelectTab(lane.primaryTab)}
+                    data-filter-target={lane.key}
+                    aria-label={`${lane.label}, ${metric.label}: ${metric.value}. Open ${shellTabLabels[lane.primaryTab]}.`}
+                  >
+                    <div className="truncate text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{metric.label}</div>
+                    <div className="mt-1 text-lg font-semibold text-foreground">{metric.value}</div>
+                  </button>
+                ))}
+              </div>
+            </section>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
 
 function KinfloOperatorSidebar({
   activeTab,
@@ -752,10 +728,9 @@ function KinfloOperatorSidebar({
                   </span>
                 </span>
               </button>
-              {isActiveLane && !lane.standalone ? (
+              {isActiveLane ? (
                 <div className="ml-4 mt-1 space-y-0.5 border-l border-primary/30 pl-2" data-testid={`section-kinflo-workflow-lane-tabs-${lane.key}`}>
-                  <>
-                      <div className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Sections in this workspace</div>
+                  <div className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Sections in this workspace</div>
                       {lane.key !== "activation" ? lane.tabs.map((tabValue) => (
                         (() => {
                           const isActiveTab = activeTab === tabValue
@@ -838,7 +813,6 @@ function KinfloOperatorSidebar({
                       ) : null}
                         </div>
                       ) : null}
-                  </>
                 </div>
               ) : null}
             </div>
@@ -8265,9 +8239,14 @@ export default function AdminKinfloShell() {
           </div>
         </section>
 
+        {activeTab === "overview" ? (
+          <KinfloOverviewAnalytics snapshot={snapshot} onSelectTab={selectShellTab} />
+        ) : (
+          <KinfloWorkflowLaneSnapshot lane={activeWorkflowLane} snapshot={snapshot} onSelectTab={selectShellTab} />
+        )}
+
         {activeTab === "overview"
           || activeTab === "hosted-activation"
-          || activeTab === "build-analytics"
           || (activeTab === "site-studio" && getClientWebsiteStudioNavigationKey(clientWebsiteStudioLane, clientWebsiteWorkbenchStage) !== "build") ? null : (
           <KinfloSectionSnapshot
             activeTab={activeTab}
@@ -8395,14 +8374,6 @@ export default function AdminKinfloShell() {
         ) : null}
 
         {activeTab === "overview" ? null : <Tabs value={activeTab} onValueChange={(value) => selectShellTab(value as ShellTabValue)} className={`${activeTab === "site-studio" ? "mt-1" : "mt-7"} min-w-0`} data-testid="section-kinflo-selected-content">
-          <TabsContent value="build-analytics" className="mt-6">
-            <KinfloBuildAnalytics
-              snapshot={snapshot}
-              onSelectTab={selectShellTab}
-              onSelectStudioSection={selectClientWebsiteStudioSection}
-            />
-          </TabsContent>
-
           <TabsContent value="tenants" className="mt-6">
             <section className="space-y-4">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
