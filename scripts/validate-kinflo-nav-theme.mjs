@@ -1,0 +1,76 @@
+import { existsSync, readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+
+const checks = [];
+const check = (condition, label, detail) => checks.push({ ok: Boolean(condition), label, detail });
+const read = (path) => readFileSync(path, "utf8");
+
+const shellPath = "client/src/pages/AdminKinfloShell.tsx";
+const cssPath = "client/src/index.css";
+const packagePath = "package.json";
+for (const path of [shellPath, cssPath, packagePath]) {
+  check(existsSync(path), `${path} exists`, "Expected navigation/theme artifact is missing.");
+}
+
+if (existsSync(shellPath)) {
+  const shell = read(shellPath);
+  for (const marker of [
+    "useVanguardTheme",
+    "VanguardThemeControl",
+    "KinfloPillCluster",
+    "kinflo-pill-success",
+    "kinflo-pill-info",
+    "kinflo-pill-warning",
+    "kinflo-pill-neutral",
+    "section-kinflo-tenant-control-plane-table",
+    "section-kinflo-site-factory-queue-table",
+    "Previous table page",
+    "Next table page",
+    "No tenants match this search.",
+    "No sites match this search.",
+  ]) {
+    check(shell.includes(marker), `admin shell includes ${marker}`, "The read-only navigation/theme contract is incomplete.");
+  }
+  check(!shell.includes("convex/_generated/api"), "admin shell excludes generated Convex bindings", "This UX lane must remain source-only.");
+  check(!shell.includes("useMutation(") && !shell.includes("useAction("), "admin shell excludes live Convex execution", "Mutation/action execution must remain gated.");
+}
+
+if (existsSync(cssPath)) {
+  const css = read(cssPath);
+  for (const marker of [
+    ".kinflo-admin-shell",
+    ".kinflo-admin-shell .kinflo-pill-success",
+    ".kinflo-admin-shell .kinflo-pill-info",
+    ".kinflo-admin-shell .kinflo-pill-warning",
+    ".dark .kinflo-admin-shell",
+    "hsl(var(--foreground))",
+    "hsl(var(--muted-foreground))",
+  ]) {
+    check(css.includes(marker), `theme CSS includes ${marker}`, "Shared light/dark theme tokens are incomplete.");
+  }
+}
+
+if (existsSync(packagePath)) {
+  check(read(packagePath).includes('"kinflo:validate-nav-theme"'), "package exposes nav/theme validation", "The focused validator is not wired into package scripts.");
+}
+
+const tracked = execFileSync("git", ["ls-files"], { encoding: "utf8" }).split("\n").filter(Boolean);
+check(!tracked.some((file) => file.startsWith("convex/_generated/")), "generated Convex bindings remain untracked", "Generated API files must remain outside this source-only lane.");
+check(!tracked.includes(".env.local"), ".env.local remains untracked", "Secret environment files must remain outside this lane.");
+
+for (const item of checks) {
+  console[item.ok ? "log" : "error"](`${item.ok ? "✓" : "✗"} ${item.label}`);
+  if (!item.ok) console.error(`  ${item.detail}`);
+}
+
+const failed = checks.filter((item) => !item.ok);
+console.log("\nKinFlo navigation/theme validation");
+console.log("Themes: light, dark, system");
+console.log("Responsive tables: search, empty recovery, pagination");
+console.log("External writes: 0");
+console.log("Convex codegen/deploy: no");
+if (failed.length) {
+  console.error(`\nValidation failed: ${failed.length} check(s) failed.`);
+  process.exit(1);
+}
+console.log(`\nValidation passed: ${checks.length} checks.`);

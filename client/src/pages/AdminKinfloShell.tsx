@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 import {
   Bell,
@@ -42,7 +42,9 @@ import {
   Workflow,
 } from "lucide-react";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import VanguardThemeControl from "@/components/VanguardThemeControl";
 import { canAccessKinfloAdmin, useKinfloAdminIdentity } from "@/contexts/KinfloAdminIdentityContext";
+import { useVanguardTheme } from "@/hooks/useVanguardTheme";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -800,18 +802,22 @@ function readInitialAdapterSwitchSurfaceId(defaultSurfaceId: string, surfaceIds:
 
 function statusBadge(status: KinfloShellStatus) {
   if (status === "active" || status === "published" || status === "done") {
-    return <Badge className="bg-emerald-600 hover:bg-emerald-600">Ready</Badge>;
+    return <Badge className="kinflo-pill kinflo-pill-success">Ready</Badge>;
   }
   if (status === "preview") {
-    return <Badge className="bg-sky-600 hover:bg-sky-600">Preview</Badge>;
+    return <Badge className="kinflo-pill kinflo-pill-info">Preview</Badge>;
   }
   if (status === "converted") {
-    return <Badge className="bg-teal-600 hover:bg-teal-600">Converted</Badge>;
+    return <Badge className="kinflo-pill kinflo-pill-info">Converted</Badge>;
   }
   if (status === "nurture") {
-    return <Badge className="bg-amber-600 hover:bg-amber-600">Nurture</Badge>;
+    return <Badge className="kinflo-pill kinflo-pill-warning">Nurture</Badge>;
   }
-  return <Badge variant="outline">Draft</Badge>;
+  return <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">Draft</Badge>;
+}
+
+function KinfloPillCluster({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <div className={`kinflo-pill-cluster flex flex-wrap items-center justify-end gap-2 ${className}`}>{children}</div>;
 }
 
 function TenantControlPlaneTable({ tenants }: { tenants: ShellTenant[] }) {
@@ -4942,6 +4948,7 @@ export default function AdminKinfloShell() {
   const adminIdentity = useKinfloAdminIdentity();
   const { isLoading } = adminIdentity;
   const canAccessAdmin = canAccessKinfloAdmin(adminIdentity);
+  const vanguardTheme = useVanguardTheme(canAccessAdmin && !isLoading);
   const [location, navigate] = useLocation();
   const snapshot = useKinfloShellSnapshot();
   const adminScope = useKinfloAdminScope();
@@ -7084,11 +7091,11 @@ export default function AdminKinfloShell() {
   );
 
   return (
-    <div className="min-h-screen overflow-x-clip bg-slate-50 text-slate-950">
+    <div className="kinflo-admin-shell min-h-screen overflow-x-clip bg-background text-foreground">
       <div className="mx-auto grid max-w-7xl gap-5 px-4 sm:px-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:items-start lg:px-8">
         <KinfloTenantAdminSidebar activeTab={activeTab} onSelectTab={selectShellTab} />
         <div className="min-w-0">
-      <div className="border-b border-slate-200 bg-white/95">
+      <div className="border-b border-border bg-card/95">
         <div className={`mx-auto flex max-w-7xl flex-col px-4 sm:px-6 lg:px-8 ${activeTab === "site-studio" ? "gap-2 py-3" : "gap-5 py-6"}`}>
           <Breadcrumbs
             items={[
@@ -7107,10 +7114,11 @@ export default function AdminKinfloShell() {
           ) : null}
           <div className={`flex flex-col lg:flex-row lg:items-center lg:justify-between ${activeTab === "site-studio" ? "gap-2" : "gap-4"}`}>
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
+              <KinfloPillCluster className="sm:ml-auto">
                 <Badge className="bg-slate-950 text-white hover:bg-slate-950">Convex Phase 1</Badge>
-                <Badge variant="outline" className="border-slate-300 bg-white">Provider-light shell</Badge>
-              </div>
+                <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">Provider-light shell</Badge>
+                <VanguardThemeControl mode={vanguardTheme.mode} onChange={vanguardTheme.setMode} navSolid />
+              </KinfloPillCluster>
               <h1 className={`${activeTab === "site-studio" ? "mt-2 text-2xl sm:text-3xl" : "mt-3 text-3xl sm:text-4xl"} font-semibold leading-tight tracking-normal`}>KinFlo OS</h1>
               <p className={`${activeTab === "site-studio" ? "hidden" : "mt-2"} max-w-3xl text-base leading-7 text-slate-600`}>
                 The operating shell for tenants, sites, templates, permissions, and configurable public experiences.
@@ -7159,17 +7167,17 @@ export default function AdminKinfloShell() {
             data-testid="section-kinflo-persistent-identity-strip"
           >
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
+              <KinfloPillCluster className="lg:ml-auto">
+                <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">
                   {persistentIdentity.objectType}
                 </Badge>
-                <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700" data-testid="text-kinflo-persistent-identity-environment">
+                <Badge variant="outline" className="kinflo-pill kinflo-pill-warning" data-testid="text-kinflo-persistent-identity-environment">
                   {persistentIdentity.environment}
                 </Badge>
-                <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
+                <Badge variant="outline" className="kinflo-pill kinflo-pill-success">
                   {snapshot.dataMode.runtimeLabel}
                 </Badge>
-              </div>
+              </KinfloPillCluster>
               <div className="mt-2 grid min-w-0 gap-2 sm:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)_minmax(0,0.8fr)]">
                 <div className="min-w-0">
                   <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">Active object</div>
@@ -7211,20 +7219,20 @@ export default function AdminKinfloShell() {
             data-testid="section-kinflo-active-object-signal"
           >
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
+              <KinfloPillCluster className="lg:ml-auto">
+                <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">
                   {snapshot.activeObjectSignal.objectType}
                 </Badge>
-                <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">
+                <Badge variant="outline" className="kinflo-pill kinflo-pill-warning">
                   {snapshot.activeObjectSignal.environment}
                 </Badge>
-                <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700">
+                <Badge variant="outline" className="kinflo-pill kinflo-pill-success">
                   {snapshot.activeObjectSignal.readinessLabel}
                 </Badge>
-                <Badge variant="outline" className="border-slate-300 bg-white text-slate-700">
+                <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">
                   Owner: {snapshot.activeObjectSignal.owner}
                 </Badge>
-              </div>
+              </KinfloPillCluster>
               <div className="mt-2 truncate text-base font-semibold leading-tight text-slate-950" data-testid="text-kinflo-active-object-name">
                 {snapshot.activeObjectSignal.label}
               </div>
@@ -7261,11 +7269,11 @@ export default function AdminKinfloShell() {
           data-testid="section-kinflo-command-brief"
         >
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="secondary" className="bg-emerald-50 text-emerald-800 hover:bg-emerald-50">Command Brief</Badge>
-              <Badge variant="outline" className="border-slate-300 bg-white">{snapshot.dataMode.runtimeLabel}</Badge>
-              <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">{snapshot.activeObjectSignal.environment}</Badge>
-            </div>
+            <KinfloPillCluster>
+              <Badge variant="secondary" className="kinflo-pill kinflo-pill-success">Command Brief</Badge>
+              <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">{snapshot.dataMode.runtimeLabel}</Badge>
+              <Badge variant="outline" className="kinflo-pill kinflo-pill-warning">{snapshot.activeObjectSignal.environment}</Badge>
+            </KinfloPillCluster>
             <h2 className={`${activeTab === "site-studio" ? "mt-2 text-lg" : "mt-4 text-2xl md:text-3xl"} max-w-3xl font-semibold leading-tight tracking-normal`}>
               {commandBrief.decision}
             </h2>
