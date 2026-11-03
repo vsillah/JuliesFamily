@@ -96,6 +96,10 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "provider writes gated",
   "hosted deployment gated",
   "shellTabLabels[tabValue]",
+  "section-kinflo-tenant-control-plane-cards",
+  "section-kinflo-site-factory-queue-cards",
+  "className=\"hidden overflow-x-auto rounded-lg border lg:block\"",
+  "className=\"grid gap-2 lg:hidden\"",
 ]);
 
 requireIncludes("package.json", [
