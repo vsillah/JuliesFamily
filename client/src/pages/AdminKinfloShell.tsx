@@ -1373,7 +1373,7 @@ function ConfigurationAffordanceStrip({
   disabledActionLabel,
   readinessPercent,
   testId,
-  notesLabel = "Provenance notes",
+  notesLabel = "Evidence",
 }: {
   surface: string;
   objectLabel: string;
@@ -1386,6 +1386,11 @@ function ConfigurationAffordanceStrip({
   testId: string;
   notesLabel?: string;
 }) {
+  const adminStateLabel = stateLabel.startsWith("Fixture ") ? "Local preview" : stateLabel;
+  const stateDescription = adminStateLabel === "Local preview"
+    ? "Preview-only data; live changes are unavailable."
+    : "Changes stay local until live save is approved.";
+
   return (
     <section
       className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50/70 p-3 text-sm lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.8fr)_minmax(220px,0.9fr)]"
@@ -1394,12 +1399,13 @@ function ConfigurationAffordanceStrip({
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="outline" className="border-slate-300 bg-white">
-            Field affordance
+            Configuration status
           </Badge>
-          <Badge className="bg-slate-950 hover:bg-slate-950">{stateLabel}</Badge>
+          <Badge className="bg-slate-950 hover:bg-slate-950">{adminStateLabel}</Badge>
         </div>
         <div className="mt-3 font-semibold text-slate-950">{surface}</div>
         <p className="mt-1 break-words text-xs leading-5 text-slate-600">{objectLabel}</p>
+        <p className="mt-2 text-xs leading-5 text-slate-600">{stateDescription}</p>
         <div className="mt-3">
           <div className="flex items-center justify-between text-xs">
             <span className="font-medium text-slate-700">Activation evidence</span>
@@ -1409,8 +1415,10 @@ function ConfigurationAffordanceStrip({
         </div>
       </div>
 
-      <div className="min-w-0 rounded-lg border border-white bg-white p-3">
-        <div className="text-[11px] font-medium uppercase tracking-normal text-slate-500">{notesLabel}</div>
+      <details className="min-w-0 rounded-lg border border-white bg-white p-3">
+        <summary className="cursor-pointer text-[11px] font-medium uppercase tracking-normal text-slate-500">
+          {notesLabel} <span className="normal-case tracking-normal">({provenanceNotes.length} details)</span>
+        </summary>
         <div className="mt-3 space-y-2">
           {provenanceNotes.slice(0, 3).map((note) => (
             <div key={note} className="flex items-start gap-2 text-xs leading-5 text-slate-600">
@@ -1419,10 +1427,10 @@ function ConfigurationAffordanceStrip({
             </div>
           ))}
         </div>
-      </div>
+      </details>
 
       <div className="min-w-0 rounded-lg border border-amber-200 bg-amber-50 p-3">
-        <div className="text-[11px] font-medium uppercase tracking-normal text-amber-700">Hosted gate</div>
+        <div className="text-[11px] font-medium uppercase tracking-normal text-amber-700">Live save unavailable</div>
         <div className="mt-3 space-y-2">
           {activationEvidence.slice(0, 2).map((item) => (
             <div key={item} className="flex items-start gap-2 text-xs leading-5 text-amber-900">
@@ -5290,7 +5298,17 @@ export default function AdminKinfloShell() {
   const defaultNavigationItem = snapshot.navigationDraft.items.find(
     (item) => item.placement === snapshot.navigationDraft.defaultPlacement,
   ) ?? snapshot.navigationDraft.items[0];
-  const [navigationSiteKey, setNavigationSiteKey] = useState(snapshot.navigationDraft.defaultSiteKey);
+  const navigationSiteOptions = useMemo(
+    () => [
+      snapshot.navigationDraft.siteOptions.find((site) => site.key === adminScope.site.key) ?? {
+        key: adminScope.site.key,
+        label: adminScope.site.name,
+        previewPath: `/kinflo-sites/${adminScope.site.key}`,
+      },
+    ],
+    [adminScope.site.key, adminScope.site.name, snapshot.navigationDraft.siteOptions],
+  );
+  const [navigationSiteKey, setNavigationSiteKey] = useState(adminScope.site.key);
   const [navigationPlacement, setNavigationPlacement] = useState(snapshot.navigationDraft.defaultPlacement);
   const [selectedNavigationItemKey, setSelectedNavigationItemKey] = useState(defaultNavigationItem?.key ?? "");
   const [navigationLabel, setNavigationLabel] = useState(defaultNavigationItem?.label ?? "");
@@ -5602,8 +5620,8 @@ export default function AdminKinfloShell() {
   const brandReadyCount = brandReadiness.filter((item) => item.done).length;
   const brandReadinessPercent = Math.round((brandReadyCount / brandReadiness.length) * 100);
   const selectedNavigationSite = useMemo(
-    () => snapshot.navigationDraft.siteOptions.find((site) => site.key === navigationSiteKey) ?? snapshot.navigationDraft.siteOptions[0],
-    [navigationSiteKey, snapshot.navigationDraft.siteOptions],
+    () => navigationSiteOptions.find((site) => site.key === navigationSiteKey) ?? navigationSiteOptions[0],
+    [navigationSiteKey, navigationSiteOptions],
   );
   const filteredNavigationItems = useMemo(
     () => snapshot.navigationDraft.items.filter((item) => item.placement === navigationPlacement),
@@ -5640,6 +5658,9 @@ export default function AdminKinfloShell() {
   ];
   const navigationReadyCount = navigationReadiness.filter((item) => item.done).length;
   const navigationReadinessPercent = Math.round((navigationReadyCount / navigationReadiness.length) * 100);
+  useEffect(() => {
+    setNavigationSiteKey(adminScope.site.key);
+  }, [adminScope.site.key]);
   const selectedPreviewSite = useMemo(
     () => snapshot.previewStudio.siteOptions.find((site) => site.slug === previewSiteSlug) ?? snapshot.previewStudio.siteOptions[0],
     [previewSiteSlug, snapshot.previewStudio.siteOptions],
@@ -11462,22 +11483,22 @@ export default function AdminKinfloShell() {
                       <p className="mt-1 text-sm text-muted-foreground">{selectedBrandSite?.label}</p>
                     </div>
                     <Badge variant={brandThemeDirty ? "default" : "secondary"}>
-                      {brandThemeDirty ? "Local edits" : "Fixture theme"}
+                      {brandThemeDirty ? "Local edits" : "Local preview"}
                     </Badge>
                   </CardHeader>
                   <CardContent className="space-y-5">
                     <ConfigurationAffordanceStrip
                       surface="Brand theme configuration"
                       objectLabel={selectedBrandSite?.label ?? "No site selected"}
-                      stateLabel={brandThemeDirty ? "Local edits" : "Fixture theme"}
+                      stateLabel={brandThemeDirty ? "Local edits" : "Local preview"}
                       provenanceNotes={[
                         `Palette: ${selectedBrandPalette?.label ?? "pending"}`,
                         `Typography: ${selectedBrandTypography?.label ?? "pending"}`,
                         `Media: ${selectedBrandMedia?.label ?? "pending"}`,
                       ]}
                       activationEvidence={snapshot.brandTheme.activationEvidence}
-                      blockedLiveAction="Live theme save is blocked until hosted Convex, generated API bindings, visual QA, and public renderer smoke are approved."
-                      disabledActionLabel="Live theme save gated"
+                      blockedLiveAction="Live theme changes are unavailable until the live service, generated connection, visual review, and public preview check are complete."
+                      disabledActionLabel="Live theme unavailable"
                       readinessPercent={brandReadinessPercent}
                       testId="section-kinflo-configuration-affordance-brand"
                       notesLabel="Theme draft summary"
@@ -11742,39 +11763,39 @@ export default function AdminKinfloShell() {
                     <div>
                       <CardTitle className="text-base">Navigation Draft</CardTitle>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        {selectedNavigationSite?.label} · {navigationPlacement}
+                        {selectedNavigationSite?.label ?? adminScope.site.name} · {navigationPlacement}
                       </p>
                     </div>
                     <Badge variant={navigationDraftDirty ? "default" : "secondary"}>
-                      {navigationDraftDirty ? "Local edits" : "Fixture navigation"}
+                      {navigationDraftDirty ? "Local edits" : "Local preview"}
                     </Badge>
                   </CardHeader>
                   <CardContent className="space-y-5">
                     <ConfigurationAffordanceStrip
-                      surface="Navigation configuration"
-                      objectLabel={`${selectedNavigationSite?.label ?? "No site selected"} · ${navigationPlacement}`}
-                      stateLabel={navigationDraftDirty ? "Local edits" : "Fixture navigation"}
+                      surface="Navigation settings"
+                      objectLabel={`${selectedNavigationSite?.label ?? adminScope.site.name} · ${navigationPlacement}`}
+                      stateLabel={navigationDraftDirty ? "Local edits" : "Local preview"}
                       provenanceNotes={[
                         `Item: ${selectedNavigationItem?.label ?? "pending"}`,
                         `Href: ${navigationHref || "pending"}`,
                         `Visibility: ${navigationVisible ? "visible" : "hidden"}`,
                       ]}
                       activationEvidence={snapshot.navigationDraft.activationEvidence}
-                      blockedLiveAction="Live navigation save is blocked until hosted Convex, generated API bindings, public preview smoke, and audit review are approved."
-                      disabledActionLabel="Live navigation save gated"
+                      blockedLiveAction="Live navigation changes are unavailable until the live service, generated connection, public preview check, and audit review are complete."
+                      disabledActionLabel="Live navigation unavailable"
                       readinessPercent={navigationReadinessPercent}
                       testId="section-kinflo-configuration-affordance-navigation"
                     />
 
                     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                       <div className="space-y-2">
-                        <Label>Site</Label>
+                        <Label>Site in current scope</Label>
                         <Select value={navigationSiteKey} onValueChange={setNavigationSiteKey}>
                           <SelectTrigger data-testid="select-kinflo-navigation-site">
                             <SelectValue placeholder="Select site" />
                           </SelectTrigger>
                           <SelectContent>
-                            {snapshot.navigationDraft.siteOptions.map((site) => (
+                            {navigationSiteOptions.map((site) => (
                               <SelectItem key={site.key} value={site.key}>
                                 {site.label}
                               </SelectItem>
@@ -14133,22 +14154,22 @@ export default function AdminKinfloShell() {
                       </p>
                     </div>
                     <Badge variant={assetDraftDirty ? "default" : "secondary"}>
-                      {assetDraftDirty ? "Local edits" : "Fixture asset"}
+                      {assetDraftDirty ? "Local edits" : "Local preview"}
                     </Badge>
                   </CardHeader>
                   <CardContent className="space-y-5">
                     <ConfigurationAffordanceStrip
                       surface="Asset metadata configuration"
                       objectLabel={`${selectedAssetSite?.label ?? "No site selected"} · ${selectedAsset?.storageProvider ?? "fixture"}`}
-                      stateLabel={assetDraftDirty ? "Local edits" : "Fixture asset"}
+                      stateLabel={assetDraftDirty ? "Local edits" : "Local preview"}
                       provenanceNotes={[
                         `Asset: ${assetName || "pending"}`,
                         `Usage: ${assetUsage || "pending"}`,
                         `Provenance: ${assetProvenance || "pending"}`,
                       ]}
                       activationEvidence={snapshot.assetLibrary.activationEvidence}
-                      blockedLiveAction="Live asset upload is blocked until object storage, generated Convex API bindings, file-size policy, and provenance review are approved."
-                      disabledActionLabel="Live asset upload gated"
+                      blockedLiveAction="Live asset uploads are unavailable until storage, the generated connection, file policy, and evidence review are complete."
+                      disabledActionLabel="Live asset upload unavailable"
                       readinessPercent={assetReadinessPercent}
                       testId="section-kinflo-configuration-affordance-assets"
                     />
@@ -14376,22 +14397,22 @@ export default function AdminKinfloShell() {
                       </p>
                     </div>
                     <Badge variant={domainDraftDirty ? "default" : "secondary"}>
-                      {domainDraftDirty ? "Local edits" : "Fixture domain"}
+                      {domainDraftDirty ? "Local edits" : "Local preview"}
                     </Badge>
                   </CardHeader>
                   <CardContent className="space-y-5">
                     <ConfigurationAffordanceStrip
                       surface="Domain readiness configuration"
                       objectLabel={`${selectedDomainSite?.label ?? "No site selected"} · ${selectedDomain?.providerStatus ?? "not attached"}`}
-                      stateLabel={domainDraftDirty ? "Local edits" : "Fixture domain"}
+                      stateLabel={domainDraftDirty ? "Local edits" : "Local preview"}
                       provenanceNotes={[
                         `Hostname: ${domainHostname || "pending"}`,
                         `Primary route: ${domainIsPrimary ? "primary" : "secondary"}`,
                         `SSL: ${selectedDomain?.sslStatus ?? "not requested"}`,
                       ]}
                       activationEvidence={snapshot.domainReadiness.activationEvidence}
-                      blockedLiveAction="Live DNS save is blocked until hosted Convex, DNS ownership, SSL provisioning, Vercel domain attachment, and rollback approval are complete."
-                      disabledActionLabel="Live DNS save gated"
+                      blockedLiveAction="Live domain changes are unavailable until DNS ownership, SSL, domain attachment, and rollback approval are complete."
+                      disabledActionLabel="Live domain changes unavailable"
                       readinessPercent={domainReadinessPercent}
                       testId="section-kinflo-configuration-affordance-domains"
                     />
@@ -14620,22 +14641,22 @@ export default function AdminKinfloShell() {
                       </p>
                     </div>
                     <Badge variant={integrationDraftDirty ? "default" : "secondary"}>
-                      {integrationDraftDirty ? "Local edits" : "Fixture integration"}
+                      {integrationDraftDirty ? "Local edits" : "Local preview"}
                     </Badge>
                   </CardHeader>
                   <CardContent className="space-y-5">
                     <ConfigurationAffordanceStrip
                       surface="Provider integration configuration"
                       objectLabel={`${selectedIntegration?.label ?? "Integration"} · ${selectedIntegrationProvider?.category ?? "provider"}`}
-                      stateLabel={integrationDraftDirty ? "Local edits" : "Fixture integration"}
+                      stateLabel={integrationDraftDirty ? "Local edits" : "Local preview"}
                       provenanceNotes={[
                         `Provider: ${selectedIntegrationProvider?.label ?? integrationProvider}`,
                         `Env keys: ${integrationEnvKeys.split("\n").filter((key) => Boolean(key.trim())).length} named`,
                         `Smoke gate: ${selectedIntegration?.smokeGate ?? "pending"}`,
                       ]}
                       activationEvidence={snapshot.integrationReadiness.activationEvidence}
-                      blockedLiveAction="Live provider save is blocked until hosted activation, provider env review, smoke approval, and per-provider write signoff are complete."
-                      disabledActionLabel="Live provider save gated"
+                      blockedLiveAction="Live provider changes are unavailable until activation, provider review, smoke approval, and write signoff are complete."
+                      disabledActionLabel="Live provider changes unavailable"
                       readinessPercent={integrationReadinessPercent}
                       testId="section-kinflo-configuration-affordance-integrations"
                     />
@@ -14857,22 +14878,22 @@ export default function AdminKinfloShell() {
                       </p>
                     </div>
                     <Badge variant={campaignDraftDirty ? "default" : "secondary"}>
-                      {campaignDraftDirty ? "Local edits" : "Fixture campaign"}
+                      {campaignDraftDirty ? "Local edits" : "Local preview"}
                     </Badge>
                   </CardHeader>
                   <CardContent className="space-y-5">
                     <ConfigurationAffordanceStrip
                       surface="Campaign automation configuration"
                       objectLabel={`${selectedCampaignSite?.label ?? "No site selected"} · ${selectedCampaignChannel?.label ?? "channel"}`}
-                      stateLabel={campaignDraftDirty ? "Local edits" : "Fixture campaign"}
+                      stateLabel={campaignDraftDirty ? "Local edits" : "Local preview"}
                       provenanceNotes={[
                         `Campaign: ${campaignName || "pending"}`,
                         `Approval owner: ${campaignApprovalOwner || "pending"}`,
                         `Steps: ${selectedCampaign?.steps.length ?? 0} review-only`,
                       ]}
                       activationEvidence={snapshot.campaignAutomation.activationEvidence}
-                      blockedLiveAction="Live campaign send is blocked until consent proof, campaign approval, provider-send smoke, and rollback owner approval are complete."
-                      disabledActionLabel="Live campaign send gated"
+                      blockedLiveAction="Live campaign sends are unavailable until consent, campaign approval, provider checks, and rollback ownership are complete."
+                      disabledActionLabel="Live campaign send unavailable"
                       readinessPercent={campaignReadinessPercent}
                       testId="section-kinflo-configuration-affordance-campaigns"
                     />
@@ -15111,22 +15132,22 @@ export default function AdminKinfloShell() {
                       </p>
                     </div>
                     <Badge variant={aiReviewDraftDirty ? "default" : "secondary"}>
-                      {aiReviewDraftDirty ? "Local edits" : "Fixture AI record"}
+                      {aiReviewDraftDirty ? "Local edits" : "Local preview"}
                     </Badge>
                   </CardHeader>
                   <CardContent className="space-y-5">
                     <ConfigurationAffordanceStrip
                       surface="AI review configuration"
                       objectLabel={`${selectedAiReviewSite?.label ?? "No site selected"} · ${selectedAiRecord?.reviewer ?? "reviewer pending"}`}
-                      stateLabel={aiReviewDraftDirty ? "Local edits" : "Fixture AI record"}
+                      stateLabel={aiReviewDraftDirty ? "Local edits" : "Local preview"}
                       provenanceNotes={[
                         `Target: ${aiPublishTarget || "pending"}`,
                         `Sources: ${selectedAiRecord?.sourceInputs.length ?? 0} recorded`,
                         `Reviewer notes: ${aiReviewerNotes || "pending"}`,
                       ]}
                       activationEvidence={snapshot.aiReview.activationEvidence}
-                      blockedLiveAction="Live AI review and publish are blocked until provider generation, usage caps, reviewer approval, and content publish smoke are approved."
-                      disabledActionLabel="Live AI publish gated"
+                      blockedLiveAction="Live AI review and publishing are unavailable until provider setup, usage limits, reviewer approval, and publish checks are complete."
+                      disabledActionLabel="Live AI publishing unavailable"
                       readinessPercent={aiReviewReadinessPercent}
                       testId="section-kinflo-configuration-affordance-ai-review"
                     />
@@ -15357,22 +15378,22 @@ export default function AdminKinfloShell() {
                       </p>
                     </div>
                     <Badge variant={contentDraftDirty ? "default" : "secondary"}>
-                      {contentDraftDirty ? "Local edits" : "Fixture draft"}
+                      {contentDraftDirty ? "Local edits" : "Local preview"}
                     </Badge>
                   </CardHeader>
                   <CardContent className="space-y-5">
                     <ConfigurationAffordanceStrip
                       surface="Content draft configuration"
                       objectLabel={`${selectedContentSite?.label ?? "No site selected"} · ${selectedContentPage?.label ?? "No page selected"}`}
-                      stateLabel={contentDraftDirty ? "Local edits" : "Fixture draft"}
+                      stateLabel={contentDraftDirty ? "Local edits" : "Local preview"}
                       provenanceNotes={[
                         `Block: ${selectedContentBlock?.label ?? "pending"}`,
                         `Persona: ${selectedContentBlock?.persona ?? "pending"}`,
                         `Journey: ${selectedContentBlock?.journeyStage ?? "pending"}`,
                       ]}
                       activationEvidence={snapshot.contentDraft.activationEvidence}
-                      blockedLiveAction="Live content save and publish are blocked until generated Convex API bindings, hosted auth, and content smoke cleanup are approved."
-                      disabledActionLabel="Live content publish gated"
+                      blockedLiveAction="Live content changes are unavailable until the generated connection, sign-in, and content checks are complete."
+                      disabledActionLabel="Live content changes unavailable"
                       readinessPercent={contentReadinessPercent}
                       testId="section-kinflo-configuration-affordance-content"
                     />
