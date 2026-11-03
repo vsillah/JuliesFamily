@@ -46,6 +46,7 @@ for (const pattern of [
   "getClientWebsiteStudioNavigationKey",
   'studioLane: lane',
   'studioStage: stage',
+  'isActiveLane ? "text-foreground/75" : statusTone',
 ]) {
   if (shell.includes(pattern)) {
     pass(`shell includes ${pattern}`);
