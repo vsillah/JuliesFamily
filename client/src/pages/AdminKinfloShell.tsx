@@ -226,7 +226,7 @@ const clientWebsiteStudioLaneSectionTestIds: Record<ClientWebsiteStudioLane, str
   handoff: "section-kinflo-client-studio-lane-handoff",
   workbench: "section-kinflo-client-studio-lane-workbench",
 };
-const clientWebsiteWorkbenchStageValues = ["sites", "preview", "launch"] as const;
+const clientWebsiteWorkbenchStageValues = ["sites", "preview", "operations", "launch"] as const;
 type ClientWebsiteWorkbenchStage = (typeof clientWebsiteWorkbenchStageValues)[number];
 const clientWebsiteLaunchDossierValues = ["provisioning", "packets", "qa", "decision"] as const;
 type ClientWebsiteLaunchDossier = (typeof clientWebsiteLaunchDossierValues)[number];
@@ -259,22 +259,22 @@ function getClientWebsiteStudioNavigationKey(
   if (lane === "handoff") {
     return "handoff";
   }
-  return lane === "workbench" && stage !== "sites" ? "preview-launch" : "build";
+  return lane === "workbench" && stage !== "sites" && stage !== "operations" ? "preview-launch" : "build";
 }
 
 const shellTabLabels: Record<ShellTabValue, string> = {
   overview: "Overview",
   tenants: "Tenants",
   sites: "Sites",
-  "launch-readiness": "Launch",
+  "launch-readiness": "Readiness",
   "adapter-switch": "Adapter",
   "hosted-activation": "Activation",
-  factory: "Website setup",
+  factory: "Site factory",
   plans: "Plans",
   brand: "Brand",
   navigation: "Navigation",
   preview: "Preview",
-  "site-studio": "Studio",
+  "site-studio": "Site setup",
   assets: "Assets",
   domains: "Domains",
   integrations: "Integrations",
@@ -366,7 +366,7 @@ function getKinfloSectionSnapshotMetrics(
       ];
     case "site-studio":
       return [
-        { label: "Studio sites", value: snapshot.clientWebsiteStudio.sites.length, detail: "Scoped workspace targets", targetTestId: focusTarget },
+        { label: "Build sites", value: snapshot.clientWebsiteStudio.sites.length, detail: "Scoped build targets", targetTestId: focusTarget },
         { label: "Starter packs", value: snapshot.clientWebsiteStudio.starterContentPacks.length, detail: "Local content fixtures", targetTestId: focusTarget },
         { label: "Preview lanes", value: clientWebsiteStudioLaneValues.length, detail: "No live publish path", targetTestId: focusTarget },
       ];
@@ -482,6 +482,7 @@ const workflowNavigationLanes: {
   icon: typeof Boxes;
   tabs: ShellTabValue[];
   primaryTab: ShellTabValue;
+  sectionCount?: number;
   status: "ready" | "review" | "blocked";
   blockedLiveAction: string;
 }[] = [
@@ -498,27 +499,18 @@ const workflowNavigationLanes: {
   {
     key: "build",
     label: "Build",
-    description: "Factory, content, brand, navigation, assets, and templates",
+    description: "Build sites, review configuration, handoff health, and supporting content",
     icon: Factory,
-    tabs: ["factory", "content", "brand", "navigation", "assets", "templates"],
-    primaryTab: "factory",
+    tabs: ["site-studio", "factory", "content", "brand", "navigation", "assets", "templates"],
+    primaryTab: "site-studio",
+    sectionCount: 9,
     status: "ready",
     blockedLiveAction: "live content save gated",
   },
   {
-    key: "studio",
-    label: "Studio",
-    description: "Build, configure, hand off, preview, and launch client sites",
-    icon: LayoutDashboard,
-    tabs: ["site-studio"],
-    primaryTab: "site-studio",
-    status: "ready",
-    blockedLiveAction: "studio actions gated",
-  },
-  {
     key: "launch",
     label: "Launch",
-    description: "Readiness, preview, domains, and handoff gates",
+    description: "Preview, readiness, domains, and release gates",
     icon: Rocket,
     tabs: ["launch-readiness", "preview", "domains"],
     primaryTab: "launch-readiness",
@@ -558,6 +550,134 @@ const workflowNavigationLanes: {
 ];
 
 const workflowNavigationTabCoverage = workflowNavigationLanes.flatMap((lane) => lane.tabs);
+
+type KinfloWorkflowLane = (typeof workflowNavigationLanes)[number];
+
+function getKinfloWorkflowLaneMetrics(
+  lane: KinfloWorkflowLane,
+  snapshot: KinfloShellSnapshot,
+): KinfloSectionSnapshotMetric[] {
+  if (lane.key === "build") {
+    return [
+      { label: "Build sections", value: 9, detail: "Persistent site setup and lifecycle destinations", targetTestId: "section-kinflo-selected-content" },
+      { label: "Scoped sites", value: snapshot.clientWebsiteStudio.sites.length, detail: "Available in this operator scope", targetTestId: "section-kinflo-selected-content" },
+      { label: "Handoff measures", value: vanguardOperationsMetricsFixture.length, detail: "Order health signals in Handoff", targetTestId: "section-kinflo-selected-content" },
+    ];
+  }
+  return getKinfloSectionSnapshotMetrics(lane.primaryTab, snapshot);
+}
+
+function selectKinfloWorkflowMetric(
+  lane: KinfloWorkflowLane,
+  metric: KinfloSectionSnapshotMetric,
+  onSelectTab: (tab: ShellTabValue) => void,
+  onSelectStudioSection: (section: ClientWebsiteStudioNavigationKey) => void,
+) {
+  if (lane.key === "build" && metric.label === "Handoff measures") {
+    onSelectStudioSection("handoff");
+    return;
+  }
+  onSelectTab(lane.primaryTab);
+}
+
+function KinfloWorkflowLaneSnapshot({
+  lane,
+  snapshot,
+  onSelectTab,
+  onSelectStudioSection,
+}: {
+  lane: KinfloWorkflowLane;
+  snapshot: KinfloShellSnapshot;
+  onSelectTab: (tab: ShellTabValue) => void;
+  onSelectStudioSection: (section: ClientWebsiteStudioNavigationKey) => void;
+}) {
+  const metrics = getKinfloWorkflowLaneMetrics(lane, snapshot);
+  return (
+    <section className="mt-5 rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5" data-testid={`section-kinflo-lane-snapshot-${lane.key}`}>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">L1 workspace health</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">{lane.label} at a glance</h2>
+          <p className="mt-1 text-sm leading-5 text-muted-foreground">Review this workspace&apos;s scoped signals, then open a section below.</p>
+        </div>
+        <Badge variant="outline" className="w-fit kinflo-pill kinflo-pill-neutral">Vanguard scope · read-only</Badge>
+      </div>
+      <div className="mt-4 grid gap-2 sm:grid-cols-3">
+        {metrics.map((metric) => (
+          <button
+            key={metric.label}
+            type="button"
+            className="kinflo-section-metric-card rounded-lg border border-border bg-muted/30 p-3 text-left transition hover:border-primary/50 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            onClick={() => selectKinfloWorkflowMetric(lane, metric, onSelectTab, onSelectStudioSection)}
+            data-filter-target={lane.key}
+            aria-label={`${lane.label}, ${metric.label}: ${metric.value}. Open ${shellTabLabels[lane.primaryTab]}.`}
+          >
+            <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{metric.label}</div>
+            <div className="mt-2 text-2xl font-semibold text-foreground">{metric.value}</div>
+            <div className="mt-1 text-xs leading-5 text-muted-foreground">{metric.detail}</div>
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function KinfloOverviewAnalytics({
+  snapshot,
+  onSelectTab,
+  onSelectStudioSection,
+}: {
+  snapshot: KinfloShellSnapshot;
+  onSelectTab: (tab: ShellTabValue) => void;
+  onSelectStudioSection: (section: ClientWebsiteStudioNavigationKey) => void;
+}) {
+  return (
+    <section className="mt-5 rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5" data-testid="section-kinflo-overview-analytics">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">L0 operating health</div>
+          <h2 className="mt-1 text-lg font-semibold text-foreground">Workspace health at a glance</h2>
+          <p className="mt-1 max-w-3xl text-sm leading-5 text-muted-foreground">Compare the six operator workspaces, then open a lane to inspect its scoped sections and inform the next best action.</p>
+        </div>
+        <Badge variant="outline" className="w-fit kinflo-pill kinflo-pill-neutral">Vanguard scope · read-only</Badge>
+      </div>
+      <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        {workflowNavigationLanes.map((lane) => {
+          const metrics = getKinfloWorkflowLaneMetrics(lane, snapshot);
+          return (
+            <section key={lane.key} className="rounded-lg border border-border bg-muted/20 p-3" data-testid={`section-kinflo-overview-analytics-${lane.key}`}>
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <h3 className="text-sm font-semibold text-foreground">{lane.label}</h3>
+                  <p className="mt-1 text-xs leading-5 text-muted-foreground">{lane.description}</p>
+                </div>
+                <Button type="button" variant="outline" size="sm" className="shrink-0" onClick={() => onSelectTab(lane.primaryTab)}>
+                  Open lane
+                  <ChevronRight className="ml-1 h-3 w-3" aria-hidden="true" />
+                </Button>
+              </div>
+              <div className="mt-3 grid grid-cols-3 gap-2">
+                {metrics.map((metric) => (
+                  <button
+                    key={metric.label}
+                    type="button"
+                    className="kinflo-section-metric-card min-w-0 rounded-md border border-border bg-card p-2 text-left transition hover:border-primary/50 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    onClick={() => selectKinfloWorkflowMetric(lane, metric, onSelectTab, onSelectStudioSection)}
+                    data-filter-target={lane.key}
+                    aria-label={`${lane.label}, ${metric.label}: ${metric.value}. Open ${shellTabLabels[lane.primaryTab]}.`}
+                  >
+                    <div className="truncate text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{metric.label}</div>
+                    <div className="mt-1 text-lg font-semibold text-foreground">{metric.value}</div>
+                  </button>
+                ))}
+              </div>
+            </section>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
 
 function KinfloOperatorSidebar({
   activeTab,
@@ -621,57 +741,60 @@ function KinfloOperatorSidebar({
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-semibold">{lane.label}</span>
                   <span className={`kinflo-workspace-lane-description mt-0.5 block truncate text-[11px] ${isActiveLane ? "text-foreground/75" : statusTone}`}>
-                    {lane.tabs.length} sections · {lane.status}
+                    {lane.sectionCount ?? lane.tabs.length} sections · {lane.status}
                   </span>
                 </span>
               </button>
               {isActiveLane ? (
                 <div className="ml-4 mt-1 space-y-0.5 border-l border-primary/30 pl-2" data-testid={`section-kinflo-workflow-lane-tabs-${lane.key}`}>
                   <div className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Sections in this workspace</div>
-                  {lane.key !== "activation" && lane.key !== "studio" ? lane.tabs.map((tabValue) => (
-                    <button
-                      key={tabValue}
-                      type="button"
-                      onClick={() => onSelectTab(tabValue)}
-                      aria-current={activeTab === tabValue ? "page" : undefined}
-                      className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition ${activeTab === tabValue ? "bg-primary/10 font-semibold text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
-                      data-testid={`dot-kinflo-workflow-lane-${lane.key}-${tabValue}`}
-                    >
-                      <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${activeTab === tabValue ? "bg-primary" : "bg-muted-foreground/40"}`} />
-                      <span className="truncate">{shellTabLabels[tabValue]}</span>
-                    </button>
-                  )) : null}
-                  {lane.key === "studio" ? (
-                    <div className="mt-1 space-y-0.5 border-t border-border/70 pt-1" data-testid="section-kinflo-sidebar-studio-sections">
-                      <div className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Studio sections</div>
-                      {[
-                        { key: "build", label: "Build", detail: "Sites and starting points" },
-                        { key: "configuration", label: "Configuration", detail: "Profiles and approvals" },
-                        { key: "handoff", label: "Handoff", detail: "Permissions and delivery" },
-                        { key: "preview-launch", label: "Preview & Launch", detail: "Review and release" },
-                      ].map((section) => {
-                        const isActiveSection = activeStudioSection === section.key;
-                        return (
-                          <button
-                            key={section.key}
-                            type="button"
-                            onClick={() => onSelectStudioSection(section.key as ClientWebsiteStudioNavigationKey)}
-                            aria-current={isActiveSection ? "page" : undefined}
-                            className={`flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left text-xs transition ${isActiveSection ? "bg-primary/10 font-semibold text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
-                            data-testid={`button-kinflo-studio-section-${section.key}`}
-                          >
-                            <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${isActiveSection ? "bg-primary" : "bg-muted-foreground/40"}`} />
-                            <span className="min-w-0">
-                              <span className="block truncate">{section.label}</span>
-                              <span className="block truncate text-[10px] font-normal text-muted-foreground">{section.detail}</span>
-                            </span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  ) : null}
-                  {lane.key === "activation" ? (
-                    <div className="mt-1 border-t border-border/70 pt-1" data-testid="section-kinflo-sidebar-activation-steps">
+                      {lane.key !== "activation" ? lane.tabs.map((tabValue) => (
+                        (() => {
+                          const isActiveTab = activeTab === tabValue
+                            && (tabValue !== "site-studio" || activeStudioSection === "build");
+                          return (
+                            <button
+                              key={tabValue}
+                              type="button"
+                              onClick={() => tabValue === "site-studio" ? onSelectStudioSection("build") : onSelectTab(tabValue)}
+                              aria-current={isActiveTab ? "page" : undefined}
+                              className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition ${isActiveTab ? "bg-primary/10 font-semibold text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+                              data-testid={`dot-kinflo-workflow-lane-${lane.key}-${tabValue}`}
+                            >
+                              <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${isActiveTab ? "bg-primary" : "bg-muted-foreground/40"}`} />
+                              <span className="truncate">{shellTabLabels[tabValue]}</span>
+                            </button>
+                          );
+                        })()
+                      )) : null}
+                      {lane.key === "build" ? (
+                        <div className="mt-1 space-y-0.5 border-t border-border/70 pt-1" data-testid="section-kinflo-sidebar-build-site-sections">
+                          {[
+                            { key: "configuration", label: "Configuration", detail: "Profiles and approvals" },
+                            { key: "handoff", label: "Handoff", detail: "Permissions and delivery" },
+                          ].map((section) => {
+                            const isActiveSection = activeStudioSection === section.key;
+                            return (
+                              <button
+                                key={section.key}
+                                type="button"
+                                onClick={() => onSelectStudioSection(section.key as ClientWebsiteStudioNavigationKey)}
+                                aria-current={isActiveSection ? "page" : undefined}
+                                className={`flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left text-xs transition ${isActiveSection ? "bg-primary/10 font-semibold text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+                                data-testid={`button-kinflo-studio-section-${section.key}`}
+                              >
+                                <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${isActiveSection ? "bg-primary" : "bg-muted-foreground/40"}`} />
+                                <span className="min-w-0">
+                                  <span className="block truncate">{section.label}</span>
+                                  <span className="block truncate text-[10px] font-normal text-muted-foreground">{section.detail}</span>
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ) : null}
+                      {lane.key === "activation" ? (
+                        <div className="mt-1 border-t border-border/70 pt-1" data-testid="section-kinflo-sidebar-activation-steps">
                       <button
                         type="button"
                         onClick={() => onSelectTab("hosted-activation")}
@@ -705,8 +828,8 @@ function KinfloOperatorSidebar({
                           })}
                         </div>
                       ) : null}
-                    </div>
-                  ) : null}
+                        </div>
+                      ) : null}
                 </div>
               ) : null}
             </div>
@@ -3039,6 +3162,132 @@ function ClientWebsiteConfigurationCommandSurface({
             </Badge>
           ))}
         </div>
+      </div>
+    </section>
+  );
+}
+
+function VanguardBuildOverview({
+  stage,
+  siteLabel,
+  tenantSlug,
+  readiness,
+  readyCount,
+  previewHref,
+}: {
+  stage: ClientWebsiteWorkbenchStage;
+  siteLabel: string;
+  tenantSlug: string;
+  readiness: Array<{ label: string; done?: boolean }>;
+  readyCount: number;
+  previewHref: string;
+}) {
+  const steps: Array<{ value: ClientWebsiteWorkbenchStage; label: string; detail: string }> = [
+    { value: "sites", label: "Site setup", detail: "Choose the site and confirm its starting structure." },
+    { value: "operations", label: "Handoff", detail: "Review permissions and delivery context before release." },
+  ];
+  const activeStep = steps.find((step) => step.value === stage) ?? steps[0];
+
+  return (
+    <section className="rounded-lg border border-border bg-card p-3" data-testid="section-kinflo-vanguard-build-overview">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <div className="text-sm font-semibold text-foreground">Build a site</div>
+          <p className="mt-1 max-w-2xl text-xs leading-5 text-muted-foreground">
+            Build covers site setup and handoff. Preview, readiness, and domains continue in Launch.
+          </p>
+        </div>
+        <Badge variant="outline" className="w-fit border-border bg-muted text-foreground">Read only</Badge>
+      </div>
+
+      <p className="mt-3 text-xs leading-5 text-muted-foreground">Use the sidebar to change sections. This sequence shows where the selected section fits in the site path.</p>
+      <ol className="mt-4 grid gap-2 sm:grid-cols-2" aria-label="Build sequence" data-testid="section-kinflo-vanguard-build-stepper">
+        {steps.map((step, index) => {
+          const isActive = step.value === stage;
+          return (
+            <li
+              key={step.value}
+              aria-current={isActive ? "step" : undefined}
+              className={`rounded-md border px-3 py-2 ${isActive ? "border-primary bg-primary text-primary-foreground" : "border-border bg-muted text-foreground"}`}
+              data-testid={`step-kinflo-vanguard-build-${step.value}`}
+            >
+                <span className="flex items-center gap-2 text-xs font-semibold">
+                  <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] ${isActive ? "bg-primary-foreground/15" : "bg-card text-muted-foreground"}`}>{index + 1}</span>
+                  {step.label}
+                </span>
+                <span className={`mt-1 block text-[11px] leading-4 ${isActive ? "text-primary-foreground/75" : "text-muted-foreground"}`}>{step.detail}</span>
+            </li>
+          );
+        })}
+      </ol>
+
+      <div className="mt-3 rounded-md border border-border bg-muted p-3" data-testid="section-kinflo-vanguard-build-active-step">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <div className="text-xs font-semibold uppercase tracking-wide text-primary">{activeStep.label}</div>
+            <div className="mt-1 text-base font-semibold text-foreground">{siteLabel}</div>
+            <div className="mt-1 text-xs text-muted-foreground">{tenantSlug} · {readyCount}/{readiness.length} readiness checks recorded</div>
+          </div>
+          {stage === "preview" ? (
+            <a className="inline-flex w-fit items-center rounded-md border border-border bg-card px-3 py-2 text-xs font-semibold text-foreground hover:border-primary/50" href={previewHref} target="_blank" rel="noreferrer" data-testid="link-kinflo-vanguard-build-preview">
+              Open preview
+            </a>
+          ) : null}
+        </div>
+
+        {stage === "sites" ? (
+          <div className="mt-3 grid gap-2 sm:grid-cols-3">
+            {readiness.slice(0, 3).map((item) => (
+              <div key={item.label} className="rounded-md border border-border bg-card px-3 py-2 text-xs">
+                <div className="font-medium text-foreground">{item.label}</div>
+                <div className="mt-1 text-muted-foreground">{item.done ? "Recorded" : "Needs review"}</div>
+              </div>
+            ))}
+          </div>
+        ) : null}
+
+        {stage === "preview" ? (
+          <p className="mt-3 text-xs leading-5 text-muted-foreground">Review the public site and mobile journey here. Client sharing, saving, and provider actions remain disabled.</p>
+        ) : null}
+
+        {stage === "launch" ? (
+          <p className="mt-3 text-xs leading-5 text-muted-foreground">The launch decision is still read-only. Use Preview for the public review and Operations for the supporting order context.</p>
+        ) : null}
+
+      </div>
+    </section>
+  );
+}
+
+function VanguardOperationsMetricSnapshot({ onOpenDetail }: { onOpenDetail: () => void }) {
+  return (
+    <section className="rounded-lg border border-border bg-card p-3" data-testid="section-kinflo-vanguard-metrics-summary">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Handoff health</div>
+          <h2 className="mt-1 text-base font-semibold text-foreground">Order operations at a glance</h2>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">Ten read-only measures summarize flow, delivery risk, materials, quality, and team capacity.</p>
+        </div>
+        <Badge variant="outline" className="w-fit kinflo-pill kinflo-pill-neutral">Fixture measures · read-only</Badge>
+      </div>
+      <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-5" data-testid="section-kinflo-vanguard-metrics-summary-cards">
+        {vanguardOperationsMetricsFixture.map((metric) => (
+          <button
+            key={metric.key}
+            type="button"
+            className="rounded-md border border-border bg-muted/30 p-3 text-left transition hover:border-primary/50 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            onClick={onOpenDetail}
+            data-filter-target="handoff"
+            aria-label={`${metric.label}: ${metric.value}. Open Handoff metric detail.`}
+          >
+            <div className="flex items-start justify-between gap-2">
+              <div className="text-xs font-semibold text-foreground">{metric.label}</div>
+              <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral shrink-0 text-[10px]">{metric.postureLabel}</Badge>
+            </div>
+            <div className="mt-2 text-lg font-semibold text-foreground">{metric.value}</div>
+            <div className="mt-1 text-[11px] font-medium text-muted-foreground">{metric.windowLabel}</div>
+          </button>
+        ))}
       </div>
     </section>
   );
@@ -6976,6 +7225,44 @@ export default function AdminKinfloShell() {
     navigate(query ? `/admin/kinflo-os?${query}` : "/admin/kinflo-os");
   };
 
+  useEffect(() => {
+    if (typeof window === "undefined" || activeTab !== "site-studio") {
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("studioLane") !== "workbench") {
+      return;
+    }
+
+    const legacyStage = params.get("studioStage");
+    const nextTab = legacyStage === "preview"
+      ? "preview"
+      : legacyStage === "launch"
+        ? "launch-readiness"
+        : null;
+    if (!nextTab) {
+      return;
+    }
+
+    params.set("tab", nextTab);
+    [
+      "studioLane",
+      "studioStage",
+      "studioDossier",
+      "studioProvisioning",
+      "studioHandoff",
+      "studioMatrix",
+      "studioSection",
+      "studioConfigure",
+      "studioConfig",
+      "studioChange",
+      "studioApproval",
+      "studioSave",
+    ].forEach((key) => params.delete(key));
+    navigate(`/admin/kinflo-os?${params.toString()}`);
+  }, [activeTab, navigate]);
+
   const scrollClientWebsiteStudioLaneToTop = (lane: ClientWebsiteStudioLane) => {
     if (typeof window === "undefined") {
       return;
@@ -7739,7 +8026,7 @@ export default function AdminKinfloShell() {
     >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between" data-testid="section-kinflo-client-studio-context">
         <div className="min-w-0">
-          <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Studio workspace</div>
+          <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Build workspace</div>
           <div className="mt-0.5 truncate text-sm font-semibold text-foreground">
             {clientWebsiteStudioNavigationValues.includes(getClientWebsiteStudioNavigationKey(clientWebsiteStudioLane, clientWebsiteWorkbenchStage))
               ? {
@@ -7750,7 +8037,7 @@ export default function AdminKinfloShell() {
               }[getClientWebsiteStudioNavigationKey(clientWebsiteStudioLane, clientWebsiteWorkbenchStage)]
               : "Build"}
           </div>
-          <p className="mt-0.5 text-xs text-muted-foreground">Choose a Studio section from the sidebar. The active workspace opens here.</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">Choose a build section from the sidebar. The active workspace opens here.</p>
         </div>
         <div className="flex shrink-0 flex-wrap items-center gap-2 text-xs text-muted-foreground">
           <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">{clientWebsiteStudioStatusLabel}</Badge>
@@ -7969,7 +8256,15 @@ export default function AdminKinfloShell() {
           </div>
         </section>
 
-        {activeTab === "overview" || activeTab === "hosted-activation" ? null : (
+        {activeTab === "overview" ? (
+          <KinfloOverviewAnalytics snapshot={snapshot} onSelectTab={selectShellTab} onSelectStudioSection={selectClientWebsiteStudioSection} />
+        ) : (
+          <KinfloWorkflowLaneSnapshot lane={activeWorkflowLane} snapshot={snapshot} onSelectTab={selectShellTab} onSelectStudioSection={selectClientWebsiteStudioSection} />
+        )}
+
+        {activeTab === "overview"
+          || activeTab === "hosted-activation"
+          || (activeTab === "site-studio" && getClientWebsiteStudioNavigationKey(clientWebsiteStudioLane, clientWebsiteWorkbenchStage) !== "build") ? null : (
           <KinfloSectionSnapshot
             activeTab={activeTab}
             snapshot={snapshot}
@@ -12760,19 +13055,50 @@ export default function AdminKinfloShell() {
             <section className="flex min-w-0 flex-col gap-2 overflow-x-clip" data-testid="section-kinflo-client-studio-compact-shell">
               {clientWebsiteStudioLaneRail}
 
-              <div className={`${shouldShowClientWebsiteStudioContext || websiteStudioRouteScope.status === "blocked" ? "block" : "hidden"} order-2`}>
-                <TenantSiteComposer
-                  siteKey={selectedClientWebsiteStudioSite?.key ?? "julies-family-public"}
-                  tenantSlug={selectedClientWebsiteStudioSite?.tenantSlug ?? adminScope.tenant.slug}
-                  siteLabel={selectedClientWebsiteStudioSite?.label ?? "Tenant site"}
-                  previewPath={clientWebsiteStudioPreviewPath}
-                  routeScope={websiteStudioRouteScope}
-                  onOpenControl={(control) => selectShellTab(control)}
-                />
+              {isVanguardWebsite && clientWebsiteStudioLane === "workbench" && clientWebsiteWorkbenchStage === "sites" ? (
+                <div className="order-2" data-testid="section-kinflo-vanguard-build-primary">
+                  <VanguardBuildOverview
+                    stage={clientWebsiteWorkbenchStage}
+                    siteLabel={selectedClientWebsiteStudioSite?.label ?? "Vanguard site"}
+                    tenantSlug={selectedClientWebsiteStudioSite?.tenantSlug ?? "vanguard-enterprises"}
+                    readiness={clientWebsiteStudioReadiness}
+                    readyCount={clientWebsiteStudioReadyCount}
+                    previewHref={clientWebsiteStudioPreviewHref}
+                  />
+                </div>
+              ) : null}
+
+              <div className={`${(shouldShowClientWebsiteStudioContext && (!isVanguardWebsite || clientWebsiteWorkbenchStage === "sites")) || websiteStudioRouteScope.status === "blocked" ? "block" : "hidden"} order-3`}>
+                {isVanguardWebsite ? (
+                  <details className="rounded-lg border border-border bg-card p-3" data-testid="section-kinflo-vanguard-site-design-details">
+                    <summary className="cursor-pointer list-none text-sm font-semibold text-foreground">
+                      Site design controls <span className="ml-2 text-xs font-normal text-muted-foreground">Open when editing the public structure</span>
+                    </summary>
+                    <div className="mt-3">
+                      <TenantSiteComposer
+                        siteKey={selectedClientWebsiteStudioSite?.key ?? "julies-family-public"}
+                        tenantSlug={selectedClientWebsiteStudioSite?.tenantSlug ?? adminScope.tenant.slug}
+                        siteLabel={selectedClientWebsiteStudioSite?.label ?? "Tenant site"}
+                        previewPath={clientWebsiteStudioPreviewPath}
+                        routeScope={websiteStudioRouteScope}
+                        onOpenControl={(control) => selectShellTab(control)}
+                      />
+                    </div>
+                  </details>
+                ) : (
+                  <TenantSiteComposer
+                    siteKey={selectedClientWebsiteStudioSite?.key ?? "julies-family-public"}
+                    tenantSlug={selectedClientWebsiteStudioSite?.tenantSlug ?? adminScope.tenant.slug}
+                    siteLabel={selectedClientWebsiteStudioSite?.label ?? "Tenant site"}
+                    previewPath={clientWebsiteStudioPreviewPath}
+                    routeScope={websiteStudioRouteScope}
+                    onOpenControl={(control) => selectShellTab(control)}
+                  />
+                )}
               </div>
 
               <div
-                className={`order-3 ${shouldShowClientWebsiteStudioContext ? "overflow-hidden" : "hidden"} rounded-lg border border-slate-200 bg-white shadow-sm`}
+                className={`order-4 ${shouldShowClientWebsiteStudioContext && (!isVanguardWebsite || clientWebsiteWorkbenchStage === "operations") ? "overflow-hidden" : "hidden"} rounded-lg border border-slate-200 bg-white shadow-sm`}
                 data-testid="section-kinflo-client-control-room-frame"
               >
                 <div className="grid min-w-0 gap-0 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -12832,7 +13158,7 @@ export default function AdminKinfloShell() {
                 </div>
               </div>
 
-              <div className={`order-3 ${shouldShowClientWebsiteStudioContext ? "block" : "hidden"}`}>
+              <div className={`order-3 ${shouldShowClientWebsiteStudioContext && (!isVanguardWebsite || clientWebsiteWorkbenchStage === "operations") ? "block" : "hidden"}`}>
                 <ClientWebsitePortfolioRegistry
                   registry={snapshot.clientWebsiteStudio.portfolioRegistry}
                   selectedSiteKey={clientWebsiteStudioSiteKey}
@@ -12842,7 +13168,7 @@ export default function AdminKinfloShell() {
               </div>
 
               <div
-                className={`order-3 ${shouldShowClientWebsiteStudioContext ? "hidden lg:grid" : "hidden"} grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm lg:grid-cols-4`}
+                className={`order-3 ${shouldShowClientWebsiteStudioContext && (!isVanguardWebsite || clientWebsiteWorkbenchStage === "operations") ? "hidden lg:grid" : "hidden"} grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm lg:grid-cols-4`}
                 data-testid="section-kinflo-client-studio-operating-frame"
               >
                 {clientWebsiteStudioReviewStats.map((stat) => (
@@ -12853,10 +13179,12 @@ export default function AdminKinfloShell() {
                 ))}
               </div>
 
-              <div className={`order-3 ${shouldShowClientWebsiteStudioContext ? "grid" : "hidden"} gap-2 xl:grid-cols-[minmax(0,0.48fr)_minmax(0,0.52fr)]`}>
+              <div className={`order-3 ${shouldShowClientWebsiteStudioContext && (!isVanguardWebsite || clientWebsiteWorkbenchStage === "operations") ? "grid" : "hidden"} gap-2 xl:grid-cols-[minmax(0,0.48fr)_minmax(0,0.52fr)]`}>
                 {isVanguardWebsite ? (
                   <div className="xl:col-span-2">
-                    <VanguardFulfillmentWorkspace previewHref={clientWebsiteStudioPreviewHref} />
+                    {clientWebsiteWorkbenchStage === "operations" ? (
+                      <VanguardFulfillmentWorkspace previewHref={clientWebsiteStudioPreviewHref} />
+                    ) : null}
                   </div>
                 ) : (
                   <>
@@ -12876,7 +13204,7 @@ export default function AdminKinfloShell() {
               </div>
 
               <div
-                className={`order-3 ${shouldShowClientWebsiteStudioContext ? "hidden lg:grid" : "hidden"} grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm lg:grid-cols-4`}
+                className={`order-3 ${shouldShowClientWebsiteStudioContext && (!isVanguardWebsite || clientWebsiteWorkbenchStage === "operations") ? "hidden lg:grid" : "hidden"} grid-cols-2 gap-2 rounded-lg border border-slate-200 bg-white p-2 shadow-sm lg:grid-cols-4`}
                 data-testid="section-kinflo-client-workbench-grid-contract"
               >
                 {clientWebsiteWorkbenchGridContract.map((item) => (
@@ -12944,7 +13272,12 @@ export default function AdminKinfloShell() {
                   data-testid="section-kinflo-client-studio-lane-handoff"
                 >
                   {isVanguardWebsite ? (
-                    <VanguardFulfillmentWorkspace previewHref={clientWebsiteStudioPreviewHref} />
+                    <div className="space-y-3">
+                      <VanguardOperationsMetricSnapshot
+                        onOpenDetail={() => focusSelectedShellSection("site-studio", "section-kinflo-vanguard-metrics-optimization")}
+                      />
+                      <VanguardFulfillmentWorkspace previewHref={clientWebsiteStudioPreviewHref} />
+                    </div>
                   ) : <Tabs
                     value={clientWebsiteHandoffWorkspace}
                     onValueChange={(value) => selectClientWebsiteHandoffWorkspace(value as ClientWebsiteHandoffWorkspace)}
@@ -13005,9 +13338,10 @@ export default function AdminKinfloShell() {
                     data-testid="section-kinflo-client-workbench-grid"
                   >
                     <Tabs value={clientWebsiteWorkbenchStage} onValueChange={(value) => selectClientWebsiteWorkbenchStage(value as ClientWebsiteWorkbenchStage)} className={isVanguardWebsite ? "hidden" : "min-w-0"} data-testid="tabs-kinflo-client-workbench-stage">
-                      <TabsList className="grid h-auto w-full grid-cols-3 bg-slate-100 p-1">
+                      <TabsList className="grid h-auto w-full grid-cols-4 bg-slate-100 p-1">
                         <TabsTrigger value="sites" data-testid="tab-kinflo-client-workbench-sites">Sites</TabsTrigger>
                         <TabsTrigger value="preview" data-testid="tab-kinflo-client-workbench-preview">Preview</TabsTrigger>
+                        <TabsTrigger value="operations" data-testid="tab-kinflo-client-workbench-operations">Operations</TabsTrigger>
                         <TabsTrigger value="launch" data-testid="tab-kinflo-client-workbench-launch">Launch</TabsTrigger>
                       </TabsList>
 
@@ -13232,6 +13566,16 @@ export default function AdminKinfloShell() {
                     </div>
                   </CardContent>
                     </Card>
+                  </TabsContent>
+
+                  <TabsContent value="operations" className="mt-4" data-testid="section-kinflo-client-workbench-operations">
+                    <div className="rounded-lg border border-border bg-muted p-4">
+                      <div className="text-sm font-semibold text-foreground">Operations context</div>
+                      <p className="mt-1 max-w-2xl text-xs leading-5 text-muted-foreground">
+                        This step is reserved for order routing, fulfillment evidence, quality checks, and delivery measures when the selected site exposes that workflow.
+                      </p>
+                      <Badge variant="outline" className="mt-3 border-border bg-card text-foreground">No operational workspace for this site</Badge>
+                    </div>
                   </TabsContent>
 
                   <TabsContent value="launch" className="mt-2" data-testid="section-kinflo-client-workbench-launch">
