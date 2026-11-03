@@ -31,6 +31,11 @@ if (existsSync(shellPath)) {
     "kinflo-pill-warning",
     "kinflo-pill-neutral",
     "kinflo-preview-artifact",
+    "Configuration status",
+    "Local preview",
+    "Live save unavailable",
+    "Site in current scope",
+    "navigationSiteOptions",
     "kinflo-metric-card",
     "data-filter-target={filterTarget.tab}",
     'tenants: { tab: "tenants"',
@@ -50,6 +55,7 @@ if (existsSync(shellPath)) {
   }
   check(!shell.includes("convex/_generated/api"), "admin shell excludes generated Convex bindings", "This UX lane must remain source-only.");
   check(!shell.includes("useMutation(") && !shell.includes("useAction("), "admin shell excludes live Convex execution", "Mutation/action execution must remain gated.");
+  check(!shell.includes("Field affordance") && !shell.includes("Fixture navigation"), "admin shell excludes implementation-facing navigation labels", "Operator-facing configuration labels must use plain language.");
 }
 
 if (existsSync(dashboardShellPath)) {
