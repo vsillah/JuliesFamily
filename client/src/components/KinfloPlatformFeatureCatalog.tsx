@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   LockKeyhole,
   Settings2,
+  X,
 } from "lucide-react";
 import { getKinfloPlatformAnalyticsSnapshot } from "../lib/kinfloPlatformAnalytics";
 
@@ -590,81 +591,137 @@ function PlatformLaneAnalytics({
       ?.tenantCount ?? 0;
   const metrics = {
     control: [
-      [
-        "Tenant relationships",
-        String(snapshot.tenantCount),
-        "Local tenant snapshot",
-      ],
-      ["Sites", String(snapshot.siteCount), "Across all fixture tenants"],
-      [
-        "Active tenants",
-        String(snapshot.activeTenantCount),
-        "Read-only relationship status",
-      ],
+      {
+        key: "all",
+        label: "Tenant relationships",
+        value: String(snapshot.tenantCount),
+        detail: "Local tenant snapshot",
+        matches: () => true,
+      },
+      {
+        key: "sites",
+        label: "Sites",
+        value: String(snapshot.siteCount),
+        detail: "Across all fixture tenants",
+        matches: () => true,
+      },
+      {
+        key: "active",
+        label: "Active tenants",
+        value: String(snapshot.activeTenantCount),
+        detail: "Read-only relationship status",
+        matches: (tenant: (typeof snapshot.tenantCoverage)[number]) =>
+          tenant.status === "active",
+      },
     ],
     build: [
-      [
-        "Sites represented",
-        String(snapshot.siteCount),
-        "Available in the local snapshot",
-      ],
-      [
-        "Build-enabled tenants",
-        String(capabilityCount("build")),
-        "Capability adoption",
-      ],
-      [
-        "Draft tenants",
-        String(snapshot.draftTenantCount),
-        "Awaiting live readiness",
-      ],
+      {
+        key: "sites",
+        label: "Sites represented",
+        value: String(snapshot.siteCount),
+        detail: "Available in the local snapshot",
+        matches: () => true,
+      },
+      {
+        key: "build",
+        label: "Build-enabled tenants",
+        value: String(capabilityCount("build")),
+        detail: "Capability adoption",
+        matches: (tenant: (typeof snapshot.tenantCoverage)[number]) =>
+          tenant.capabilityKeys.includes("build"),
+      },
+      {
+        key: "draft",
+        label: "Draft tenants",
+        value: String(snapshot.draftTenantCount),
+        detail: "Awaiting live readiness",
+        matches: (tenant: (typeof snapshot.tenantCoverage)[number]) =>
+          tenant.status === "draft",
+      },
     ],
     launch: [
-      [
-        "Launch-enabled tenants",
-        String(capabilityCount("launch")),
-        "Capability adoption",
-      ],
-      [
-        "Sessions at launch",
-        String(snapshot.sessionFlow[2].sessions),
-        "Fixture flow reaches review",
-      ],
-      ["Live release posture", "Gated", "Hosted activation remains disabled"],
+      {
+        key: "launch",
+        label: "Launch-enabled tenants",
+        value: String(capabilityCount("launch")),
+        detail: "Capability adoption",
+        matches: (tenant: (typeof snapshot.tenantCoverage)[number]) =>
+          tenant.capabilityKeys.includes("launch"),
+      },
+      {
+        key: "review",
+        label: "Sessions at launch",
+        value: String(snapshot.sessionFlow[2].sessions),
+        detail: "Fixture flow reaches review",
+        matches: (tenant: (typeof snapshot.tenantCoverage)[number]) =>
+          tenant.status === "active",
+      },
+      {
+        key: "gated",
+        label: "Live release posture",
+        value: "Gated",
+        detail: "Hosted activation remains disabled",
+        matches: () => true,
+      },
     ],
     growth: [
-      [
-        "Growth-enabled tenants",
-        String(capabilityCount("growth")),
-        "Capability adoption",
-      ],
-      [
-        "Fixture events",
-        String(
+      {
+        key: "growth",
+        label: "Growth-enabled tenants",
+        value: String(capabilityCount("growth")),
+        detail: "Capability adoption",
+        matches: (tenant: (typeof snapshot.tenantCoverage)[number]) =>
+          tenant.capabilityKeys.includes("growth"),
+      },
+      {
+        key: "events",
+        label: "Fixture events",
+        value: String(
           snapshot.activityTrend.reduce((total, day) => total + day.events, 0),
         ),
-        "Illustrative 7-day snapshot",
-      ],
-      [
-        "Operating sessions",
-        String(snapshot.sessionFlow[3].sessions),
-        "Fixture flow reaches operation",
-      ],
+        detail: "Illustrative 7-day snapshot",
+        matches: () => true,
+      },
+      {
+        key: "operate",
+        label: "Operating sessions",
+        value: String(snapshot.sessionFlow[3].sessions),
+        detail: "Fixture flow reaches operation",
+        matches: (tenant: (typeof snapshot.tenantCoverage)[number]) =>
+          tenant.status === "active",
+      },
     ],
     evidence: [
-      [
-        "Evidence-enabled tenants",
-        String(capabilityCount("evidence")),
-        "Capability adoption",
-      ],
-      [
-        "Review sessions",
-        String(snapshot.sessionFlow[2].sessions),
-        "Fixture readiness path",
-      ],
-      ["Live actions", "Gated", "Activation and provider writes disabled"],
+      {
+        key: "evidence",
+        label: "Evidence-enabled tenants",
+        value: String(capabilityCount("evidence")),
+        detail: "Capability adoption",
+        matches: (tenant: (typeof snapshot.tenantCoverage)[number]) =>
+          tenant.capabilityKeys.includes("evidence"),
+      },
+      {
+        key: "review",
+        label: "Review sessions",
+        value: String(snapshot.sessionFlow[2].sessions),
+        detail: "Fixture readiness path",
+        matches: (tenant: (typeof snapshot.tenantCoverage)[number]) =>
+          tenant.status === "active",
+      },
+      {
+        key: "gated",
+        label: "Live actions",
+        value: "Gated",
+        detail: "Activation and provider writes disabled",
+        matches: () => true,
+      },
     ],
   }[section];
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const selectedMetric = metrics.find((metric) => metric.key === activeFilter);
+  const filteredTenants = selectedMetric
+    ? snapshot.tenantCoverage.filter(selectedMetric.matches)
+    : snapshot.tenantCoverage;
 
   return (
     <section
@@ -689,22 +746,69 @@ function PlatformLaneAnalytics({
         </span>
       </div>
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
-        {metrics.map(([label, value, detail]) => (
-          <div
-            key={label}
-            className="border border-slate-300 bg-white px-4 py-4 shadow-sm"
+        {metrics.map((metric) => (
+          <button
+            key={metric.key}
+            type="button"
+            aria-pressed={activeFilter === metric.key}
+            onClick={() =>
+              setActiveFilter((current) =>
+                current === metric.key ? null : metric.key,
+              )
+            }
+            className={`border px-4 py-4 text-left shadow-sm transition ${activeFilter === metric.key ? "border-slate-950 bg-slate-950 text-white" : "border-slate-300 bg-white text-slate-950 hover:border-slate-950"}`}
+            data-testid={`button-kinflo-${section}-metric-${metric.key}`}
           >
+            <div
+              className={`text-xs font-semibold uppercase tracking-[0.12em] ${activeFilter === metric.key ? "text-slate-300" : "text-slate-500"}`}
+            >
+              {metric.label}
+            </div>
+            <div className="mt-3 text-xl font-semibold">{metric.value}</div>
+            <div
+              className={`mt-2 text-sm leading-5 ${activeFilter === metric.key ? "text-slate-300" : "text-slate-600"}`}
+            >
+              {metric.detail}
+            </div>
+          </button>
+        ))}
+      </div>
+      <div
+        className="mt-4 border border-slate-300 bg-white p-4"
+        data-testid={`section-kinflo-${section}-metric-filter-results`}
+      >
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
             <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-              {label}
+              Tenant filter
             </div>
-            <div className="mt-3 text-xl font-semibold text-slate-950">
-              {value}
-            </div>
-            <div className="mt-2 text-sm leading-5 text-slate-600">
-              {detail}
+            <div className="mt-1 text-sm font-semibold text-slate-900">
+              {selectedMetric
+                ? `${selectedMetric.label} · ${filteredTenants.length} tenants`
+                : `All fixture tenants · ${filteredTenants.length}`}
             </div>
           </div>
-        ))}
+          {selectedMetric ? (
+            <button
+              type="button"
+              onClick={() => setActiveFilter(null)}
+              className="inline-flex items-center gap-2 self-start border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:border-slate-950 sm:self-auto"
+              data-testid={`button-kinflo-${section}-metric-filter-clear`}
+            >
+              <X className="h-3.5 w-3.5" aria-hidden="true" /> Clear filter
+            </button>
+          ) : null}
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {filteredTenants.map((tenant) => (
+            <span
+              key={tenant.tenant}
+              className="border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700"
+            >
+              {tenant.tenant}
+            </span>
+          ))}
+        </div>
       </div>
     </section>
   );

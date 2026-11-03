@@ -70,6 +70,7 @@ export type KinfloPlatformAnalyticsSnapshot = {
     sites: number;
     status: "active" | "draft";
     capabilities: number;
+    capabilityKeys: readonly string[];
     activity: string;
   }[];
   sessionFlow: readonly {
@@ -189,6 +190,7 @@ export function getKinfloPlatformAnalyticsSnapshot(): KinfloPlatformAnalyticsSna
       sites: tenant.sites,
       status: tenant.status,
       capabilities: tenant.capabilities.length,
+      capabilityKeys: tenant.capabilities,
       activity: tenant.activity,
     })),
     sessionFlow: [
