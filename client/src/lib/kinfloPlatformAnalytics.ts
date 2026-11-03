@@ -65,12 +65,20 @@ export type KinfloPlatformAnalyticsSnapshot = {
     label: string;
     events: number;
   }[];
+  activityByTenant: readonly {
+    tenantSlug: string;
+    tenant: string;
+    events: readonly number[];
+  }[];
   tenantCoverage: readonly {
+    tenantSlug: string;
     tenant: string;
     sites: number;
     status: "active" | "draft";
     capabilities: number;
     capabilityKeys: readonly string[];
+    sessions: number;
+    operatingSessions: number;
     activity: string;
   }[];
   sessionFlow: readonly {
@@ -85,6 +93,7 @@ type PlatformCapabilityKey =
 
 type FixtureTenant = {
   tenant: string;
+  slug: string;
   sites: number;
   status: "active" | "draft";
   capabilities: readonly PlatformCapabilityKey[];
@@ -94,6 +103,7 @@ type FixtureTenant = {
 const fixtureTenants: readonly FixtureTenant[] = [
   {
     tenant: "Julie\'s Family Learning Program",
+    slug: "julies-family",
     sites: 2,
     status: "active",
     capabilities: ["control", "build", "launch", "growth"],
@@ -101,6 +111,7 @@ const fixtureTenants: readonly FixtureTenant[] = [
   },
   {
     tenant: "Vanguard Enterprises",
+    slug: "vanguard-enterprises",
     sites: 1,
     status: "active",
     capabilities: ["control", "build", "launch", "growth", "evidence"],
@@ -108,6 +119,7 @@ const fixtureTenants: readonly FixtureTenant[] = [
   },
   {
     tenant: "Advisor Client Starter",
+    slug: "advisor-client-starter",
     sites: 1,
     status: "draft",
     capabilities: ["control", "build", "launch"],
@@ -115,6 +127,7 @@ const fixtureTenants: readonly FixtureTenant[] = [
   },
   {
     tenant: "Campaign Microsite Lab",
+    slug: "campaign-microsite-lab",
     sites: 2,
     status: "draft",
     capabilities: ["control", "build", "growth"],
@@ -185,12 +198,41 @@ export function getKinfloPlatformAnalyticsSnapshot(): KinfloPlatformAnalyticsSna
       { label: "Sat", events: 16 },
       { label: "Sun", events: 13 },
     ],
+    activityByTenant: [
+      {
+        tenantSlug: "julies-family",
+        tenant: "Julie\'s Family Learning Program",
+        events: [3, 4, 2, 5, 4, 5, 4],
+      },
+      {
+        tenantSlug: "vanguard-enterprises",
+        tenant: "Vanguard Enterprises",
+        events: [2, 3, 3, 4, 3, 5, 4],
+      },
+      {
+        tenantSlug: "advisor-client-starter",
+        tenant: "Advisor Client Starter",
+        events: [1, 2, 2, 2, 2, 3, 2],
+      },
+      {
+        tenantSlug: "campaign-microsite-lab",
+        tenant: "Campaign Microsite Lab",
+        events: [2, 2, 2, 3, 3, 3, 3],
+      },
+    ],
     tenantCoverage: fixtureTenants.map((tenant) => ({
+      tenantSlug: tenant.slug,
       tenant: tenant.tenant,
       sites: tenant.sites,
       status: tenant.status,
       capabilities: tenant.capabilities.length,
       capabilityKeys: tenant.capabilities,
+      sessions: tenant.status === "active" ? 1 : 0,
+      operatingSessions:
+        tenant.slug === "vanguard-enterprises" ||
+        tenant.slug === "julies-family"
+          ? 1
+          : 0,
       activity: tenant.activity,
     })),
     sessionFlow: [

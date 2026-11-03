@@ -142,21 +142,47 @@ function initialPlatformSection(): PlatformSection {
     : "overview";
 }
 
+function initialPlatformTenant() {
+  if (typeof window === "undefined") return "all";
+  return (
+    new URLSearchParams(window.location.search).get("platformTenant") || "all"
+  );
+}
+
 function PlatformMetricGrid({
   snapshot,
+  selectedTenantSlug,
 }: {
   snapshot: ReturnType<typeof getKinfloPlatformAnalyticsSnapshot>;
+  selectedTenantSlug: string;
 }) {
+  const visibleTenants = snapshot.tenantCoverage.filter(
+    (tenant) =>
+      selectedTenantSlug === "all" || tenant.tenantSlug === selectedTenantSlug,
+  );
+  const siteCount = visibleTenants.reduce(
+    (total, tenant) => total + tenant.sites,
+    0,
+  );
+  const activeTenantCount = visibleTenants.filter(
+    (tenant) => tenant.status === "active",
+  ).length;
+  const draftTenantCount = visibleTenants.filter(
+    (tenant) => tenant.status === "draft",
+  ).length;
   const overviewMetrics = [
     {
       label: "Tenant relationships",
-      value: String(snapshot.tenantCount),
-      detail: `${snapshot.activeTenantCount} active, ${snapshot.draftTenantCount} draft fixture tenants`,
+      value: String(visibleTenants.length),
+      detail: `${activeTenantCount} active, ${draftTenantCount} draft fixture tenants`,
     },
     {
       label: "Sites",
-      value: String(snapshot.siteCount),
-      detail: "Across the local tenant relationship snapshot",
+      value: String(siteCount),
+      detail:
+        selectedTenantSlug === "all"
+          ? "Across the local tenant relationship snapshot"
+          : "Within the selected tenant lens",
     },
     {
       label: "Capability lanes",
@@ -214,27 +240,87 @@ function PlatformMetricGrid({
   );
 }
 
-const flowStages = [
-  { label: "Tenant entry", detail: "Opened consumer workspace" },
-  { label: "Build", detail: "Configured site experience" },
-  { label: "Launch", detail: "Reached readiness review" },
-  { label: "Operate", detail: "Used tenant workflows" },
-] as const;
-
-function PlatformAnalyticsWorkspace() {
+function PlatformAnalyticsWorkspace({
+  selectedTenantSlug,
+  onTenantChange,
+}: {
+  selectedTenantSlug: string;
+  onTenantChange: (tenantSlug: string) => void;
+}) {
   const snapshot = getKinfloPlatformAnalyticsSnapshot();
-  const maxActivity = Math.max(
-    ...snapshot.activityTrend.map((day) => day.events),
+  const visibleTenants = snapshot.tenantCoverage.filter(
+    (tenant) =>
+      selectedTenantSlug === "all" || tenant.tenantSlug === selectedTenantSlug,
   );
-  const radarPoints = snapshot.capabilityAdoption
+  const visibleSeries = snapshot.activityByTenant.filter(
+    (series) =>
+      selectedTenantSlug === "all" || series.tenantSlug === selectedTenantSlug,
+  );
+  const activityDays = snapshot.activityTrend.map((day, index) => ({
+    label: day.label,
+    events: visibleSeries.reduce(
+      (total, series) => total + series.events[index],
+      0,
+    ),
+  }));
+  const maxActivity = Math.max(...activityDays.map((day) => day.events));
+  const visibleCapabilityAdoption = snapshot.capabilityAdoption.map(
+    (capability) => ({
+      ...capability,
+      tenantCount: visibleTenants.filter((tenant) =>
+        tenant.capabilityKeys.includes(capability.key),
+      ).length,
+    }),
+  );
+  const tenantDenominator = Math.max(1, visibleTenants.length);
+  const radarPoints = visibleCapabilityAdoption
     .map((capability, index) => {
       const angle =
-        -Math.PI / 2 +
-        (index * Math.PI * 2) / snapshot.capabilityAdoption.length;
-      const radius = 32 + (capability.tenantCount / snapshot.tenantCount) * 58;
+        -Math.PI / 2 + (index * Math.PI * 2) / visibleCapabilityAdoption.length;
+      const radius = 32 + (capability.tenantCount / tenantDenominator) * 58;
       return `${120 + Math.cos(angle) * radius},${105 + Math.sin(angle) * radius}`;
     })
     .join(" ");
+  const selectedTenant =
+    selectedTenantSlug === "all" ? undefined : visibleTenants[0];
+  const visibleSessionStarts = visibleTenants.reduce(
+    (total, tenant) => total + tenant.sessions,
+    0,
+  );
+  const visibleOperatingSessions = visibleTenants.reduce(
+    (total, tenant) => total + tenant.operatingSessions,
+    0,
+  );
+  const flowValues = selectedTenant
+    ? [
+        {
+          label: "Tenant entry",
+          sessions: selectedTenant.sessions,
+          detail: "Opened consumer workspace",
+        },
+        {
+          label: "Build",
+          sessions: selectedTenant.sessions,
+          detail: "Configured site experience",
+        },
+        {
+          label: "Launch",
+          sessions: selectedTenant.sessions,
+          detail: "Reached readiness review",
+        },
+        {
+          label: "Operate",
+          sessions: selectedTenant.operatingSessions,
+          detail: "Used tenant workflows",
+        },
+      ]
+    : snapshot.sessionFlow;
+  const seriesColors = [
+    "bg-slate-950",
+    "bg-slate-700",
+    "bg-slate-500",
+    "bg-slate-300",
+  ];
 
   return (
     <section
@@ -265,23 +351,47 @@ function PlatformAnalyticsWorkspace() {
         </span>
       </div>
 
+      <div className="mt-5 flex flex-col gap-3 border border-slate-300 bg-white p-4 sm:flex-row sm:items-end sm:justify-between">
+        <label className="grid gap-2 text-sm font-semibold text-slate-800">
+          Tenant lens
+          <select
+            value={selectedTenantSlug}
+            onChange={(event) => onTenantChange(event.target.value)}
+            className="h-10 min-w-64 rounded-md border border-slate-300 bg-white px-3 font-normal text-slate-950 outline-none ring-slate-950 focus:ring-2"
+            data-testid="select-kinflo-platform-tenant-lens"
+          >
+            <option value="all">All tenants</option>
+            {visibleTenants.map((tenant) => (
+              <option key={tenant.tenantSlug} value={tenant.tenantSlug}>
+                {tenant.tenant}
+              </option>
+            ))}
+          </select>
+        </label>
+        <div className="text-sm text-slate-600">
+          {selectedTenant
+            ? `Showing ${selectedTenant.tenant}`
+            : `Showing all ${snapshot.tenantCount} fixture tenants`}
+        </div>
+      </div>
+
       <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[
           [
             "Activity over time",
-            `${snapshot.activityTrend.reduce((total, day) => total + day.events, 0)} fixture events`,
+            `${activityDays.reduce((total, day) => total + day.events, 0)} fixture events`,
             "7-day snapshot",
           ],
           [
             "End-to-end sessions",
-            `${snapshot.sessionFlow[0].sessions} started`,
+            `${visibleSessionStarts} started`,
             "Entry to operation",
           ],
           ["Usage economics", "Not connected", "Price per usage unit"],
           [
             "Tenant coverage",
-            `${snapshot.tenantCount} tenants`,
-            "Cross-tenant snapshot",
+            `${visibleTenants.length} tenants`,
+            selectedTenant ? "Selected tenant" : "Cross-tenant snapshot",
           ],
         ].map(([label, value, detail]) => (
           <div
@@ -326,7 +436,7 @@ function PlatformAnalyticsWorkspace() {
             className="mt-5 flex h-44 items-end gap-2 border border-slate-300 bg-slate-50 px-5 pb-5 pt-8"
             data-testid="panel-kinflo-activity-chart"
           >
-            {snapshot.activityTrend.map((day) => (
+            {activityDays.map((day, dayIndex) => (
               <div
                 key={day.label}
                 className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-2"
@@ -335,14 +445,37 @@ function PlatformAnalyticsWorkspace() {
                   {day.events}
                 </div>
                 <div
-                  className="w-full bg-slate-950"
+                  className="flex w-full max-w-10 flex-col justify-end"
                   style={{
                     height: `${Math.max(18, (day.events / maxActivity) * 100)}%`,
                   }}
                   title={`${day.label}: ${day.events} fixture events`}
-                />
+                >
+                  {visibleSeries.map((series, seriesIndex) => (
+                    <div
+                      key={series.tenantSlug}
+                      className={`min-h-[2px] ${seriesColors[seriesIndex % seriesColors.length]}`}
+                      style={{ flexGrow: series.events[dayIndex] }}
+                      title={`${series.tenant}: ${series.events[dayIndex]} events`}
+                    />
+                  ))}
+                </div>
                 <div className="text-xs text-slate-500">{day.label}</div>
               </div>
+            ))}
+          </div>
+          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-slate-500">
+            {visibleSeries.map((series, index) => (
+              <span
+                key={series.tenantSlug}
+                className="inline-flex items-center gap-2"
+              >
+                <span
+                  className={`h-2.5 w-2.5 ${seriesColors[index % seriesColors.length]}`}
+                  aria-hidden="true"
+                />
+                {series.tenant}
+              </span>
             ))}
           </div>
           <p className="mt-3 text-xs leading-5 text-slate-500">
@@ -374,7 +507,7 @@ function PlatformAnalyticsWorkspace() {
               viewBox="0 0 240 210"
               className="h-52 w-full max-w-xs text-slate-300"
               role="img"
-              aria-label="Capability mix radar chart from local fixture snapshot"
+              aria-label="Capability mix radar chart from the selected tenant lens"
             >
               <polygon
                 points="120,18 205,80 172,175 68,175 35,80"
@@ -450,7 +583,7 @@ function PlatformAnalyticsWorkspace() {
             </svg>
           </div>
           <div className="mt-1 flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs text-slate-500">
-            {snapshot.capabilityAdoption.map((capability) => (
+            {visibleCapabilityAdoption.map((capability) => (
               <span key={capability.key}>
                 {capability.label}: {capability.tenantCount}
               </span>
@@ -474,7 +607,7 @@ function PlatformAnalyticsWorkspace() {
             End-to-end tenant flow
           </h3>
           <div className="mt-4 grid gap-2 sm:grid-cols-4">
-            {flowStages.map((stage, index) => (
+            {flowValues.map((stage, index) => (
               <div
                 key={stage.label}
                 className="border border-slate-200 bg-slate-50 px-3 py-3"
@@ -493,7 +626,8 @@ function PlatformAnalyticsWorkspace() {
           </div>
           <p className="mt-4 text-sm leading-6 text-slate-500">
             Conversion and drop-off rates will use live session events when
-            telemetry is connected. Current counts are fixture-only.
+            telemetry is connected. Current counts are fixture-only;{" "}
+            {visibleOperatingSessions} reach operation in this lens.
           </p>
         </section>
         <section
@@ -559,7 +693,7 @@ function PlatformAnalyticsWorkspace() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 text-slate-700">
-              {snapshot.tenantCoverage.map((tenant) => (
+              {visibleTenants.map((tenant) => (
                 <tr key={tenant.tenant}>
                   <td className="px-3 py-3 font-semibold text-slate-900">
                     {tenant.tenant}
@@ -1122,6 +1256,9 @@ export default function KinfloPlatformFeatureCatalog({
   const [activeSection, setActiveSection] = useState<PlatformSection>(
     initialPlatformSection,
   );
+  const [selectedTenantSlug, setSelectedTenantSlug] = useState(
+    initialPlatformTenant,
+  );
   function selectSection(section: PlatformSection) {
     setActiveSection(section);
     if (typeof window !== "undefined") {
@@ -1129,6 +1266,15 @@ export default function KinfloPlatformFeatureCatalog({
       url.searchParams.set("view", "platform");
       if (section === "overview") url.searchParams.delete("platformSection");
       else url.searchParams.set("platformSection", section);
+      window.history.replaceState({}, "", url);
+    }
+  }
+  function selectTenant(tenantSlug: string) {
+    setSelectedTenantSlug(tenantSlug);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (tenantSlug === "all") url.searchParams.delete("platformTenant");
+      else url.searchParams.set("platformTenant", tenantSlug);
       window.history.replaceState({}, "", url);
     }
   }
@@ -1238,8 +1384,14 @@ export default function KinfloPlatformFeatureCatalog({
             </div>
             {activeSection === "overview" ? (
               <>
-                <PlatformMetricGrid snapshot={platformAnalyticsSnapshot} />
-                <PlatformAnalyticsWorkspace />
+                <PlatformMetricGrid
+                  snapshot={platformAnalyticsSnapshot}
+                  selectedTenantSlug={selectedTenantSlug}
+                />
+                <PlatformAnalyticsWorkspace
+                  selectedTenantSlug={selectedTenantSlug}
+                  onTenantChange={selectTenant}
+                />
                 <section
                   className="mt-8"
                   aria-labelledby="platform-lanes-heading"
