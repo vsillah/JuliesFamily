@@ -1,0 +1,53 @@
+{
+  "phase": 182,
+  "status": "prepare_only_production_read_only_adapter_cutover",
+  "sourceCommit": "750685bd8d40ea948a4cf031a9de8428861fba52",
+  "productionDeployment": "dpl_56TLt1jB6RvRtsNQettFmBSzgn2b",
+  "convexDeployment": "clever-viper-68",
+  "route": "/admin/kinflo-os",
+  "scope": {
+    "tenantSlug": "vanguard-enterprises",
+    "siteSlug": "vanguard-enterprises"
+  },
+  "readOnlyBatch": {
+    "queryCount": 9,
+    "functions": [
+      "controlPlane:listTenants",
+      "controlPlane:listSitesForTenant",
+      "controlPlane:listAuditEvents",
+      "controlPlane:listPlanCatalog",
+      "entitlements:entitlementUsageSnapshot",
+      "entitlements:checkEntitlementLimit",
+      "publicSite:resolvePublishedSite",
+      "launchReadiness:getSiteLaunchReadiness",
+      "activation:readiness"
+    ],
+    "requiresAllQueriesBeforeLiveSelection": true,
+    "fixtureFallback": true
+  },
+  "providerBoundary": {
+    "externalWrites": false,
+    "mutationHooksMounted": false,
+    "providerApisTouched": false,
+    "publishEnabled": false,
+    "uploadsEnabled": false,
+    "communicationsEnabled": false,
+    "generatedFilesTracked": false,
+    "secretsReadOrPrinted": false,
+    "approvalRecordedInCommittedSource": false
+  },
+  "runtimeControls": {
+    "readOnlyGeneratedApiFlag": "VITE_KINFLO_READ_ONLY_GENERATED_API_AVAILABLE",
+    "readOnlySmokeFlag": "VITE_KINFLO_READ_ONLY_SMOKE_VERIFIED",
+    "readOnlyAdapterFlag": "VITE_KINFLO_READ_ONLY_ADAPTER_MODE",
+    "requiredAdapterValue": "live_verified",
+    "fullAdapterEnabled": false,
+    "canUseLiveData": false
+  },
+  "rollback": {
+    "checkpoint": "Keep Phase 176 read-only flags and fixture provider available.",
+    "trigger": "Any scope mismatch, query mismatch, blank state, horizontal overflow, mutation hook, provider write, or unknown result.",
+    "action": "Disable the read-only adapter flags and return to the fixture provider without changing production data."
+  },
+  "nextGate": "A separate approval is required before any runtime configuration change, deployment, hosted smoke, or mutation/provider action."
+}

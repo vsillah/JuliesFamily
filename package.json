@@ -237,6 +237,7 @@
     "kinflo:live-handoff": "node scripts/validate-convex-live-handoff.mjs",
     "kinflo:validate-live-adapter": "node scripts/validate-kinflo-live-adapter.mjs",
     "kinflo:validate-read-only-live-adapter": "node scripts/validate-kinflo-read-only-live-adapter.mjs",
+    "kinflo:validate-production-read-only-adapter-cutover": "node scripts/validate-kinflo-production-read-only-adapter-cutover.mjs",
     "kinflo:validate-limited-preferences-adapter": "node scripts/validate-kinflo-limited-preferences-adapter.mjs",
     "kinflo:validate-limited-preferences-activation-packet": "node scripts/validate-kinflo-limited-preferences-activation-packet.mjs",
     "kinflo:capture-limited-preferences-adapter-qa": "node scripts/capture-kinflo-limited-preferences-adapter-qa.mjs",
