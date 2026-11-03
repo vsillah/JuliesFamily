@@ -607,7 +607,7 @@ function KinfloTenantAdminSidebar({
             ? "text-amber-700 dark:text-amber-300"
             : lane.status === "ready"
               ? "text-emerald-700 dark:text-emerald-300"
-              : "text-muted-foreground";
+              : "border-border bg-muted text-muted-foreground";
 
           return (
             <div key={lane.key} className="rounded-lg" data-testid={`button-kinflo-workflow-lane-${lane.key}`}>
@@ -616,7 +616,7 @@ function KinfloTenantAdminSidebar({
                 onClick={() => onSelectTab(isActiveLane ? "overview" : lane.primaryTab)}
                 aria-current={isActiveLane ? "page" : undefined}
                 aria-expanded={isActiveLane}
-                className={`flex w-full items-start gap-2 rounded-lg border border-transparent px-2.5 py-2 text-left transition hover:border-primary/50 hover:bg-muted ${isActiveLane ? "bg-primary text-primary-foreground" : "bg-card text-foreground"}`}
+                className={`kinflo-workspace-lane-card bg-card text-foreground hover:border-primary/50 hover:bg-muted flex w-full items-start gap-2 rounded-lg border border-transparent px-2.5 py-2 text-left transition ${isActiveLane ? "bg-primary text-primary-foreground" : ""}`}
               >
                 <LaneIcon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
                 <span className="min-w-0 flex-1">

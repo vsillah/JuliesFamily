@@ -91,7 +91,7 @@ const shellContents = read("client/src/pages/AdminKinfloShell.tsx");
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "workflowNavigationLanes",
   "workflowNavigationTabCoverage",
-  "section-kinflo-workflow-navigation-rail",
+  "section-kinflo-operator-sidebar",
   "section-kinflo-workflow-navigation-lanes",
   "button-kinflo-sidebar-overview",
   "focusSelectedShellSection",
@@ -109,7 +109,7 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "Open activation checklist",
   "Review adapter mapping",
   "Review launch evidence",
-  "Choose a workspace or return to the overview",
+  "Shared KinFlo navigation for the selected tenant and site.",
   "label: \"Evidence\"",
   "client sharing gated",
   "provider writes gated",
