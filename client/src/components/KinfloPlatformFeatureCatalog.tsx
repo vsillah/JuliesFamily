@@ -175,6 +175,14 @@ const platformTimeRanges: readonly {
   { key: "90d", label: "Last 90 days", chartLabel: "Last 90 days" },
 ];
 
+const analyticsModuleLabels: Record<string, string> = {
+  crm_comms: "CRM and communications",
+  content_experimentation: "Content and experimentation",
+  admin_governance: "Administrative governance",
+  program_outcomes: "Program outcomes",
+  platform_health: "Platform health",
+};
+
 const platformActivityFixtures: Record<
   PlatformTimeRange,
   { labels: readonly string[]; values: Record<string, readonly number[]> }
@@ -1322,18 +1330,24 @@ function PlatformAnalyticsWorkspace({
               id="platform-coverage-heading"
               className="mt-2 text-lg font-semibold text-slate-950"
             >
-              Tenant activity at a glance
+              Tenant profiles and activity
             </h3>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+              Each tenant profile determines which analytics surfaces are
+              available in its consumer workspace. Platform health remains a
+              common control-plane view.
+            </p>
           </div>
           <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
             Fixture snapshot
           </span>
         </div>
         <div className="mt-4 overflow-x-auto border border-slate-200">
-          <table className="w-full min-w-[640px] text-left text-sm">
+          <table className="w-full min-w-[860px] text-left text-sm">
             <thead className="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-[0.1em] text-slate-500">
               <tr>
                 <th className="px-3 py-3 font-semibold">Tenant</th>
+                <th className="px-3 py-3 font-semibold">Analytics profile</th>
                 <th className="px-3 py-3 font-semibold">Sites</th>
                 <th className="px-3 py-3 font-semibold">Status</th>
                 <th className="px-3 py-3 font-semibold">Capabilities</th>
@@ -1345,6 +1359,16 @@ function PlatformAnalyticsWorkspace({
                 <tr key={tenant.tenant}>
                   <td className="px-3 py-3 font-semibold text-slate-900">
                     {tenant.tenant}
+                  </td>
+                  <td className="px-3 py-3 align-top">
+                    <div className="font-semibold text-slate-900">
+                      {tenant.profileLabel}
+                    </div>
+                    <div className="mt-1 max-w-xs text-xs leading-5 text-slate-500">
+                      {tenant.analyticsModules
+                        .map((module) => analyticsModuleLabels[module])
+                        .join(" · ")}
+                    </div>
                   </td>
                   <td className="px-3 py-3">{tenant.sites}</td>
                   <td className="px-3 py-3 capitalize">{tenant.status}</td>

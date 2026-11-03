@@ -21,6 +21,15 @@ export type KinfloPlatformAnalyticsReadiness = {
   reason: string;
 };
 
+export type KinfloTenantProfileKey = "nonprofit" | "for_profit" | "starter";
+
+export type KinfloTenantAnalyticsModule =
+  | "crm_comms"
+  | "content_experimentation"
+  | "admin_governance"
+  | "program_outcomes"
+  | "platform_health";
+
 export const kinfloPlatformAnalyticsSourceContract = {
   activityEvents: [
     "eventId",
@@ -122,6 +131,9 @@ export type KinfloPlatformAnalyticsSnapshot = {
   tenantCoverage: readonly {
     tenantSlug: string;
     tenant: string;
+    profileKey: KinfloTenantProfileKey;
+    profileLabel: string;
+    analyticsModules: readonly KinfloTenantAnalyticsModule[];
     sites: number;
     status: "active" | "draft";
     capabilities: number;
@@ -184,6 +196,9 @@ type PlatformCapabilityKey =
 type FixtureTenant = {
   tenant: string;
   slug: string;
+  profileKey: KinfloTenantProfileKey;
+  profileLabel: string;
+  analyticsModules: readonly KinfloTenantAnalyticsModule[];
   sites: number;
   status: "active" | "draft";
   capabilities: readonly PlatformCapabilityKey[];
@@ -194,6 +209,15 @@ const fixtureTenants: readonly FixtureTenant[] = [
   {
     tenant: "Julie\'s Family Learning Program",
     slug: "julies-family",
+    profileKey: "nonprofit",
+    profileLabel: "Nonprofit operations",
+    analyticsModules: [
+      "crm_comms",
+      "content_experimentation",
+      "admin_governance",
+      "program_outcomes",
+      "platform_health",
+    ],
     sites: 2,
     status: "active",
     capabilities: ["control", "build", "launch", "growth"],
@@ -202,6 +226,14 @@ const fixtureTenants: readonly FixtureTenant[] = [
   {
     tenant: "Vanguard Enterprises",
     slug: "vanguard-enterprises",
+    profileKey: "for_profit",
+    profileLabel: "For-profit operations",
+    analyticsModules: [
+      "crm_comms",
+      "content_experimentation",
+      "admin_governance",
+      "platform_health",
+    ],
     sites: 1,
     status: "active",
     capabilities: ["control", "build", "launch", "growth", "evidence"],
@@ -210,6 +242,9 @@ const fixtureTenants: readonly FixtureTenant[] = [
   {
     tenant: "Advisor Client Starter",
     slug: "advisor-client-starter",
+    profileKey: "starter",
+    profileLabel: "Starter workspace",
+    analyticsModules: ["crm_comms", "admin_governance", "platform_health"],
     sites: 1,
     status: "draft",
     capabilities: ["control", "build", "launch"],
@@ -218,6 +253,14 @@ const fixtureTenants: readonly FixtureTenant[] = [
   {
     tenant: "Campaign Microsite Lab",
     slug: "campaign-microsite-lab",
+    profileKey: "for_profit",
+    profileLabel: "For-profit operations",
+    analyticsModules: [
+      "crm_comms",
+      "content_experimentation",
+      "admin_governance",
+      "platform_health",
+    ],
     sites: 2,
     status: "draft",
     capabilities: ["control", "build", "growth"],
@@ -321,6 +364,9 @@ export function getKinfloPlatformAnalyticsSnapshot(): KinfloPlatformAnalyticsSna
     tenantCoverage: fixtureTenants.map((tenant) => ({
       tenantSlug: tenant.slug,
       tenant: tenant.tenant,
+      profileKey: tenant.profileKey,
+      profileLabel: tenant.profileLabel,
+      analyticsModules: tenant.analyticsModules,
       sites: tenant.sites,
       status: tenant.status,
       capabilities: tenant.capabilities.length,
