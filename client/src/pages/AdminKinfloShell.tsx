@@ -339,7 +339,7 @@ function KinfloOperatorSidebar({
   onSelectTab: (tab: ShellTabValue) => void;
 }) {
   return (
-    <aside className="rounded-xl border border-border bg-card p-3 shadow-sm lg:sticky lg:top-4" data-testid="section-kinflo-operator-sidebar">
+    <aside className="border-y border-r border-border bg-card p-3 md:sticky md:top-4 md:min-h-[calc(100vh-12rem)]" data-testid="section-kinflo-operator-sidebar">
       <div className="flex items-start justify-between gap-3 border-b border-border pb-3">
         <div>
           <div className="text-sm font-semibold text-foreground">Operator site</div>
@@ -7126,9 +7126,9 @@ export default function AdminKinfloShell() {
       </div>
 
       <main className={`mx-auto w-full max-w-7xl overflow-x-clip px-4 sm:px-6 lg:px-8 ${activeTab === "site-studio" ? "py-3" : "py-7"}`}>
-        <div className="grid gap-5 lg:grid-cols-[240px_minmax(0,1fr)] lg:items-start" data-testid="section-kinflo-workflow-navigation-rail">
+        <div className="-mx-4 grid gap-0 sm:-mx-6 lg:-mx-8 md:grid-cols-[220px_minmax(0,1fr)] md:items-start" data-testid="section-kinflo-workflow-navigation-rail">
           <KinfloOperatorSidebar activeTab={activeTab} onSelectTab={selectShellTab} />
-          <div className="min-w-0">
+          <div className="min-w-0 px-4 sm:px-6 lg:px-8">
         <section
           className={`${activeTab === "site-studio" ? "hidden" : "mt-5"} rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5`}
           data-testid="section-kinflo-decision-rail"
