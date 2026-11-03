@@ -1014,17 +1014,17 @@ function HostedActivationOwnerChecklist({
   ];
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm" data-testid={testIds.root}>
+    <section className="rounded-2xl border border-border bg-card p-3 shadow-sm" data-testid={testIds.root}>
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="outline" className="border-slate-300 bg-slate-50">
+            <Badge variant="outline" className="border-border bg-muted text-foreground">
               Owner gate
             </Badge>
-            <Badge className="bg-slate-950 hover:bg-slate-950">prepare only</Badge>
+            <Badge className="bg-primary text-primary-foreground hover:bg-primary">prepare only</Badge>
           </div>
-          <h3 className="mt-3 text-base font-semibold text-slate-950">Hosted activation owner checklist</h3>
-          <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600" data-testid={testIds.nextGate}>
+          <h3 className="mt-2 text-base font-semibold text-foreground">Hosted activation owner checklist</h3>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground" data-testid={testIds.nextGate}>
             {nextHumanGate}
           </p>
         </div>
@@ -1034,48 +1034,56 @@ function HostedActivationOwnerChecklist({
         </Button>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-4" data-testid={testIds.summary}>
+      <div className="mt-3 grid grid-cols-2 gap-2 lg:grid-cols-4" data-testid={testIds.summary}>
         {summaryItems.map((item) => (
-          <div key={item.label} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2">
-            <div className="text-[10px] font-medium uppercase tracking-normal text-slate-500">{item.label}</div>
-            <div className="mt-1 text-lg font-semibold text-slate-950">{item.value}</div>
+          <div key={item.label} className="rounded-lg border border-border bg-muted/40 px-3 py-2">
+            <div className="text-[10px] font-medium uppercase tracking-normal text-muted-foreground">{item.label}</div>
+            <div className="mt-1 text-lg font-semibold text-foreground">{item.value}</div>
           </div>
         ))}
       </div>
 
-      <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.38fr)]">
-        <div className="max-h-[360px] space-y-3 overflow-y-auto pr-1" data-testid={testIds.scroll}>
-          {decisions.map((decision) => (
-            <div key={decision.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3" data-testid={`card-hosted-activation-owner-checklist-${decision.id}`}>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                <div className="min-w-0">
-                  <div className="text-sm font-semibold text-slate-950">{decision.label}</div>
-                  <div className="mt-1 text-xs text-slate-500">
-                    {decision.owner} · before {decision.requiredBefore}
+      <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(220px,0.38fr)]">
+        <ol className="space-y-1.5" data-testid={testIds.scroll}>
+          {decisions.map((decision, index) => {
+            const isNext = decision.id === nextDecision?.id;
+            return (
+              <li key={decision.id} data-testid={`card-hosted-activation-owner-checklist-${decision.id}`}>
+                <div className={`rounded-lg border p-2.5 ${isNext ? "border-primary/40 bg-primary/5" : "border-border bg-muted/20"}`}>
+                  <div className="flex items-center gap-2">
+                    <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${isNext ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                      {index + 1}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-semibold text-foreground">{decision.label}</div>
+                      <div className="truncate text-xs text-muted-foreground">{decision.owner} · before {decision.requiredBefore}</div>
+                    </div>
+                    <Badge variant={decision.status === "pending_owner_decision" ? "secondary" : "outline"} className="shrink-0 whitespace-nowrap">
+                      {decision.status.replaceAll("_", " ")}
+                    </Badge>
                   </div>
+                  {isNext ? (
+                    <div className="mt-2 ml-8 space-y-2 text-xs leading-5 text-muted-foreground">
+                      <p>{decision.decisionNeeded}</p>
+                      <p><span className="font-medium text-foreground">Evidence:</span> {decision.evidenceTarget}</p>
+                    </div>
+                  ) : null}
                 </div>
-                <Badge variant={decision.status === "pending_owner_decision" ? "secondary" : "outline"} className="self-start whitespace-nowrap">
-                  {decision.status.replaceAll("_", " ")}
-                </Badge>
-              </div>
-              <p className="mt-3 text-xs leading-5 text-slate-600">{decision.decisionNeeded}</p>
-              <div className="mt-3 rounded-lg border border-white bg-white p-2 text-xs leading-5 text-slate-600">
-                <span className="font-medium text-slate-900">Evidence: </span>
-                {decision.evidenceTarget}
-              </div>
-            </div>
-          ))}
-        </div>
+              </li>
+            );
+          })}
+        </ol>
 
-        <aside className="rounded-xl border border-amber-200 bg-amber-50 p-3">
-          <div className="text-[11px] font-medium uppercase tracking-normal text-amber-700">Next owner action</div>
-          <div className="mt-2 text-sm font-semibold text-amber-950">{nextDecision?.label ?? "Owner decision pending"}</div>
-          <p className="mt-2 text-xs leading-5 text-amber-900">
+        <aside className="rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-400/40 dark:bg-amber-950/30">
+          <div className="text-[11px] font-medium uppercase tracking-normal text-amber-700 dark:text-amber-300">Next owner action</div>
+          <div className="mt-1 text-sm font-semibold text-amber-950 dark:text-amber-100">{nextDecision?.label ?? "Owner decision pending"}</div>
+          <p className="mt-1 text-xs leading-5 text-amber-900 dark:text-amber-100">
             {nextDecision?.blockedUntil ?? "Owner approval is required before hosted activation can move forward."}
           </p>
-          <div className="mt-3 rounded-lg border border-amber-200 bg-white/70 p-2 text-xs leading-5 text-amber-900">
-            {providerBoundary}
-          </div>
+          <details className="mt-2 rounded-lg border border-amber-200 bg-white/70 p-2 text-xs leading-5 text-amber-900 dark:border-amber-400/40 dark:bg-black/10 dark:text-amber-100">
+            <summary className="cursor-pointer font-medium">Provider boundary</summary>
+            <p className="mt-1">{providerBoundary}</p>
+          </details>
         </aside>
       </div>
     </section>
@@ -7287,98 +7295,80 @@ export default function AdminKinfloShell() {
 
         <Tabs value={activeTab} onValueChange={(value) => selectShellTab(value as ShellTabValue)} className={`${activeTab === "site-studio" ? "mt-1" : "mt-7"} min-w-0`}>
           <section
-            className={`${activeTab === "site-studio" ? "mb-1 hidden rounded-md px-2 py-1.5 lg:block" : "mb-3 rounded-2xl p-3"} border border-slate-200 bg-white shadow-sm`}
+            className="grid gap-4 lg:grid-cols-[240px_minmax(0,1fr)] lg:items-start"
             data-testid="section-kinflo-workflow-navigation-rail"
           >
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <div className={`${activeTab === "site-studio" ? "text-xs" : "text-sm"} font-semibold text-slate-950`}>Workspaces</div>
-                <p className={`${activeTab === "site-studio" ? "hidden" : "mt-1"} text-xs leading-5 text-slate-500`}>
-                  Choose a work area first. The section tabs below change within that workspace.
-                </p>
+            <aside className="rounded-xl border border-border bg-card p-3 shadow-sm lg:sticky lg:top-4" data-testid="section-kinflo-operator-sidebar">
+              <div className="flex items-start justify-between gap-3 border-b border-border pb-3">
+                <div>
+                  <div className="text-sm font-semibold text-foreground">Operator site</div>
+                  <p className="mt-1 text-xs leading-5 text-muted-foreground">Choose a work area first. The current section stays visible below.</p>
+                </div>
+                <Badge variant="outline" className="kinflo-pill kinflo-pill-warning shrink-0 text-[10px]">
+                  {workflowNavigationTabCoverage.length}/{shellTabValues.length}
+                </Badge>
               </div>
-              <Badge variant="outline" className={`${activeTab === "site-studio" ? "text-[11px]" : ""} kinflo-pill kinflo-pill-warning self-start`}>
-                {workflowNavigationTabCoverage.length}/{shellTabValues.length} tabs reachable
-              </Badge>
-            </div>
-            <div className={`${activeTab === "site-studio" ? "hidden" : "mt-3 grid"} gap-2 md:grid-cols-2 xl:grid-cols-3`} role="tablist" aria-label="KinFlo workspaces" data-testid="section-kinflo-workflow-navigation-lanes">
-              {workflowNavigationLanes.map((lane) => {
-                const LaneIcon = lane.icon;
-                const isActiveLane = lane.tabs.includes(activeTab);
-                const laneTone = lane.status === "blocked"
-                  ? "border-amber-300/70 bg-amber-50 text-amber-900 dark:border-amber-400/50 dark:bg-amber-950/40 dark:text-amber-100"
-                  : lane.status === "ready"
-                    ? "border-emerald-300/70 bg-emerald-50 text-emerald-900 dark:border-emerald-400/50 dark:bg-emerald-950/40 dark:text-emerald-100"
-                    : "border-border bg-muted text-foreground";
+              <Button
+                type="button"
+                variant="ghost"
+                className="mt-2 w-full justify-start px-2 text-sm text-muted-foreground hover:text-foreground"
+                onClick={() => selectShellTab("tenants")}
+                data-testid="button-kinflo-sidebar-overview"
+              >
+                <ChevronLeft className="mr-2 h-4 w-4" aria-hidden="true" />
+                Overview
+              </Button>
+              <nav className="mt-2 space-y-1" aria-label="KinFlo operator sections" data-testid="section-kinflo-workflow-navigation-lanes">
+                {workflowNavigationLanes.map((lane) => {
+                  const LaneIcon = lane.icon;
+                  const isActiveLane = lane.tabs.includes(activeTab);
+                  const statusTone = lane.status === "blocked"
+                    ? "text-amber-700 dark:text-amber-300"
+                    : lane.status === "ready"
+                      ? "text-emerald-700 dark:text-emerald-300"
+                      : "border-border bg-muted text-muted-foreground";
 
-                return (
-                  <button
-                    key={lane.key}
-                    type="button"
-                    onClick={() => selectShellTab(lane.primaryTab)}
-                    role="tab"
-                    aria-selected={isActiveLane}
-                    className={`kinflo-workspace-lane-card min-w-0 rounded-xl border p-3 text-left transition ${
-                      isActiveLane
-                        ? "border-slate-900 bg-slate-950 text-white shadow-sm"
-                        : "border-border bg-card text-foreground hover:border-primary/50 hover:bg-muted"
-                    }`}
-                    data-testid={`button-kinflo-workflow-lane-${lane.key}`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex min-w-0 items-start gap-2">
-                        <div className={`mt-0.5 rounded-lg border p-1.5 ${isActiveLane ? "border-white/10 bg-white/10 text-white" : laneTone}`}>
-                          <LaneIcon className="h-4 w-4" />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="truncate text-sm font-semibold">{lane.label}</div>
-                          <div className={`kinflo-workspace-lane-description mt-1 line-clamp-2 text-xs leading-5 ${isActiveLane ? "text-slate-300" : "text-muted-foreground"}`}>
-                            {lane.description}
-                          </div>
-                        </div>
-                      </div>
-                      <Badge
-                        variant="outline"
-                        className={isActiveLane ? "shrink-0 border-white/10 bg-white/10 text-white" : "kinflo-pill kinflo-pill-neutral shrink-0"}
+                  return (
+                    <div key={lane.key} className="rounded-lg" data-testid={`button-kinflo-workflow-lane-${lane.key}`}>
+                      <button
+                        type="button"
+                        onClick={() => selectShellTab(lane.primaryTab)}
+                        aria-current={isActiveLane ? "page" : undefined}
+                        className={`kinflo-workspace-lane-card bg-card text-foreground hover:border-primary/50 hover:bg-muted flex w-full items-start gap-2 rounded-lg border border-transparent px-2.5 py-2 text-left transition ${isActiveLane ? "bg-primary text-primary-foreground" : ""}`}
                       >
-                        {lane.tabs.length}
-                      </Badge>
-                    </div>
-                    <div className={`mt-3 border-t pt-3 ${isActiveLane ? "border-white/10" : "border-border"}`} data-testid={`section-kinflo-workflow-lane-tabs-${lane.key}`}>
-                      <div className={`mb-2 text-[10px] font-semibold uppercase tracking-wider ${isActiveLane ? "text-slate-400" : "text-muted-foreground"}`}>Sections in this workspace</div>
-                      <div className="flex flex-wrap gap-1.5">
-                      {lane.tabs.map((tabValue) => (
-                        <span
-                          key={tabValue}
-                          className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[11px] font-medium ${
-                            activeTab === tabValue
-                              ? isActiveLane
-                                ? "border-emerald-200/30 bg-emerald-300/20 text-emerald-100"
-                                : "border-emerald-200 bg-emerald-50 text-emerald-700"
-                              : isActiveLane
-                                ? "border-white/10 bg-white/10 text-slate-200"
-                                : "border-border bg-muted text-muted-foreground"
-                          }`}
-                          data-testid={`dot-kinflo-workflow-lane-${lane.key}-${tabValue}`}
-                        >
-                          <span
-                            className={`h-1.5 w-1.5 rounded-full ${
-                              activeTab === tabValue ? "bg-emerald-400" : lane.status === "blocked" ? "bg-amber-400" : "bg-slate-300"
-                            }`}
-                          />
-                          {shellTabLabels[tabValue]}
+                        <LaneIcon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-sm font-semibold">{lane.label}</span>
+                          <span className={`kinflo-workspace-lane-description mt-0.5 block truncate text-[11px] ${isActiveLane ? "text-primary-foreground/75" : statusTone}`}>
+                            {lane.tabs.length} sections · {lane.status}
+                          </span>
                         </span>
-                      ))}
-                      </div>
+                      </button>
+                      {isActiveLane ? (
+                        <div className="ml-4 mt-1 space-y-0.5 border-l border-primary/30 pl-2" data-testid={`section-kinflo-workflow-lane-tabs-${lane.key}`}>
+                          <div className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Sections in this workspace</div>
+                          {lane.tabs.map((tabValue) => (
+                            <button
+                              key={tabValue}
+                              type="button"
+                              onClick={() => selectShellTab(tabValue)}
+                              aria-current={activeTab === tabValue ? "page" : undefined}
+                              className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition ${activeTab === tabValue ? "bg-primary/10 font-semibold text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+                              data-testid={`dot-kinflo-workflow-lane-${lane.key}-${tabValue}`}
+                            >
+                              <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${activeTab === tabValue ? "bg-primary" : "bg-muted-foreground/40"}`} />
+                              <span className="truncate">{shellTabLabels[tabValue]}</span>
+                            </button>
+                          ))}
+                        </div>
+                      ) : null}
                     </div>
-                    <div className={`mt-3 text-xs leading-5 ${isActiveLane ? "text-amber-100" : "text-amber-700 dark:text-amber-200"}`}>
-                      {lane.blockedLiveAction}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </section>
+                  );
+                })}
+              </nav>
+            </aside>
+
+            <div className="min-w-0">
 
           <div className={`${activeTab === "site-studio" ? "hidden sm:block" : "block"} w-full min-w-0 rounded-md border border-border bg-card`} data-testid="section-kinflo-contextual-navigation">
             <div className="flex flex-col gap-2 border-b border-border px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
@@ -10635,40 +10625,59 @@ export default function AdminKinfloShell() {
                       </div>
                     </div>
 
-                    <div className="grid gap-3 lg:grid-cols-2">
-                      {snapshot.hostedActivationRunbook.steps.map((step) => (
-                        <div key={step.id} className="rounded-md border p-3" data-testid={`card-hosted-activation-${step.id}`}>
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
-                              <div className="text-sm font-medium">{step.order}. {step.label}</div>
-                              <p className="mt-1 text-xs text-muted-foreground">{step.requiredBefore}</p>
-                            </div>
-                            {hostedActivationStatusBadge(step.status)}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    <ol className="space-y-1.5" data-testid="section-kinflo-hosted-activation-stepper">
+                      {snapshot.hostedActivationRunbook.steps.map((step) => {
+                        const isSelected = step.id === hostedActivationStepId;
+                        return (
+                          <li key={step.id} data-testid={`card-hosted-activation-${step.id}`}>
+                            <button
+                              type="button"
+                              onClick={() => selectHostedActivationStep(step.id)}
+                              aria-current={isSelected ? "step" : undefined}
+                              className={`flex w-full items-center gap-3 rounded-lg border p-2.5 text-left transition ${isSelected ? "border-primary/40 bg-primary/5" : "border-border bg-muted/20 hover:bg-muted/50"}`}
+                            >
+                              <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${isSelected ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
+                                {step.order}
+                              </span>
+                              <span className="min-w-0 flex-1">
+                                <span className="block truncate text-sm font-medium text-foreground">{step.label}</span>
+                                <span className="mt-0.5 block truncate text-xs text-muted-foreground">Before: {step.requiredBefore}</span>
+                              </span>
+                              {hostedActivationStatusBadge(step.status)}
+                              <ChevronRight className={`h-4 w-4 shrink-0 ${isSelected ? "text-primary" : "text-muted-foreground/50"}`} aria-hidden="true" />
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ol>
                   </CardContent>
                 </Card>
               </div>
 
-              <div className="space-y-4">
-                <DecisionGateRail
-                  title="Hosted activation decision gate"
-                  owner={selectedHostedActivationStep?.owner ?? "Vambah"}
-                  posture={snapshot.hostedActivationRunbook.activationConsole.nextHumanGate}
-                  evidence={[
-                    selectedHostedActivationStep?.evidenceTarget ?? "Hosted activation evidence target is pending.",
-                    ...snapshot.hostedActivationRunbook.activationConsole.evidenceSummary,
-                  ]}
-                  rollback={selectedHostedActivationStep?.rollback
-                    ?? "Keep all shell surfaces on fixtures and do not run hosted Convex commands."}
-                  blockedActions={snapshot.hostedActivationRunbook.activationConsole.blockedLiveActions}
-                  disabledActionLabel="Hosted activation remains gated"
-                  testId="section-kinflo-hosted-activation-decision-gate-rail"
-                />
+              <div className="space-y-3">
+                <div className="rounded-xl border border-border bg-muted/30 p-3">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Evidence and policy</div>
+                  <p className="mt-1 text-sm leading-5 text-foreground">The active gate stays in the main column. Supporting evidence is available here when you need it.</p>
+                </div>
+                <details className="rounded-xl border border-border bg-card p-3" data-testid="section-kinflo-hosted-activation-supporting-evidence">
+                  <summary className="cursor-pointer list-none text-sm font-semibold text-foreground">Open supporting evidence</summary>
+                  <div className="mt-3 space-y-4">
+                    <DecisionGateRail
+                      title="Hosted activation decision gate"
+                      owner={selectedHostedActivationStep?.owner ?? "Vambah"}
+                      posture={snapshot.hostedActivationRunbook.activationConsole.nextHumanGate}
+                      evidence={[
+                        selectedHostedActivationStep?.evidenceTarget ?? "Hosted activation evidence target is pending.",
+                        ...snapshot.hostedActivationRunbook.activationConsole.evidenceSummary,
+                      ]}
+                      rollback={selectedHostedActivationStep?.rollback
+                        ?? "Keep all shell surfaces on fixtures and do not run hosted Convex commands."}
+                      blockedActions={snapshot.hostedActivationRunbook.activationConsole.blockedLiveActions}
+                      disabledActionLabel="Hosted activation remains gated"
+                      testId="section-kinflo-hosted-activation-decision-gate-rail"
+                    />
 
-                <Card>
+                    <Card>
                   <CardHeader>
                     <CardTitle className="text-base">Completion Rules</CardTitle>
                     <p className="text-sm text-muted-foreground">These rules prevent local evidence from being mistaken for hosted activation.</p>
@@ -10681,9 +10690,9 @@ export default function AdminKinfloShell() {
                       </div>
                     ))}
                   </CardContent>
-                </Card>
+                    </Card>
 
-                <Card>
+                    <Card>
                   <CardHeader>
                     <CardTitle className="text-base">Evidence Targets</CardTitle>
                   </CardHeader>
@@ -10694,9 +10703,9 @@ export default function AdminKinfloShell() {
                       </div>
                     ))}
                   </CardContent>
-                </Card>
+                    </Card>
 
-                <Card>
+                    <Card>
                   <CardHeader>
                     <CardTitle className="text-base">Source Documents</CardTitle>
                   </CardHeader>
@@ -10707,9 +10716,9 @@ export default function AdminKinfloShell() {
                       </div>
                     ))}
                   </CardContent>
-                </Card>
+                    </Card>
 
-                <Card>
+                    <Card>
                   <CardHeader>
                     <CardTitle className="text-base">Provider Boundary</CardTitle>
                   </CardHeader>
@@ -10727,7 +10736,9 @@ export default function AdminKinfloShell() {
                       <span>No live Convex query, mutation, or action is executed.</span>
                     </div>
                   </CardContent>
-                </Card>
+                    </Card>
+                  </div>
+                </details>
               </div>
             </section>
           </TabsContent>
@@ -15975,6 +15986,8 @@ export default function AdminKinfloShell() {
               </div>
             </section>
           </TabsContent>
+          </div>
+          </section>
         </Tabs>
 
         <div className={`${activeTab === "site-studio" ? "hidden" : "mt-8 flex"} flex-col gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between`}>
