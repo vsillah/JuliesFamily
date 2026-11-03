@@ -7014,8 +7014,11 @@ export default function AdminKinfloShell() {
       <div className="border-b border-slate-200 bg-white/95">
         <div className={`mx-auto flex max-w-7xl flex-col px-4 sm:px-6 lg:px-8 ${activeTab === "site-studio" ? "gap-2 py-3" : "gap-5 py-6"}`}>
           <Breadcrumbs
-            items={[{ label: "Admin Dashboard", href: clientWebsiteAdminHref }, { label: "KinFlo OS" }]}
-            homeHref={clientWebsiteStudioPreviewPath}
+            items={[
+              { label: "KinFlo platform", href: "/admin/kinflo-os?view=platform" },
+              { label: `${adminScope.tenant.name} workspace` },
+            ]}
+            showHome={false}
           />
           {clientWebsiteAdminScope.status === "invalid" ? (
             <div
@@ -7058,10 +7061,11 @@ export default function AdminKinfloShell() {
             data-testid="section-kinflo-active-admin-scope"
           >
             <div className="min-w-0">
-              <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Active tenant/site scope</div>
+              <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Child entry point · active tenant/site scope</div>
               <div className="mt-1 truncate text-sm font-semibold" data-testid="text-kinflo-active-admin-scope">
                 {adminScope.tenant.name} / {adminScope.site.name}
               </div>
+              <div className="mt-1 text-xs text-slate-400">Parent platform: KinFlo platform · this workspace is scoped to the selected tenant and site.</div>
             </div>
             <Button
               type="button"

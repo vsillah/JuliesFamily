@@ -10,9 +10,10 @@ interface BreadcrumbsProps {
   items: BreadcrumbItem[];
   variant?: 'light' | 'dark';
   homeHref?: string;
+  showHome?: boolean;
 }
 
-export default function Breadcrumbs({ items, variant = 'light', homeHref = '/' }: BreadcrumbsProps) {
+export default function Breadcrumbs({ items, variant = 'light', homeHref = '/', showHome = true }: BreadcrumbsProps) {
   const isDark = variant === 'dark';
   const baseColor = isDark ? "text-white/70" : "text-muted-foreground";
   const hoverColor = isDark ? "hover:text-white" : "hover:text-foreground";
@@ -20,21 +21,23 @@ export default function Breadcrumbs({ items, variant = 'light', homeHref = '/' }
   
   return (
     <nav className="flex items-center gap-2 text-sm mb-6" aria-label="Breadcrumb">
-      <Link 
-        href={homeHref}
-        className={`flex items-center gap-1 ${baseColor} ${hoverColor} transition-colors`}
-        data-testid="breadcrumb-home"
-      >
-        <Home className="w-4 h-4" />
-        <span>Home</span>
-      </Link>
+      {showHome ? (
+        <Link
+          href={homeHref}
+          className={`flex items-center gap-1 ${baseColor} ${hoverColor} transition-colors`}
+          data-testid="breadcrumb-home"
+        >
+          <Home className="w-4 h-4" />
+          <span>Home</span>
+        </Link>
+      ) : null}
       
       {items.map((item, index) => {
         const isLast = index === items.length - 1;
         
         return (
           <div key={index} className="flex items-center gap-2">
-            <ChevronRight className={`w-4 h-4 ${baseColor}`} />
+            {(showHome || index > 0) ? <ChevronRight className={`w-4 h-4 ${baseColor}`} /> : null}
             {item.href && !isLast ? (
               <Link 
                 href={item.href}

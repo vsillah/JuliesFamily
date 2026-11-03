@@ -53,6 +53,17 @@ test("site-scoped links stay on the KinFlo route and carry both scopes", () => {
   assert.equal(href.includes("/admin?"), false);
 });
 
+test("KinFlo shell names the platform parent before the tenant workspace", () => {
+  const source = readFileSync("client/src/pages/AdminKinfloShell.tsx", "utf8");
+  const breadcrumbs = source.slice(source.indexOf("<Breadcrumbs"), source.indexOf("{clientWebsiteAdminScope.status"));
+  assert.match(breadcrumbs, /KinFlo platform/);
+  assert.match(breadcrumbs, /admin\/kinflo-os\?view=platform/);
+  assert.match(breadcrumbs, /adminScope\.tenant\.name.*workspace/);
+  assert.match(breadcrumbs, /showHome=\{false\}/);
+  assert.match(source, /Child entry point · active tenant\/site scope/);
+  assert.match(source, /Parent platform: KinFlo platform/);
+});
+
 test("KinFlo public controls do not link to Julie's legacy admin route", () => {
   for (const path of [
     "client/src/components/KinfloPublicSiteAccountControls.tsx",
