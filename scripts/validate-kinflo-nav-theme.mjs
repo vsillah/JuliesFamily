@@ -8,7 +8,8 @@ const read = (path) => readFileSync(path, "utf8");
 const shellPath = "client/src/pages/AdminKinfloShell.tsx";
 const cssPath = "client/src/index.css";
 const packagePath = "package.json";
-for (const path of [shellPath, cssPath, packagePath]) {
+const projectRulePath = "AGENTS.md";
+for (const path of [shellPath, cssPath, packagePath, projectRulePath]) {
   check(existsSync(path), `${path} exists`, "Expected navigation/theme artifact is missing.");
 }
 
@@ -18,10 +19,24 @@ if (existsSync(shellPath)) {
     "useVanguardTheme",
     "VanguardThemeControl",
     "KinfloPillCluster",
+    "kinflo-pill-warning",
+    "kinflo-workspace-lane-card",
+    "kinflo-workspace-lane-description",
+    "bg-card text-foreground hover:border-primary/50 hover:bg-muted",
+    "text-muted-foreground",
+    "border-border bg-muted text-muted-foreground",
     "kinflo-pill-success",
     "kinflo-pill-info",
     "kinflo-pill-warning",
     "kinflo-pill-neutral",
+    "kinflo-metric-card",
+    "data-filter-target={filterTarget.tab}",
+    'tenants: { tab: "tenants"',
+    'sites: { tab: "sites"',
+    'templates: { tab: "templates"',
+    'leads: { tab: "crm"',
+    'launchGates: { tab: "launch-readiness"',
+    "aria-pressed={isActiveFilter}",
     "section-kinflo-tenant-control-plane-table",
     "section-kinflo-site-factory-queue-table",
     "Previous table page",
@@ -35,6 +50,12 @@ if (existsSync(shellPath)) {
   check(!shell.includes("useMutation(") && !shell.includes("useAction("), "admin shell excludes live Convex execution", "Mutation/action execution must remain gated.");
 }
 
+if (existsSync(projectRulePath)) {
+  const projectRules = read(projectRulePath);
+  check(projectRules.includes("## Dashboard Metric Cards"), "project rule requires actionable metric cards", "Dashboard metrics must lead to their underlying read-only data.");
+  check(projectRules.includes("read-only") && projectRules.includes("no-mutation"), "project rule preserves read-only card behavior", "Metric navigation must not introduce live writes.");
+}
+
 if (existsSync(cssPath)) {
   const css = read(cssPath);
   for (const marker of [
@@ -42,6 +63,7 @@ if (existsSync(cssPath)) {
     ".kinflo-admin-shell .kinflo-pill-success",
     ".kinflo-admin-shell .kinflo-pill-info",
     ".kinflo-admin-shell .kinflo-pill-warning",
+    ".dark .kinflo-admin-shell .kinflo-workspace-lane-card",
     ".dark .kinflo-admin-shell",
     "hsl(var(--foreground))",
     "hsl(var(--muted-foreground))",

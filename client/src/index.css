@@ -403,6 +403,22 @@
   color: hsl(40 85% 82%);
 }
 
+.kinflo-admin-shell .kinflo-workspace-lane-card {
+  background-color: hsl(var(--card));
+  border-color: hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+
+.dark .kinflo-admin-shell .kinflo-workspace-lane-card {
+  background-color: hsl(0 0% 14%);
+  border-color: hsl(0 0% 28%);
+  color: hsl(0 0% 96%);
+}
+
+.dark .kinflo-admin-shell .kinflo-workspace-lane-card .kinflo-workspace-lane-description {
+  color: hsl(0 0% 78%);
+}
+
 /**
  * Using the elevate system.
  * Automatic contrast adjustment.
