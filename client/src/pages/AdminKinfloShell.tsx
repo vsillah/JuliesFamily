@@ -338,7 +338,7 @@ function KinfloTenantAdminSidebar({
   onSelectTab: (tab: ShellTabValue) => void;
 }) {
   return (
-    <aside className="rounded-xl border border-border bg-card p-3 shadow-sm lg:sticky lg:top-4" data-testid="section-kinflo-operator-sidebar">
+    <aside className="border-y border-r border-border bg-card p-3 lg:sticky lg:top-4 lg:min-h-[calc(100vh-12rem)]" data-testid="section-kinflo-operator-sidebar">
       <div className="flex items-start justify-between gap-3 border-b border-border pb-3">
         <div className="min-w-0">
           <div className="text-sm font-semibold text-foreground">Tenant admin</div>
