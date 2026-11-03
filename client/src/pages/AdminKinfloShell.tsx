@@ -482,6 +482,7 @@ const workflowNavigationLanes: {
   icon: typeof Boxes;
   tabs: ShellTabValue[];
   primaryTab: ShellTabValue;
+  sectionCount?: number;
   status: "ready" | "review" | "blocked";
   blockedLiveAction: string;
 }[] = [
@@ -502,6 +503,7 @@ const workflowNavigationLanes: {
     icon: Factory,
     tabs: ["site-studio", "factory", "content", "brand", "navigation", "assets", "templates"],
     primaryTab: "site-studio",
+    sectionCount: 9,
     status: "ready",
     blockedLiveAction: "live content save gated",
   },
@@ -611,7 +613,7 @@ function KinfloOperatorSidebar({
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-semibold">{lane.label}</span>
                   <span className={`kinflo-workspace-lane-description mt-0.5 block truncate text-[11px] ${isActiveLane ? "text-foreground/75" : statusTone}`}>
-                    {lane.tabs.length} sections · {lane.status}
+                    {lane.sectionCount ?? lane.tabs.length} sections · {lane.status}
                   </span>
                 </span>
               </button>
@@ -619,21 +621,26 @@ function KinfloOperatorSidebar({
                 <div className="ml-4 mt-1 space-y-0.5 border-l border-primary/30 pl-2" data-testid={`section-kinflo-workflow-lane-tabs-${lane.key}`}>
                   <div className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Sections in this workspace</div>
                   {lane.key !== "activation" ? lane.tabs.map((tabValue) => (
-                    <button
-                      key={tabValue}
-                      type="button"
-                      onClick={() => onSelectTab(tabValue)}
-                      aria-current={activeTab === tabValue ? "page" : undefined}
-                      className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition ${activeTab === tabValue ? "bg-primary/10 font-semibold text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
-                      data-testid={`dot-kinflo-workflow-lane-${lane.key}-${tabValue}`}
-                    >
-                      <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${activeTab === tabValue ? "bg-primary" : "bg-muted-foreground/40"}`} />
-                      <span className="truncate">{shellTabLabels[tabValue]}</span>
-                    </button>
+                    (() => {
+                      const isActiveTab = activeTab === tabValue
+                        && (tabValue !== "site-studio" || activeStudioSection === "build");
+                      return (
+                        <button
+                          key={tabValue}
+                          type="button"
+                          onClick={() => tabValue === "site-studio" ? onSelectStudioSection("build") : onSelectTab(tabValue)}
+                          aria-current={isActiveTab ? "page" : undefined}
+                          className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition ${isActiveTab ? "bg-primary/10 font-semibold text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+                          data-testid={`dot-kinflo-workflow-lane-${lane.key}-${tabValue}`}
+                        >
+                          <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${isActiveTab ? "bg-primary" : "bg-muted-foreground/40"}`} />
+                          <span className="truncate">{shellTabLabels[tabValue]}</span>
+                        </button>
+                      );
+                    })()
                   )) : null}
-                  {lane.key === "build" && activeTab === "site-studio" ? (
+                  {lane.key === "build" ? (
                     <div className="mt-1 space-y-0.5 border-t border-border/70 pt-1" data-testid="section-kinflo-sidebar-build-site-sections">
-                      <div className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Site lifecycle</div>
                       {[
                         { key: "configuration", label: "Configuration", detail: "Profiles and approvals" },
                         { key: "handoff", label: "Handoff", detail: "Permissions and delivery" },

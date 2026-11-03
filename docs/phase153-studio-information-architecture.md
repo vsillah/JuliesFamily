@@ -8,8 +8,9 @@ npm run kinflo:validate-studio-information-architecture
 
 ## Change
 
-Build is the persistent operator sidebar parent for site construction. Its primary Site setup destination contains two lifecycle sections:
+Build is the persistent operator sidebar parent for site construction. It exposes nine L2 destinations, with Site setup, Configuration, and Handoff kept together as persistent siblings:
 
+- Site setup: choose the site and starting structure
 - Configuration: profiles and approvals
 - Handoff: permissions and delivery
 
