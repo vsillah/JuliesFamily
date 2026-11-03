@@ -190,6 +190,7 @@ const notificationChannelOptions = [
 ];
 
 const shellTabValues = [
+  "overview",
   "tenants",
   "sites",
   "launch-readiness",
@@ -244,6 +245,7 @@ const clientConfigurationSaveDetailValues = ["blockers", "evidence", "audit", "r
 type ClientConfigurationSaveDetail = (typeof clientConfigurationSaveDetailValues)[number];
 
 const shellTabLabels: Record<ShellTabValue, string> = {
+  overview: "Overview",
   tenants: "Tenants",
   sites: "Sites",
   "launch-readiness": "Launch",
@@ -343,20 +345,21 @@ function KinfloOperatorSidebar({
       <div className="flex items-start justify-between gap-3 border-b border-border pb-3">
         <div>
           <div className="text-sm font-semibold text-foreground">Operator site</div>
-          <p className="mt-1 text-xs leading-5 text-muted-foreground">Choose a work area first. The current section stays visible below.</p>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground">Choose a workspace or return to the overview. The selected section opens below.</p>
         </div>
         <Badge variant="outline" className="kinflo-pill kinflo-pill-warning shrink-0 text-[10px]">
-          {workflowNavigationTabCoverage.length}/{shellTabValues.length}
+          {workflowNavigationTabCoverage.length}/{shellTabValues.length - 1}
         </Badge>
       </div>
       <Button
         type="button"
         variant="ghost"
-        className="mt-2 w-full justify-start px-2 text-sm text-muted-foreground hover:text-foreground"
-        onClick={() => onSelectTab("tenants")}
+        className={`mt-2 w-full justify-start px-2 text-sm text-muted-foreground hover:text-foreground ${activeTab === "overview" ? "bg-muted font-semibold text-foreground" : ""}`}
+        onClick={() => onSelectTab("overview")}
+        aria-current={activeTab === "overview" ? "page" : undefined}
         data-testid="button-kinflo-sidebar-overview"
       >
-        <ChevronLeft className="mr-2 h-4 w-4" aria-hidden="true" />
+        <LayoutDashboard className="mr-2 h-4 w-4" aria-hidden="true" />
         Overview
       </Button>
       <nav className="mt-2 space-y-1" aria-label="KinFlo operator sections" data-testid="section-kinflo-workflow-navigation-lanes">
@@ -573,10 +576,10 @@ const hostedActivationOwnerChecklistTestIds = {
 
 function readInitialShellTab(): ShellTabValue {
   if (typeof window === "undefined") {
-    return "tenants";
+    return "overview";
   }
   const tab = new URLSearchParams(window.location.search).get("tab");
-  return shellTabValues.includes(tab as ShellTabValue) ? (tab as ShellTabValue) : "tenants";
+  return shellTabValues.includes(tab as ShellTabValue) ? (tab as ShellTabValue) : "overview";
 }
 
 function readInitialClientWebsiteStudioLane(): ClientWebsiteStudioLane {
@@ -6344,6 +6347,34 @@ export default function AdminKinfloShell() {
     }, 0);
   };
 
+  const focusSelectedShellSection = (tab: ShellTabValue) => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    let attempts = 0;
+    const focus = () => {
+      if (tab === "overview" || tab === "site-studio") {
+        window.scrollTo({ top: 0, behavior: "auto" });
+        return;
+      }
+
+      const sectionNavigation = document.querySelector('[data-testid="section-kinflo-contextual-navigation"]');
+      if (sectionNavigation instanceof HTMLElement) {
+        const top = sectionNavigation.getBoundingClientRect().top + window.scrollY;
+        window.scrollTo({ top: Math.max(0, top - 16), behavior: "auto" });
+        return;
+      }
+
+      if (attempts < 12) {
+        attempts += 1;
+        window.setTimeout(focus, 40);
+      }
+    };
+
+    window.setTimeout(focus, 0);
+  };
+
   useEffect(() => {
     if (activeTab !== "site-studio") {
       return;
@@ -6390,6 +6421,7 @@ export default function AdminKinfloShell() {
       cutoverReview: tab === "hosted-activation" ? generatedApiCutoverReviewItemId : undefined,
       cutoverBatch: tab === "hosted-activation" ? generatedApiCutoverBatchId : undefined,
     });
+    focusSelectedShellSection(tab);
   };
 
   const selectClientWebsiteStudioSite = (siteKey: string) => {
@@ -7130,7 +7162,7 @@ export default function AdminKinfloShell() {
           <KinfloOperatorSidebar activeTab={activeTab} onSelectTab={selectShellTab} />
           <div className="min-w-0 px-4 sm:px-6 lg:px-8">
         <section
-          className={`${activeTab === "site-studio" ? "hidden" : "mt-5"} rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5`}
+          className={`${activeTab === "overview" ? "mt-5" : "hidden"} rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5`}
           data-testid="section-kinflo-decision-rail"
         >
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
@@ -7222,7 +7254,7 @@ export default function AdminKinfloShell() {
         </section>
 
         <section
-          className={`${activeTab === "site-studio" ? "hidden" : "mt-5"} rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5`}
+          className={`${activeTab === "overview" ? "mt-5" : "hidden"} rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5`}
           data-testid="section-kinflo-linked-data"
         >
           <div>
@@ -7376,7 +7408,7 @@ export default function AdminKinfloShell() {
           />
         ) : null}
 
-        <Tabs value={activeTab} onValueChange={(value) => selectShellTab(value as ShellTabValue)} className={`${activeTab === "site-studio" ? "mt-1" : "mt-7"} min-w-0`}>
+        {activeTab === "overview" ? null : <Tabs value={activeTab} onValueChange={(value) => selectShellTab(value as ShellTabValue)} className={`${activeTab === "site-studio" ? "mt-1" : "mt-7"} min-w-0`}>
           <div className={`${activeTab === "site-studio" ? "hidden sm:block" : "block"} w-full min-w-0 rounded-md border border-border bg-card`} data-testid="section-kinflo-contextual-navigation">
             <div className="flex flex-col gap-2 border-b border-border px-3 py-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -15993,7 +16025,7 @@ export default function AdminKinfloShell() {
               </div>
             </section>
           </TabsContent>
-        </Tabs>
+        </Tabs>}
 
         <div className={`${activeTab === "site-studio" ? "hidden" : "mt-8 flex"} flex-col gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between`}>
           <div>
