@@ -6,10 +6,11 @@ const check = (condition, label, detail) => checks.push({ ok: Boolean(condition)
 const read = (path) => readFileSync(path, "utf8");
 
 const shellPath = "client/src/pages/AdminKinfloShell.tsx";
+const dashboardShellPath = "client/src/components/KinfloDashboardShell.tsx";
 const cssPath = "client/src/index.css";
 const packagePath = "package.json";
 const projectRulePath = "AGENTS.md";
-for (const path of [shellPath, cssPath, packagePath, projectRulePath]) {
+for (const path of [shellPath, dashboardShellPath, cssPath, packagePath, projectRulePath]) {
   check(existsSync(path), `${path} exists`, "Expected navigation/theme artifact is missing.");
 }
 
@@ -48,6 +49,20 @@ if (existsSync(shellPath)) {
   }
   check(!shell.includes("convex/_generated/api"), "admin shell excludes generated Convex bindings", "This UX lane must remain source-only.");
   check(!shell.includes("useMutation(") && !shell.includes("useAction("), "admin shell excludes live Convex execution", "Mutation/action execution must remain gated.");
+}
+
+if (existsSync(dashboardShellPath)) {
+  const dashboardShell = read(dashboardShellPath);
+  for (const marker of [
+    "border-border bg-card p-3 text-foreground",
+    "border-border bg-muted/70",
+    "text-muted-foreground",
+    "dark:text-amber-200",
+    "dark:text-emerald-200",
+  ]) {
+    check(dashboardShell.includes(marker), `dashboard shell includes ${marker}`, "Workspace cards must use shared light/dark theme tokens.");
+  }
+  check(!dashboardShell.includes("bg-white") && !dashboardShell.includes("bg-slate-50"), "dashboard shell excludes light-only surfaces", "Dashboard workspace cards must not force light-mode backgrounds.");
 }
 
 if (existsSync(projectRulePath)) {
