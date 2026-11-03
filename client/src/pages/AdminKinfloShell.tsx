@@ -459,7 +459,7 @@ function KinfloSectionSnapshot({
 }
 
 const workflowNavigationLanes: {
-  key: "control" | "build" | "launch" | "growth" | "evidence";
+  key: "control" | "build" | "launch" | "growth" | "evidence" | "activation";
   label: string;
   description: string;
   icon: typeof Boxes;
@@ -510,13 +510,23 @@ const workflowNavigationLanes: {
   },
   {
     key: "evidence",
-    label: "Evidence & Activation",
-    description: "AI review, adapters, Convex activation, and rollback gates",
+    label: "Evidence",
+    description: "AI review, adapter mapping, and audit history",
     icon: FileText,
-    tabs: ["ai-review", "adapter-switch", "hosted-activation"],
+    tabs: ["ai-review", "adapter-switch"],
     primaryTab: "ai-review",
     status: "blocked",
-    blockedLiveAction: "generated API and hosted deployment gated",
+    blockedLiveAction: "evidence capture gated",
+  },
+  {
+    key: "activation",
+    label: "Activation",
+    description: "Hosted activation, read-only smokes, and cutover gates",
+    icon: KeyRound,
+    tabs: ["hosted-activation"],
+    primaryTab: "hosted-activation",
+    status: "blocked",
+    blockedLiveAction: "hosted activation gated",
   },
 ];
 
@@ -586,7 +596,7 @@ function KinfloOperatorSidebar({
               {isActiveLane ? (
                 <div className="ml-4 mt-1 space-y-0.5 border-l border-primary/30 pl-2" data-testid={`section-kinflo-workflow-lane-tabs-${lane.key}`}>
                   <div className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Sections in this workspace</div>
-                  {lane.tabs.filter((tabValue) => tabValue !== "hosted-activation").map((tabValue) => (
+                  {lane.key !== "activation" ? lane.tabs.map((tabValue) => (
                     <button
                       key={tabValue}
                       type="button"
@@ -598,15 +608,15 @@ function KinfloOperatorSidebar({
                       <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${activeTab === tabValue ? "bg-primary" : "bg-muted-foreground/40"}`} />
                       <span className="truncate">{shellTabLabels[tabValue]}</span>
                     </button>
-                  ))}
-                  {lane.key === "evidence" ? (
+                  )) : null}
+                  {lane.key === "activation" ? (
                     <div className="mt-1 border-t border-border/70 pt-1" data-testid="section-kinflo-sidebar-activation-steps">
                       <button
                         type="button"
                         onClick={() => onSelectTab("hosted-activation")}
                         aria-current={activeTab === "hosted-activation" ? "page" : undefined}
                         className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition ${activeTab === "hosted-activation" ? "bg-primary/10 font-semibold text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
-                        data-testid="dot-kinflo-workflow-lane-evidence-hosted-activation"
+                        data-testid="dot-kinflo-workflow-lane-activation-hosted-activation"
                       >
                         <KeyRound className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                         <span className="truncate">Hosted activation</span>
