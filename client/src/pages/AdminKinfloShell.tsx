@@ -567,14 +567,29 @@ function getKinfloWorkflowLaneMetrics(
   return getKinfloSectionSnapshotMetrics(lane.primaryTab, snapshot);
 }
 
+function selectKinfloWorkflowMetric(
+  lane: KinfloWorkflowLane,
+  metric: KinfloSectionSnapshotMetric,
+  onSelectTab: (tab: ShellTabValue) => void,
+  onSelectStudioSection: (section: ClientWebsiteStudioNavigationKey) => void,
+) {
+  if (lane.key === "build" && metric.label === "Handoff measures") {
+    onSelectStudioSection("handoff");
+    return;
+  }
+  onSelectTab(lane.primaryTab);
+}
+
 function KinfloWorkflowLaneSnapshot({
   lane,
   snapshot,
   onSelectTab,
+  onSelectStudioSection,
 }: {
   lane: KinfloWorkflowLane;
   snapshot: KinfloShellSnapshot;
   onSelectTab: (tab: ShellTabValue) => void;
+  onSelectStudioSection: (section: ClientWebsiteStudioNavigationKey) => void;
 }) {
   const metrics = getKinfloWorkflowLaneMetrics(lane, snapshot);
   return (
@@ -593,7 +608,7 @@ function KinfloWorkflowLaneSnapshot({
             key={metric.label}
             type="button"
             className="kinflo-section-metric-card rounded-lg border border-border bg-muted/30 p-3 text-left transition hover:border-primary/50 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            onClick={() => onSelectTab(lane.primaryTab)}
+            onClick={() => selectKinfloWorkflowMetric(lane, metric, onSelectTab, onSelectStudioSection)}
             data-filter-target={lane.key}
             aria-label={`${lane.label}, ${metric.label}: ${metric.value}. Open ${shellTabLabels[lane.primaryTab]}.`}
           >
@@ -610,9 +625,11 @@ function KinfloWorkflowLaneSnapshot({
 function KinfloOverviewAnalytics({
   snapshot,
   onSelectTab,
+  onSelectStudioSection,
 }: {
   snapshot: KinfloShellSnapshot;
   onSelectTab: (tab: ShellTabValue) => void;
+  onSelectStudioSection: (section: ClientWebsiteStudioNavigationKey) => void;
 }) {
   return (
     <section className="mt-5 rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5" data-testid="section-kinflo-overview-analytics">
@@ -645,7 +662,7 @@ function KinfloOverviewAnalytics({
                     key={metric.label}
                     type="button"
                     className="kinflo-section-metric-card min-w-0 rounded-md border border-border bg-card p-2 text-left transition hover:border-primary/50 hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    onClick={() => onSelectTab(lane.primaryTab)}
+                    onClick={() => selectKinfloWorkflowMetric(lane, metric, onSelectTab, onSelectStudioSection)}
                     data-filter-target={lane.key}
                     aria-label={`${lane.label}, ${metric.label}: ${metric.value}. Open ${shellTabLabels[lane.primaryTab]}.`}
                   >
@@ -8240,9 +8257,9 @@ export default function AdminKinfloShell() {
         </section>
 
         {activeTab === "overview" ? (
-          <KinfloOverviewAnalytics snapshot={snapshot} onSelectTab={selectShellTab} />
+          <KinfloOverviewAnalytics snapshot={snapshot} onSelectTab={selectShellTab} onSelectStudioSection={selectClientWebsiteStudioSection} />
         ) : (
-          <KinfloWorkflowLaneSnapshot lane={activeWorkflowLane} snapshot={snapshot} onSelectTab={selectShellTab} />
+          <KinfloWorkflowLaneSnapshot lane={activeWorkflowLane} snapshot={snapshot} onSelectTab={selectShellTab} onSelectStudioSection={selectClientWebsiteStudioSection} />
         )}
 
         {activeTab === "overview"
