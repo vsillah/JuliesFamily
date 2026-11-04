@@ -6522,11 +6522,6 @@ export default function AdminKinfloShell() {
   const isClientWebsitePreviewLaunchWorkbench =
     clientWebsiteStudioLane === "workbench"
     && (clientWebsiteWorkbenchStage === "preview" || clientWebsiteWorkbenchStage === "launch");
-  const clientWebsitePreviewLaunchStep = clientWebsiteWorkbenchStage === "preview"
-    ? "preview"
-    : clientWebsiteLaunchDossier === "decision"
-      ? "decision"
-      : "qa";
   const shouldShowClientWebsiteStudioContext =
     clientWebsiteStudioLane === "workbench"
     && !isClientWebsiteBuildWorkbench
@@ -13291,61 +13286,6 @@ export default function AdminKinfloShell() {
                         <TabsTrigger value="preview" data-testid="tab-kinflo-client-workbench-preview">Preview</TabsTrigger>
                         <TabsTrigger value="launch" data-testid="tab-kinflo-client-workbench-launch">Launch</TabsTrigger>
                       </TabsList>
-
-                      {isClientWebsitePreviewLaunchWorkbench ? (
-                        <section className="mb-3 rounded-xl border border-border bg-card p-3" data-testid="section-kinflo-client-preview-launch-sequence">
-                          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                            <div className="min-w-0">
-                              <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Preview &amp; Launch sequence</div>
-                              <h3 className="mt-1 text-base font-semibold text-foreground">Review the site, then make the launch decision</h3>
-                              <p className="mt-1 max-w-2xl text-xs leading-5 text-muted-foreground">
-                                Preview &amp; Launch ends at Decision. Publish, handoff, and domain actions remain gated until their evidence is approved.
-                              </p>
-                            </div>
-                            <Badge variant="outline" className="w-fit border-border bg-muted text-foreground">Read only</Badge>
-                          </div>
-
-                          <div className="mt-3 grid gap-2 sm:grid-cols-3" role="tablist" aria-label="Preview and launch sequence">
-                            {[
-                              { key: "preview", label: "Preview", detail: "Inspect the public experience." },
-                              { key: "qa", label: "QA", detail: "Review proof and blocked actions." },
-                              { key: "decision", label: "Decision", detail: "Confirm readiness without publishing." },
-                            ].map((step, index) => {
-                              const isActive = clientWebsitePreviewLaunchStep === step.key;
-                              return (
-                                <button
-                                  key={step.key}
-                                  type="button"
-                                  role="tab"
-                                  aria-selected={isActive}
-                                  aria-current={isActive ? "step" : undefined}
-                                  onClick={() => {
-                                    if (step.key === "preview") {
-                                      selectClientWebsiteWorkbenchStage("preview");
-                                    } else {
-                                      selectClientWebsiteLaunchDossier(step.key === "decision" ? "decision" : "qa");
-                                    }
-                                  }}
-                                  className={`min-w-0 rounded-lg border px-3 py-2 text-left transition ${
-                                    isActive
-                                      ? "border-primary bg-primary text-primary-foreground"
-                                      : "border-border bg-muted/30 text-foreground hover:bg-muted"
-                                  }`}
-                                  data-testid={`tab-kinflo-client-preview-launch-step-${step.key}`}
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-current text-[10px] font-semibold">{index + 1}</span>
-                                    <span className="truncate text-sm font-semibold">{step.label}</span>
-                                  </div>
-                                  <span className={`mt-1 block text-[11px] leading-4 ${isActive ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
-                                    {step.detail}
-                                  </span>
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </section>
-                      ) : null}
 
                   <TabsContent value="sites" className="mt-4" data-testid="section-kinflo-client-workbench-sites">
                     <section className="mb-3 rounded-xl border border-border bg-card p-3" data-testid="section-kinflo-client-build-sequence">
