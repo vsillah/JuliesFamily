@@ -576,6 +576,8 @@ function KinfloTenantAdminSidebar({
   onSelectTab,
   activeStudioSection,
   onSelectStudioSection,
+  activeStudioLaunchDossier,
+  onSelectStudioLaunchDossier,
   activeLaunchReadinessStage,
   onSelectLaunchReadinessStage,
   activationSteps,
@@ -586,6 +588,8 @@ function KinfloTenantAdminSidebar({
   onSelectTab: (tab: ShellTabValue) => void;
   activeStudioSection: ClientWebsiteStudioNavigationKey | null;
   onSelectStudioSection: (section: ClientWebsiteStudioNavigationKey) => void;
+  activeStudioLaunchDossier: ClientWebsiteLaunchDossier;
+  onSelectStudioLaunchDossier: (dossier: ClientWebsiteLaunchDossier) => void;
   activeLaunchReadinessStage: LaunchReadinessStage;
   onSelectLaunchReadinessStage: (stage: LaunchReadinessStage) => void;
   activationSteps: KinfloShellSnapshot["hostedActivationRunbook"]["steps"];
@@ -724,20 +728,49 @@ function KinfloTenantAdminSidebar({
                       ].map((section) => {
                         const isActiveSection = activeStudioSection === section.key;
                         return (
-                          <button
-                            key={section.key}
-                            type="button"
-                            onClick={() => onSelectStudioSection(section.key as ClientWebsiteStudioNavigationKey)}
-                            aria-current={isActiveSection ? "page" : undefined}
-                            className={`flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left text-xs transition ${isActiveSection ? "bg-primary/10 font-semibold text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
-                            data-testid={`button-kinflo-studio-section-${section.key}`}
-                          >
-                            <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${isActiveSection ? "bg-primary" : "bg-muted-foreground/40"}`} />
-                            <span className="min-w-0">
-                              <span className="block truncate">{section.label}</span>
-                              <span className="block truncate text-[10px] font-normal text-muted-foreground">{section.detail}</span>
-                            </span>
-                          </button>
+                          <div key={section.key}>
+                            <button
+                              type="button"
+                              onClick={() => onSelectStudioSection(section.key as ClientWebsiteStudioNavigationKey)}
+                              aria-current={isActiveSection ? "page" : undefined}
+                              className={`flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left text-xs transition ${isActiveSection ? "bg-primary/10 font-semibold text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+                              data-testid={`button-kinflo-studio-section-${section.key}`}
+                            >
+                              <span className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${isActiveSection ? "bg-primary" : "bg-muted-foreground/40"}`} />
+                              <span className="min-w-0">
+                                <span className="block truncate">{section.label}</span>
+                                <span className="block truncate text-[10px] font-normal text-muted-foreground">{section.detail}</span>
+                              </span>
+                            </button>
+                            {section.key === "preview-launch" && isActiveSection ? (
+                              <div className="mt-1 space-y-0.5 border-l border-primary/20 pl-3" data-testid="section-kinflo-sidebar-preview-launch-dossiers">
+                                {[
+                                  { key: "provisioning" as const, label: "Provision", detail: "Prepare the launch packet." },
+                                  { key: "packets" as const, label: "Packets", detail: "Review launch evidence." },
+                                  { key: "qa" as const, label: "QA", detail: "Inspect proof and blockers." },
+                                  { key: "decision" as const, label: "Decision", detail: "Confirm the release boundary." },
+                                ].map((dossier) => {
+                                  const isActiveDossier = activeStudioLaunchDossier === dossier.key;
+                                  return (
+                                    <button
+                                      key={dossier.key}
+                                      type="button"
+                                      onClick={() => onSelectStudioLaunchDossier(dossier.key)}
+                                      aria-current={isActiveDossier ? "step" : undefined}
+                                      className={`flex w-full items-start gap-2 rounded-md px-2 py-1.5 text-left text-[11px] leading-4 transition ${isActiveDossier ? "bg-primary/10 font-semibold text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+                                      data-testid={`button-kinflo-studio-launch-dossier-${dossier.key}`}
+                                    >
+                                      <span className={`mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full ${isActiveDossier ? "bg-primary" : "bg-muted-foreground/40"}`} />
+                                      <span className="min-w-0">
+                                        <span className="block truncate">{dossier.label}</span>
+                                        <span className="block truncate text-[10px] font-normal text-muted-foreground">{dossier.detail}</span>
+                                      </span>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            ) : null}
+                          </div>
                         );
                       })}
                     </div>
@@ -8024,6 +8057,8 @@ export default function AdminKinfloShell() {
           onSelectTab={selectShellTab}
           activeStudioSection={activeTab === "site-studio" ? getClientWebsiteStudioNavigationKey(clientWebsiteStudioLane, clientWebsiteWorkbenchStage) : null}
           onSelectStudioSection={selectClientWebsiteStudioSection}
+          activeStudioLaunchDossier={clientWebsiteLaunchDossier}
+          onSelectStudioLaunchDossier={selectClientWebsiteLaunchDossier}
           activeLaunchReadinessStage={launchReadinessStage}
           onSelectLaunchReadinessStage={selectLaunchReadinessStage}
           activationSteps={snapshot.hostedActivationRunbook.steps}
@@ -13738,13 +13773,6 @@ export default function AdminKinfloShell() {
                         className="flex min-h-0 min-w-0 flex-col overflow-hidden"
                         data-testid="tabs-kinflo-client-launch-dossier"
                       >
-                        <TabsList className="grid h-8 w-full grid-cols-4 bg-slate-100 p-1">
-                          <TabsTrigger value="provisioning" data-testid="tab-kinflo-client-launch-dossier-provisioning">Provision</TabsTrigger>
-                          <TabsTrigger value="packets" data-testid="tab-kinflo-client-launch-dossier-packets">Packets</TabsTrigger>
-                          <TabsTrigger value="qa" data-testid="tab-kinflo-client-launch-dossier-qa">QA</TabsTrigger>
-                          <TabsTrigger value="decision" data-testid="tab-kinflo-client-launch-dossier-decision">Decision</TabsTrigger>
-                        </TabsList>
-
                         <TabsContent
                           value="provisioning"
                           className="mt-2 min-h-0 flex-1 overflow-hidden pr-0"
