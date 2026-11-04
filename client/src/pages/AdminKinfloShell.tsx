@@ -218,6 +218,8 @@ const clientWebsiteStudioLaneValues = ["queue", "configuration", "handoff", "wor
 type ClientWebsiteStudioLane = (typeof clientWebsiteStudioLaneValues)[number];
 const clientWebsiteStudioNavigationValues = ["build", "configuration", "handoff", "preview-launch"] as const;
 type ClientWebsiteStudioNavigationKey = (typeof clientWebsiteStudioNavigationValues)[number];
+const launchReadinessStageValues = ["overview", "evidence", "review", "decide"] as const;
+type LaunchReadinessStage = (typeof launchReadinessStageValues)[number];
 const clientWebsiteStudioLaneSectionTestIds: Record<ClientWebsiteStudioLane, string> = {
   queue: "section-kinflo-client-studio-lane-queue",
   configuration: "section-kinflo-client-studio-lane-configuration",
@@ -574,6 +576,8 @@ function KinfloTenantAdminSidebar({
   onSelectTab,
   activeStudioSection,
   onSelectStudioSection,
+  activeLaunchReadinessStage,
+  onSelectLaunchReadinessStage,
   activationSteps,
   activeActivationStepId,
   onSelectActivationStep,
@@ -582,6 +586,8 @@ function KinfloTenantAdminSidebar({
   onSelectTab: (tab: ShellTabValue) => void;
   activeStudioSection: ClientWebsiteStudioNavigationKey | null;
   onSelectStudioSection: (section: ClientWebsiteStudioNavigationKey) => void;
+  activeLaunchReadinessStage: LaunchReadinessStage;
+  onSelectLaunchReadinessStage: (stage: LaunchReadinessStage) => void;
   activationSteps: KinfloShellSnapshot["hostedActivationRunbook"]["steps"];
   activeActivationStepId: string;
   onSelectActivationStep: (stepId: string) => void;
@@ -640,7 +646,7 @@ function KinfloTenantAdminSidebar({
               {isActiveLane ? (
                 <div className="ml-4 mt-1 space-y-0.5 border-l border-primary/30 pl-2" data-testid={`section-kinflo-workflow-lane-tabs-${lane.key}`}>
                   <div className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Sections in this workspace</div>
-                  {lane.key !== "activation" && lane.key !== "studio" ? lane.tabs.map((tabValue) => (
+                  {lane.key !== "activation" && lane.key !== "studio" && lane.key !== "launch" ? lane.tabs.map((tabValue) => (
                     <button
                       key={tabValue}
                       type="button"
@@ -653,6 +659,60 @@ function KinfloTenantAdminSidebar({
                       <span className="truncate">{shellTabLabels[tabValue]}</span>
                     </button>
                   )) : null}
+                  {lane.key === "launch" ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => onSelectTab("launch-readiness")}
+                        aria-current={activeTab === "launch-readiness" ? "page" : undefined}
+                        aria-expanded={activeTab === "launch-readiness"}
+                        className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition ${activeTab === "launch-readiness" ? "bg-primary/10 font-semibold text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+                        data-testid="dot-kinflo-workflow-lane-launch-launch-readiness"
+                      >
+                        <Rocket className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        <span className="truncate">Launch Readiness</span>
+                      </button>
+                      {activeTab === "launch-readiness" ? (
+                        <div className="mt-1 space-y-0.5 border-l border-primary/20 pl-3" data-testid="section-kinflo-sidebar-launch-readiness-stages">
+                          <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Stages</div>
+                          {[
+                            { key: "overview" as const, label: "Overview" },
+                            { key: "evidence" as const, label: "Evidence" },
+                            { key: "review" as const, label: "Review" },
+                            { key: "decide" as const, label: "Decide" },
+                          ].map((stage) => {
+                            const isActiveStage = activeLaunchReadinessStage === stage.key;
+                            return (
+                              <button
+                                key={stage.key}
+                                type="button"
+                                onClick={() => onSelectLaunchReadinessStage(stage.key)}
+                                aria-current={isActiveStage ? "step" : undefined}
+                                className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[11px] transition ${isActiveStage ? "bg-primary/10 font-semibold text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+                                data-testid={`dot-kinflo-sidebar-launch-readiness-stage-${stage.key}`}
+                              >
+                                <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${isActiveStage ? "bg-primary" : "bg-muted-foreground/40"}`} />
+                                <span className="truncate">{stage.label}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ) : null}
+                      {lane.tabs.filter((tabValue) => tabValue !== "launch-readiness").map((tabValue) => (
+                        <button
+                          key={tabValue}
+                          type="button"
+                          onClick={() => onSelectTab(tabValue)}
+                          aria-current={activeTab === tabValue ? "page" : undefined}
+                          className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs transition ${activeTab === tabValue ? "bg-primary/10 font-semibold text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+                          data-testid={`dot-kinflo-workflow-lane-${lane.key}-${tabValue}`}
+                        >
+                          <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${activeTab === tabValue ? "bg-primary" : "bg-muted-foreground/40"}`} />
+                          <span className="truncate">{shellTabLabels[tabValue]}</span>
+                        </button>
+                      ))}
+                    </>
+                  ) : null}
                   {lane.key === "studio" ? (
                     <div className="mt-1 space-y-0.5 border-t border-border/70 pt-1" data-testid="section-kinflo-sidebar-studio-sections">
                       <div className="mb-1 px-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Studio sections</div>
@@ -922,6 +982,19 @@ function readInitialClientWebsiteWorkbenchStage(): ClientWebsiteWorkbenchStage {
   return clientWebsiteWorkbenchStageValues.includes(stage as ClientWebsiteWorkbenchStage)
     ? (stage as ClientWebsiteWorkbenchStage)
     : "preview";
+}
+
+function readInitialLaunchReadinessStage(): LaunchReadinessStage {
+  if (typeof window === "undefined") {
+    return "overview";
+  }
+  const stage = new URLSearchParams(window.location.search).get("launchStage");
+  if (stage === "launch") {
+    return "decide";
+  }
+  return launchReadinessStageValues.includes(stage as LaunchReadinessStage)
+    ? stage as LaunchReadinessStage
+    : "overview";
 }
 
 function readInitialClientWebsiteStudioBuildStep(): ClientWebsiteStudioBuildStep {
@@ -5710,7 +5783,7 @@ export default function AdminKinfloShell() {
   ));
   const [selectedLaunchPacketId, setSelectedLaunchPacketId] = useState(snapshot.siteLaunchPackets[0]?.id ?? "");
   const [launchReadinessSiteKey, setLaunchReadinessSiteKey] = useState(snapshot.launchReadiness.defaultSiteKey);
-  const [launchReadinessStage, setLaunchReadinessStage] = useState<"overview" | "evidence" | "review" | "launch">("overview");
+  const [launchReadinessStage, setLaunchReadinessStage] = useState<LaunchReadinessStage>(readInitialLaunchReadinessStage);
   const adapterSwitchBatchIds = useMemo(
     () => snapshot.adapterSwitchReadiness.batches.map((batch) => batch.id),
     [snapshot.adapterSwitchReadiness.batches],
@@ -6889,6 +6962,7 @@ export default function AdminKinfloShell() {
 
   useEffect(() => {
     const nextTab = readInitialShellTab();
+    const nextLaunchReadinessStage = readInitialLaunchReadinessStage();
     const nextLane = readInitialClientWebsiteStudioLane();
     const nextScope = resolveKinfloAdminScope(
       typeof window === "undefined" ? "" : window.location.search,
@@ -6942,6 +7016,7 @@ export default function AdminKinfloShell() {
       generatedApiCutoverBatchIds,
     );
     setActiveTab((current) => (current === nextTab ? current : nextTab));
+    setLaunchReadinessStage((current) => (current === nextLaunchReadinessStage ? current : nextLaunchReadinessStage));
     setClientWebsiteStudioSiteKey((current) => (current === nextSiteKey ? current : nextSiteKey));
     setClientWebsiteStudioLane((current) => (current === nextLane ? current : nextLane));
     setClientWebsiteWorkbenchStage((current) => (current === nextStage ? current : nextStage));
@@ -7161,6 +7236,7 @@ export default function AdminKinfloShell() {
     const shouldKeepConfigurationSaveDetail = tab === "site-studio" && clientWebsiteStudioLane === "configuration";
     updateKinfloShellRoute({
       tab,
+      launchStage: tab === "launch-readiness" ? launchReadinessStage : undefined,
       studioSite: clientWebsiteStudioSiteKey,
       workspace: workspaceKey,
       studioLane: tab === "site-studio" ? clientWebsiteStudioLane : undefined,
@@ -7186,6 +7262,40 @@ export default function AdminKinfloShell() {
       cutoverBatch: tab === "hosted-activation" ? generatedApiCutoverBatchId : undefined,
     });
     focusSelectedShellSection(tab);
+  };
+
+  const selectLaunchReadinessStage = (stage: LaunchReadinessStage) => {
+    setActiveTab("launch-readiness");
+    setActiveWorkspaceKey(null);
+    setLaunchReadinessStage(stage);
+    updateKinfloShellRoute({
+      tab: "launch-readiness",
+      launchStage: stage,
+      studioSite: clientWebsiteStudioSiteKey,
+      workspace: undefined,
+      studioLane: undefined,
+      studioStage: undefined,
+      studioBuildStep: undefined,
+      studioDossier: undefined,
+      studioProvisioning: undefined,
+      studioHandoff: undefined,
+      studioMatrix: undefined,
+      studioSection: undefined,
+      studioConfigure: undefined,
+      studioConfig: undefined,
+      studioChange: undefined,
+      studioApproval: undefined,
+      studioSave: undefined,
+      adapterBatch: undefined,
+      adapterSurface: undefined,
+      activationStep: undefined,
+      smokeEvidence: undefined,
+      preflightEvidence: undefined,
+      preflightResult: undefined,
+      cutoverReview: undefined,
+      cutoverBatch: undefined,
+    });
+    focusSelectedShellSection("launch-readiness");
   };
 
   const selectClientWebsiteStudioSite = (siteKey: string) => {
@@ -7919,6 +8029,8 @@ export default function AdminKinfloShell() {
           onSelectTab={selectShellTab}
           activeStudioSection={activeTab === "site-studio" ? getClientWebsiteStudioNavigationKey(clientWebsiteStudioLane, clientWebsiteWorkbenchStage) : null}
           onSelectStudioSection={selectClientWebsiteStudioSection}
+          activeLaunchReadinessStage={launchReadinessStage}
+          onSelectLaunchReadinessStage={selectLaunchReadinessStage}
           activationSteps={snapshot.hostedActivationRunbook.steps}
           activeActivationStepId={hostedActivationStepId}
           onSelectActivationStep={selectHostedActivationStep}
@@ -8295,33 +8407,30 @@ export default function AdminKinfloShell() {
                 </div>
                 <Badge variant="outline" className="w-fit">Read only</Badge>
               </div>
-              <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4" role="tablist" aria-label="Launch review sequence">
+              <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4" role="list" aria-label="Launch review progress">
                 {[
                   { value: "overview" as const, label: "Overview", detail: "Start with the selected site and readiness signal." },
                   { value: "evidence" as const, label: "Evidence", detail: "Inspect the stages that support the launch decision." },
                   { value: "review" as const, label: "Review", detail: "Confirm blockers, owners, and the next gate." },
-                  { value: "launch" as const, label: "Launch", detail: "Review the final boundary without executing it." },
+                  { value: "decide" as const, label: "Decide", detail: "Review the final boundary without executing it." },
                 ].map((stage, index) => {
                   const isActive = launchReadinessStage === stage.value;
                   return (
-                    <button
+                    <div
                       key={stage.value}
-                      type="button"
-                      role="tab"
-                      aria-selected={isActive}
+                      role="listitem"
                       aria-current={isActive ? "step" : undefined}
-                      onClick={() => setLaunchReadinessStage(stage.value)}
-                      className={`min-w-0 rounded-lg border px-3 py-2 text-left transition ${isActive
+                      className={`min-w-0 rounded-lg border px-3 py-2 text-left ${isActive
                         ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                        : "border-border bg-muted/30 text-foreground hover:border-primary/50 hover:bg-muted"}`}
-                      data-testid={`tab-kinflo-launch-readiness-stage-${stage.value}`}
+                        : "border-border bg-muted/30 text-foreground"}`}
+                      data-testid={`progress-kinflo-launch-readiness-stage-${stage.value}`}
                     >
                       <div className="flex items-center gap-2">
                         <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-current text-[10px] font-semibold">{index + 1}</span>
                         <span className="truncate text-xs font-semibold">{stage.label}</span>
                       </div>
                       <span className={`mt-1 block text-[10px] leading-4 ${isActive ? "text-primary-foreground/75" : "text-muted-foreground"}`}>{stage.detail}</span>
-                    </button>
+                    </div>
                   );
                 })}
               </div>
@@ -8426,7 +8535,7 @@ export default function AdminKinfloShell() {
                 </>
               ) : null}
 
-              {launchReadinessStage === "launch" ? (
+              {launchReadinessStage === "decide" ? (
                 <Card>
                   <CardHeader><CardTitle className="text-base">Final launch boundary</CardTitle><p className="text-sm text-muted-foreground">The packet is reviewable, but the live boundary remains closed until hosted evidence is accepted.</p></CardHeader>
                   <CardContent className="space-y-4">
