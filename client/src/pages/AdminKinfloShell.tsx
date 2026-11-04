@@ -694,7 +694,7 @@ function KinfloTenantAdminSidebar({
             ? "text-amber-700 dark:text-amber-300"
             : lane.status === "ready"
               ? "text-emerald-700 dark:text-emerald-300"
-              : "border-border bg-muted text-muted-foreground";
+              : "text-muted-foreground";
 
           return (
             <div key={lane.key} className="rounded-lg" data-testid={`button-kinflo-workflow-lane-${lane.key}`}>
