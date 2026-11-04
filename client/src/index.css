@@ -513,7 +513,7 @@
 
 .dark .kinflo-admin-shell .kinflo-workspace-lane-card {
   background-color: hsl(0 0% 14%);
-  border-color: hsl(0 0% 28%);
+  border-color: hsl(var(--border));
   color: hsl(0 0% 96%);
 }
 

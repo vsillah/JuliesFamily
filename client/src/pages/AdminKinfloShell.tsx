@@ -8399,43 +8399,6 @@ export default function AdminKinfloShell() {
           </TabsContent>
 
           <TabsContent value="launch-readiness" className="mt-6">
-            <section className="mb-4 rounded-xl border border-border bg-card p-3 text-card-foreground" data-testid="section-kinflo-launch-readiness-sequence">
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0">
-                  <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Launch review sequence</div>
-                  <div className="mt-0.5 text-xs text-muted-foreground">Review the site packet in order. Live publishing and launch remain gated.</div>
-                </div>
-                <Badge variant="outline" className="w-fit">Read only</Badge>
-              </div>
-              <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4" role="list" aria-label="Launch review progress">
-                {[
-                  { value: "overview" as const, label: "Overview", detail: "Start with the selected site and readiness signal." },
-                  { value: "evidence" as const, label: "Evidence", detail: "Inspect the stages that support the launch decision." },
-                  { value: "review" as const, label: "Review", detail: "Confirm blockers, owners, and the next gate." },
-                  { value: "decide" as const, label: "Decide", detail: "Review the final boundary without executing it." },
-                ].map((stage, index) => {
-                  const isActive = launchReadinessStage === stage.value;
-                  return (
-                    <div
-                      key={stage.value}
-                      role="listitem"
-                      aria-current={isActive ? "step" : undefined}
-                      className={`min-w-0 rounded-lg border px-3 py-2 text-left ${isActive
-                        ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                        : "border-border bg-muted/30 text-foreground"}`}
-                      data-testid={`progress-kinflo-launch-readiness-stage-${stage.value}`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-current text-[10px] font-semibold">{index + 1}</span>
-                        <span className="truncate text-xs font-semibold">{stage.label}</span>
-                      </div>
-                      <span className={`mt-1 block text-[10px] leading-4 ${isActive ? "text-primary-foreground/75" : "text-muted-foreground"}`}>{stage.detail}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-xl font-semibold">Launch Readiness</h2>
