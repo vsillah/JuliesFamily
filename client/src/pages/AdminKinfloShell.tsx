@@ -13266,14 +13266,7 @@ export default function AdminKinfloShell() {
                 </div>
 
                 <div
-                  className={`${clientWebsiteStudioLane === "workbench" ? "block" : "hidden"} mt-2 ${
-                    isClientWebsiteLaunchWorkbench
-                      ? "max-h-[calc(100vh-14rem)] overflow-hidden pr-0"
-                      : clientWebsiteWorkbenchStage === "sites"
-                        || clientWebsiteWorkbenchStage === "preview"
-                        ? "max-h-none overflow-visible pr-0"
-                      : "max-h-[min(540px,calc(100vh-15rem))] overflow-y-auto overflow-x-hidden pr-1"
-                  }`}
+                  className={`${clientWebsiteStudioLane === "workbench" ? "block" : "hidden"} mt-2 max-h-none overflow-visible pr-0`}
                   data-testid="section-kinflo-client-studio-lane-workbench"
                 >
                   <div
@@ -13626,7 +13619,7 @@ export default function AdminKinfloShell() {
 
                   <TabsContent value="launch" className="mt-2" data-testid="section-kinflo-client-workbench-launch">
                     <div
-                      className="grid max-h-[calc(100vh-12rem)] min-w-0 gap-2 overflow-y-auto overflow-x-hidden pr-1 lg:h-[clamp(360px,calc(100vh-25rem),520px)] lg:grid-cols-[minmax(260px,320px)_minmax(0,1fr)] lg:gap-3 lg:overflow-hidden lg:pr-0"
+                      className="grid min-w-0 gap-2 lg:grid-cols-[minmax(260px,320px)_minmax(0,1fr)] lg:gap-3"
                       data-testid="section-kinflo-client-launch-rail"
                     >
                       <div className="rounded-lg border border-slate-200 bg-slate-950 p-2 text-white shadow-sm lg:hidden" data-testid="section-kinflo-client-launch-mobile-summary">
@@ -13652,7 +13645,7 @@ export default function AdminKinfloShell() {
                           ))}
                         </div>
                       </div>
-                      <div className="hidden min-h-0 min-w-0 space-y-3 overflow-y-auto overflow-x-hidden pr-1 lg:block" data-testid="section-kinflo-client-launch-command-column">
+                      <div className="hidden min-w-0 space-y-3 lg:block" data-testid="section-kinflo-client-launch-command-column">
                   <div className="rounded-2xl border border-slate-900 bg-slate-950 p-3 text-white shadow-sm lg:p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div>
@@ -13987,7 +13980,7 @@ export default function AdminKinfloShell() {
 
                         <TabsContent
                           value="packets"
-                          className="mt-3 grid max-h-[calc(100vh-21rem)] gap-3 overflow-y-auto pr-1 xl:grid-cols-2"
+                          className="mt-3 grid gap-3 xl:grid-cols-2"
                           data-testid="section-kinflo-client-launch-dossier-packets"
                         >
 
@@ -14335,7 +14328,7 @@ export default function AdminKinfloShell() {
 
                         <TabsContent
                           value="qa"
-                          className="mt-3 grid max-h-[calc(100vh-21rem)] gap-3 overflow-y-auto pr-1 xl:grid-cols-2"
+                          className="mt-3 grid gap-3 xl:grid-cols-2"
                           data-testid="section-kinflo-client-launch-dossier-qa"
                         >
 
@@ -14674,7 +14667,7 @@ export default function AdminKinfloShell() {
 
                         <TabsContent
                           value="decision"
-                          className="mt-3 grid max-h-[calc(100vh-21rem)] gap-3 overflow-y-auto pr-1 xl:grid-cols-2"
+                          className="mt-3 grid gap-3 xl:grid-cols-2"
                           data-testid="section-kinflo-client-launch-dossier-decision"
                         >
 
