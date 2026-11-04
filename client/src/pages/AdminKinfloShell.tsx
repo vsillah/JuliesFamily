@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 import {
   Bell,
@@ -98,8 +98,11 @@ import {
   type ShellHostedActivationStepStatus,
   type ShellIntegrationDraft,
   type ShellLaunchReadinessSite,
+  type ShellLead,
   type ShellMetricIconKey,
+  type ShellPipelineStage,
   type ShellSite,
+  type ShellTask,
   type ShellTenant,
   type KinfloShellSnapshot,
 } from "@/lib/kinfloShellData";
@@ -5871,10 +5874,106 @@ export default function AdminKinfloShell() {
     }),
     [adminScope.site.key, adminScope.site.name, adminScope.tenant.name, adminScope.tenant.slug, snapshot.leads, snapshot.pipelineStages, snapshot.tasks],
   );
+  const [crmPreviewLeads, setCrmPreviewLeads] = useState<ShellLead[]>([]);
+  const [crmPreviewTasks, setCrmPreviewTasks] = useState<ShellTask[]>([]);
+  const [crmInquiryFormOpen, setCrmInquiryFormOpen] = useState(false);
+  const [crmTaskFormOpen, setCrmTaskFormOpen] = useState(false);
+  const [crmInquiryName, setCrmInquiryName] = useState("");
+  const [crmInquiryEmail, setCrmInquiryEmail] = useState("");
+  const [crmTaskTitle, setCrmTaskTitle] = useState("");
+  const [crmTaskLead, setCrmTaskLead] = useState("");
+  const [crmTaskDue, setCrmTaskDue] = useState("This week");
+  const [crmPreviewNotice, setCrmPreviewNotice] = useState("");
+  useEffect(() => {
+    setCrmPreviewLeads([...crmWorkspace.leads]);
+    setCrmPreviewTasks([...crmWorkspace.tasks]);
+    setCrmInquiryFormOpen(false);
+    setCrmTaskFormOpen(false);
+    setCrmPreviewNotice("");
+  }, [crmWorkspace.leads, crmWorkspace.tasks]);
   const crmOperatingContext = crmWorkspace.context;
-  const scopedCrmLeads = crmWorkspace.leads;
-  const scopedCrmTasks = crmWorkspace.tasks;
-  const scopedCrmPipelineStages = crmWorkspace.pipelineStages;
+  const scopedCrmLeads = crmPreviewLeads;
+  const scopedCrmTasks = crmPreviewTasks;
+  const scopedCrmPipelineStages = useMemo<ShellPipelineStage[]>(
+    () => crmWorkspace.pipelineStages.map((stage) => ({
+      ...stage,
+      leads: crmPreviewLeads.filter((lead) => lead.stage === stage.slug).length,
+    })),
+    [crmPreviewLeads, crmWorkspace.pipelineStages],
+  );
+  const crmPreviewAnalytics = useMemo(() => {
+    const firstStage = scopedCrmPipelineStages[0]?.slug;
+    const movedLeads = firstStage ? crmPreviewLeads.filter((lead) => lead.stage !== firstStage).length : 0;
+    const convertedLeads = crmPreviewLeads.filter((lead) => lead.status === "converted").length;
+    return {
+      contacts: { value: crmPreviewLeads.length, detail: "Contacts in this workspace" },
+      pipelineMovement: { value: movedLeads, detail: firstStage ? "Contacts past the first stage" : "No pipeline stage signal" },
+      followUpTasks: { value: crmPreviewTasks.length, detail: "Follow-up items" },
+      journeyConversion: {
+        value: crmPreviewLeads.length > 0 ? `${Math.round((convertedLeads / crmPreviewLeads.length) * 100)}%` : "No signal",
+        detail: crmPreviewLeads.length > 0 ? "Contacts marked converted" : "No contacts in this workspace",
+      },
+    };
+  }, [crmPreviewLeads, crmPreviewTasks, scopedCrmPipelineStages]);
+  const createPreviewInquiry = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const name = crmInquiryName.trim();
+    const email = crmInquiryEmail.trim();
+    const firstStage = scopedCrmPipelineStages[0]?.slug ?? "new_lead";
+    if (!name || !email) {
+      setCrmPreviewNotice("Add a name and email to create the preview inquiry.");
+      return;
+    }
+    setCrmPreviewLeads((leads) => [{
+      tenantSlug: adminScope.tenant.slug,
+      siteKey: adminScope.site.key,
+      name,
+      email,
+      site: adminScope.site.name,
+      persona: "New inquiry",
+      stage: firstStage,
+      owner: "Unassigned",
+      status: "pending",
+      lastEvent: "Preview inquiry added",
+    }, ...leads]);
+    setCrmInquiryName("");
+    setCrmInquiryEmail("");
+    setCrmInquiryFormOpen(false);
+    setCrmPreviewNotice("Preview inquiry added. Live intake remains unavailable until CRM review is complete.");
+  };
+  const movePreviewLead = (email: string, stage: string) => {
+    const nextStage = scopedCrmPipelineStages.find((item) => item.slug === stage);
+    setCrmPreviewLeads((leads) => leads.map((lead) => lead.email === email
+      ? { ...lead, stage, lastEvent: `Preview stage changed to ${nextStage?.label ?? stage}` }
+      : lead));
+    setCrmPreviewNotice("Preview stage updated locally. Live stage changes remain unavailable.");
+  };
+  const createPreviewTask = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const title = crmTaskTitle.trim();
+    if (!title) {
+      setCrmPreviewNotice("Add a task title to create the preview task.");
+      return;
+    }
+    setCrmPreviewTasks((tasks) => [{
+      tenantSlug: adminScope.tenant.slug,
+      siteKey: adminScope.site.key,
+      title,
+      lead: crmTaskLead.trim() || "Unassigned contact",
+      owner: "Unassigned",
+      due: crmTaskDue.trim() || "This week",
+      status: "pending",
+    }, ...tasks]);
+    setCrmTaskTitle("");
+    setCrmTaskLead("");
+    setCrmTaskDue("This week");
+    setCrmTaskFormOpen(false);
+    setCrmPreviewNotice("Preview task added. Live task creation remains unavailable.");
+  };
+  const completePreviewTask = (task: ShellTask) => {
+    setCrmPreviewTasks((tasks) => tasks.map((item) => item === task ? { ...item, status: "done" } : item));
+    setCrmPreviewNotice("Preview task marked complete locally. Live task updates remain unavailable.");
+  };
   const scopedFixtureExperiencePreferences = {
     ...snapshot.experiencePreferences,
     scopeLabel: `${adminScope.tenant.name} site admin`,
@@ -8353,7 +8452,7 @@ export default function AdminKinfloShell() {
           <KinfloSectionSnapshot
             activeTab={activeTab}
             snapshot={snapshot}
-            crmAnalytics={crmWorkspace.analytics}
+            crmAnalytics={crmPreviewAnalytics}
             onFocusMetric={(targetTestId) => focusSelectedShellSection(activeTab, targetTestId)}
           />
         )}
@@ -16652,8 +16751,8 @@ export default function AdminKinfloShell() {
                     </div>
                     <div className="rounded-md border border-border bg-background p-3">
                       <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Editing</div>
-                      <div className="mt-1 text-sm font-semibold text-foreground">Preview only</div>
-                      <div className="mt-1 text-xs text-muted-foreground">Changes are not available yet</div>
+                      <div className="mt-1 text-sm font-semibold text-foreground">Preview controls</div>
+                      <div className="mt-1 text-xs text-muted-foreground">Live changes remain gated</div>
                     </div>
                   </CardContent>
                   <div className="mx-6 mb-6 grid gap-2 border-t border-border pt-4 sm:grid-cols-2" data-testid="section-kinflo-crm-action-gates">
@@ -16670,7 +16769,15 @@ export default function AdminKinfloShell() {
                   {crmOperatingContext.blocker ? (
                     <div className="mx-6 mb-6 rounded-md border border-border bg-muted p-3 text-sm text-muted-foreground">{crmOperatingContext.blocker}</div>
                   ) : null}
+                  <div className="mx-6 mb-6 rounded-md border border-primary/20 bg-primary/5 p-3 text-sm text-muted-foreground">
+                    Preview controls below update this local workspace only. Live CRM changes remain unavailable until the connection review is complete.
+                  </div>
                 </Card>
+                {crmPreviewNotice ? (
+                  <div className="rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm text-foreground" role="status" data-testid="text-kinflo-crm-preview-notice">
+                    {crmPreviewNotice}
+                  </div>
+                ) : null}
                 <div className="overflow-hidden rounded-lg border" data-testid="section-kinflo-crm-lead-table">
                   {scopedCrmLeads.length > 0 ? (
                     <Table>
@@ -16693,7 +16800,16 @@ export default function AdminKinfloShell() {
                             </TableCell>
                             <TableCell>{lead.site}</TableCell>
                             <TableCell>{lead.persona}</TableCell>
-                            <TableCell>{lead.stage}</TableCell>
+                            <TableCell>
+                              <Select value={lead.stage} onValueChange={(stage) => movePreviewLead(lead.email, stage)}>
+                                <SelectTrigger className="h-8 min-w-[132px]" aria-label={`Move ${lead.name} to a pipeline stage`}>
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {scopedCrmPipelineStages.map((stage) => <SelectItem key={stage.slug} value={stage.slug}>{stage.label}</SelectItem>)}
+                                </SelectContent>
+                              </Select>
+                            </TableCell>
                             <TableCell>{lead.owner}</TableCell>
                             <TableCell className="text-right">{statusBadge(lead.status)}</TableCell>
                           </TableRow>
@@ -16710,8 +16826,8 @@ export default function AdminKinfloShell() {
               </div>
 
               <div className="space-y-4">
-                <Card data-testid="section-kinflo-crm-pipeline">
-                  <CardHeader className="flex flex-row items-start gap-3 space-y-0">
+                <Card data-testid="section-kinflo-crm-website-inquiries">
+                  <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
                     <div className="rounded-md border bg-background p-2">
                       <FormInput className="h-4 w-4" />
                     </div>
@@ -16719,6 +16835,10 @@ export default function AdminKinfloShell() {
                       <CardTitle className="text-base">Website inquiries</CardTitle>
                       <p className="mt-1 text-sm text-muted-foreground">Capture new inquiries from the public site and route them to the right team.</p>
                     </div>
+                    <Button type="button" size="sm" variant="outline" className="shrink-0" onClick={() => setCrmInquiryFormOpen((open) => !open)} data-testid="button-kinflo-crm-add-preview-inquiry">
+                      <Plus className="mr-2 h-3.5 w-3.5" />
+                      {crmInquiryFormOpen ? "Close" : "Add preview inquiry"}
+                    </Button>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {snapshot.leadCaptureContracts.map((contract) => (
@@ -16738,10 +16858,29 @@ export default function AdminKinfloShell() {
                         <div className="mt-2 text-xs text-muted-foreground">{presentKinfloCopy(contract.fallback)}</div>
                       </div>
                     ))}
+                    {crmInquiryFormOpen ? (
+                      <form className="rounded-md border border-primary/30 bg-primary/5 p-3" onSubmit={createPreviewInquiry} data-testid="form-kinflo-crm-preview-inquiry">
+                        <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Preview inquiry</div>
+                        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                          <div className="space-y-1">
+                            <Label htmlFor="kinflo-crm-preview-inquiry-name">Name</Label>
+                            <Input id="kinflo-crm-preview-inquiry-name" value={crmInquiryName} onChange={(event) => setCrmInquiryName(event.target.value)} placeholder="Contact name" />
+                          </div>
+                          <div className="space-y-1">
+                            <Label htmlFor="kinflo-crm-preview-inquiry-email">Email</Label>
+                            <Input id="kinflo-crm-preview-inquiry-email" type="email" value={crmInquiryEmail} onChange={(event) => setCrmInquiryEmail(event.target.value)} placeholder="name@example.com" />
+                          </div>
+                        </div>
+                        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-xs text-muted-foreground">Saved to this local preview only.</span>
+                          <Button type="submit" size="sm"><Plus className="mr-2 h-3.5 w-3.5" />Add inquiry</Button>
+                        </div>
+                      </form>
+                    ) : null}
                   </CardContent>
                 </Card>
 
-                <Card data-testid="section-kinflo-crm-follow-up-tasks">
+                <Card data-testid="section-kinflo-crm-pipeline">
                   <CardHeader className="flex flex-row items-start gap-3 space-y-0">
                     <div className="rounded-md border bg-background p-2">
                       <Workflow className="h-4 w-4" />
@@ -16764,8 +16903,8 @@ export default function AdminKinfloShell() {
                   </CardContent>
                 </Card>
 
-                <Card>
-                  <CardHeader className="flex flex-row items-start gap-3 space-y-0">
+                <Card data-testid="section-kinflo-crm-follow-up-tasks">
+                  <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
                     <div className="rounded-md border bg-background p-2">
                       <ListChecks className="h-4 w-4" />
                     </div>
@@ -16773,8 +16912,35 @@ export default function AdminKinfloShell() {
                       <CardTitle className="text-base">Follow-up Tasks</CardTitle>
                       <p className="mt-1 text-sm text-muted-foreground">Follow-up work for this site.</p>
                     </div>
+                    <Button type="button" size="sm" variant="outline" className="shrink-0" onClick={() => setCrmTaskFormOpen((open) => !open)} data-testid="button-kinflo-crm-add-preview-task">
+                      <Plus className="mr-2 h-3.5 w-3.5" />
+                      {crmTaskFormOpen ? "Close" : "Add preview task"}
+                    </Button>
                   </CardHeader>
                   <CardContent className="space-y-3">
+                    {crmTaskFormOpen ? (
+                      <form className="rounded-md border border-primary/30 bg-primary/5 p-3" onSubmit={createPreviewTask} data-testid="form-kinflo-crm-preview-task">
+                        <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Preview task</div>
+                        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                          <div className="space-y-1 sm:col-span-2">
+                            <Label htmlFor="kinflo-crm-preview-task-title">Task</Label>
+                            <Input id="kinflo-crm-preview-task-title" value={crmTaskTitle} onChange={(event) => setCrmTaskTitle(event.target.value)} placeholder="Follow up with this contact" />
+                          </div>
+                          <div className="space-y-1">
+                            <Label htmlFor="kinflo-crm-preview-task-lead">Contact</Label>
+                            <Input id="kinflo-crm-preview-task-lead" value={crmTaskLead} onChange={(event) => setCrmTaskLead(event.target.value)} placeholder="Contact name" />
+                          </div>
+                          <div className="space-y-1">
+                            <Label htmlFor="kinflo-crm-preview-task-due">Due</Label>
+                            <Input id="kinflo-crm-preview-task-due" value={crmTaskDue} onChange={(event) => setCrmTaskDue(event.target.value)} placeholder="This week" />
+                          </div>
+                        </div>
+                        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-xs text-muted-foreground">Saved to this local preview only.</span>
+                          <Button type="submit" size="sm"><Plus className="mr-2 h-3.5 w-3.5" />Add task</Button>
+                        </div>
+                      </form>
+                    ) : null}
                     {scopedCrmTasks.map((task) => (
                       <div key={`${task.lead}-${task.title}`} className="rounded-md border px-3 py-2 text-sm">
                         <div className="flex items-start justify-between gap-3">
@@ -16782,7 +16948,14 @@ export default function AdminKinfloShell() {
                             <div className="font-medium">{task.title}</div>
                             <div className="mt-1 text-xs text-muted-foreground">{task.lead} · {task.owner}</div>
                           </div>
-                          {statusBadge(task.status)}
+                          <div className="flex shrink-0 items-center gap-2">
+                            {statusBadge(task.status)}
+                            {task.status !== "done" ? (
+                              <Button type="button" size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => completePreviewTask(task)}>
+                                Mark done
+                              </Button>
+                            ) : null}
+                          </div>
                         </div>
                         <div className="mt-2 text-xs text-muted-foreground">{task.due}</div>
                       </div>
