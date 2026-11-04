@@ -27,6 +27,10 @@ import {
   DisabledKinfloThemeWriteAdapterProvider,
   LiveKinfloThemeWriteAdapterProvider,
 } from "@/contexts/KinfloThemeWriteAdapterContext";
+import {
+  DisabledKinfloCrmWriteAdapterProvider,
+  LiveKinfloCrmWriteAdapterProvider,
+} from "@/contexts/KinfloCrmWriteAdapterContext";
 import { Phase174GeneratedReadOnlyHarness } from "@/components/Phase174GeneratedReadOnlyHarness";
 import { isPhase174GeneratedReadOnlyHarnessRequested } from "@/lib/kinfloPhase174GeneratedReadOnlyHarness";
 
@@ -116,7 +120,9 @@ function LocalFixtureIdentityGate({ children }: { children: ReactNode }) {
     <KinfloAdminIdentityProvider value={value}>
       <FixtureKinfloShellSnapshotProvider>
         <DisabledKinfloPreferencesAdapterProvider>
-          <DisabledKinfloThemeWriteAdapterProvider>{children}</DisabledKinfloThemeWriteAdapterProvider>
+          <DisabledKinfloThemeWriteAdapterProvider>
+            <DisabledKinfloCrmWriteAdapterProvider>{children}</DisabledKinfloCrmWriteAdapterProvider>
+          </DisabledKinfloThemeWriteAdapterProvider>
         </DisabledKinfloPreferencesAdapterProvider>
       </FixtureKinfloShellSnapshotProvider>
     </KinfloAdminIdentityProvider>
@@ -416,7 +422,9 @@ function ConvexIdentityGate({ children }: { children: ReactNode }) {
     >
       <ReadOnlyLiveKinfloShellSnapshotProvider>
         <LiveKinfloPreferencesAdapterProvider>
-          <LiveKinfloThemeWriteAdapterProvider>{children}</LiveKinfloThemeWriteAdapterProvider>
+          <LiveKinfloThemeWriteAdapterProvider>
+            <LiveKinfloCrmWriteAdapterProvider>{children}</LiveKinfloCrmWriteAdapterProvider>
+          </LiveKinfloThemeWriteAdapterProvider>
         </LiveKinfloPreferencesAdapterProvider>
       </ReadOnlyLiveKinfloShellSnapshotProvider>
     </KinfloAdminIdentityProvider>

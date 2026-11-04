@@ -16770,7 +16770,7 @@ export default function AdminKinfloShell() {
                     <div className="mx-6 mb-6 rounded-md border border-border bg-muted p-3 text-sm text-muted-foreground">{crmOperatingContext.blocker}</div>
                   ) : null}
                   <div className="mx-6 mb-6 rounded-md border border-primary/20 bg-primary/5 p-3 text-sm text-muted-foreground">
-                    Preview controls below update this local workspace only. Live CRM changes remain unavailable until the connection review is complete.
+                    Preview controls below update this local workspace only. Preview writes disabled; live CRM changes remain unavailable until the connection review is complete.
                   </div>
                 </Card>
                 {crmPreviewNotice ? (
