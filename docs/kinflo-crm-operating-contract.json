@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "status": "source_only_architecture",
+  "product": "Kinflo",
+  "scopeModel": {
+    "platform": "Kinflo owns tenant relationships, plans, entitlements, capacity, and cross-tenant analytics.",
+    "tenant": "A consumer organization owns CRM, communications, governance, integrations, and tenant analytics.",
+    "site": "A child workspace owns site configuration, content, brand, navigation, launch, and site operations.",
+    "task": "An L3 task is one focused workflow with a source record, permission, blocker, next action, and audit event."
+  },
+  "lanes": [
+    {
+      "key": "control",
+      "label": "Control",
+      "routeTab": "tenants",
+      "purpose": "Relationships, sites, plans, access, and platform policy.",
+      "tasks": ["tenant relationships", "site ownership", "plans and entitlements", "role and access review"]
+    },
+    {
+      "key": "build",
+      "label": "Build",
+      "routeTab": "site-studio",
+      "purpose": "Site factory, configuration, content, brand, navigation, assets, and templates.",
+      "tasks": ["site setup", "content", "brand", "navigation", "assets", "templates"]
+    },
+    {
+      "key": "launch",
+      "label": "Launch",
+      "routeTab": "launch-readiness",
+      "purpose": "Readiness, preview, domains, handoff, and release gates.",
+      "tasks": ["readiness", "preview", "domains", "handoff", "decide"]
+    },
+    {
+      "key": "growth",
+      "label": "Growth",
+      "routeTab": "crm",
+      "purpose": "CRM, communications, integrations, experimentation, and tenant operating signals.",
+      "tasks": ["CRM", "communications", "campaigns", "integrations", "analytics"]
+    },
+    {
+      "key": "evidence",
+      "label": "Evidence & Activation",
+      "routeTab": "hosted-activation",
+      "purpose": "AI review, adapters, hosted activation, rollback evidence, and release ownership.",
+      "tasks": ["AI review", "adapter readiness", "activation", "rollback evidence"]
+    }
+  ],
+  "capabilities": [
+    {
+      "key": "crm_comms",
+      "label": "CRM and communications",
+      "lane": "growth",
+      "scope": "tenant",
+      "profiles": ["nonprofit", "for_profit", "starter"],
+      "permissions": ["audience:view", "audience:manage", "analytics:view"],
+      "metrics": ["contacts", "pipeline movement", "follow-up tasks", "journey conversion"]
+    },
+    {
+      "key": "content_experimentation",
+      "label": "Content and experimentation",
+      "lane": "build",
+      "scope": "site",
+      "profiles": ["nonprofit", "for_profit"],
+      "permissions": ["content:view", "content:edit", "experiment:view", "experiment:manage"],
+      "metrics": ["content readiness", "experiment participation", "preview outcomes"]
+    },
+    {
+      "key": "admin_governance",
+      "label": "Administrative governance",
+      "lane": "control",
+      "scope": "tenant",
+      "profiles": ["nonprofit", "for_profit", "starter"],
+      "permissions": ["tenant:view", "tenant:manage", "member:view", "member:manage"],
+      "metrics": ["memberships", "access reviews", "audit events"]
+    },
+    {
+      "key": "platform_health",
+      "label": "Platform health",
+      "lane": "evidence",
+      "scope": "platform",
+      "profiles": ["nonprofit", "for_profit", "starter"],
+      "permissions": ["platform:manage", "analytics:view"],
+      "metrics": ["capacity", "service health", "load balancing", "activation readiness"]
+    }
+  ],
+  "entities": [
+    "tenants",
+    "sites",
+    "memberships",
+    "entitlements",
+    "leads",
+    "pipelineStages",
+    "pipelineEvents",
+    "journeyProgressionRules",
+    "journeyProgressionEvents",
+    "tasks",
+    "leadEvents",
+    "auditEvents"
+  ],
+  "crmFunctionFamilies": {
+    "read": ["crm.listLeads", "crm.getLeadTimeline", "crm.listJourneyProgressionRules"],
+    "write": ["crm.submitLead", "crm.upsertPipelineStage", "crm.upsertJourneyProgressionRule", "crm.transitionLeadStage", "crm.updateLead", "crm.assignLead", "crm.createTask"],
+    "policy": ["accessPolicy.canPerform", "entitlements.checkEntitlementLimit"]
+  },
+  "eventTaxonomy": [
+    "lead_created",
+    "lead_resubmitted",
+    "pipeline_stage_changed",
+    "journey_progression_recorded",
+    "task_created",
+    "access_reviewed",
+    "capability_used"
+  ],
+  "operatingMetrics": [
+    "contacts",
+    "pipeline_movement",
+    "follow_up_tasks",
+    "journey_conversion",
+    "access_reviews",
+    "audit_events",
+    "capacity",
+    "service_health"
+  ],
+  "boundaries": {
+    "readOnlyPreview": true,
+    "liveWritesEnabled": false,
+    "providerApisEnabled": false,
+    "generatedConvexApiImported": false,
+    "crossTenantRecordsVisibleByDefault": false,
+    "learnerAndFamilyProgramOperationsRequiredForVanguard": false,
+    "donorAndFundraisingOperationsRequiredForVanguard": false
+  },
+  "implementationPhases": [
+    { "number": 1, "name": "Contract", "state": "source_only" },
+    { "number": 2, "name": "Control vertical slice", "state": "next" },
+    { "number": 3, "name": "Tenant CRM vertical slice", "state": "planned" },
+    { "number": 4, "name": "Analytics aggregation", "state": "planned" },
+    { "number": 5, "name": "Governed live actions", "state": "approval_gated" }
+  ]
+}
