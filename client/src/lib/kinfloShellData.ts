@@ -6734,11 +6734,13 @@ const fixtureAccessDelegation: ShellAccessDelegation = {
   defaultRoleKey: "tenant.admin",
   tenantOptions: [
     { slug: "julies-family", label: "Julie's Family Learning Program" },
+    { slug: "vanguard-enterprises", label: "Vanguard Enterprises" },
     { slug: "advisor-client-starter", label: "Advisor Client Starter" },
     { slug: "campaign-microsite-lab", label: "Campaign Microsite Lab" },
   ],
   siteOptions: [
     { key: "julies-family-public", label: "Julie Family Public Site", tenantSlug: "julies-family" },
+    { key: "vanguard-enterprises", label: "Vanguard Enterprises", tenantSlug: "vanguard-enterprises" },
     { key: "advisor-client-site", label: "Advisor Client Site", tenantSlug: "advisor-client-starter" },
     { key: "campaign-microsite", label: "Campaign Microsite", tenantSlug: "campaign-microsite-lab" },
   ],
