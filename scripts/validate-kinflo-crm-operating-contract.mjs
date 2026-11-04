@@ -61,10 +61,12 @@ for (const phrase of [
 const context = existsSync(contextPath) ? readFileSync(contextPath, "utf8") : "";
 for (const phrase of [
   "resolveKinfloCrmOperatingContext",
+  "resolveKinfloCrmWorkspace",
   "evaluateKinfloCapability",
   "audience:view",
   "writes: \"disabled\"",
   "isKinfloCrmRecordInScope",
+  "actionGates",
 ]) {
   check(context.includes(phrase), `CRM context includes ${phrase}`, "CRM context must resolve authorization and scope before actions.");
 }
@@ -77,6 +79,7 @@ for (const phrase of ["tenantSlug: string;", "siteKey: string;", "const fixtureL
 const adminShell = existsSync(adminShellPath) ? readFileSync(adminShellPath, "utf8") : "";
 for (const phrase of [
   "section-kinflo-crm-operating-context",
+  "section-kinflo-crm-action-gates",
   "scopedCrmLeads",
   "scopedCrmTasks",
   "Preview writes disabled",

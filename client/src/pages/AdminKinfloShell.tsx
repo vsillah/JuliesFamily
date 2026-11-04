@@ -159,8 +159,7 @@ import {
   type KinfloGovernanceRole,
 } from "@/lib/kinfloAdminGovernance";
 import {
-  isKinfloCrmRecordInScope,
-  resolveKinfloCrmOperatingContext,
+  resolveKinfloCrmWorkspace,
 } from "@/lib/kinfloCrmOperatingContext";
 
 const metricIcons: Record<ShellMetricIconKey, typeof Boxes> = {
@@ -5797,37 +5796,22 @@ export default function AdminKinfloShell() {
   const adminScope = useKinfloAdminScope();
   const preferencesAdapter = useKinfloPreferencesAdapter();
   const themeWriteAdapter = useKinfloThemeWriteAdapter();
-  const crmOperatingContext = useMemo(
-    () => resolveKinfloCrmOperatingContext({
+  const crmWorkspace = useMemo(
+    () => resolveKinfloCrmWorkspace({
       tenantSlug: adminScope.tenant.slug,
       tenantName: adminScope.tenant.name,
       siteKey: adminScope.site.key,
       siteName: adminScope.site.name,
+      leads: snapshot.leads,
+      pipelineStages: snapshot.pipelineStages,
+      tasks: snapshot.tasks,
     }),
-    [adminScope.site.key, adminScope.site.name, adminScope.tenant.name, adminScope.tenant.slug],
+    [adminScope.site.key, adminScope.site.name, adminScope.tenant.name, adminScope.tenant.slug, snapshot.leads, snapshot.pipelineStages, snapshot.tasks],
   );
-  const crmScopeInput = useMemo(
-    () => ({
-      tenantSlug: adminScope.tenant.slug,
-      siteKey: adminScope.site.key,
-    }),
-    [adminScope.site.key, adminScope.tenant.slug],
-  );
-  const scopedCrmLeads = useMemo(
-    () => snapshot.leads.filter((lead) => isKinfloCrmRecordInScope(lead, crmScopeInput)),
-    [crmScopeInput, snapshot.leads],
-  );
-  const scopedCrmTasks = useMemo(
-    () => snapshot.tasks.filter((task) => isKinfloCrmRecordInScope(task, crmScopeInput)),
-    [crmScopeInput, snapshot.tasks],
-  );
-  const scopedCrmPipelineStages = useMemo(
-    () => snapshot.pipelineStages.map((stage) => ({
-      ...stage,
-      leads: scopedCrmLeads.filter((lead) => lead.stage === stage.slug).length,
-    })),
-    [scopedCrmLeads, snapshot.pipelineStages],
-  );
+  const crmOperatingContext = crmWorkspace.context;
+  const scopedCrmLeads = crmWorkspace.leads;
+  const scopedCrmTasks = crmWorkspace.tasks;
+  const scopedCrmPipelineStages = crmWorkspace.pipelineStages;
   const scopedFixtureExperiencePreferences = {
     ...snapshot.experiencePreferences,
     scopeLabel: `${adminScope.tenant.name} site admin`,
@@ -16608,6 +16592,17 @@ export default function AdminKinfloShell() {
                       <div className="mt-1 text-xs text-muted-foreground">Preview writes disabled</div>
                     </div>
                   </CardContent>
+                  <div className="mx-6 mb-6 grid gap-2 border-t border-border pt-4 sm:grid-cols-2" data-testid="section-kinflo-crm-action-gates">
+                    {crmWorkspace.actionGates.map((action) => (
+                      <div key={action.key} className="flex items-start justify-between gap-3 rounded-md border border-border bg-background px-3 py-2 text-sm">
+                        <div className="min-w-0">
+                          <div className="font-medium text-foreground">{action.label}</div>
+                          <div className="mt-1 text-xs text-muted-foreground">{action.permission} · {action.reason}</div>
+                        </div>
+                        <Badge variant="outline" className="shrink-0">{action.status}</Badge>
+                      </div>
+                    ))}
+                  </div>
                   {crmOperatingContext.blocker ? (
                     <div className="mx-6 mb-6 rounded-md border border-border bg-muted p-3 text-sm text-muted-foreground">{crmOperatingContext.blocker}</div>
                   ) : null}

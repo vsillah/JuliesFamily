@@ -1,4 +1,5 @@
 import { evaluateKinfloCapability, type KinfloGovernanceRole } from "./kinfloAdminGovernance";
+import type { ShellLead, ShellPipelineStage, ShellTask } from "./kinfloShellData";
 import { getKinfloPlatformAnalyticsSnapshot, type KinfloTenantProfileKey } from "./kinfloPlatformAnalytics";
 
 export type KinfloCrmOperatingContextInput = {
@@ -21,6 +22,27 @@ export type KinfloCrmOperatingContext = {
   };
   audit: { source: "local_fixture"; eventStream: "read_only"; writes: "disabled" };
   blocker?: string;
+};
+
+export type KinfloCrmActionGate = {
+  key: "create_lead" | "transition_pipeline" | "assign_owner" | "create_follow_up_task";
+  label: string;
+  status: "gated";
+  permission: string;
+  reason: string;
+};
+
+export type KinfloCrmWorkspaceState = {
+  context: KinfloCrmOperatingContext;
+  leads: readonly ShellLead[];
+  pipelineStages: readonly ShellPipelineStage[];
+  tasks: readonly ShellTask[];
+  metrics: {
+    leads: number;
+    pipelineStages: number;
+    followUpTasks: number;
+  };
+  actionGates: readonly KinfloCrmActionGate[];
 };
 
 export function resolveKinfloCrmOperatingContext(input: KinfloCrmOperatingContextInput): KinfloCrmOperatingContext {
@@ -97,4 +119,37 @@ export function isKinfloCrmRecordInScope(
   context: Pick<KinfloCrmOperatingContextInput, "tenantSlug" | "siteKey">,
 ) {
   return record.tenantSlug === context.tenantSlug && record.siteKey === context.siteKey;
+}
+
+export function resolveKinfloCrmWorkspace(input: KinfloCrmOperatingContextInput & {
+  leads: readonly ShellLead[];
+  pipelineStages: readonly ShellPipelineStage[];
+  tasks: readonly ShellTask[];
+}): KinfloCrmWorkspaceState {
+  const context = resolveKinfloCrmOperatingContext(input);
+  const scope = { tenantSlug: input.tenantSlug, siteKey: input.siteKey };
+  const leads = input.leads.filter((lead) => isKinfloCrmRecordInScope(lead, scope));
+  const tasks = input.tasks.filter((task) => isKinfloCrmRecordInScope(task, scope));
+  const pipelineStages = input.pipelineStages.map((stage) => ({
+    ...stage,
+    leads: leads.filter((lead) => lead.stage === stage.slug).length,
+  }));
+  const actionGates: readonly KinfloCrmActionGate[] = [
+    { key: "create_lead", label: "Create lead", status: "gated", permission: "audience:manage", reason: "Lead writes require an approved CRM runtime path." },
+    { key: "transition_pipeline", label: "Move pipeline stage", status: "gated", permission: "audience:manage", reason: "Pipeline transitions require governed writes and audit events." },
+    { key: "assign_owner", label: "Assign owner", status: "gated", permission: "audience:manage", reason: "Assignment changes remain disabled in the read-only preview." },
+    { key: "create_follow_up_task", label: "Create follow-up task", status: "gated", permission: "audience:manage", reason: "Task writes remain disabled until the tenant CRM adapter is approved." },
+  ];
+  return {
+    context,
+    leads,
+    pipelineStages,
+    tasks,
+    metrics: {
+      leads: leads.length,
+      pipelineStages: pipelineStages.length,
+      followUpTasks: tasks.length,
+    },
+    actionGates,
+  };
 }
