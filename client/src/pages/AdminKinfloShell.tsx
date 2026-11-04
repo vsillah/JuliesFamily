@@ -139,7 +139,6 @@ import {
   summarizeTenantOrderQueue,
 } from "@/lib/kinfloOrderOperationsWorkbench";
 import KinfloOperationsWorkspace from "@/components/KinfloOperationsWorkspace";
-import KinfloReleaseReadinessPanel from "@/components/KinfloReleaseReadinessPanel";
 import KinfloHostedActivationReadinessPanel from "@/components/KinfloHostedActivationReadinessPanel";
 import {
   buildKinfloAudiencePreviewHref,
@@ -1394,10 +1393,10 @@ function liveAdapterStatusBadge(status: ShellLiveAdapterStatus) {
 
 function launchReadinessStatusBadge(status: ShellLaunchReadinessSite["stages"][number]["status"]) {
   if (status === "ready") {
-    return <Badge className="bg-emerald-600 hover:bg-emerald-600">Ready</Badge>;
+    return <Badge variant="secondary">Ready</Badge>;
   }
   if (status === "blocked") {
-    return <Badge variant="destructive">Blocked</Badge>;
+    return <Badge variant="outline" className="border-primary text-primary">Blocked</Badge>;
   }
   return <Badge variant="outline">Pending</Badge>;
 }
@@ -5711,6 +5710,7 @@ export default function AdminKinfloShell() {
   ));
   const [selectedLaunchPacketId, setSelectedLaunchPacketId] = useState(snapshot.siteLaunchPackets[0]?.id ?? "");
   const [launchReadinessSiteKey, setLaunchReadinessSiteKey] = useState(snapshot.launchReadiness.defaultSiteKey);
+  const [launchReadinessStage, setLaunchReadinessStage] = useState<"overview" | "evidence" | "review" | "launch">("overview");
   const adapterSwitchBatchIds = useMemo(
     () => snapshot.adapterSwitchReadiness.batches.map((batch) => batch.id),
     [snapshot.adapterSwitchReadiness.batches],
@@ -8287,168 +8287,159 @@ export default function AdminKinfloShell() {
           </TabsContent>
 
           <TabsContent value="launch-readiness" className="mt-6">
-            <KinfloReleaseReadinessPanel
-              scope={{
-                tenantSlug: adminScope.tenant.slug,
-                siteSlug: adminScope.site.key,
-              }}
-            />
-            <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
-              <div className="min-w-0 space-y-4">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <h2 className="text-xl font-semibold">Launch Readiness</h2>
-                    <p className="text-sm text-muted-foreground">One review packet for the client website launch path across setup, access, content, preview, CRM, domains, providers, campaigns, and AI review.</p>
-                  </div>
-                  <Badge variant="outline">
-                    <ListChecks className="mr-1 h-3 w-3" />
-                    Read-only
-                  </Badge>
+            <section className="mb-4 rounded-xl border border-border bg-card p-3 text-card-foreground" data-testid="section-kinflo-launch-readiness-sequence">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Launch review sequence</div>
+                  <div className="mt-0.5 text-xs text-muted-foreground">Review the site packet in order. Live publishing and launch remain gated.</div>
                 </div>
+                <Badge variant="outline" className="w-fit">Read only</Badge>
+              </div>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4" role="tablist" aria-label="Launch review sequence">
+                {[
+                  { value: "overview" as const, label: "Overview", detail: "Start with the selected site and readiness signal." },
+                  { value: "evidence" as const, label: "Evidence", detail: "Inspect the stages that support the launch decision." },
+                  { value: "review" as const, label: "Review", detail: "Confirm blockers, owners, and the next gate." },
+                  { value: "launch" as const, label: "Launch", detail: "Review the final boundary without executing it." },
+                ].map((stage, index) => {
+                  const isActive = launchReadinessStage === stage.value;
+                  return (
+                    <button
+                      key={stage.value}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      aria-current={isActive ? "step" : undefined}
+                      onClick={() => setLaunchReadinessStage(stage.value)}
+                      className={`min-w-0 rounded-lg border px-3 py-2 text-left transition ${isActive
+                        ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                        : "border-border bg-muted/30 text-foreground hover:border-primary/50 hover:bg-muted"}`}
+                      data-testid={`tab-kinflo-launch-readiness-stage-${stage.value}`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-current text-[10px] font-semibold">{index + 1}</span>
+                        <span className="truncate text-xs font-semibold">{stage.label}</span>
+                      </div>
+                      <span className={`mt-1 block text-[10px] leading-4 ${isActive ? "text-primary-foreground/75" : "text-muted-foreground"}`}>{stage.detail}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
 
-                <Card>
-                  <CardHeader className="flex flex-col gap-4 space-y-0 lg:flex-row lg:items-start lg:justify-between">
-                    <div>
-                      <CardTitle className="text-base">Client Site Launch Packet</CardTitle>
-                      <p className="mt-1 text-sm text-muted-foreground">{selectedLaunchReadinessSite?.tenant}</p>
-                    </div>
-                    <div className="w-full lg:w-[280px]">
-                      <Label>Site</Label>
-                      <Select value={launchReadinessSiteKey} onValueChange={setLaunchReadinessSiteKey}>
-                        <SelectTrigger className="mt-2" data-testid="select-kinflo-launch-readiness-site">
-                          <SelectValue placeholder="Select launch site" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {snapshot.launchReadiness.siteOptions.map((site) => (
-                            <SelectItem key={site.key} value={site.key}>
-                              {site.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-5">
-                    <div className="grid gap-4 md:grid-cols-[220px_minmax(0,1fr)]">
-                      <div className="rounded-md border p-4">
-                        <div className="text-sm font-medium">Launch readiness</div>
-                        <div className="mt-3 text-3xl font-bold" data-testid="text-kinflo-launch-readiness-status">
-                          {selectedLaunchReadinessSite?.readinessPercent ?? 0}%
-                        </div>
-                        <Progress value={selectedLaunchReadinessSite?.readinessPercent ?? 0} className="mt-3" />
-                        <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                          <Badge variant="secondary">{launchReadinessCounts.ready} ready</Badge>
-                          <Badge variant="outline">{launchReadinessCounts.pending} pending</Badge>
-                          <Badge variant={launchReadinessCounts.blocked > 0 ? "destructive" : "outline"}>
-                            {launchReadinessCounts.blocked} blocked
-                          </Badge>
-                        </div>
-                      </div>
-                      <div className="rounded-md border p-4">
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                          <div>
-                            <div className="text-sm font-medium">{selectedLaunchReadinessSite?.label}</div>
-                            <p className="mt-2 text-sm text-muted-foreground" data-testid="text-kinflo-launch-readiness-blocker">
-                              {selectedLaunchReadinessSite?.blockerSummary}
-                            </p>
-                          </div>
-                          <Badge variant={selectedLaunchReadinessSite?.launchDecision === "ready_for_review" ? "secondary" : "outline"}>
-                            {selectedLaunchReadinessSite?.launchDecision.replace(/_/g, " ")}
-                          </Badge>
-                        </div>
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          <Button size="sm" variant="outline" asChild data-testid="button-open-launch-preview">
-                            <Link href={selectedLaunchReadinessSite?.previewPath ?? "/admin/kinflo-os"}>
-                              <ExternalLink className="mr-2 h-3 w-3" />
-                              Open preview
-                            </Link>
-                          </Button>
-                          <Button size="sm" disabled data-testid="button-live-launch-gated">
-                            <Rocket className="mr-2 h-3 w-3" />
-                            Live launch gated
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">Launch Readiness</h2>
+                <p className="text-sm text-muted-foreground">A staged review of the selected client site before any live publish or launch decision.</p>
+              </div>
+              <Badge variant="outline"><ListChecks className="mr-1 h-3 w-3" />Read-only</Badge>
+            </div>
 
-                    <div className="rounded-md border">
-                      <div className="grid grid-cols-[minmax(0,1fr)_96px] gap-3 border-b px-4 py-3 text-sm font-medium md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_120px]">
-                        <span>Stage</span>
-                        <span className="hidden md:block">Evidence</span>
-                        <span>Status</span>
+            <section className="mt-4 space-y-4" data-testid={`section-kinflo-launch-readiness-${launchReadinessStage}`}>
+              {launchReadinessStage === "overview" ? (
+                <>
+                  <Card>
+                    <CardHeader className="flex flex-col gap-4 space-y-0 lg:flex-row lg:items-start lg:justify-between">
+                      <div>
+                        <CardTitle className="text-base">Selected site</CardTitle>
+                        <p className="mt-1 text-sm text-muted-foreground">{selectedLaunchReadinessSite?.tenant}</p>
                       </div>
-                      <div className="divide-y">
-                        {(selectedLaunchReadinessSite?.stages ?? []).map((stage) => (
-                          <div key={stage.key} className="grid grid-cols-[minmax(0,1fr)_96px] gap-3 px-4 py-3 text-sm md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_120px]">
-                            <div className="min-w-0">
-                              <div className="font-medium">{stage.label}</div>
-                              <div className="mt-1 text-xs text-muted-foreground">{stage.surface} · {stage.owner}</div>
-                              <div className="mt-2 flex flex-wrap gap-1">
-                                {stage.convexFunctions.map((functionName) => (
-                                  <Badge key={functionName} variant="secondary" className="max-w-full whitespace-normal break-all text-left">{functionName}</Badge>
-                                ))}
-                              </div>
-                            </div>
-                            <div className="hidden min-w-0 text-muted-foreground md:block">
-                              <div>{stage.evidence}</div>
-                              <div className="mt-1 text-xs">{stage.gate}</div>
-                            </div>
-                            <div>{launchReadinessStatusBadge(stage.status)}</div>
+                      <div className="w-full lg:w-[280px]">
+                        <Label>Site</Label>
+                        <Select value={launchReadinessSiteKey} onValueChange={setLaunchReadinessSiteKey}>
+                          <SelectTrigger className="mt-2" data-testid="select-kinflo-launch-readiness-site"><SelectValue placeholder="Select launch site" /></SelectTrigger>
+                          <SelectContent>
+                            {snapshot.launchReadiness.siteOptions.map((site) => <SelectItem key={site.key} value={site.key}>{site.label}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                        {[
+                          ["Readiness", `${selectedLaunchReadinessSite?.readinessPercent ?? 0}%`, "text-kinflo-launch-readiness-status"],
+                          ["Ready", launchReadinessCounts.ready, ""],
+                          ["Pending", launchReadinessCounts.pending, ""],
+                          ["Blocked", launchReadinessCounts.blocked, ""],
+                        ].map(([label, value, testId]) => (
+                          <div key={label} className="rounded-lg border border-border bg-muted/30 p-3">
+                            <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
+                            <div className="mt-1 text-2xl font-semibold" data-testid={testId || undefined}>{value}</div>
                           </div>
                         ))}
                       </div>
-                    </div>
-
-                    <div className="rounded-md border p-4 text-sm text-muted-foreground">
-                      {snapshot.launchReadiness.providerBoundary}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div className="space-y-4">
-                <DecisionGateRail
-                  title="Launch decision gate"
-                  owner={selectedLaunchReadinessSite?.stages.find((stage) => stage.status === "blocked")?.owner
-                    ?? selectedLaunchReadinessSite?.stages[0]?.owner
-                    ?? "Vambah"}
-                  posture={selectedLaunchReadinessSite?.blockerSummary ?? snapshot.launchReadiness.providerBoundary}
-                  evidence={snapshot.launchReadiness.activationEvidence}
-                  rollback="Keep the public site on provider-light preview, block live lead writes, and hold client handoff until launch evidence is accepted."
-                  blockedActions={["publish client site", "write live lead", "send campaign traffic", "attach production domain"]}
-                  disabledActionLabel="Live launch remains gated"
-                  testId="section-kinflo-launch-decision-gate-rail"
-                />
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">Convex Launch Contract</CardTitle>
-                    <p className="text-sm text-muted-foreground">The launch packet is a read-only query contract until generated API bindings and live smoke are approved.</p>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {snapshot.launchReadiness.convexFunctions.map((functionName) => (
-                      <div key={functionName} className="flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm">
-                        <span className="min-w-0 break-all">{functionName}</span>
-                        <Badge variant="outline">Mapped</Badge>
+                      <Progress value={selectedLaunchReadinessSite?.readinessPercent ?? 0} className="h-2" />
+                      <div className="rounded-lg border border-border bg-muted/30 p-4">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div className="min-w-0">
+                            <div className="text-sm font-medium">{selectedLaunchReadinessSite?.label}</div>
+                            <p className="mt-2 text-sm text-muted-foreground" data-testid="text-kinflo-launch-readiness-blocker">{selectedLaunchReadinessSite?.blockerSummary}</p>
+                          </div>
+                          <Badge variant="outline" className="w-fit">{selectedLaunchReadinessSite?.launchDecision.replace(/_/g, " ")}</Badge>
+                        </div>
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          <Button size="sm" variant="outline" asChild data-testid="button-open-launch-preview">
+                            <Link href={selectedLaunchReadinessSite?.previewPath ?? "/admin/kinflo-os"}><ExternalLink className="mr-2 h-3 w-3" />Open preview</Link>
+                          </Button>
+                          <Button size="sm" disabled data-testid="button-live-launch-gated"><Rocket className="mr-2 h-3 w-3" />Live launch gated</Button>
+                        </div>
                       </div>
-                    ))}
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                </>
+              ) : null}
 
+              {launchReadinessStage === "evidence" ? (
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">Activation Evidence</CardTitle>
-                  </CardHeader>
+                  <CardHeader><CardTitle className="text-base">Launch evidence by stage</CardTitle><p className="text-sm text-muted-foreground">Each row shows the accountable owner, evidence, and gate for the selected site.</p></CardHeader>
                   <CardContent className="space-y-2">
-                    {snapshot.launchReadiness.activationEvidence.map((item) => (
-                      <div key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
-                        <CircleDashed className="mt-0.5 h-4 w-4" />
-                        <span>{item}</span>
+                    {(selectedLaunchReadinessSite?.stages ?? []).map((stage) => (
+                      <div key={stage.key} className="grid gap-3 rounded-lg border border-border p-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_auto]">
+                        <div className="min-w-0"><div className="font-medium">{stage.label}</div><div className="mt-1 text-xs text-muted-foreground">{stage.surface} · {stage.owner}</div></div>
+                        <div className="min-w-0 text-sm text-muted-foreground"><div>{stage.evidence}</div><div className="mt-1 text-xs">{stage.gate}</div></div>
+                        <div>{launchReadinessStatusBadge(stage.status)}</div>
                       </div>
                     ))}
                   </CardContent>
                 </Card>
-              </div>
+              ) : null}
+
+              {launchReadinessStage === "review" ? (
+                <>
+                  <DecisionGateRail
+                    title="Launch decision gate"
+                    owner={selectedLaunchReadinessSite?.stages.find((stage) => stage.status === "blocked")?.owner ?? selectedLaunchReadinessSite?.stages[0]?.owner ?? "Vambah"}
+                    posture={selectedLaunchReadinessSite?.blockerSummary ?? snapshot.launchReadiness.providerBoundary}
+                    evidence={snapshot.launchReadiness.activationEvidence}
+                    rollback="Keep the public site on provider-light preview, block live lead writes, and hold client handoff until launch evidence is accepted."
+                    blockedActions={["publish client site", "write live lead", "send campaign traffic", "attach production domain"]}
+                    disabledActionLabel="Live launch remains gated"
+                    testId="section-kinflo-launch-decision-gate-rail"
+                  />
+                  <details className="rounded-xl border border-border bg-card p-3" data-testid="section-kinflo-launch-readiness-technical-evidence">
+                    <summary className="cursor-pointer list-none text-sm font-semibold text-foreground"><span className="flex items-center justify-between gap-3"><span>Technical launch evidence</span><span className="text-xs font-normal text-muted-foreground">Contract functions and activation checks</span></span></summary>
+                    <div className="mt-3 space-y-2">
+                      {snapshot.launchReadiness.convexFunctions.map((functionName) => <div key={functionName} className="flex items-center justify-between gap-3 rounded-md border border-border px-3 py-2 text-sm"><span className="min-w-0 break-all">{functionName}</span><Badge variant="outline">Mapped</Badge></div>)}
+                      {snapshot.launchReadiness.activationEvidence.map((item) => <div key={item} className="flex items-start gap-2 text-sm text-muted-foreground"><CircleDashed className="mt-0.5 h-4 w-4 shrink-0" /><span>{item}</span></div>)}
+                    </div>
+                  </details>
+                </>
+              ) : null}
+
+              {launchReadinessStage === "launch" ? (
+                <Card>
+                  <CardHeader><CardTitle className="text-base">Final launch boundary</CardTitle><p className="text-sm text-muted-foreground">The packet is reviewable, but the live boundary remains closed until hosted evidence is accepted.</p></CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="rounded-lg border border-border bg-muted/30 p-4 text-sm leading-6 text-muted-foreground">{snapshot.launchReadiness.providerBoundary}</div>
+                    <div className="flex flex-wrap gap-2">{["publish client site", "write live lead", "send campaign traffic", "attach production domain"].map((action) => <Badge key={action} variant="outline">{action} gated</Badge>)}</div>
+                    <Button disabled variant="outline" data-testid="button-live-launch-gated"><Rocket className="mr-2 h-4 w-4" />Live launch gated</Button>
+                    <details className="rounded-lg border border-border p-3" data-testid="section-kinflo-launch-readiness-launch-gates">
+                      <summary className="cursor-pointer list-none text-sm font-semibold">Launch gates and rollback</summary>
+                      <div className="mt-3 text-sm text-muted-foreground">Keep the public site on provider-light preview and hold live writes until launch evidence, generated bindings, and hosted smoke are accepted.</div>
+                    </details>
+                  </CardContent>
+                </Card>
+              ) : null}
             </section>
           </TabsContent>
 
