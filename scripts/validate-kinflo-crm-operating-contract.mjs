@@ -67,11 +67,24 @@ for (const phrase of [
   "writes: \"disabled\"",
   "isKinfloCrmRecordInScope",
   "actionGates",
+  "governedWrites",
   "analytics",
   "pipelineMovement",
   "journeyConversion",
 ]) {
   check(context.includes(phrase), `CRM context includes ${phrase}`, "CRM context must resolve authorization and scope before actions.");
+}
+
+for (const functionName of [
+  "crm.submitLead",
+  "crm.upsertPipelineStage",
+  "crm.upsertJourneyProgressionRule",
+  "crm.transitionLeadStage",
+  "crm.updateLead",
+  "crm.assignLead",
+  "crm.createTask",
+]) {
+  check(context.includes(functionName), `CRM context includes ${functionName}`, "Governed CRM writes must be explicit and source-only.");
 }
 
 const shellData = existsSync(shellDataPath) ? readFileSync(shellDataPath, "utf8") : "";

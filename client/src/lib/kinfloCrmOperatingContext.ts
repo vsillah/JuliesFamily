@@ -32,6 +32,21 @@ export type KinfloCrmActionGate = {
   reason: string;
 };
 
+export type KinfloCrmGovernedWrite = {
+  functionName:
+    | "crm.submitLead"
+    | "crm.upsertPipelineStage"
+    | "crm.upsertJourneyProgressionRule"
+    | "crm.transitionLeadStage"
+    | "crm.updateLead"
+    | "crm.assignLead"
+    | "crm.createTask";
+  label: string;
+  status: "gated";
+  scope: "tenant/site";
+  reason: string;
+};
+
 export type KinfloCrmWorkspaceState = {
   context: KinfloCrmOperatingContext;
   leads: readonly ShellLead[];
@@ -49,6 +64,7 @@ export type KinfloCrmWorkspaceState = {
     followUpTasks: number;
   };
   actionGates: readonly KinfloCrmActionGate[];
+  governedWrites: readonly KinfloCrmGovernedWrite[];
 };
 
 export function resolveKinfloCrmOperatingContext(input: KinfloCrmOperatingContextInput): KinfloCrmOperatingContext {
@@ -151,6 +167,15 @@ export function resolveKinfloCrmWorkspace(input: KinfloCrmOperatingContextInput 
     { key: "assign_owner", label: "Assign owner", status: "gated", permission: "audience:manage", reason: "Assignment changes remain disabled in the read-only preview." },
     { key: "create_follow_up_task", label: "Create follow-up task", status: "gated", permission: "audience:manage", reason: "Task writes remain disabled until the tenant CRM adapter is approved." },
   ];
+  const governedWrites: readonly KinfloCrmGovernedWrite[] = [
+    { functionName: "crm.submitLead", label: "Submit lead", status: "gated", scope: "tenant/site", reason: "Requires an approved intake adapter and audit event." },
+    { functionName: "crm.upsertPipelineStage", label: "Configure pipeline stage", status: "gated", scope: "tenant/site", reason: "Requires an approved tenant CRM configuration path." },
+    { functionName: "crm.upsertJourneyProgressionRule", label: "Configure journey rule", status: "gated", scope: "tenant/site", reason: "Requires an approved progression policy and audit event." },
+    { functionName: "crm.transitionLeadStage", label: "Transition lead stage", status: "gated", scope: "tenant/site", reason: "Requires an approved transition request and audit event." },
+    { functionName: "crm.updateLead", label: "Update lead", status: "gated", scope: "tenant/site", reason: "Requires an approved scoped record update." },
+    { functionName: "crm.assignLead", label: "Assign lead", status: "gated", scope: "tenant/site", reason: "Requires an approved owner assignment and audit event." },
+    { functionName: "crm.createTask", label: "Create follow-up task", status: "gated", scope: "tenant/site", reason: "Requires an approved task request and audit event." },
+  ];
   return {
     context,
     leads,
@@ -180,5 +205,6 @@ export function resolveKinfloCrmWorkspace(input: KinfloCrmOperatingContextInput 
       followUpTasks: tasks.length,
     },
     actionGates,
+    governedWrites,
   };
 }
