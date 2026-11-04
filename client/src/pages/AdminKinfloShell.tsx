@@ -368,51 +368,51 @@ function getKinfloSectionSnapshotMetrics(
   switch (activeTab) {
     case "tenants":
       return [
-        { label: "Tenant records", value: snapshot.tenants.length, detail: "Scoped to this operator view", targetTestId: "section-kinflo-tenant-control-plane-table" },
-        { label: "Sites", value: snapshot.sites.length, detail: "Available across the tenant scope", targetTestId: "section-kinflo-tenant-control-plane-table" },
+        { label: "Tenant records", value: snapshot.tenants.length, detail: "Available in this workspace", targetTestId: "section-kinflo-tenant-control-plane-table" },
+        { label: "Sites", value: snapshot.sites.length, detail: "Available across this workspace", targetTestId: "section-kinflo-tenant-control-plane-table" },
         { label: "Active tenants", value: countStatuses(snapshot.tenants, "active"), detail: "Ready for review", targetTestId: "section-kinflo-tenant-control-plane-table" },
       ];
     case "sites":
       return [
         { label: "Site records", value: snapshot.sites.length, detail: "Filtered in the queue below", targetTestId: "section-kinflo-site-factory-queue-table" },
         { label: "Published", value: countStatuses(snapshot.sites, "published"), detail: "Public records currently listed", targetTestId: "section-kinflo-site-factory-queue-table" },
-        { label: "Preview or draft", value: snapshot.sites.length - countStatuses(snapshot.sites, "published"), detail: "Still gated from publishing", targetTestId: "section-kinflo-site-factory-queue-table" },
+        { label: "Preview or draft", value: snapshot.sites.length - countStatuses(snapshot.sites, "published"), detail: "Not yet ready to publish", targetTestId: "section-kinflo-site-factory-queue-table" },
       ];
     case "launch-readiness":
       return [
-        { label: "Sites in review", value: snapshot.launchReadiness.sites.length, detail: "Launch packets in this scope", targetTestId: focusTarget },
+        { label: "Sites in review", value: snapshot.launchReadiness.sites.length, detail: "Launch items in this workspace", targetTestId: focusTarget },
         { label: "Launch gates", value: snapshot.launchGates.length, detail: "Readiness checks represented", targetTestId: focusTarget },
         { label: "Ready gates", value: countStatuses(snapshot.launchGates, "active"), detail: "Preview status", targetTestId: focusTarget },
       ];
     case "adapter-switch":
       return [
-        { label: "Batches", value: snapshot.adapterSwitchReadiness.batches.length, detail: "Generated contract batches", targetTestId: focusTarget },
-        { label: "Runway steps", value: snapshot.adapterSwitchReadiness.runwaySteps.length, detail: "Review steps before cutover", targetTestId: focusTarget },
+        { label: "Batches", value: snapshot.adapterSwitchReadiness.batches.length, detail: "Connection groups", targetTestId: focusTarget },
+        { label: "Runway steps", value: snapshot.adapterSwitchReadiness.runwaySteps.length, detail: "Review steps before launch", targetTestId: focusTarget },
         { label: "Acceptance groups", value: snapshot.adapterSwitchReadiness.acceptanceMatrix.length, detail: "Awaiting review", targetTestId: focusTarget },
       ];
     case "hosted-activation":
       return [
-        { label: "Activation steps", value: snapshot.hostedActivationRunbook.steps.length, detail: "Prepare-only checklist", targetTestId: focusTarget },
-        { label: "Decision gates", value: snapshot.hostedActivationRunbook.decisionRegister.length, detail: "Owner approvals still required", targetTestId: focusTarget },
+        { label: "Activation steps", value: snapshot.hostedActivationRunbook.steps.length, detail: "Preparation checklist", targetTestId: focusTarget },
+        { label: "Decision gates", value: snapshot.hostedActivationRunbook.decisionRegister.length, detail: "Review decisions", targetTestId: focusTarget },
         { label: "Evidence targets", value: snapshot.hostedActivationRunbook.evidenceTargets.length, detail: "Ready for verification", targetTestId: focusTarget },
       ];
     case "factory":
       return [
         { label: "Starter templates", value: snapshot.templates.length, detail: "Available for review", targetTestId: focusTarget },
         { label: "Sites in queue", value: snapshot.sites.length, detail: "Existing records only", targetTestId: focusTarget },
-        { label: "Readiness checks", value: snapshot.siteCreationWizard.readinessChecks.length, detail: "Creation remains gated", targetTestId: focusTarget },
+        { label: "Readiness checks", value: snapshot.siteCreationWizard.readinessChecks.length, detail: "Creation not available yet", targetTestId: focusTarget },
       ];
     case "plans":
       return [
         { label: "Plans", value: snapshot.billingPlans.length, detail: "Plan definitions in the shell", targetTestId: focusTarget },
-        { label: "Entitlements", value: snapshot.tenantEntitlements.length, detail: "Scoped entitlement records", targetTestId: focusTarget },
-        { label: "Tenant scope", value: snapshot.tenants.length, detail: "No billing writes enabled", targetTestId: focusTarget },
+        { label: "Entitlements", value: snapshot.tenantEntitlements.length, detail: "Plan access records", targetTestId: focusTarget },
+        { label: "Tenant scope", value: snapshot.tenants.length, detail: "Billing updates not available", targetTestId: focusTarget },
       ];
     case "brand":
       return [
-        { label: "Site themes", value: snapshot.brandTheme.siteOptions.length, detail: "Scoped theme targets", targetTestId: focusTarget },
+        { label: "Site themes", value: snapshot.brandTheme.siteOptions.length, detail: "Themes for this workspace", targetTestId: focusTarget },
         { label: "Palettes", value: snapshot.brandTheme.paletteOptions.length, detail: "Available for local review", targetTestId: focusTarget },
-        { label: "Typography", value: snapshot.brandTheme.typographyOptions.length, detail: "Preview configuration only", targetTestId: focusTarget },
+        { label: "Typography", value: snapshot.brandTheme.typographyOptions.length, detail: "Preview settings", targetTestId: focusTarget },
       ];
     case "navigation":
       return [
@@ -422,33 +422,33 @@ function getKinfloSectionSnapshotMetrics(
       ];
     case "preview":
       return [
-        { label: "Preview sites", value: snapshot.previewStudio.siteOptions.length, detail: "Fixture preview routes", targetTestId: focusTarget },
+        { label: "Preview sites", value: snapshot.previewStudio.siteOptions.length, detail: "Preview routes", targetTestId: focusTarget },
         { label: "Personas", value: snapshot.previewStudio.personaOptions.length, detail: "Audience contexts", targetTestId: focusTarget },
         { label: "Devices", value: snapshot.previewStudio.deviceOptions.length, detail: "Responsive review targets", targetTestId: focusTarget },
       ];
     case "site-studio":
       return [
         { label: "Studio sites", value: snapshot.clientWebsiteStudio.sites.length, detail: "Scoped workspace targets", targetTestId: focusTarget },
-        { label: "Starter packs", value: snapshot.clientWebsiteStudio.starterContentPacks.length, detail: "Local content fixtures", targetTestId: focusTarget },
+        { label: "Starter packs", value: snapshot.clientWebsiteStudio.starterContentPacks.length, detail: "Starter content", targetTestId: focusTarget },
         { label: "Preview lanes", value: clientWebsiteStudioLaneValues.length, detail: "Preview publishing", targetTestId: focusTarget },
       ];
     case "assets":
       return [
-        { label: "Assets", value: snapshot.assetLibrary.assets.length, detail: "Library records in scope", targetTestId: focusTarget },
-        { label: "Asset kinds", value: snapshot.assetLibrary.kindOptions.length, detail: "Local taxonomy", targetTestId: focusTarget },
+        { label: "Assets", value: snapshot.assetLibrary.assets.length, detail: "Available assets", targetTestId: focusTarget },
+        { label: "Asset kinds", value: snapshot.assetLibrary.kindOptions.length, detail: "Asset categories", targetTestId: focusTarget },
         { label: "Sites", value: snapshot.assetLibrary.siteOptions.length, detail: "Scoped asset targets", targetTestId: focusTarget },
       ];
     case "domains":
       return [
         { label: "Domains", value: snapshot.domainReadiness.domains.length, detail: "Domain records in scope", targetTestId: focusTarget },
-        { label: "Ready for DNS", value: countStatuses(snapshot.domainReadiness.domains, "pending"), detail: "Provider work remains gated", targetTestId: focusTarget },
+        { label: "Ready for DNS", value: countStatuses(snapshot.domainReadiness.domains, "pending"), detail: "Connection review needed", targetTestId: focusTarget },
         { label: "Checklist items", value: snapshot.domainReadiness.dnsChecklist.length, detail: "Readiness evidence only", targetTestId: focusTarget },
       ];
     case "integrations":
       return [
         { label: "Integrations", value: snapshot.integrationReadiness.integrations.length, detail: "Provider records in review", targetTestId: focusTarget },
-        { label: "Provider types", value: snapshot.integrationReadiness.providerOptions.length, detail: "No provider calls enabled", targetTestId: focusTarget },
-        { label: "Safety checks", value: snapshot.integrationReadiness.safetyChecklist.length, detail: "Configuration remains gated", targetTestId: focusTarget },
+        { label: "Connection types", value: snapshot.integrationReadiness.providerOptions.length, detail: "Connections not active", targetTestId: focusTarget },
+        { label: "Safety checks", value: snapshot.integrationReadiness.safetyChecklist.length, detail: "Review required", targetTestId: focusTarget },
       ];
     case "campaigns":
       return [
@@ -460,19 +460,19 @@ function getKinfloSectionSnapshotMetrics(
       return [
         { label: "AI reviews", value: snapshot.aiReview.records.length, detail: "Review records in scope", targetTestId: focusTarget },
         { label: "Pending", value: countStatuses(snapshot.aiReview.records, "pending"), detail: "Awaiting human review", targetTestId: focusTarget },
-        { label: "Checklist items", value: snapshot.aiReview.reviewChecklist.length, detail: "Publish remains gated", targetTestId: focusTarget },
+        { label: "Checklist items", value: snapshot.aiReview.reviewChecklist.length, detail: "Publish review needed", targetTestId: focusTarget },
       ];
     case "content":
       return [
         { label: "Content blocks", value: snapshot.contentDraft.blocks.length, detail: "Draft content in scope", targetTestId: focusTarget },
-        { label: "Page options", value: snapshot.contentDraft.pageOptions.length, detail: "Fixture page targets", targetTestId: focusTarget },
-        { label: "Activation evidence", value: snapshot.contentDraft.activationEvidence.length, detail: "Publish remains gated", targetTestId: focusTarget },
+        { label: "Page options", value: snapshot.contentDraft.pageOptions.length, detail: "Available page targets", targetTestId: focusTarget },
+        { label: "Review items", value: snapshot.contentDraft.activationEvidence.length, detail: "Publish review needed", targetTestId: focusTarget },
       ];
     case "templates":
       return [
-        { label: "Templates", value: snapshot.templates.length, detail: "Starter contracts in scope", targetTestId: focusTarget },
-        { label: "Configurable fields", value: snapshot.templates.reduce((total, template) => total + template.configurableFields.length, 0), detail: "Local configuration surface", targetTestId: focusTarget },
-        { label: "QA checks", value: snapshot.templates.reduce((total, template) => total + template.qaChecks.length, 0), detail: "Launch criteria remain review-only", targetTestId: focusTarget },
+        { label: "Templates", value: snapshot.templates.length, detail: "Starter options", targetTestId: focusTarget },
+        { label: "Configurable fields", value: snapshot.templates.reduce((total, template) => total + template.configurableFields.length, 0), detail: "Available settings", targetTestId: focusTarget },
+        { label: "QA checks", value: snapshot.templates.reduce((total, template) => total + template.qaChecks.length, 0), detail: "Launch criteria", targetTestId: focusTarget },
       ];
     case "crm":
       return [
@@ -483,14 +483,14 @@ function getKinfloSectionSnapshotMetrics(
     case "experience":
       return [
         { label: "Experience controls", value: snapshot.experienceControls.length, detail: "Shell defaults in review", targetTestId: focusTarget },
-        { label: "Workflow defaults", value: snapshot.experiencePreferences.workflowDefaults.length, detail: "Scoped preference inputs", targetTestId: focusTarget },
-        { label: "Channels", value: snapshot.experiencePreferences.notificationChannels.length, detail: "Notifications remain gated", targetTestId: focusTarget },
+        { label: "Workflow defaults", value: snapshot.experiencePreferences.workflowDefaults.length, detail: "Workspace preferences", targetTestId: focusTarget },
+        { label: "Channels", value: snapshot.experiencePreferences.notificationChannels.length, detail: "Notifications not available yet", targetTestId: focusTarget },
       ];
     case "access":
       return [
-        { label: "Roles", value: snapshot.roles.length, detail: "Current read-only role map", targetTestId: focusTarget },
-        { label: "Role options", value: snapshot.accessDelegation.roleOptions.length, detail: "Delegation remains gated", targetTestId: focusTarget },
-        { label: "Activation evidence", value: snapshot.accessDelegation.activationEvidence.length, detail: "No invite or write action", targetTestId: focusTarget },
+        { label: "Roles", value: snapshot.roles.length, detail: "Current role map", targetTestId: focusTarget },
+        { label: "Role options", value: snapshot.accessDelegation.roleOptions.length, detail: "Delegation not available yet", targetTestId: focusTarget },
+        { label: "Review items", value: snapshot.accessDelegation.activationEvidence.length, detail: "Invitations not available yet", targetTestId: focusTarget },
       ];
     default:
       return snapshot.metrics.slice(0, 3).map((metric) => ({ label: metric.label, value: metric.value, detail: metric.detail, targetTestId: focusTarget }));
