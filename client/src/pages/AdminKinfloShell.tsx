@@ -158,6 +158,10 @@ import {
   type KinfloGovernancePermission,
   type KinfloGovernanceRole,
 } from "@/lib/kinfloAdminGovernance";
+import {
+  isKinfloCrmRecordInScope,
+  resolveKinfloCrmOperatingContext,
+} from "@/lib/kinfloCrmOperatingContext";
 
 const metricIcons: Record<ShellMetricIconKey, typeof Boxes> = {
   tenants: Boxes,
@@ -5793,6 +5797,37 @@ export default function AdminKinfloShell() {
   const adminScope = useKinfloAdminScope();
   const preferencesAdapter = useKinfloPreferencesAdapter();
   const themeWriteAdapter = useKinfloThemeWriteAdapter();
+  const crmOperatingContext = useMemo(
+    () => resolveKinfloCrmOperatingContext({
+      tenantSlug: adminScope.tenant.slug,
+      tenantName: adminScope.tenant.name,
+      siteKey: adminScope.site.key,
+      siteName: adminScope.site.name,
+    }),
+    [adminScope.site.key, adminScope.site.name, adminScope.tenant.name, adminScope.tenant.slug],
+  );
+  const crmScopeInput = useMemo(
+    () => ({
+      tenantSlug: adminScope.tenant.slug,
+      siteKey: adminScope.site.key,
+    }),
+    [adminScope.site.key, adminScope.tenant.slug],
+  );
+  const scopedCrmLeads = useMemo(
+    () => snapshot.leads.filter((lead) => isKinfloCrmRecordInScope(lead, crmScopeInput)),
+    [crmScopeInput, snapshot.leads],
+  );
+  const scopedCrmTasks = useMemo(
+    () => snapshot.tasks.filter((task) => isKinfloCrmRecordInScope(task, crmScopeInput)),
+    [crmScopeInput, snapshot.tasks],
+  );
+  const scopedCrmPipelineStages = useMemo(
+    () => snapshot.pipelineStages.map((stage) => ({
+      ...stage,
+      leads: scopedCrmLeads.filter((lead) => lead.stage === stage.slug).length,
+    })),
+    [scopedCrmLeads, snapshot.pipelineStages],
+  );
   const scopedFixtureExperiencePreferences = {
     ...snapshot.experiencePreferences,
     scopeLabel: `${adminScope.tenant.name} site admin`,
@@ -16543,8 +16578,42 @@ export default function AdminKinfloShell() {
                     crm.submitLead
                   </Badge>
                 </div>
+                <Card className="shadow-none" data-testid="section-kinflo-crm-operating-context">
+                  <CardHeader className="space-y-1">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <CardTitle className="text-base">Operating context</CardTitle>
+                      <Badge variant="outline">{crmOperatingContext.audit.eventStream.replaceAll("_", " ")}</Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">CRM actions resolve through tenant, site, capability, and role context before they can be enabled.</p>
+                  </CardHeader>
+                  <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    <div className="rounded-md border border-border bg-background p-3">
+                      <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Scope</div>
+                      <div className="mt-1 text-sm font-semibold text-foreground">{crmOperatingContext.tenant.name}</div>
+                      <div className="mt-1 text-xs text-muted-foreground">{crmOperatingContext.site.name}</div>
+                    </div>
+                    <div className="rounded-md border border-border bg-background p-3">
+                      <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Profile</div>
+                      <div className="mt-1 text-sm font-semibold text-foreground">{crmOperatingContext.tenant.profileLabel}</div>
+                      <div className="mt-1 text-xs text-muted-foreground">{crmOperatingContext.capability.label}</div>
+                    </div>
+                    <div className="rounded-md border border-border bg-background p-3">
+                      <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Read access</div>
+                      <div className="mt-1 text-sm font-semibold text-foreground">{crmOperatingContext.authorization.read.status === "allowed" ? "Allowed" : "Blocked"}</div>
+                      <div className="mt-1 text-xs text-muted-foreground">{crmOperatingContext.authorization.read.permission}</div>
+                    </div>
+                    <div className="rounded-md border border-border bg-background p-3">
+                      <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Write state</div>
+                      <div className="mt-1 text-sm font-semibold text-foreground">Gated</div>
+                      <div className="mt-1 text-xs text-muted-foreground">Preview writes disabled</div>
+                    </div>
+                  </CardContent>
+                  {crmOperatingContext.blocker ? (
+                    <div className="mx-6 mb-6 rounded-md border border-border bg-muted p-3 text-sm text-muted-foreground">{crmOperatingContext.blocker}</div>
+                  ) : null}
+                </Card>
                 <div className="overflow-hidden rounded-lg border" data-testid="section-kinflo-crm-lead-table">
-                  {snapshot.leads.length > 0 ? (
+                  {scopedCrmLeads.length > 0 ? (
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -16557,7 +16626,7 @@ export default function AdminKinfloShell() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {snapshot.leads.map((lead) => (
+                        {scopedCrmLeads.map((lead) => (
                           <TableRow key={lead.email}>
                             <TableCell>
                               <div className="font-medium">{lead.name}</div>
@@ -16575,7 +16644,7 @@ export default function AdminKinfloShell() {
                   ) : (
                     <div className="border-dashed px-4 py-10 text-center" data-testid="section-kinflo-crm-lead-table-empty">
                       <div className="text-sm font-semibold text-foreground">No lead records yet</div>
-                      <p className="mt-1 text-sm text-muted-foreground">Public intake is scoped to Vanguard Enterprises, but no lead values are available in this read-only fixture.</p>
+                      <p className="mt-1 text-sm text-muted-foreground">No lead records are available for the active tenant/site scope in this read-only fixture.</p>
                     </div>
                   )}
                 </div>
@@ -16624,7 +16693,7 @@ export default function AdminKinfloShell() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {snapshot.pipelineStages.map((stage) => (
+                    {scopedCrmPipelineStages.map((stage) => (
                       <div key={stage.slug} className="flex items-center justify-between rounded-md border px-3 py-2 text-sm">
                         <div>
                           <div className="font-medium">{stage.label}</div>
@@ -16647,7 +16716,7 @@ export default function AdminKinfloShell() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {snapshot.tasks.map((task) => (
+                    {scopedCrmTasks.map((task) => (
                       <div key={`${task.lead}-${task.title}`} className="rounded-md border px-3 py-2 text-sm">
                         <div className="flex items-start justify-between gap-3">
                           <div>
@@ -16659,6 +16728,9 @@ export default function AdminKinfloShell() {
                         <div className="mt-2 text-xs text-muted-foreground">{task.due}</div>
                       </div>
                     ))}
+                    {scopedCrmTasks.length === 0 ? (
+                      <div className="rounded-md border border-dashed border-border px-3 py-4 text-sm text-muted-foreground">No follow-up tasks are registered for this scope.</div>
+                    ) : null}
                   </CardContent>
                 </Card>
               </div>

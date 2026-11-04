@@ -8,9 +8,15 @@ const check = (condition, label, detail) => condition ? pass(label) : fail(label
 
 const contractPath = "docs/kinflo-crm-operating-contract.json";
 const documentPath = "docs/kinflo-crm-operating-contract.md";
+const contextPath = "client/src/lib/kinfloCrmOperatingContext.ts";
+const shellDataPath = "client/src/lib/kinfloShellData.ts";
+const adminShellPath = "client/src/pages/AdminKinfloShell.tsx";
 
 check(existsSync(contractPath), `${contractPath} exists`, "Operating contract JSON is missing.");
 check(existsSync(documentPath), `${documentPath} exists`, "Operating contract documentation is missing.");
+check(existsSync(contextPath), `${contextPath} exists`, "CRM operating context resolver is missing.");
+check(existsSync(shellDataPath), `${shellDataPath} exists`, "Scoped CRM fixture fields are missing.");
+check(existsSync(adminShellPath), `${adminShellPath} exists`, "CRM shell integration is missing.");
 
 if (existsSync(contractPath)) {
   const contract = JSON.parse(readFileSync(contractPath, "utf8"));
@@ -50,6 +56,32 @@ for (const phrase of [
   "does not execute Convex queries or mutations",
 ]) {
   check(document.includes(phrase), `document includes ${phrase}`, "Required operating contract boundary is missing.");
+}
+
+const context = existsSync(contextPath) ? readFileSync(contextPath, "utf8") : "";
+for (const phrase of [
+  "resolveKinfloCrmOperatingContext",
+  "evaluateKinfloCapability",
+  "audience:view",
+  "writes: \"disabled\"",
+  "isKinfloCrmRecordInScope",
+]) {
+  check(context.includes(phrase), `CRM context includes ${phrase}`, "CRM context must resolve authorization and scope before actions.");
+}
+
+const shellData = existsSync(shellDataPath) ? readFileSync(shellDataPath, "utf8") : "";
+for (const phrase of ["tenantSlug: string;", "siteKey: string;", "const fixtureLeads", "const fixtureTasks"]) {
+  check(shellData.includes(phrase), `CRM fixture includes ${phrase}`, "CRM fixture records must carry explicit scope keys.");
+}
+
+const adminShell = existsSync(adminShellPath) ? readFileSync(adminShellPath, "utf8") : "";
+for (const phrase of [
+  "section-kinflo-crm-operating-context",
+  "scopedCrmLeads",
+  "scopedCrmTasks",
+  "Preview writes disabled",
+]) {
+  check(adminShell.includes(phrase), `CRM shell includes ${phrase}`, "CRM UI must render scoped operating context and filtered records.");
 }
 
 const tracked = execFileSync("git", ["ls-files"], { encoding: "utf8" }).split("\n").filter(Boolean);

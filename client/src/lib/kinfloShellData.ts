@@ -2176,6 +2176,8 @@ export type ShellAccessDelegation = {
 };
 
 export type ShellLead = {
+  tenantSlug: string;
+  siteKey: string;
   name: string;
   email: string;
   site: string;
@@ -2194,6 +2196,8 @@ export type ShellPipelineStage = {
 };
 
 export type ShellTask = {
+  tenantSlug: string;
+  siteKey: string;
   title: string;
   lead: string;
   owner: string;
@@ -6784,6 +6788,8 @@ const fixtureAccessDelegation: ShellAccessDelegation = {
 
 const fixtureLeads: ShellLead[] = [
   {
+    tenantSlug: "julies-family",
+    siteKey: "julies-family-public",
     name: "Maria Alvarez",
     email: "maria@example.invalid",
     site: "Julie Family Public Site",
@@ -6794,6 +6800,8 @@ const fixtureLeads: ShellLead[] = [
     lastEvent: "Submitted family learning intake",
   },
   {
+    tenantSlug: "julies-family",
+    siteKey: "julies-family-public",
     name: "Devon Price",
     email: "devon@example.invalid",
     site: "Tech Goes Home Cohort",
@@ -6804,6 +6812,8 @@ const fixtureLeads: ShellLead[] = [
     lastEvent: "Assigned follow-up task",
   },
   {
+    tenantSlug: "advisor-client-starter",
+    siteKey: "advisor-client-site",
     name: "Aisha Grant",
     email: "aisha@example.invalid",
     site: "Advisor Client Site",
@@ -6823,6 +6833,8 @@ const fixturePipelineStages: ShellPipelineStage[] = [
 
 const fixtureTasks: ShellTask[] = [
   {
+    tenantSlug: "julies-family",
+    siteKey: "julies-family-public",
     title: "Call Maria about evening classes",
     lead: "Maria Alvarez",
     owner: "Program lead",
@@ -6830,6 +6842,8 @@ const fixtureTasks: ShellTask[] = [
     status: "pending",
   },
   {
+    tenantSlug: "julies-family",
+    siteKey: "julies-family-public",
     title: "Send volunteer orientation packet",
     lead: "Devon Price",
     owner: "Volunteer coordinator",
