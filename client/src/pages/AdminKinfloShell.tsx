@@ -336,7 +336,11 @@ function presentKinfloCopy(value: string) {
     .replace(/public intake connection until live connection are approved/gi, "Available after connection review")
     .replace(/legacy fallback/gi, "previous connection")
     .replace(/cutover/gi, "switch")
+    .replace(/codegen/gi, "connection setup")
+    .replace(/mutations?/gi, "live updates")
     .replace(/activation/gi, "launch")
+    .replace(/hosted launch/gi, "launch setup")
+    .replace(/repo sharing risk posture/gi, "sharing review")
     .replace(/gated/gi, "awaiting review")
     .replace(/blocked/gi, "not yet available")
     .replace(/_/g, " ")
@@ -624,7 +628,7 @@ const workflowNavigationLanes: {
   {
     key: "activation",
     label: "Activation",
-    description: "Hosted activation, read-only smokes, and cutover gates",
+    description: "Launch setup, review checks, and handoff decisions",
     icon: KeyRound,
     tabs: ["hosted-activation"],
     primaryTab: "hosted-activation",
@@ -847,7 +851,7 @@ function KinfloTenantAdminSidebar({
                         data-testid="dot-kinflo-workflow-lane-activation-hosted-activation"
                       >
                         <KeyRound className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-                        <span className="truncate">Hosted activation</span>
+                        <span className="truncate">Launch setup</span>
                       </button>
                       {activeTab === "hosted-activation" ? (
                         <div className="mt-1 space-y-0.5 border-l border-primary/20 pl-3" data-testid="section-kinflo-sidebar-activation-stepper">
@@ -866,7 +870,7 @@ function KinfloTenantAdminSidebar({
                                 <span className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] ${isActiveStep ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
                                   {step.order}
                                 </span>
-                                <span className="min-w-0 truncate">{step.label}</span>
+                                <span className="min-w-0 truncate">{presentKinfloCopy(step.label)}</span>
                               </button>
                             );
                           })}
@@ -1564,9 +1568,9 @@ function launchReadinessStatusBadge(status: ShellLaunchReadinessSite["stages"][n
     return <Badge variant="secondary">Ready</Badge>;
   }
   if (status === "blocked") {
-    return <Badge variant="outline" className="border-primary text-primary">Blocked</Badge>;
+    return <Badge variant="outline" className="border-primary text-primary">Needs review</Badge>;
   }
-  return <Badge variant="outline">Pending</Badge>;
+  return <Badge variant="outline">Coming up</Badge>;
 }
 
 function hostedActivationStatusBadge(status: ShellHostedActivationStepStatus) {
@@ -1596,7 +1600,7 @@ function HostedActivationOverview({
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant="outline" className="kinflo-pill kinflo-pill-warning">Review-only</Badge>
+              <Badge variant="outline" className="kinflo-pill kinflo-pill-warning">Review</Badge>
               <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">Vanguard scope</Badge>
               <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">Preview</Badge>
             </div>
@@ -1632,10 +1636,10 @@ function HostedActivationOverview({
             <div className="min-w-0">
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Selected gate</div>
               <div className="mt-2 flex flex-wrap items-center gap-2">
-                <h3 className="text-lg font-semibold text-foreground">{selectedStep?.label ?? "Activation step pending"}</h3>
+                <h3 className="text-lg font-semibold text-foreground">{presentKinfloCopy(selectedStep?.label ?? "Launch step pending")}</h3>
                 {selectedStep ? hostedActivationStatusBadge(selectedStep.status) : null}
               </div>
-              <p className="mt-1 text-sm text-muted-foreground">Owner: {selectedStep?.owner ?? "Assigned owner pending"} · before {selectedStep?.requiredBefore ?? "next approval"}</p>
+              <p className="mt-1 text-sm text-muted-foreground">Owner: {presentKinfloCopy(selectedStep?.owner ?? "Assigned owner pending")} · before {presentKinfloCopy(selectedStep?.requiredBefore ?? "next review")}</p>
             </div>
             <Button disabled variant="outline" className="shrink-0" data-testid="button-hosted-activation-selected-gate">
               <LockKeyhole className="mr-2 h-4 w-4" />
@@ -1646,19 +1650,19 @@ function HostedActivationOverview({
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-400/40 dark:bg-amber-950/30">
               <div className="text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">What happens next</div>
-              <p className="mt-2 text-sm leading-6 text-amber-950 dark:text-amber-100">{selectedStep?.commandOrAction ?? "Select a gate from the sidebar."}</p>
+              <p className="mt-2 text-sm leading-6 text-amber-950 dark:text-amber-100">{presentKinfloCopy(selectedStep?.commandOrAction ?? "Select a launch step from the sidebar.")}</p>
             </div>
             <div className="rounded-xl border border-border bg-muted/40 p-3">
               <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Evidence needed</div>
-              <p className="mt-2 text-sm leading-6 text-foreground">{selectedStep?.evidenceTarget ?? "No evidence target is available yet."}</p>
+              <p className="mt-2 text-sm leading-6 text-foreground">{presentKinfloCopy(selectedStep?.evidenceTarget ?? "No review item is available yet.")}</p>
             </div>
           </div>
 
           <div className="mt-3 grid gap-2 text-xs sm:grid-cols-3">
             {[
-              ["Provider writes", selectedStep?.providerWrites ? "Allowed after approval" : "Blocked"],
-              ["Live Convex", selectedStep?.liveConvexExecution ? "Read-only" : "Blocked"],
-              ["Rollback", selectedStep?.rollback ?? "Keep fixture data active"],
+              ["Live updates", selectedStep?.providerWrites ? "Available after approval" : "Awaiting review"],
+              ["Connection", selectedStep?.liveConvexExecution ? "Preview" : "Awaiting review"],
+              ["Fallback", selectedStep?.rollback ?? "Keep preview data active"],
             ].map(([label, value]) => (
               <div key={label} className="rounded-lg border border-border bg-background px-3 py-2">
                 <div className="font-semibold uppercase tracking-wide text-muted-foreground">{label}</div>
@@ -1706,7 +1710,7 @@ function HostedActivationOwnerChecklist({
             </Badge>
             <Badge className="bg-primary text-primary-foreground hover:bg-primary">prepare only</Badge>
           </div>
-          <h3 className="mt-2 text-base font-semibold text-foreground">Hosted activation owner checklist</h3>
+          <h3 className="mt-2 text-base font-semibold text-foreground">Launch review checklist</h3>
           <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground" data-testid={testIds.nextGate}>
             {nextHumanGate}
           </p>
@@ -5484,7 +5488,7 @@ function DecisionGateRail({
           <div className="min-w-0">
             <Badge className="border-white/10 bg-white/10 text-white hover:bg-white/10">Decision rail</Badge>
             <CardTitle className="mt-3 text-base leading-tight">{title}</CardTitle>
-            <p className="mt-2 text-sm leading-6 text-slate-300">{posture}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-300">{presentKinfloCopy(posture)}</p>
           </div>
           <ShieldCheck className="mt-1 h-5 w-5 shrink-0 text-amber-300" />
         </div>
@@ -5501,7 +5505,7 @@ function DecisionGateRail({
             {evidence.slice(0, 4).map((item) => (
               <div key={item} className="flex items-start gap-2 text-xs leading-5 text-slate-300">
                 <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
-                <span>{item}</span>
+                <span>{presentKinfloCopy(item)}</span>
               </div>
             ))}
           </div>
@@ -5509,7 +5513,7 @@ function DecisionGateRail({
 
         <div className="rounded-xl border border-amber-300/30 bg-amber-300/10 p-3" data-testid={`${testId}-rollback`}>
           <div className="text-[11px] font-medium uppercase tracking-normal text-amber-100">Rollback</div>
-          <p className="mt-1 text-xs leading-5 text-amber-50">{rollback}</p>
+          <p className="mt-1 text-xs leading-5 text-amber-50">{presentKinfloCopy(rollback)}</p>
         </div>
 
         <div className="rounded-xl border border-rose-300/30 bg-rose-400/10 p-3" data-testid={`${testId}-blocked-actions`}>
@@ -5517,7 +5521,7 @@ function DecisionGateRail({
           <div className="mt-3 flex flex-wrap gap-1.5">
             {blockedActions.slice(0, 4).map((action) => (
               <Badge key={action} variant="outline" className="border-rose-200/30 bg-white/10 text-rose-50">
-                {action}
+                {presentKinfloCopy(action)}
               </Badge>
             ))}
           </div>
@@ -5525,7 +5529,7 @@ function DecisionGateRail({
 
         <Button disabled variant="secondary" className="w-full justify-start" data-testid={`${testId}-disabled-action`}>
           <ShieldCheck className="mr-2 h-4 w-4" />
-          {disabledActionLabel}
+          {presentKinfloCopy(disabledActionLabel)}
         </Button>
       </CardContent>
     </Card>
@@ -6834,7 +6838,7 @@ export default function AdminKinfloShell() {
     { label: "Required pages selected", done: requiredPagesSelected },
     { label: "Owner role scoped", done: Boolean(wizardOwnerRole) },
     { label: "Preview route prepared", done: Boolean(selectedLaunchPacket?.previewPath) },
-    { label: "Live Convex smoke pending", done: false },
+    { label: "Launch verification pending", done: false },
   ];
   const wizardReadyCount = wizardReadiness.filter((item) => item.done).length;
   const wizardReadinessPercent = Math.round((wizardReadyCount / wizardReadiness.length) * 100);
@@ -8513,7 +8517,7 @@ export default function AdminKinfloShell() {
                 <h2 className="text-xl font-semibold">Launch Readiness</h2>
                 <p className="text-sm text-muted-foreground">A staged review of the selected client site before any live publish or launch decision.</p>
               </div>
-              <Badge variant="outline"><ListChecks className="mr-1 h-3 w-3" />Read-only</Badge>
+              <Badge variant="outline"><ListChecks className="mr-1 h-3 w-3" />Preview</Badge>
             </div>
 
             <section className="mt-4 space-y-4" data-testid={`section-kinflo-launch-readiness-${launchReadinessStage}`}>
@@ -8540,8 +8544,8 @@ export default function AdminKinfloShell() {
                         {[
                           ["Readiness", `${selectedLaunchReadinessSite?.readinessPercent ?? 0}%`, "text-kinflo-launch-readiness-status"],
                           ["Ready", launchReadinessCounts.ready, ""],
-                          ["Pending", launchReadinessCounts.pending, ""],
-                          ["Blocked", launchReadinessCounts.blocked, ""],
+                            ["Coming up", launchReadinessCounts.pending, ""],
+                            ["Needs review", launchReadinessCounts.blocked, ""],
                         ].map(([label, value, testId]) => (
                           <div key={label} className="rounded-lg border border-border bg-muted/30 p-3">
                             <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{label}</div>
@@ -8554,7 +8558,7 @@ export default function AdminKinfloShell() {
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                           <div className="min-w-0">
                             <div className="text-sm font-medium">{selectedLaunchReadinessSite?.label}</div>
-                            <p className="mt-2 text-sm text-muted-foreground" data-testid="text-kinflo-launch-readiness-blocker">{selectedLaunchReadinessSite?.blockerSummary}</p>
+                            <p className="mt-2 text-sm text-muted-foreground" data-testid="text-kinflo-launch-readiness-blocker">{presentKinfloCopy(selectedLaunchReadinessSite?.blockerSummary ?? "Launch review is in progress.")}</p>
                           </div>
                           <Badge variant="outline" className="w-fit">{selectedLaunchReadinessSite?.launchDecision.replace(/_/g, " ")}</Badge>
                         </div>
@@ -8562,7 +8566,7 @@ export default function AdminKinfloShell() {
                           <Button size="sm" variant="outline" asChild data-testid="button-open-launch-preview">
                             <Link href={selectedLaunchReadinessSite?.previewPath ?? "/admin/kinflo-os"}><ExternalLink className="mr-2 h-3 w-3" />Open preview</Link>
                           </Button>
-                          <Button size="sm" disabled data-testid="button-live-launch-gated"><Rocket className="mr-2 h-3 w-3" />Live launch gated</Button>
+                          <Button size="sm" disabled data-testid="button-live-launch-gated"><Rocket className="mr-2 h-3 w-3" />Launch awaiting review</Button>
                         </div>
                       </div>
                     </CardContent>
@@ -8590,11 +8594,11 @@ export default function AdminKinfloShell() {
                   <DecisionGateRail
                     title="Launch decision gate"
                     owner={selectedLaunchReadinessSite?.stages.find((stage) => stage.status === "blocked")?.owner ?? selectedLaunchReadinessSite?.stages[0]?.owner ?? "Vambah"}
-                    posture={selectedLaunchReadinessSite?.blockerSummary ?? snapshot.launchReadiness.providerBoundary}
+                    posture={presentKinfloCopy(selectedLaunchReadinessSite?.blockerSummary ?? snapshot.launchReadiness.providerBoundary)}
                     evidence={snapshot.launchReadiness.activationEvidence}
-                    rollback="Keep the public site on provider-light preview, block live lead writes, and hold client handoff until launch evidence is accepted."
+                    rollback="Keep the public site in preview, pause live lead updates, and hold client handoff until launch evidence is accepted."
                     blockedActions={["publish client site", "write live lead", "send campaign traffic", "attach production domain"]}
-                    disabledActionLabel="Live launch remains gated"
+                    disabledActionLabel="Launch remains unavailable"
                     testId="section-kinflo-launch-decision-gate-rail"
                   />
                   <details className="rounded-xl border border-border bg-card p-3" data-testid="section-kinflo-launch-readiness-technical-evidence">
@@ -8611,12 +8615,12 @@ export default function AdminKinfloShell() {
                 <Card>
                   <CardHeader><CardTitle className="text-base">Final launch boundary</CardTitle><p className="text-sm text-muted-foreground">The packet is reviewable, but the live boundary remains closed until hosted evidence is accepted.</p></CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="rounded-lg border border-border bg-muted/30 p-4 text-sm leading-6 text-muted-foreground">{snapshot.launchReadiness.providerBoundary}</div>
-                    <div className="flex flex-wrap gap-2">{["publish client site", "write live lead", "send campaign traffic", "attach production domain"].map((action) => <Badge key={action} variant="outline">{action} gated</Badge>)}</div>
-                    <Button disabled variant="outline" data-testid="button-live-launch-gated"><Rocket className="mr-2 h-4 w-4" />Live launch gated</Button>
+                    <div className="rounded-lg border border-border bg-muted/30 p-4 text-sm leading-6 text-muted-foreground">{presentKinfloCopy(snapshot.launchReadiness.providerBoundary)}</div>
+                    <div className="flex flex-wrap gap-2">{["publish client site", "write live lead", "send campaign traffic", "attach production domain"].map((action) => <Badge key={action} variant="outline">{action} awaiting review</Badge>)}</div>
+                    <Button disabled variant="outline" data-testid="button-live-launch-gated"><Rocket className="mr-2 h-4 w-4" />Launch awaiting review</Button>
                     <details className="rounded-lg border border-border p-3" data-testid="section-kinflo-launch-readiness-launch-gates">
                       <summary className="cursor-pointer list-none text-sm font-semibold">Launch gates and rollback</summary>
-                      <div className="mt-3 text-sm text-muted-foreground">Keep the public site on provider-light preview and hold live writes until launch evidence, generated bindings, and hosted smoke are accepted.</div>
+                      <div className="mt-3 text-sm text-muted-foreground">Keep the public site in preview and hold live updates until launch evidence and connection review are complete.</div>
                     </details>
                   </CardContent>
                 </Card>
@@ -9279,9 +9283,9 @@ export default function AdminKinfloShell() {
               <div className="min-w-0 space-y-4">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <h2 className="text-xl font-semibold">Hosted Activation Ledger</h2>
+                    <h2 className="text-xl font-semibold">Launch review ledger</h2>
                     <p className="text-sm text-muted-foreground">
-                      Track the human-owned approval and evidence gates before KinFlo moves from fixture proof to hosted Convex execution.
+                      Track the review decisions and evidence before Kinflo moves from preview to a live connection.
                     </p>
                   </div>
                   <Badge variant="outline">
@@ -9311,7 +9315,7 @@ export default function AdminKinfloShell() {
                           {snapshot.hostedActivationRunbook.decisionCheckpoint.status.replaceAll("_", " ")}
                         </Badge>
                       </div>
-                      <h3 className="mt-3 text-base font-semibold text-slate-950">Hosted activation checkpoint</h3>
+                      <h3 className="mt-3 text-base font-semibold text-slate-950">Launch review checkpoint</h3>
                       <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600" data-testid="text-hosted-activation-decision-checkpoint-next-gate">
                         {snapshot.hostedActivationRunbook.decisionCheckpoint.nextHumanGate}
                       </p>
@@ -10573,20 +10577,20 @@ export default function AdminKinfloShell() {
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                           <Badge className="border-white/10 bg-white/10 text-white hover:bg-white/10">
-                            Activation Console
+                            Launch Console
                           </Badge>
                           <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700">
                             {snapshot.hostedActivationRunbook.activationConsole.decision.replaceAll("_", " ")}
                           </Badge>
                         </div>
-                        <CardTitle className="mt-4 text-xl">Hosted Convex remains approval-gated</CardTitle>
+                        <CardTitle className="mt-4 text-xl">Live connection review</CardTitle>
                         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-300" data-testid="text-kinflo-hosted-activation-next-gate">
                           {snapshot.hostedActivationRunbook.activationConsole.nextHumanGate}
                         </p>
                       </div>
                       <Button disabled variant="secondary" className="self-start" data-testid="button-hosted-activation-console-gated">
                         <KeyRound className="mr-2 h-4 w-4" />
-                        Hosted activation gated
+                        Launch setup awaiting review
                       </Button>
                     </div>
                   </CardHeader>
@@ -11658,7 +11662,7 @@ export default function AdminKinfloShell() {
                         <SelectContent>
                           {snapshot.hostedActivationRunbook.steps.map((step) => (
                             <SelectItem key={step.id} value={step.id}>
-                              {step.order}. {step.label}
+                              {step.order}. {presentKinfloCopy(step.label)}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -11774,17 +11778,17 @@ export default function AdminKinfloShell() {
                   <summary className="cursor-pointer list-none text-sm font-semibold text-foreground">Open supporting evidence</summary>
                   <div className="mt-3 space-y-4">
                     <DecisionGateRail
-                      title="Hosted activation decision gate"
+                      title="Launch setup decision"
                       owner={selectedHostedActivationStep?.owner ?? "Vambah"}
                       posture={snapshot.hostedActivationRunbook.activationConsole.nextHumanGate}
                       evidence={[
-                        selectedHostedActivationStep?.evidenceTarget ?? "Hosted activation evidence target is pending.",
+                        selectedHostedActivationStep?.evidenceTarget ?? "Launch review evidence is pending.",
                         ...snapshot.hostedActivationRunbook.activationConsole.evidenceSummary,
                       ]}
                       rollback={selectedHostedActivationStep?.rollback
-                        ?? "Keep all shell surfaces on fixtures and do not run hosted Convex commands."}
+                        ?? "Keep all workspace surfaces in preview until the connection review is complete."}
                       blockedActions={snapshot.hostedActivationRunbook.activationConsole.blockedLiveActions}
-                      disabledActionLabel="Hosted activation remains gated"
+                      disabledActionLabel="Launch setup remains unavailable"
                       testId="section-kinflo-hosted-activation-decision-gate-rail"
                     />
 
@@ -11862,11 +11866,11 @@ export default function AdminKinfloShell() {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <h2 className="text-xl font-semibold">Site Factory Launch Packets</h2>
-                    <p className="text-sm text-muted-foreground">Prepare tenant, site, template, invite, and permission scope before live Convex mutations are enabled.</p>
+                    <p className="text-sm text-muted-foreground">Prepare the tenant, site, template, invite, and permissions before the workspace is ready to launch.</p>
                   </div>
                   <Badge variant="outline">
                     <Factory className="mr-1 h-3 w-3" />
-                    Provider-light
+                    Preview
                   </Badge>
                 </div>
 
@@ -11876,7 +11880,7 @@ export default function AdminKinfloShell() {
                       <div>
                         <CardTitle className="text-base">Site Creation Wizard</CardTitle>
                         <p className="mt-1 text-sm text-muted-foreground">
-                          Configure a launch-ready site packet before live Convex mutations are enabled.
+                          Configure a launch-ready site packet before publishing is available.
                         </p>
                       </div>
                       <Badge variant="secondary">{wizardReadyCount}/{wizardReadiness.length} ready</Badge>
@@ -12015,7 +12019,7 @@ export default function AdminKinfloShell() {
                       </div>
                       <Button disabled>
                         <Rocket className="mr-2 h-4 w-4" />
-                        Live mutation gated
+                        Live updates awaiting review
                       </Button>
                     </div>
                   </CardContent>

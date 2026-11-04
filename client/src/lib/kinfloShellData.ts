@@ -10918,7 +10918,7 @@ function buildMetrics(): ShellMetric[] {
     {
       label: "Launch Gates",
       value: `${completeGates}/${fixtureLaunchGates.length}`,
-      detail: "Convex auth, codegen, and live execution remain",
+      detail: "Live connection and launch review remain",
       iconKey: "launchGates",
     },
   ];
