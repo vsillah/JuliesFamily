@@ -5804,6 +5804,7 @@ export default function AdminKinfloShell() {
   const [accessTenantSlug, setAccessTenantSlug] = useState(snapshot.accessDelegation.defaultTenantSlug);
   const [accessSiteKey, setAccessSiteKey] = useState(snapshot.accessDelegation.defaultSiteKey);
   const [accessRoleKey, setAccessRoleKey] = useState(snapshot.accessDelegation.defaultRoleKey);
+  const [accessStage, setAccessStage] = useState<"overview" | "scope" | "role" | "review">("overview");
   const [contentSiteKey, setContentSiteKey] = useState(snapshot.contentDraft.defaultSiteKey);
   const [contentPageSlug, setContentPageSlug] = useState(snapshot.contentDraft.defaultPageSlug);
   const [selectedContentBlockKey, setSelectedContentBlockKey] = useState(snapshot.contentDraft.blocks[0]?.key ?? "");
@@ -16894,6 +16895,60 @@ export default function AdminKinfloShell() {
           </TabsContent>
 
           <TabsContent value="access" className="mt-6">
+            <section className="mb-4 rounded-xl border border-border bg-card p-3" data-testid="section-kinflo-access-sequence">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Access review sequence</div>
+                  <div className="mt-0.5 text-xs text-muted-foreground">Confirm the access model, scope, role, and invitation readiness in order. Live invites remain gated.</div>
+                </div>
+                <Badge variant="outline" className="w-fit">Read only</Badge>
+              </div>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-4" role="tablist" aria-label="Access review sequence">
+                {[
+                  { value: "overview" as const, label: "Overview", detail: "Review the available roles and access model." },
+                  { value: "scope" as const, label: "Scope", detail: "Prepare the local tenant and site boundary." },
+                  { value: "role" as const, label: "Role", detail: "Inspect the permission set before invitation." },
+                  { value: "review" as const, label: "Review", detail: "Confirm readiness and the blocked next action." },
+                ].map((stage, index) => {
+                  const isActive = accessStage === stage.value;
+                  return (
+                    <button
+                      key={stage.value}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      aria-current={isActive ? "step" : undefined}
+                      onClick={() => setAccessStage(stage.value)}
+                      className={`min-w-0 rounded-lg border px-3 py-2 text-left transition ${
+                        isActive
+                          ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                          : "border-border bg-muted/30 text-foreground hover:border-primary/50 hover:bg-muted"
+                      }`}
+                      data-testid={`tab-kinflo-access-stage-${stage.value}`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-current text-[10px] font-semibold">{index + 1}</span>
+                        <span className="truncate text-xs font-semibold">{stage.label}</span>
+                      </div>
+                      <span className={`mt-1 block text-[10px] leading-4 ${isActive ? "text-primary-foreground/75" : "text-muted-foreground"}`}>{stage.detail}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+            <section className="mb-6 grid gap-3 sm:grid-cols-3" data-testid="section-kinflo-access-snapshot">
+              {[
+                { label: "Role options", value: snapshot.accessDelegation.roleOptions.length, detail: "Available in this shell" },
+                { label: "Tenant scopes", value: snapshot.accessDelegation.tenantOptions.length, detail: "Scoped relationship fixtures" },
+                { label: "Live invites", value: "Gated", detail: "No invitation or membership write" },
+              ].map((metric) => (
+                <div key={metric.label} className="rounded-lg border border-border bg-muted/30 p-3">
+                  <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{metric.label}</div>
+                  <div className="mt-1 text-lg font-semibold text-foreground">{metric.value}</div>
+                  <div className="mt-1 text-xs text-muted-foreground">{metric.detail}</div>
+                </div>
+              ))}
+            </section>
             <section className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
               <div className="space-y-4">
                 <div className="flex items-center justify-between gap-4">
@@ -16903,7 +16958,7 @@ export default function AdminKinfloShell() {
                     Scoped roles
                   </Badge>
                 </div>
-                <div className="overflow-hidden rounded-lg border">
+                <div className={`${accessStage === "overview" ? "" : "hidden"} overflow-hidden rounded-lg border`} data-testid="section-kinflo-access-overview">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -16926,7 +16981,7 @@ export default function AdminKinfloShell() {
                 </Table>
               </div>
 
-                <Card>
+                <Card className={accessStage === "overview" ? "hidden" : undefined}>
                   <CardHeader className="flex flex-col gap-3 space-y-0 md:flex-row md:items-start md:justify-between">
                     <div>
                       <CardTitle className="text-base">Access Delegation Packet</CardTitle>
@@ -16937,7 +16992,7 @@ export default function AdminKinfloShell() {
                     <Badge variant="secondary">{accessReadyCount}/{accessReadiness.length} ready</Badge>
                   </CardHeader>
                   <CardContent className="space-y-5">
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className={`${accessStage === "scope" ? "" : "hidden"} grid gap-4 md:grid-cols-2`} data-testid="section-kinflo-access-scope">
                       <div className="space-y-2">
                         <Label htmlFor="kinflo-access-email">Invite email</Label>
                         <Input
@@ -16996,7 +17051,7 @@ export default function AdminKinfloShell() {
                     </div>
 
                     {selectedAccessRole ? (
-                      <div className="rounded-md border p-3 text-sm">
+                      <div className={`${accessStage === "role" ? "" : "hidden"} rounded-md border p-3 text-sm`} data-testid="section-kinflo-access-role">
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                           <div>
                             <div className="font-medium">{selectedAccessRole.label}</div>
@@ -17012,7 +17067,7 @@ export default function AdminKinfloShell() {
                       </div>
                     ) : null}
 
-                    <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_240px]">
+                    <div className={`${accessStage === "review" ? "" : "hidden"} grid gap-4 md:grid-cols-[minmax(0,1fr)_240px]`} data-testid="section-kinflo-access-review">
                       <div className="rounded-md border p-3 text-sm">
                         <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Prepared scope</div>
                         <div className="mt-2 space-y-1">
@@ -17031,7 +17086,7 @@ export default function AdminKinfloShell() {
                           {accessReadiness.map((item) => (
                             <div key={item.label} className="flex items-center gap-2 text-xs text-muted-foreground">
                               {item.done ? (
-                                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                                <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
                               ) : (
                                 <CircleDashed className="h-3.5 w-3.5" />
                               )}
@@ -17042,7 +17097,7 @@ export default function AdminKinfloShell() {
                       </div>
                     </div>
 
-                    <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className={`${accessStage === "review" ? "" : "hidden"} flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between`}>
                       <div className="text-sm text-muted-foreground">
                         {snapshot.accessDelegation.providerBoundary}
                       </div>
@@ -17056,6 +17111,14 @@ export default function AdminKinfloShell() {
               </div>
 
               <div className="space-y-3">
+                <details className="rounded-xl border border-border bg-card p-3" data-testid="section-kinflo-access-technical-evidence">
+                  <summary className="cursor-pointer list-none text-sm font-semibold text-foreground">
+                    <span className="flex items-center justify-between gap-3">
+                      <span>Technical invitation evidence</span>
+                      <span className="text-xs font-normal text-muted-foreground">Contract functions and activation checks</span>
+                    </span>
+                  </summary>
+                  <div className="mt-3">
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-base">Convex Invitation Contract</CardTitle>
@@ -17071,19 +17134,24 @@ export default function AdminKinfloShell() {
                     <div className="space-y-2">
                       {snapshot.accessDelegation.activationEvidence.map((item) => (
                         <div key={item} className="flex gap-2 text-sm text-muted-foreground">
-                          <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-600" />
+                          <CheckCircle2 className="mt-0.5 h-4 w-4 text-primary" />
                           <span>{item}</span>
                         </div>
                       ))}
                     </div>
                   </CardContent>
                 </Card>
+                  </div>
+                </details>
 
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold">Launch Gates</h2>
-                  <ShieldCheck className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <div className="rounded-lg border">
+                <details className="rounded-xl border border-border bg-card p-3" data-testid="section-kinflo-access-launch-gates">
+                  <summary className="cursor-pointer list-none text-sm font-semibold text-foreground">
+                    <span className="flex items-center justify-between gap-3">
+                      <span>Launch gates</span>
+                      <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+                    </span>
+                  </summary>
+                  <div className="mt-3 rounded-lg border">
                   {snapshot.launchGates.map((gate, index) => {
                     const done = gate.status === "done";
                     return (
@@ -17095,14 +17163,15 @@ export default function AdminKinfloShell() {
                       >
                         <span>{gate.label}</span>
                         {done ? (
-                          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                          <CheckCircle2 className="h-4 w-4 text-primary" />
                         ) : (
                           <CircleDashed className="h-4 w-4 text-muted-foreground" />
                         )}
                       </div>
                     );
                   })}
-                </div>
+                  </div>
+                </details>
               </div>
             </section>
           </TabsContent>
