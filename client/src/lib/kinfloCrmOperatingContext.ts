@@ -37,6 +37,12 @@ export type KinfloCrmWorkspaceState = {
   leads: readonly ShellLead[];
   pipelineStages: readonly ShellPipelineStage[];
   tasks: readonly ShellTask[];
+  analytics: {
+    contacts: { value: number; detail: string };
+    pipelineMovement: { value: number; detail: string };
+    followUpTasks: { value: number; detail: string };
+    journeyConversion: { value: string; detail: string };
+  };
   metrics: {
     leads: number;
     pipelineStages: number;
@@ -134,6 +140,11 @@ export function resolveKinfloCrmWorkspace(input: KinfloCrmOperatingContextInput 
     ...stage,
     leads: leads.filter((lead) => lead.stage === stage.slug).length,
   }));
+  const firstPipelineStage = pipelineStages[0]?.slug;
+  const movedLeads = firstPipelineStage
+    ? leads.filter((lead) => lead.stage !== firstPipelineStage).length
+    : 0;
+  const convertedLeads = leads.filter((lead) => lead.status === "converted").length;
   const actionGates: readonly KinfloCrmActionGate[] = [
     { key: "create_lead", label: "Create lead", status: "gated", permission: "audience:manage", reason: "Lead writes require an approved CRM runtime path." },
     { key: "transition_pipeline", label: "Move pipeline stage", status: "gated", permission: "audience:manage", reason: "Pipeline transitions require governed writes and audit events." },
@@ -145,6 +156,24 @@ export function resolveKinfloCrmWorkspace(input: KinfloCrmOperatingContextInput 
     leads,
     pipelineStages,
     tasks,
+    analytics: {
+      contacts: {
+        value: leads.length,
+        detail: "Scoped lead records",
+      },
+      pipelineMovement: {
+        value: movedLeads,
+        detail: firstPipelineStage ? "Leads beyond the first stage" : "No pipeline stage signal",
+      },
+      followUpTasks: {
+        value: tasks.length,
+        detail: "Scoped follow-up workload",
+      },
+      journeyConversion: {
+        value: leads.length > 0 ? `${Math.round((convertedLeads / leads.length) * 100)}%` : "No signal",
+        detail: leads.length > 0 ? "Leads marked converted" : "No scoped leads available",
+      },
+    },
     metrics: {
       leads: leads.length,
       pipelineStages: pipelineStages.length,

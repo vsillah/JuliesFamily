@@ -67,6 +67,9 @@ for (const phrase of [
   "writes: \"disabled\"",
   "isKinfloCrmRecordInScope",
   "actionGates",
+  "analytics",
+  "pipelineMovement",
+  "journeyConversion",
 ]) {
   check(context.includes(phrase), `CRM context includes ${phrase}`, "CRM context must resolve authorization and scope before actions.");
 }
@@ -80,6 +83,7 @@ const adminShell = existsSync(adminShellPath) ? readFileSync(adminShellPath, "ut
 for (const phrase of [
   "section-kinflo-crm-operating-context",
   "section-kinflo-crm-action-gates",
+  "section-kinflo-crm-analytics",
   "scopedCrmLeads",
   "scopedCrmTasks",
   "Preview writes disabled",

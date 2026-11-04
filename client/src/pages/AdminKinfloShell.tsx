@@ -453,13 +453,27 @@ function getKinfloSectionSnapshotMetrics(
 function KinfloSectionSnapshot({
   activeTab,
   snapshot,
+  crmAnalytics,
   onFocusMetric,
 }: {
   activeTab: ShellTabValue;
   snapshot: KinfloShellSnapshot;
+  crmAnalytics?: {
+    contacts: { value: number; detail: string };
+    pipelineMovement: { value: number; detail: string };
+    followUpTasks: { value: number; detail: string };
+    journeyConversion: { value: string; detail: string };
+  };
   onFocusMetric: (targetTestId: string) => void;
 }) {
-  const metrics = getKinfloSectionSnapshotMetrics(activeTab, snapshot);
+  const metrics = activeTab === "crm" && crmAnalytics
+    ? [
+        { label: "Contacts", value: crmAnalytics.contacts.value, detail: crmAnalytics.contacts.detail, targetTestId: "section-kinflo-crm-lead-table" },
+        { label: "Pipeline movement", value: crmAnalytics.pipelineMovement.value, detail: crmAnalytics.pipelineMovement.detail, targetTestId: "section-kinflo-crm-pipeline" },
+        { label: "Follow-up tasks", value: crmAnalytics.followUpTasks.value, detail: crmAnalytics.followUpTasks.detail, targetTestId: "section-kinflo-crm-follow-up-tasks" },
+        { label: "Journey conversion", value: crmAnalytics.journeyConversion.value, detail: crmAnalytics.journeyConversion.detail, targetTestId: "section-kinflo-crm-lead-table" },
+      ]
+    : getKinfloSectionSnapshotMetrics(activeTab, snapshot);
   return (
     <section className="mt-5 rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5" data-testid="section-kinflo-section-snapshot">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
@@ -470,7 +484,7 @@ function KinfloSectionSnapshot({
         </div>
         <Badge variant="outline" className="w-fit kinflo-pill kinflo-pill-neutral">Read-only</Badge>
       </div>
-      <div className="mt-4 grid gap-2 sm:grid-cols-3">
+      <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4" data-testid={activeTab === "crm" ? "section-kinflo-crm-analytics" : undefined}>
         {metrics.map((metric) => (
           <button
             key={metric.label}
@@ -8290,6 +8304,7 @@ export default function AdminKinfloShell() {
           <KinfloSectionSnapshot
             activeTab={activeTab}
             snapshot={snapshot}
+            crmAnalytics={crmWorkspace.analytics}
             onFocusMetric={(targetTestId) => focusSelectedShellSection(activeTab, targetTestId)}
           />
         )}
