@@ -313,6 +313,53 @@ function countStatuses(items: Array<{ status?: string }>, status: string) {
   return items.filter((item) => item.status === status).length;
 }
 
+function presentKinfloCopy(value: string) {
+  return value
+    .replace(/provider-light/gi, "preview")
+    .replace(/fixture-only/gi, "preview")
+    .replace(/fixture-backed/gi, "preview-backed")
+    .replace(/fixture/gi, "preview")
+    .replace(/read-only/gi, "preview")
+    .replace(/read only/gi, "preview")
+    .replace(/generated API bindings/gi, "live connection")
+    .replace(/generated (?:(?:Convex|live platform) )?API bindings/gi, "live connection")
+    .replace(/generated API/gi, "live connection")
+    .replace(/hosted Convex/gi, "live platform")
+    .replace(/Convex/gi, "live platform")
+    .replace(/provider writes/gi, "live connections")
+    .replace(/provider APIs/gi, "live connections")
+    .replace(/provider actions/gi, "live connections")
+    .replace(/provider/gi, "connection")
+    .replace(/hosted smoke/gi, "verification")
+    .replace(/smoke/gi, "verification")
+    .replace(/\/api\/[^\s]+/gi, "public intake connection")
+    .replace(/public intake connection until live connection are approved/gi, "Available after connection review")
+    .replace(/legacy fallback/gi, "previous connection")
+    .replace(/cutover/gi, "switch")
+    .replace(/activation/gi, "launch")
+    .replace(/gated/gi, "awaiting review")
+    .replace(/blocked/gi, "not yet available")
+    .replace(/_/g, " ")
+    .replace(/siteId/gi, "Site")
+    .replace(/journeyStage/gi, "Journey stage")
+    .replace(/runtime/gi, "system");
+}
+
+function presentKinfloFunctionName(value: string) {
+  const labels: Record<string, string> = {
+    "crm.submitLead": "Lead intake",
+    "crm.listLeads": "Contact list",
+    "crm.getLeadTimeline": "Contact history",
+    "crm.upsertPipelineStage": "Pipeline stages",
+    "crm.upsertJourneyProgressionRule": "Journey rules",
+    "crm.transitionLeadStage": "Stage updates",
+    "crm.updateLead": "Contact updates",
+    "crm.assignLead": "Owner assignments",
+    "crm.createTask": "Follow-up tasks",
+  };
+  return labels[value] ?? presentKinfloCopy(value);
+}
+
 function getKinfloSectionSnapshotMetrics(
   activeTab: ShellTabValue,
   snapshot: KinfloShellSnapshot,
@@ -323,7 +370,7 @@ function getKinfloSectionSnapshotMetrics(
       return [
         { label: "Tenant records", value: snapshot.tenants.length, detail: "Scoped to this operator view", targetTestId: "section-kinflo-tenant-control-plane-table" },
         { label: "Sites", value: snapshot.sites.length, detail: "Available across the tenant scope", targetTestId: "section-kinflo-tenant-control-plane-table" },
-        { label: "Active tenants", value: countStatuses(snapshot.tenants, "active"), detail: "Ready for read-only review", targetTestId: "section-kinflo-tenant-control-plane-table" },
+        { label: "Active tenants", value: countStatuses(snapshot.tenants, "active"), detail: "Ready for review", targetTestId: "section-kinflo-tenant-control-plane-table" },
       ];
     case "sites":
       return [
@@ -335,19 +382,19 @@ function getKinfloSectionSnapshotMetrics(
       return [
         { label: "Sites in review", value: snapshot.launchReadiness.sites.length, detail: "Launch packets in this scope", targetTestId: focusTarget },
         { label: "Launch gates", value: snapshot.launchGates.length, detail: "Readiness checks represented", targetTestId: focusTarget },
-        { label: "Ready gates", value: countStatuses(snapshot.launchGates, "active"), detail: "Provider-light status only", targetTestId: focusTarget },
+        { label: "Ready gates", value: countStatuses(snapshot.launchGates, "active"), detail: "Preview status", targetTestId: focusTarget },
       ];
     case "adapter-switch":
       return [
         { label: "Batches", value: snapshot.adapterSwitchReadiness.batches.length, detail: "Generated contract batches", targetTestId: focusTarget },
         { label: "Runway steps", value: snapshot.adapterSwitchReadiness.runwaySteps.length, detail: "Review steps before cutover", targetTestId: focusTarget },
-        { label: "Acceptance groups", value: snapshot.adapterSwitchReadiness.acceptanceMatrix.length, detail: "Still read-only and gated", targetTestId: focusTarget },
+        { label: "Acceptance groups", value: snapshot.adapterSwitchReadiness.acceptanceMatrix.length, detail: "Awaiting review", targetTestId: focusTarget },
       ];
     case "hosted-activation":
       return [
         { label: "Activation steps", value: snapshot.hostedActivationRunbook.steps.length, detail: "Prepare-only checklist", targetTestId: focusTarget },
         { label: "Decision gates", value: snapshot.hostedActivationRunbook.decisionRegister.length, detail: "Owner approvals still required", targetTestId: focusTarget },
-        { label: "Evidence targets", value: snapshot.hostedActivationRunbook.evidenceTargets.length, detail: "No hosted execution performed", targetTestId: focusTarget },
+        { label: "Evidence targets", value: snapshot.hostedActivationRunbook.evidenceTargets.length, detail: "Ready for verification", targetTestId: focusTarget },
       ];
     case "factory":
       return [
@@ -383,7 +430,7 @@ function getKinfloSectionSnapshotMetrics(
       return [
         { label: "Studio sites", value: snapshot.clientWebsiteStudio.sites.length, detail: "Scoped workspace targets", targetTestId: focusTarget },
         { label: "Starter packs", value: snapshot.clientWebsiteStudio.starterContentPacks.length, detail: "Local content fixtures", targetTestId: focusTarget },
-        { label: "Preview lanes", value: clientWebsiteStudioLaneValues.length, detail: "No live publish path", targetTestId: focusTarget },
+        { label: "Preview lanes", value: clientWebsiteStudioLaneValues.length, detail: "Preview publishing", targetTestId: focusTarget },
       ];
     case "assets":
       return [
@@ -430,8 +477,8 @@ function getKinfloSectionSnapshotMetrics(
     case "crm":
       return [
         { label: "Leads", value: snapshot.leads.length, detail: "Scoped records in the queue", targetTestId: "section-kinflo-crm-lead-table" },
-        { label: "Pipeline stages", value: snapshot.pipelineStages.length, detail: "Read-only stage model", targetTestId: "section-kinflo-crm-pipeline" },
-        { label: "Follow-up tasks", value: snapshot.tasks.length, detail: "No persistence enabled", targetTestId: "section-kinflo-crm-follow-up-tasks" },
+        { label: "Pipeline stages", value: snapshot.pipelineStages.length, detail: "Stage overview", targetTestId: "section-kinflo-crm-pipeline" },
+        { label: "Follow-up tasks", value: snapshot.tasks.length, detail: "Preview records", targetTestId: "section-kinflo-crm-follow-up-tasks" },
       ];
     case "experience":
       return [
@@ -468,10 +515,10 @@ function KinfloSectionSnapshot({
 }) {
   const metrics = activeTab === "crm" && crmAnalytics
     ? [
-        { label: "Contacts", value: crmAnalytics.contacts.value, detail: crmAnalytics.contacts.detail, targetTestId: "section-kinflo-crm-lead-table" },
-        { label: "Pipeline movement", value: crmAnalytics.pipelineMovement.value, detail: crmAnalytics.pipelineMovement.detail, targetTestId: "section-kinflo-crm-pipeline" },
-        { label: "Follow-up tasks", value: crmAnalytics.followUpTasks.value, detail: crmAnalytics.followUpTasks.detail, targetTestId: "section-kinflo-crm-follow-up-tasks" },
-        { label: "Journey conversion", value: crmAnalytics.journeyConversion.value, detail: crmAnalytics.journeyConversion.detail, targetTestId: "section-kinflo-crm-lead-table" },
+        { label: "Contacts", value: crmAnalytics.contacts.value, detail: "Contacts in this workspace", targetTestId: "section-kinflo-crm-lead-table" },
+        { label: "Pipeline movement", value: crmAnalytics.pipelineMovement.value, detail: "Contacts past the first stage", targetTestId: "section-kinflo-crm-pipeline" },
+        { label: "Follow-up tasks", value: crmAnalytics.followUpTasks.value, detail: "Follow-up items", targetTestId: "section-kinflo-crm-follow-up-tasks" },
+        { label: "Journey conversion", value: crmAnalytics.journeyConversion.value, detail: crmAnalytics.journeyConversion.detail === "No scoped leads available" ? "No contacts in this workspace" : crmAnalytics.journeyConversion.detail, targetTestId: "section-kinflo-crm-lead-table" },
       ]
     : getKinfloSectionSnapshotMetrics(activeTab, snapshot);
   return (
@@ -480,9 +527,9 @@ function KinfloSectionSnapshot({
         <div>
           <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Section snapshot</div>
           <h2 className="mt-1 text-lg font-semibold text-foreground">{shellTabLabels[activeTab]} at a glance</h2>
-          <p className="mt-1 text-sm leading-5 text-muted-foreground">Start with the scoped totals, then open the detailed read-only view below.</p>
+          <p className="mt-1 text-sm leading-5 text-muted-foreground">Start with the key numbers, then explore the details below.</p>
         </div>
-        <Badge variant="outline" className="w-fit kinflo-pill kinflo-pill-neutral">Read-only</Badge>
+        <Badge variant="outline" className="w-fit kinflo-pill kinflo-pill-neutral">Preview</Badge>
       </div>
       <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4" data-testid={activeTab === "crm" ? "section-kinflo-crm-analytics" : undefined}>
         {metrics.map((metric) => (
@@ -586,8 +633,6 @@ const workflowNavigationLanes: {
   },
 ];
 
-const workflowNavigationTabCoverage = workflowNavigationLanes.flatMap((lane) => lane.tabs);
-
 function KinfloTenantAdminSidebar({
   activeTab,
   onSelectTab,
@@ -617,13 +662,13 @@ function KinfloTenantAdminSidebar({
     <aside className="border-y border-r border-border bg-card p-3 md:sticky md:top-4 md:min-h-[calc(100vh-12rem)]" data-testid="section-kinflo-operator-sidebar">
       <div className="flex items-start justify-between gap-3 border-b border-border pb-3">
         <div className="min-w-0">
-          <div className="text-sm font-semibold text-foreground">Tenant admin</div>
+          <div className="text-sm font-semibold text-foreground">Workspace</div>
           <p className="mt-1 text-xs leading-5 text-muted-foreground">
-            Shared KinFlo navigation for the selected tenant and site.
+            Your Kinflo sections for this tenant and site.
           </p>
         </div>
         <Badge variant="outline" className="shrink-0 text-[10px]">
-          {workflowNavigationTabCoverage.length}/{shellTabValues.length - 1}
+          All sections
         </Badge>
       </div>
       <Button
@@ -660,7 +705,7 @@ function KinfloTenantAdminSidebar({
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-sm font-semibold">{lane.label}</span>
                   <span className={`kinflo-workspace-lane-description mt-0.5 block truncate text-[11px] ${isActiveLane ? "text-foreground/75" : statusTone}`}>
-                    {lane.tabs.length} sections · {lane.status}
+                    {lane.tabs.length} sections · {lane.status === "blocked" ? "Coming soon" : lane.status === "ready" ? "Ready" : "In review"}
                   </span>
                 </span>
               </button>
@@ -806,7 +851,7 @@ function KinfloTenantAdminSidebar({
                       </button>
                       {activeTab === "hosted-activation" ? (
                         <div className="mt-1 space-y-0.5 border-l border-primary/20 pl-3" data-testid="section-kinflo-sidebar-activation-stepper">
-                          <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Activation steps</div>
+                        <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Launch steps</div>
                           {activationSteps.map((step) => {
                             const isActiveStep = step.id === activeActivationStepId;
                             return (
@@ -1503,15 +1548,15 @@ function SiteFactoryQueueTable({ sites }: { sites: ShellSite[] }) {
 
 function liveAdapterStatusBadge(status: ShellLiveAdapterStatus) {
   if (status === "live_read_only") {
-    return <Badge className="bg-emerald-600 hover:bg-emerald-600">Live read-only</Badge>;
+    return <Badge className="bg-emerald-600 hover:bg-emerald-600">Connected preview</Badge>;
   }
   if (status === "live_smoke_pending") {
-    return <Badge className="bg-amber-600 hover:bg-amber-600">Smoke pending</Badge>;
+    return <Badge className="bg-amber-600 hover:bg-amber-600">Verification pending</Badge>;
   }
   if (status === "generated_api_pending") {
-    return <Badge variant="secondary">Codegen pending</Badge>;
+    return <Badge variant="secondary">Connection setup pending</Badge>;
   }
-  return <Badge variant="outline">Fixture fallback</Badge>;
+  return <Badge variant="outline">Preview fallback</Badge>;
 }
 
 function launchReadinessStatusBadge(status: ShellLaunchReadinessSite["stages"][number]["status"]) {
@@ -1529,7 +1574,7 @@ function hostedActivationStatusBadge(status: ShellHostedActivationStepStatus) {
     return <Badge className="bg-sky-600 hover:bg-sky-600">Ready after approval</Badge>;
   }
   if (status === "blocked_provider_gate") {
-    return <Badge variant="destructive">Provider gate</Badge>;
+    return <Badge variant="destructive">Connection review</Badge>;
   }
   return <Badge variant="outline">Pending approval</Badge>;
 }
@@ -1553,16 +1598,16 @@ function HostedActivationOverview({
             <div className="flex flex-wrap items-center gap-2">
               <Badge variant="outline" className="kinflo-pill kinflo-pill-warning">Review-only</Badge>
               <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">Vanguard scope</Badge>
-              <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">Fixture-only</Badge>
+              <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">Preview</Badge>
             </div>
-            <h2 className="mt-3 text-xl font-semibold text-foreground sm:text-2xl">Activation overview</h2>
+            <h2 className="mt-3 text-xl font-semibold text-foreground sm:text-2xl">Launch overview</h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-              Follow the steps in the sidebar. The selected gate below shows the next review decision; live activation stays unavailable until its evidence is approved.
+              Follow the steps in the sidebar. The selected item shows the next decision; launch remains unavailable until the review is complete.
             </p>
           </div>
           <Button disabled variant="outline" className="shrink-0" data-testid="button-hosted-activation-overview-gated">
             <ShieldCheck className="mr-2 h-4 w-4" />
-            Live activation unavailable
+            Launch not available yet
           </Button>
         </div>
 
@@ -1570,8 +1615,8 @@ function HostedActivationOverview({
           {[
             { label: "Steps", value: runbook.steps.length },
             { label: "Awaiting owner", value: pendingApproval },
-            { label: "Provider checks", value: providerGated },
-            { label: "Live actions blocked", value: liveBlocked },
+            { label: "Connection checks", value: providerGated },
+            { label: "Items awaiting review", value: liveBlocked },
           ].map((item) => (
             <div key={item.label} className="rounded-lg border border-border bg-muted/40 px-3 py-2">
               <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{item.label}</div>
@@ -1719,8 +1764,8 @@ function HostedActivationOwnerChecklist({
             {nextDecision?.blockedUntil ?? "Owner approval is required before hosted activation can move forward."}
           </p>
           <details className="mt-2 rounded-lg border border-amber-200 bg-white/70 p-2 text-xs leading-5 text-amber-900 dark:border-amber-400/40 dark:bg-black/10 dark:text-amber-100">
-            <summary className="cursor-pointer font-medium">Provider boundary</summary>
-            <p className="mt-1">{providerBoundary}</p>
+            <summary className="cursor-pointer font-medium">How this works</summary>
+            <p className="mt-1">{presentKinfloCopy(providerBoundary)}</p>
           </details>
         </aside>
       </div>
@@ -1753,8 +1798,8 @@ function ConfigurationAffordanceStrip({
 }) {
   const adminStateLabel = stateLabel.startsWith("Fixture ") ? "Local preview" : stateLabel;
   const stateDescription = adminStateLabel === "Local preview"
-    ? "Preview-only data; live changes are unavailable."
-    : "Changes stay local until live save is approved.";
+    ? "Preview data; live changes are not available yet."
+    : "Changes stay here until they are ready to share.";
 
   return (
     <section
@@ -1764,7 +1809,7 @@ function ConfigurationAffordanceStrip({
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="outline" className="border-slate-300 bg-white">
-            Configuration status
+            Review status
           </Badge>
           <Badge className="bg-slate-950 hover:bg-slate-950">{adminStateLabel}</Badge>
         </div>
@@ -1773,7 +1818,7 @@ function ConfigurationAffordanceStrip({
         <p className="mt-2 text-xs leading-5 text-slate-600">{stateDescription}</p>
         <div className="mt-3">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-medium text-slate-700">Activation evidence</span>
+            <span className="font-medium text-slate-700">Review progress</span>
             <span className="text-slate-500">{readinessPercent}%</span>
           </div>
           <Progress value={readinessPercent} className="mt-2 h-1.5" />
@@ -1788,23 +1833,23 @@ function ConfigurationAffordanceStrip({
           {provenanceNotes.slice(0, 3).map((note) => (
             <div key={note} className="flex items-start gap-2 text-xs leading-5 text-slate-600">
               <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" />
-              <span className="min-w-0 break-words">{note}</span>
+              <span className="min-w-0 break-words">{presentKinfloCopy(note)}</span>
             </div>
           ))}
         </div>
       </details>
 
       <div className="min-w-0 rounded-lg border border-amber-200 bg-amber-50 p-3">
-        <div className="text-[11px] font-medium uppercase tracking-normal text-amber-700">Live save unavailable</div>
+        <div className="text-[11px] font-medium uppercase tracking-normal text-amber-700">Changes not available yet</div>
         <div className="mt-3 space-y-2">
           {activationEvidence.slice(0, 2).map((item) => (
             <div key={item} className="flex items-start gap-2 text-xs leading-5 text-amber-900">
               <CircleDashed className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600" />
-              <span className="min-w-0 break-words">{item}</span>
+              <span className="min-w-0 break-words">{presentKinfloCopy(item)}</span>
             </div>
           ))}
         </div>
-        <p className="mt-3 text-xs leading-5 text-amber-900">{blockedLiveAction}</p>
+        <p className="mt-3 text-xs leading-5 text-amber-900">{presentKinfloCopy(blockedLiveAction)}</p>
         <Button disabled variant="outline" size="sm" className="mt-3 w-full justify-start bg-white" data-testid={`${testId}-blocked-action`}>
           <ShieldCheck className="mr-2 h-4 w-4" />
           {disabledActionLabel}
@@ -8119,18 +8164,18 @@ export default function AdminKinfloShell() {
           <div className={`flex flex-col lg:flex-row lg:items-center lg:justify-between ${activeTab === "site-studio" ? "gap-2" : "gap-4"}`}>
             <div className="min-w-0">
               <KinfloPillCluster className="sm:ml-auto">
-                <Badge className="bg-slate-950 text-white hover:bg-slate-950">Convex Phase 1</Badge>
-                <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">Provider-light shell</Badge>
+                <Badge className="bg-slate-950 text-white hover:bg-slate-950">Platform preview</Badge>
+                <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">Preview workspace</Badge>
                 <VanguardThemeControl mode={vanguardTheme.mode} onChange={vanguardTheme.setMode} navSolid />
               </KinfloPillCluster>
               <h1 className={`${activeTab === "site-studio" ? "mt-2 text-2xl sm:text-3xl" : "mt-3 text-3xl sm:text-4xl"} font-semibold leading-tight tracking-normal`}>KinFlo OS</h1>
               <p className={`${activeTab === "site-studio" ? "hidden" : "mt-2"} max-w-3xl text-base leading-7 text-slate-600`}>
-                The operating shell for tenants, sites, templates, permissions, and configurable public experiences.
+                One place to manage tenants, sites, content, permissions, and public experiences.
               </p>
             </div>
             {readOnlyReview ? (
               <div className={`${activeTab === "site-studio" ? "hidden sm:flex" : "flex"} max-w-sm items-center rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900`} data-testid="section-kinflo-read-only-creation-gate">
-                Tenant and site creation are disabled in fixture and read-only review mode.
+                This preview is for review. New tenants, sites, and updates are not available here.
               </div>
             ) : (
               <div className={`${activeTab === "site-studio" ? "hidden sm:flex" : "flex"} flex-wrap gap-2`}>
@@ -8150,11 +8195,11 @@ export default function AdminKinfloShell() {
             data-testid="section-kinflo-active-admin-scope"
           >
             <div className="min-w-0">
-              <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Child entry point · active tenant/site scope</div>
+              <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Selected workspace</div>
               <div className="mt-1 truncate text-sm font-semibold" data-testid="text-kinflo-active-admin-scope">
                 {adminScope.tenant.name} / {adminScope.site.name}
               </div>
-              <div className="mt-1 text-xs text-slate-400">Parent platform: KinFlo platform · this workspace is scoped to the selected tenant and site.</div>
+              <div className="mt-1 text-xs text-slate-400">Part of the Kinflo platform · showing this tenant and site.</div>
             </div>
             <Button
               type="button"
@@ -8179,23 +8224,23 @@ export default function AdminKinfloShell() {
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="outline" className="kinflo-pill kinflo-pill-warning">Next actions</Badge>
-                <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">{snapshot.dataMode.runtimeLabel}</Badge>
-                <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">{snapshot.activeObjectSignal.environment}</Badge>
+                <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">Preview</Badge>
+                <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral">{presentKinfloCopy(snapshot.activeObjectSignal.environment)}</Badge>
               </div>
               <h2 className="mt-3 text-xl font-semibold leading-tight text-foreground sm:text-2xl">{commandBrief.decision}</h2>
               <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-                Resolve the current gate in order. Each action opens a read-only review surface; irreversible actions remain gated.
+                Follow the recommended steps in order. Each action opens a review page; final changes require approval.
               </p>
             </div>
-            <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral w-fit shrink-0">Owner: {snapshot.activeObjectSignal.owner}</Badge>
+            <Badge variant="outline" className="kinflo-pill kinflo-pill-neutral w-fit shrink-0">Platform owner</Badge>
           </div>
 
           <div className="mt-5 grid gap-2" data-testid="section-kinflo-next-actions">
             {[
               {
                 key: "activation",
-                label: commandBrief.nextGate?.label ?? "Hosted Convex ownership",
-                detail: commandBrief.nextGate?.evidenceTarget ?? snapshot.activeObjectSignal.unblockCondition ?? commandBrief.blocker,
+                label: "Connect live services",
+                detail: "Confirm the services and permissions needed for the next stage.",
                 status: commandBrief.nextGate?.status,
                 icon: KeyRound,
                 actionLabel: "Open activation checklist",
@@ -8203,8 +8248,8 @@ export default function AdminKinfloShell() {
               },
               {
                 key: "adapter",
-                label: "Generated API and adapter review",
-                detail: "Confirm the generated read-only contract before switching away from fixtures.",
+                label: "Review connections",
+                detail: "Confirm how each workspace connects to the services it uses.",
                 status: undefined,
                 icon: Workflow,
                 actionLabel: "Review adapter mapping",
@@ -8213,7 +8258,7 @@ export default function AdminKinfloShell() {
               {
                 key: "launch",
                 label: "Launch evidence",
-                detail: "Review visual QA, domain readiness, and the launch decision packet.",
+                detail: "Review the experience, domain, and launch decision.",
                 status: undefined,
                 icon: Rocket,
                 actionLabel: "Review launch evidence",
@@ -8245,19 +8290,19 @@ export default function AdminKinfloShell() {
           </div>
 
           <div className="mt-4 rounded-xl border border-border bg-muted/50 p-3" data-testid="section-kinflo-readiness-snapshot">
-            <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Readiness snapshot</div>
+                <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Progress snapshot</div>
             <div className="mt-3 grid gap-2 sm:grid-cols-3">
               <div className="rounded-lg border border-border bg-card px-3 py-2">
                 <div className="text-xl font-semibold text-foreground">{launchReadinessCounts.ready}/{launchReadinessCounts.total}</div>
-                <div className="text-xs text-muted-foreground">launch checks ready</div>
+                <div className="text-xs text-muted-foreground">launch checks complete</div>
               </div>
               <div className="rounded-lg border border-border bg-card px-3 py-2">
                 <div className="text-xl font-semibold text-foreground">{adapterSwitchTotals.total}</div>
-                <div className="text-xs text-muted-foreground">adapter surfaces mapped</div>
+                <div className="text-xs text-muted-foreground">connections reviewed</div>
               </div>
               <div className="rounded-lg border border-border bg-card px-3 py-2">
                 <div className="text-xl font-semibold text-foreground">{hostedActivationTotals.providerGated}</div>
-                <div className="text-xs text-muted-foreground">hosted gates blocked</div>
+                <div className="text-xs text-muted-foreground">items awaiting review</div>
               </div>
             </div>
           </div>
@@ -16570,24 +16615,24 @@ export default function AdminKinfloShell() {
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <h2 className="text-xl font-semibold">CRM Lead Workspace</h2>
-                    <p className="text-sm text-muted-foreground">Site-scoped lead intake, assignment, and follow-up state.</p>
+                    <p className="text-sm text-muted-foreground">Lead intake, assignment, and follow-up for this site.</p>
                   </div>
                   <Badge variant="outline">
                     <UserRoundCheck className="mr-1 h-3 w-3" />
-                    crm.submitLead
+                    Lead intake
                   </Badge>
                 </div>
                 <Card className="shadow-none" data-testid="section-kinflo-crm-operating-context">
                   <CardHeader className="space-y-1">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <CardTitle className="text-base">Operating context</CardTitle>
-                      <Badge variant="outline">{crmOperatingContext.audit.eventStream.replaceAll("_", " ")}</Badge>
+                      <CardTitle className="text-base">Workspace context</CardTitle>
+                      <Badge variant="outline">Preview</Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground">CRM actions resolve through tenant, site, capability, and role context before they can be enabled.</p>
+                    <p className="text-sm text-muted-foreground">Your tenant, site, profile, and available CRM tools in one place.</p>
                   </CardHeader>
                   <CardContent className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                     <div className="rounded-md border border-border bg-background p-3">
-                      <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Scope</div>
+                      <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Workspace</div>
                       <div className="mt-1 text-sm font-semibold text-foreground">{crmOperatingContext.tenant.name}</div>
                       <div className="mt-1 text-xs text-muted-foreground">{crmOperatingContext.site.name}</div>
                     </div>
@@ -16597,14 +16642,14 @@ export default function AdminKinfloShell() {
                       <div className="mt-1 text-xs text-muted-foreground">{crmOperatingContext.capability.label}</div>
                     </div>
                     <div className="rounded-md border border-border bg-background p-3">
-                      <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Read access</div>
+                      <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Access</div>
                       <div className="mt-1 text-sm font-semibold text-foreground">{crmOperatingContext.authorization.read.status === "allowed" ? "Allowed" : "Blocked"}</div>
-                      <div className="mt-1 text-xs text-muted-foreground">{crmOperatingContext.authorization.read.permission}</div>
+                      <div className="mt-1 text-xs text-muted-foreground">Available for this workspace</div>
                     </div>
                     <div className="rounded-md border border-border bg-background p-3">
-                      <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Write state</div>
-                      <div className="mt-1 text-sm font-semibold text-foreground">Gated</div>
-                      <div className="mt-1 text-xs text-muted-foreground">Preview writes disabled</div>
+                      <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Editing</div>
+                      <div className="mt-1 text-sm font-semibold text-foreground">Preview only</div>
+                      <div className="mt-1 text-xs text-muted-foreground">Changes are not available yet</div>
                     </div>
                   </CardContent>
                   <div className="mx-6 mb-6 grid gap-2 border-t border-border pt-4 sm:grid-cols-2" data-testid="section-kinflo-crm-action-gates">
@@ -16612,9 +16657,9 @@ export default function AdminKinfloShell() {
                       <div key={action.key} className="flex items-start justify-between gap-3 rounded-md border border-border bg-background px-3 py-2 text-sm">
                         <div className="min-w-0">
                           <div className="font-medium text-foreground">{action.label}</div>
-                          <div className="mt-1 text-xs text-muted-foreground">{action.permission} · {action.reason}</div>
+                          <div className="mt-1 text-xs text-muted-foreground">Available after review</div>
                         </div>
-                        <Badge variant="outline" className="shrink-0">{action.status}</Badge>
+                        <Badge variant="outline" className="shrink-0">Coming soon</Badge>
                       </div>
                     ))}
                   </div>
@@ -16654,7 +16699,7 @@ export default function AdminKinfloShell() {
                   ) : (
                     <div className="border-dashed px-4 py-10 text-center" data-testid="section-kinflo-crm-lead-table-empty">
                       <div className="text-sm font-semibold text-foreground">No lead records yet</div>
-                      <p className="mt-1 text-sm text-muted-foreground">No lead records are available for the active tenant/site scope in this read-only fixture.</p>
+                      <p className="mt-1 text-sm text-muted-foreground">No contact records are available for this tenant and site in the current preview.</p>
                     </div>
                   )}
                 </div>
@@ -16667,8 +16712,8 @@ export default function AdminKinfloShell() {
                       <FormInput className="h-4 w-4" />
                     </div>
                     <div>
-                      <CardTitle className="text-base">Public Intake</CardTitle>
-                      <p className="mt-1 text-sm text-muted-foreground">Lead blocks map to `crm.submitLead` with `/api/leads` as the temporary runtime fallback.</p>
+                      <CardTitle className="text-base">Website inquiries</CardTitle>
+                      <p className="mt-1 text-sm text-muted-foreground">Capture new inquiries from the public site and route them to the right team.</p>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
@@ -16677,16 +16722,16 @@ export default function AdminKinfloShell() {
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             <div className="font-medium">{contract.label}</div>
-                            <div className="mt-1 text-xs text-muted-foreground">{contract.blockType} · {contract.convexFunction}</div>
+                            <div className="mt-1 text-xs text-muted-foreground">{presentKinfloCopy(contract.blockType)} · {presentKinfloFunctionName(contract.convexFunction)}</div>
                           </div>
-                          <Badge variant="outline">{contract.runtime}</Badge>
+                          <Badge variant="outline">{presentKinfloCopy(contract.runtime)}</Badge>
                         </div>
                         <div className="mt-2 flex flex-wrap gap-1">
                           {contract.requiredFields.map((field) => (
-                            <Badge key={field} variant="secondary">{field}</Badge>
+                            <Badge key={field} variant="secondary">{presentKinfloCopy(field)}</Badge>
                           ))}
                         </div>
-                        <div className="mt-2 text-xs text-muted-foreground">{contract.fallback}</div>
+                        <div className="mt-2 text-xs text-muted-foreground">{presentKinfloCopy(contract.fallback)}</div>
                       </div>
                     ))}
                   </CardContent>
@@ -16699,7 +16744,7 @@ export default function AdminKinfloShell() {
                     </div>
                     <div>
                       <CardTitle className="text-base">Pipeline</CardTitle>
-                      <p className="mt-1 text-sm text-muted-foreground">Phase 12 stages mirror `pipelineStages`.</p>
+                      <p className="mt-1 text-sm text-muted-foreground">Track each inquiry as it moves through your team&apos;s process.</p>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
@@ -16722,7 +16767,7 @@ export default function AdminKinfloShell() {
                     </div>
                     <div>
                       <CardTitle className="text-base">Follow-up Tasks</CardTitle>
-                      <p className="mt-1 text-sm text-muted-foreground">Task records stay scoped to lead and site.</p>
+                      <p className="mt-1 text-sm text-muted-foreground">Follow-up work for this site.</p>
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
@@ -16739,7 +16784,7 @@ export default function AdminKinfloShell() {
                       </div>
                     ))}
                     {scopedCrmTasks.length === 0 ? (
-                      <div className="rounded-md border border-dashed border-border px-3 py-4 text-sm text-muted-foreground">No follow-up tasks are registered for this scope.</div>
+                      <div className="rounded-md border border-dashed border-border px-3 py-4 text-sm text-muted-foreground">No follow-up items are available for this site.</div>
                     ) : null}
                   </CardContent>
                 </Card>
@@ -17285,13 +17330,13 @@ export default function AdminKinfloShell() {
 
         <div className={`${activeTab === "site-studio" ? "hidden" : "mt-8 flex"} flex-col gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-between`}>
           <div>
-            <h2 className="text-base font-semibold">Next Activation Gate</h2>
-            <p className="text-sm text-muted-foreground">Convex deployment, generated API bindings, and live admin smoke.</p>
+            <h2 className="text-base font-semibold">Next platform step</h2>
+            <p className="text-sm text-muted-foreground">Connect live services and complete the launch review.</p>
           </div>
           <Button variant="outline" asChild>
             <Link href="/admin/guide">
               <Settings2 className="mr-2 h-4 w-4" />
-              Admin Guide
+              Platform guide
             </Link>
           </Button>
         </div>
