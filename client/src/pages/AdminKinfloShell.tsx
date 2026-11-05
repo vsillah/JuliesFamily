@@ -8527,7 +8527,7 @@ export default function AdminKinfloShell() {
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <CardTitle className="text-base">Data Mode</CardTitle>
-                <Badge variant="outline">{snapshot.dataMode.label}</Badge>
+                <Badge variant="outline">{snapshot.dataMode.source === "convex" ? "Live read-only" : snapshot.dataMode.label}</Badge>
                 <Badge variant="secondary">{snapshot.dataMode.runtimeLabel}</Badge>
               </div>
               <p className="mt-2 max-w-3xl text-sm text-slate-600">
