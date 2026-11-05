@@ -88,7 +88,7 @@ const blockedValue: CrmWriteAdapterContextValue = {
   enabled: false,
   status: "blocked",
   error: null,
-  activationGate: blockedRuntime.activationGate,
+  activationGate: blockedRuntime.crmWriteActivationGate,
   submitLead: async () => { throw new Error("KinFlo CRM write adapter is disabled"); },
   transitionLeadStage: async () => { throw new Error("KinFlo CRM write adapter is disabled"); },
   updateLead: async () => { throw new Error("KinFlo CRM write adapter is disabled"); },
@@ -114,7 +114,7 @@ export function LiveKinfloCrmWriteAdapterProvider({ children }: { children: Reac
   const updateLead = useMutation(updateLeadMutation);
   const assignLead = useMutation(assignLeadMutation);
   const createTask = useMutation(createTaskMutation);
-  const enabled = runtime.canUseLiveData;
+  const enabled = runtime.canUseLiveCrmWrites;
   const [status, setStatus] = useState<CrmWriteStatus>(enabled ? "ready" : "blocked");
   const [error, setError] = useState<string | null>(null);
 
@@ -140,7 +140,7 @@ export function LiveKinfloCrmWriteAdapterProvider({ children }: { children: Reac
     enabled,
     status,
     error,
-    activationGate: runtime.activationGate,
+    activationGate: runtime.crmWriteActivationGate,
     submitLead: (input) => run(() => submitLead(input)),
     transitionLeadStage: (input) => run(() => transitionLeadStage(input)),
     updateLead: (input) => run(() => updateLead(input)),

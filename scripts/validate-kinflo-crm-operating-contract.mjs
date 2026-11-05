@@ -11,12 +11,18 @@ const documentPath = "docs/kinflo-crm-operating-contract.md";
 const contextPath = "client/src/lib/kinfloCrmOperatingContext.ts";
 const shellDataPath = "client/src/lib/kinfloShellData.ts";
 const adminShellPath = "client/src/pages/AdminKinfloShell.tsx";
+const runtimePath = "client/src/lib/kinfloConvexRuntime.ts";
+const writeAdapterPath = "client/src/contexts/KinfloCrmWriteAdapterContext.tsx";
+const snapshotProviderPath = "client/src/contexts/KinfloShellSnapshotContext.tsx";
 
 check(existsSync(contractPath), `${contractPath} exists`, "Operating contract JSON is missing.");
 check(existsSync(documentPath), `${documentPath} exists`, "Operating contract documentation is missing.");
 check(existsSync(contextPath), `${contextPath} exists`, "CRM operating context resolver is missing.");
 check(existsSync(shellDataPath), `${shellDataPath} exists`, "Scoped CRM fixture fields are missing.");
 check(existsSync(adminShellPath), `${adminShellPath} exists`, "CRM shell integration is missing.");
+check(existsSync(runtimePath), `${runtimePath} exists`, "CRM runtime gate is missing.");
+check(existsSync(writeAdapterPath), `${writeAdapterPath} exists`, "CRM write adapter is missing.");
+check(existsSync(snapshotProviderPath), `${snapshotProviderPath} exists`, "CRM snapshot provider is missing.");
 
 if (existsSync(contractPath)) {
   const contract = JSON.parse(readFileSync(contractPath, "utf8"));
@@ -102,6 +108,34 @@ for (const phrase of [
   "Preview writes disabled",
 ]) {
   check(adminShell.includes(phrase), `CRM shell includes ${phrase}`, "CRM UI must render scoped operating context and filtered records.");
+}
+
+const runtime = existsSync(runtimePath) ? readFileSync(runtimePath, "utf8") : "";
+for (const phrase of [
+  "VITE_KINFLO_CRM_WRITE_GENERATED_API_AVAILABLE",
+  "VITE_KINFLO_CRM_WRITE_SMOKE_VERIFIED",
+  "VITE_KINFLO_CRM_WRITE_ADAPTER_MODE",
+  "canUseLiveCrmWrites",
+  "crmWriteActivationGate",
+]) {
+  check(runtime.includes(phrase), `CRM runtime includes ${phrase}`, "CRM writes must have an independent, fail-closed runtime gate.");
+}
+
+const writeAdapter = existsSync(writeAdapterPath) ? readFileSync(writeAdapterPath, "utf8") : "";
+for (const phrase of [
+  "runtime.canUseLiveCrmWrites",
+  '"crm:submitLead"',
+  '"crm:transitionLeadStage"',
+  '"crm:updateLead"',
+  '"crm:assignLead"',
+  '"crm:createTask"',
+]) {
+  check(writeAdapter.includes(phrase), `CRM write adapter includes ${phrase}`, "Approved CRM mutations must remain behind the scoped adapter.");
+}
+
+const snapshotProvider = existsSync(snapshotProviderPath) ? readFileSync(snapshotProviderPath, "utf8") : "";
+for (const phrase of ["api.crm.listLeads", "crmListLeadsQuery", "Live CRM record"]) {
+  check(snapshotProvider.includes(phrase), `CRM snapshot includes ${phrase}`, "Live CRM reads must remain tenant/site scoped.");
 }
 
 const tracked = execFileSync("git", ["ls-files"], { encoding: "utf8" }).split("\n").filter(Boolean);

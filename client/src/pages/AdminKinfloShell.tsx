@@ -109,6 +109,7 @@ import {
 import { useKinfloAdminScope, useKinfloShellSnapshot } from "@/contexts/KinfloShellSnapshotContext";
 import { useKinfloPreferencesAdapter } from "@/contexts/KinfloPreferencesAdapterContext";
 import { useKinfloThemeWriteAdapter } from "@/contexts/KinfloThemeWriteAdapterContext";
+import { useKinfloCrmWriteAdapter } from "@/contexts/KinfloCrmWriteAdapterContext";
 import TenantSiteComposer from "@/components/TenantSiteComposer";
 import {
   buildWebsiteStudioDeepLink,
@@ -5862,6 +5863,7 @@ export default function AdminKinfloShell() {
   const adminScope = useKinfloAdminScope();
   const preferencesAdapter = useKinfloPreferencesAdapter();
   const themeWriteAdapter = useKinfloThemeWriteAdapter();
+  const crmWriteAdapter = useKinfloCrmWriteAdapter();
   const crmWorkspace = useMemo(
     () => resolveKinfloCrmWorkspace({
       tenantSlug: adminScope.tenant.slug,
@@ -5915,13 +5917,33 @@ export default function AdminKinfloShell() {
       },
     };
   }, [crmPreviewLeads, crmPreviewTasks, scopedCrmPipelineStages]);
-  const createPreviewInquiry = (event: FormEvent<HTMLFormElement>) => {
+  const createPreviewInquiry = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const name = crmInquiryName.trim();
     const email = crmInquiryEmail.trim();
     const firstStage = scopedCrmPipelineStages[0]?.slug ?? "new_lead";
     if (!name || !email) {
       setCrmPreviewNotice("Add a name and email to create the preview inquiry.");
+      return;
+    }
+    if (crmWriteAdapter.enabled) {
+      const [firstName, ...lastNameParts] = name.split(/\s+/);
+      try {
+        await crmWriteAdapter.submitLead({
+          siteId: adminScope.site.id,
+          email,
+          firstName,
+          lastName: lastNameParts.join(" ") || undefined,
+          source: "kinflo-admin",
+          metadata: { surface: "crm", scope: `${adminScope.tenant.slug}/${adminScope.site.key}` },
+        });
+        setCrmInquiryName("");
+        setCrmInquiryEmail("");
+        setCrmInquiryFormOpen(false);
+        setCrmPreviewNotice("Inquiry saved to the CRM.");
+      } catch (cause) {
+        setCrmPreviewNotice(cause instanceof Error ? cause.message : "The inquiry could not be saved.");
+      }
       return;
     }
     setCrmPreviewLeads((leads) => [{
@@ -5941,18 +5963,61 @@ export default function AdminKinfloShell() {
     setCrmInquiryFormOpen(false);
     setCrmPreviewNotice("Preview inquiry added. Live intake remains unavailable until CRM review is complete.");
   };
-  const movePreviewLead = (email: string, stage: string) => {
+  const movePreviewLead = async (email: string, stage: string) => {
     const nextStage = scopedCrmPipelineStages.find((item) => item.slug === stage);
+    const lead = scopedCrmLeads.find((item) => item.email === email);
+    if (crmWriteAdapter.enabled) {
+      if (!lead?.id) {
+        setCrmPreviewNotice("This live contact is missing its record identity; no change was submitted.");
+        return;
+      }
+      try {
+        await crmWriteAdapter.transitionLeadStage({
+          leadId: lead.id,
+          toStageKey: stage,
+          reason: "KinFlo admin pipeline update",
+          metadata: { surface: "crm", scope: `${adminScope.tenant.slug}/${adminScope.site.key}` },
+        });
+        setCrmPreviewNotice(`Pipeline stage saved as ${nextStage?.label ?? stage}.`);
+      } catch (cause) {
+        setCrmPreviewNotice(cause instanceof Error ? cause.message : "The pipeline stage could not be saved.");
+      }
+      return;
+    }
     setCrmPreviewLeads((leads) => leads.map((lead) => lead.email === email
       ? { ...lead, stage, lastEvent: `Preview stage changed to ${nextStage?.label ?? stage}` }
       : lead));
     setCrmPreviewNotice("Preview stage updated locally. Live stage changes remain unavailable.");
   };
-  const createPreviewTask = (event: FormEvent<HTMLFormElement>) => {
+  const createPreviewTask = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const title = crmTaskTitle.trim();
     if (!title) {
       setCrmPreviewNotice("Add a task title to create the preview task.");
+      return;
+    }
+    if (crmWriteAdapter.enabled) {
+      try {
+        await crmWriteAdapter.createTask({
+          siteId: adminScope.site.id,
+          title,
+          taskType: "follow_up",
+          status: "pending",
+          metadata: {
+            surface: "crm",
+            scope: `${adminScope.tenant.slug}/${adminScope.site.key}`,
+            contactLabel: crmTaskLead.trim() || undefined,
+            dueLabel: crmTaskDue.trim() || "This week",
+          },
+        });
+        setCrmTaskTitle("");
+        setCrmTaskLead("");
+        setCrmTaskDue("This week");
+        setCrmTaskFormOpen(false);
+        setCrmPreviewNotice("Follow-up task saved to the CRM.");
+      } catch (cause) {
+        setCrmPreviewNotice(cause instanceof Error ? cause.message : "The follow-up task could not be saved.");
+      }
       return;
     }
     setCrmPreviewTasks((tasks) => [{
@@ -16751,8 +16816,8 @@ export default function AdminKinfloShell() {
                     </div>
                     <div className="rounded-md border border-border bg-background p-3">
                       <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Editing</div>
-                      <div className="mt-1 text-sm font-semibold text-foreground">Preview controls</div>
-                      <div className="mt-1 text-xs text-muted-foreground">Live changes remain gated</div>
+                      <div className="mt-1 text-sm font-semibold text-foreground">{crmWriteAdapter.enabled ? "CRM connected" : "Preview controls"}</div>
+                      <div className="mt-1 text-xs text-muted-foreground">{crmWriteAdapter.enabled ? "Scoped live changes" : "Live changes remain gated"}</div>
                     </div>
                   </CardContent>
                   <div className="mx-6 mb-6 grid gap-2 border-t border-border pt-4 sm:grid-cols-2" data-testid="section-kinflo-crm-action-gates">
@@ -16760,9 +16825,9 @@ export default function AdminKinfloShell() {
                       <div key={action.key} className="flex items-start justify-between gap-3 rounded-md border border-border bg-background px-3 py-2 text-sm">
                         <div className="min-w-0">
                           <div className="font-medium text-foreground">{action.label}</div>
-                          <div className="mt-1 text-xs text-muted-foreground">Available after review</div>
+                          <div className="mt-1 text-xs text-muted-foreground">{crmWriteAdapter.enabled ? "Available in this scope" : "Available after review"}</div>
                         </div>
-                        <Badge variant="outline" className="shrink-0">Coming soon</Badge>
+                        <Badge variant="outline" className="shrink-0">{crmWriteAdapter.enabled ? "Available" : "Coming soon"}</Badge>
                       </div>
                     ))}
                   </div>
@@ -16770,7 +16835,9 @@ export default function AdminKinfloShell() {
                     <div className="mx-6 mb-6 rounded-md border border-border bg-muted p-3 text-sm text-muted-foreground">{crmOperatingContext.blocker}</div>
                   ) : null}
                   <div className="mx-6 mb-6 rounded-md border border-primary/20 bg-primary/5 p-3 text-sm text-muted-foreground">
-                    Preview controls below update this local workspace only. Preview writes disabled; live CRM changes remain unavailable until the connection review is complete.
+                    {crmWriteAdapter.enabled
+                      ? "CRM changes are connected for this verified tenant and site scope."
+                      : "Preview writes disabled. Controls below update this local workspace only; live CRM changes remain unavailable until the connection review is complete."}
                   </div>
                 </Card>
                 {crmPreviewNotice ? (
@@ -16837,7 +16904,7 @@ export default function AdminKinfloShell() {
                     </div>
                     <Button type="button" size="sm" variant="outline" className="shrink-0" onClick={() => setCrmInquiryFormOpen((open) => !open)} data-testid="button-kinflo-crm-add-preview-inquiry">
                       <Plus className="mr-2 h-3.5 w-3.5" />
-                      {crmInquiryFormOpen ? "Close" : "Add preview inquiry"}
+                      {crmInquiryFormOpen ? "Close" : crmWriteAdapter.enabled ? "Add inquiry" : "Add preview inquiry"}
                     </Button>
                   </CardHeader>
                   <CardContent className="space-y-3">
@@ -16860,7 +16927,7 @@ export default function AdminKinfloShell() {
                     ))}
                     {crmInquiryFormOpen ? (
                       <form className="rounded-md border border-primary/30 bg-primary/5 p-3" onSubmit={createPreviewInquiry} data-testid="form-kinflo-crm-preview-inquiry">
-                        <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Preview inquiry</div>
+                        <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{crmWriteAdapter.enabled ? "Website inquiry" : "Preview inquiry"}</div>
                         <div className="mt-3 grid gap-2 sm:grid-cols-2">
                           <div className="space-y-1">
                             <Label htmlFor="kinflo-crm-preview-inquiry-name">Name</Label>
@@ -16872,7 +16939,7 @@ export default function AdminKinfloShell() {
                           </div>
                         </div>
                         <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-                          <span className="text-xs text-muted-foreground">Saved to this local preview only.</span>
+                          <span className="text-xs text-muted-foreground">{crmWriteAdapter.enabled ? "Saved to the scoped CRM." : "Saved to this local preview only."}</span>
                           <Button type="submit" size="sm"><Plus className="mr-2 h-3.5 w-3.5" />Add inquiry</Button>
                         </div>
                       </form>
@@ -16914,13 +16981,13 @@ export default function AdminKinfloShell() {
                     </div>
                     <Button type="button" size="sm" variant="outline" className="shrink-0" onClick={() => setCrmTaskFormOpen((open) => !open)} data-testid="button-kinflo-crm-add-preview-task">
                       <Plus className="mr-2 h-3.5 w-3.5" />
-                      {crmTaskFormOpen ? "Close" : "Add preview task"}
+                      {crmTaskFormOpen ? "Close" : crmWriteAdapter.enabled ? "Add task" : "Add preview task"}
                     </Button>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {crmTaskFormOpen ? (
                       <form className="rounded-md border border-primary/30 bg-primary/5 p-3" onSubmit={createPreviewTask} data-testid="form-kinflo-crm-preview-task">
-                        <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Preview task</div>
+                        <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{crmWriteAdapter.enabled ? "Follow-up task" : "Preview task"}</div>
                         <div className="mt-3 grid gap-2 sm:grid-cols-2">
                           <div className="space-y-1 sm:col-span-2">
                             <Label htmlFor="kinflo-crm-preview-task-title">Task</Label>
@@ -16936,7 +17003,7 @@ export default function AdminKinfloShell() {
                           </div>
                         </div>
                         <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-                          <span className="text-xs text-muted-foreground">Saved to this local preview only.</span>
+                          <span className="text-xs text-muted-foreground">{crmWriteAdapter.enabled ? "Saved to the scoped CRM." : "Saved to this local preview only."}</span>
                           <Button type="submit" size="sm"><Plus className="mr-2 h-3.5 w-3.5" />Add task</Button>
                         </div>
                       </form>

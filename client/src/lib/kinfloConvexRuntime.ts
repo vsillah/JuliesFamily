@@ -130,6 +130,11 @@ export type KinfloConvexRuntimeSnapshot = {
   themeWriteReadbackVerified: boolean;
   themeWriteVisualQaApproved: boolean;
   canUseLiveThemeWrites: boolean;
+  crmWriteGeneratedApiAvailable: boolean;
+  crmWriteAdapterSelected: boolean;
+  crmWriteSmokeVerified: boolean;
+  canUseLiveCrmWrites: boolean;
+  crmWriteActivationGate: string;
   themeWriteActivationGate: string;
   activationGate: string;
   provisioningGate: string;
@@ -177,6 +182,14 @@ function readThemeWriteRuntimeGate() {
     themeWriteSmokeVerified,
     themeWriteReadbackVerified,
     themeWriteVisualQaApproved,
+  };
+}
+
+function readCrmWriteRuntimeGate() {
+  return {
+    crmWriteGeneratedApiAvailable: readBooleanEnv(import.meta.env.VITE_KINFLO_CRM_WRITE_GENERATED_API_AVAILABLE),
+    crmWriteAdapterSelected: import.meta.env.VITE_KINFLO_CRM_WRITE_ADAPTER_MODE === "live_verified",
+    crmWriteSmokeVerified: readBooleanEnv(import.meta.env.VITE_KINFLO_CRM_WRITE_SMOKE_VERIFIED),
   };
 }
 
@@ -236,12 +249,25 @@ export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
       ? "Theme writes are enabled for verified site-scoped saves with read-back confirmation."
       : "Live theme save requires the verified read-only adapter, reviewed generated bindings, hosted mutation smoke, read-back proof, visual QA approval, and an explicit live_verified adapter selection.",
   };
+  const crmWriteRuntime = readCrmWriteRuntimeGate();
+  const canUseLiveCrmWrites = Boolean(
+    canUseReadOnlyLiveData
+      && crmWriteRuntime.crmWriteGeneratedApiAvailable
+      && crmWriteRuntime.crmWriteAdapterSelected
+      && crmWriteRuntime.crmWriteSmokeVerified,
+  );
+  const crmWriteActivationGate = canUseLiveCrmWrites
+    ? "CRM writes are enabled for verified tenant/site-scoped operations with audit evidence."
+    : "CRM writes remain in preview until generated CRM bindings, scoped smoke evidence, and the explicit CRM adapter flag are verified.";
 
   if (!urlConfigured) {
     return {
       ...preferenceMutationSmokeClientGate,
       ...preferencesRuntime,
       ...themeWriteGate,
+      ...crmWriteRuntime,
+      canUseLiveCrmWrites,
+      crmWriteActivationGate,
       mode: "fixture_only",
       label: "Fixture only",
       urlConfigured,
@@ -262,6 +288,9 @@ export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
       ...preferenceMutationSmokeClientGate,
       ...preferencesRuntime,
       ...themeWriteGate,
+      ...crmWriteRuntime,
+      canUseLiveCrmWrites,
+      crmWriteActivationGate,
       mode: "env_configured_codegen_pending",
       label: "Convex env ready, codegen pending",
       publicUrl,
@@ -283,6 +312,9 @@ export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
       ...preferenceMutationSmokeClientGate,
       ...preferencesRuntime,
       ...themeWriteGate,
+      ...crmWriteRuntime,
+      canUseLiveCrmWrites,
+      crmWriteActivationGate,
       mode: "generated_api_ready_smoke_pending",
       label: "Read-only bindings ready, smoke pending",
       publicUrl,
@@ -304,6 +336,9 @@ export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
       ...preferenceMutationSmokeClientGate,
       ...preferencesRuntime,
       ...themeWriteGate,
+      ...crmWriteRuntime,
+      canUseLiveCrmWrites,
+      crmWriteActivationGate,
       mode: "read_only_live_ready",
       label: "Convex read-only live",
       publicUrl,
@@ -324,6 +359,9 @@ export function getKinfloConvexRuntime(): KinfloConvexRuntimeSnapshot {
     ...preferenceMutationSmokeClientGate,
     ...preferencesRuntime,
     ...themeWriteGate,
+    ...crmWriteRuntime,
+    canUseLiveCrmWrites,
+    crmWriteActivationGate,
     mode: "live_ready",
     label: "Convex full adapter blocked",
     publicUrl,

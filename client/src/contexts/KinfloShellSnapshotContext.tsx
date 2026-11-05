@@ -120,6 +120,7 @@ const checkEntitlementLimitQuery = api.entitlements.checkEntitlementLimit;
 const publicSiteQuery = api.publicSite.resolvePublishedSite;
 const siteLaunchReadinessQuery = api.launchReadiness.getSiteLaunchReadiness;
 const activationReadinessQuery = api.activation.readiness;
+const crmListLeadsQuery = api.crm.listLeads;
 
 const KinfloShellSnapshotContext = createContext<KinfloShellSnapshot | null>(null);
 
@@ -458,6 +459,10 @@ function EnabledReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children
     publicSiteQuery,
     enabled && selectedSite?.subdomain ? { subdomain: selectedSite.subdomain, route: "/" } : "skip",
   );
+  const crmLeads = useQuery(
+    crmListLeadsQuery,
+    enabled && selectedSite ? { siteId: selectedSite._id, limit: 100 } : "skip",
+  );
 
   const tenantOptions = (tenants ?? []).map((tenant) => ({ id: tenant._id, slug: tenant.slug, name: tenant.name }));
   const siteOptions = (sites ?? []).map((site) => ({
@@ -479,6 +484,7 @@ function EnabledReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children
     && siteLimit !== undefined
     && primarySite !== undefined
     && launchReadiness !== undefined
+    && crmLeads !== undefined
     && (primarySite.subdomain ? publicSite !== undefined : true);
 
   const snapshot = useMemo(() => {
@@ -590,6 +596,23 @@ function EnabledReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children
       blockerSummary: `${launchReadiness.readyCount}/${launchReadiness.totalCount} read-only launch checks ready`,
       stages: readinessStages(launchReadiness),
     };
+    const liveLeads = crmLeads.map((lead) => ({
+      id: lead._id,
+      tenantSlug: primaryTenant.slug,
+      siteKey: primarySite.slug,
+      name: [lead.firstName, lead.lastName].filter(Boolean).join(" ") || lead.email,
+      email: lead.email,
+      site: primarySite.name,
+      persona: lead.persona ?? "Contact",
+      stage: lead.pipelineStageKey ?? "new_lead",
+      owner: lead.assignedTo ?? "Unassigned",
+      status: (lead.status === "converted"
+        ? "converted"
+        : lead.status === "archived"
+          ? "archived"
+          : "active") as KinfloShellStatus,
+      lastEvent: "Live CRM record",
+    }));
     let liveBindings = liveBindingEvidence(fallback, "Tenant control plane", [
       `${tenants.length} scoped tenant(s) returned`,
       `${scopedSites.length} active site returned for ${primaryTenant.slug}`,
@@ -657,11 +680,13 @@ function EnabledReadOnlyLiveKinfloShellSnapshotProvider({ children }: { children
           "Mutation and provider-write references remain unmounted",
         ],
       },
+      leads: liveLeads,
     };
   }, [
     activation,
     auditEvents,
     coreLoaded,
+    crmLeads,
     enabled,
     entitlementUsage,
     launchReadiness,

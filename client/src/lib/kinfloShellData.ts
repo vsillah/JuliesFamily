@@ -2176,6 +2176,7 @@ export type ShellAccessDelegation = {
 };
 
 export type ShellLead = {
+  id?: string;
   tenantSlug: string;
   siteKey: string;
   name: string;

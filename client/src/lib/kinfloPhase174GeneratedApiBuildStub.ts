@@ -138,6 +138,18 @@ type Phase174GeneratedApi = {
     listClientWebsiteLaunchComposer: ReadOnlyReference;
   };
   crm: {
+    listLeads: ReadOnlyReference<{ siteId: string; status?: string; pipelineStageKey?: string; limit?: number }, Array<{
+      _id: string;
+      siteId: string;
+      email: string;
+      firstName?: string;
+      lastName?: string;
+      persona?: string;
+      pipelineStageKey?: string;
+      assignedTo?: string;
+      status: string;
+      updatedAt: number;
+    }>>;
     listJourneyProgressionRules: ReadOnlyReference;
   };
   integrations: {
