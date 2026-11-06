@@ -1,10 +1,10 @@
 # Phase 189: Convex read-only smoke result
 
-Status: blocked at the authenticated development-admin gate. The approved
-development-readiness scope reached the exact local generated-binding harness
-and the local Auth0 callback now returns to the harness, but the authenticated
-identity has no platform-admin projection in the development deployment. The
-read-only query sequence was not started.
+Status: blocked at the approved scope-ID entry gate. The authenticated
+development-admin repair succeeded and the exact local generated-binding
+harness is available, but the approved Convex tenant and site IDs were not
+available in the current task context. The read-only query sequence was not
+started; no IDs were guessed or substituted with URL slugs.
 
 ## Boundaries
 
@@ -26,7 +26,9 @@ read-only query sequence was not started.
   the query runner.
 - The harness requires separately approved Convex `tenants` and `sites` IDs;
   URL slugs such as `vanguard-enterprises` are not accepted as substitutes.
-- The user completed the hosted dev-admin role repair successfully.
+- The one-time dev-only platform-role repair completed successfully for the
+  authenticated identity. No tenant, site, production, provider, CRM, data,
+  deployment, or adapter change was made.
 - The approved Infisical `dev:/SITE_URL` value was aligned to the available
   local harness port `http://127.0.0.1:5001`; activation preflight passed all
   114 checks and injected eight secrets without creating `.env.local`.
@@ -40,23 +42,22 @@ read-only query sequence was not started.
   `CONVEX_SITE_URL` for the Convex Auth provider domain, while the browser
   client starts Auth0 through the Convex deployment selected by
   `VITE_CONVEX_URL`. The app does not read `SITE_URL` for this callback.
-- The repair button was not invoked because role repair is outside this
-  approval. No query, mutation, provider action, deployment, import, or data
-  write ran.
+- A direct unauthenticated CLI lookup was rejected by the server, preserving
+  the authenticated boundary. No query, mutation, provider action, deployment,
+  import, or data write ran.
 
 ## Stop decision
 
-Stop at the development-admin gate. Do not click role repair, invent tenant or
-site IDs, or retry the query sequence until the approved identity has a
-platform-admin projection on `hallowed-manatee-765` or the smoke is explicitly
-moved to an approved hosted development route exposing the same generated
-harness. No additional role, tenant, site, production, provider, or adapter
-change was made in this phase.
+Stop at the scope-ID entry gate. Do not invent tenant or site IDs, use URL
+slugs as substitutes, or retry the query sequence until the approved Convex
+tenant and site IDs for the Vanguard and Julie scopes are entered directly in
+the harness. No additional role, tenant, site, production, provider, CRM,
+data, deployment, or adapter change was made in this phase.
 
 ## Next gate
 
-After the callback binding is corrected, sign in once, paste the approved
-Vanguard or Julie Convex tenant ID and its approved site ID into the harness,
-confirm that the IDs belong to the approved scope, and run `Run 20 read-only
-queries`. The harness stops after the first failure and emits only sanitized
-counts and statuses; preserve that boundary.
+With the repaired session retained, paste the approved Vanguard or Julie
+Convex tenant ID and its approved site ID directly into the harness, confirm
+that the IDs belong to the approved scope, and run `Run 20 read-only queries`.
+The harness stops after the first failure and emits only sanitized counts and
+statuses; preserve that boundary.
