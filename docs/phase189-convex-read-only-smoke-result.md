@@ -1,8 +1,9 @@
 # Phase 189: Convex read-only smoke result
 
-Status: blocked at the authenticated browser gate. The approved development
-readiness scope reached the exact local generated-binding harness, but the
-read-only query sequence was not started.
+Status: blocked at the authenticated browser callback gate. The approved
+development-readiness scope reached the exact local generated-binding harness,
+and the user completed the hosted dev-role repair, but the read-only query
+sequence was not started.
 
 ## Boundaries
 
@@ -24,18 +25,25 @@ read-only query sequence was not started.
   the query runner.
 - The harness requires separately approved Convex `tenants` and `sites` IDs;
   URL slugs such as `vanguard-enterprises` are not accepted as substitutes.
+- The user completed the hosted dev-admin role repair successfully.
+- Starting Auth0 sign-in from `127.0.0.1:5000` redirected back to the hosted
+  `SITE_URL`, so the local browser did not receive a localhost Convex Auth
+  session. The hosted preview then showed the repaired admin shell, not the
+  development-only harness.
 - No query, mutation, provider action, deployment, import, or data write ran.
 
 ## Stop decision
 
-Stop at the user-owned Auth0 gate. Do not enter credentials, invent tenant or
-site IDs, or retry the query sequence until the user completes Auth0 sign-in
-in the persistent tab and supplies or pastes the approved IDs into the local
-harness fields.
+Stop at the callback-binding mismatch. Do not enter credentials again, invent
+tenant or site IDs, or retry the query sequence until the approved development
+callback/SITE_URL path is aligned with the local harness or the smoke is
+explicitly moved to the hosted development route that exposes the same
+generated harness.
 
 ## Next gate
 
-After sign-in, paste the approved Vanguard or Julie Convex tenant ID and its
-approved site ID into the harness, confirm that the IDs belong to the approved
-scope, and run `Run 20 read-only queries`. The harness stops after the first
-failure and emits only sanitized counts and statuses; preserve that boundary.
+After the callback binding is corrected, sign in once, paste the approved
+Vanguard or Julie Convex tenant ID and its approved site ID into the harness,
+confirm that the IDs belong to the approved scope, and run `Run 20 read-only
+queries`. The harness stops after the first failure and emits only sanitized
+counts and statuses; preserve that boundary.
