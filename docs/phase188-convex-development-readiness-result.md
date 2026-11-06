@@ -1,7 +1,7 @@
 # Phase 188: Convex development readiness result
 
-Status: blocked at local codegen. The approved development-readiness gate did
-not reach a valid generated API review or read-only smoke.
+Status: development readiness passed after dependency materialization; the
+authenticated read-only smoke is tracked separately in Phase 189.
 
 ## Approved binding
 
@@ -17,28 +17,23 @@ not reach a valid generated API review or read-only smoke.
 - Infisical-backed activation preflight passed 114 checks.
 - The repository generated-API contract review passed 314 checks before
   codegen, with 95 runtime functions mapped and no generated API imports.
-- The standard codegen wrapper could not materialize the pinned Convex CLI
-  because npm returned `ETARGET` for unavailable
-  `@tailwindcss/oxide@4.3.5`.
-- The already-installed pinned Convex `1.42.1` binary was tried through the
-  same Infisical environment. Codegen reached component bundling but failed
-  because the current checkout has no local `convex/server` resolution.
-- A non-mutating `NODE_PATH` retry produced the same resolver failure.
-
-The failed runs left only ignored partial files under `convex/_generated/`;
-they were not treated as valid bindings, imported by the product, committed,
-or used for smoke. No hosted Convex query, mutation, action, deployment, or
-data write ran.
+- `npm ci --ignore-scripts --no-audit --no-fund` materialized the lockfile
+  dependencies without changing the manifest.
+- The standard Infisical-backed codegen wrapper then passed with pinned Convex
+  CLI `1.42.1`, generated bindings, and TypeScript validation.
+- Codegen output reported synchronization of the approved development
+  deployment. No production deployment, mutation, action, provider action, or
+  data write was intentionally run.
+- Generated files remain ignored and uncommitted under `convex/_generated/`.
 
 ## Stop decision
 
-The read-only Vanguard/Julie smoke was not run because valid generated
-bindings were not produced. The gate stops on the local dependency/resolution
-blocker rather than treating partial generated scaffolding as evidence.
+Generated API review passed 314 checks, and the read-only smoke manifest and
+dry-run validators passed. The browser query sequence is not represented here;
+its authenticated gate and stop condition are recorded in Phase 189.
 
 ## Next repair
 
-Repair the checkout's dependency materialization so the pinned Convex CLI can
-resolve `convex/server` from the current project, then rerun one explicitly
-approved codegen and generated-binding review. Do not enable the adapter or
-run hosted smoke until that review passes.
+Complete the user-owned Auth0 sign-in and provide the separately approved
+Convex tenant/site IDs to the Phase 189 local harness. Do not enable the
+adapter or run mutation smoke until the read-only query sequence passes.
