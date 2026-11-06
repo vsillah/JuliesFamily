@@ -35,15 +35,20 @@ sequence was not started.
   confirms the current callback path does not consume that Infisical key. The
   hosted preview then showed the repaired admin shell, not the development-only
   harness.
+- Source inspection confirms the mismatch: `convex/auth.config.ts` reads
+  `CONVEX_SITE_URL` for the Convex Auth provider domain, while the browser
+  client starts Auth0 through the Convex deployment selected by
+  `VITE_CONVEX_URL`. The app does not read `SITE_URL` for this callback.
 - No query, mutation, provider action, deployment, import, or data write ran.
 
 ## Stop decision
 
 Stop at the callback-binding mismatch. Do not enter credentials again, invent
-tenant or site IDs, or retry the query sequence until the development callback
-path is explicitly mapped to the local harness or the smoke is explicitly
-moved to a hosted development route that exposes the same generated harness.
-No additional Infisical key or hosted configuration was changed in this phase.
+tenant or site IDs, or retry the query sequence until the development Convex
+site URL and Auth0 callback are explicitly aligned with the local harness or
+the smoke is explicitly moved to a hosted development route that exposes the
+same generated harness. No additional Infisical key or hosted configuration
+was changed in this phase.
 
 ## Next gate
 
