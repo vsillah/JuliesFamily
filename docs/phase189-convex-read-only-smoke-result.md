@@ -26,19 +26,24 @@ sequence was not started.
 - The harness requires separately approved Convex `tenants` and `sites` IDs;
   URL slugs such as `vanguard-enterprises` are not accepted as substitutes.
 - The user completed the hosted dev-admin role repair successfully.
+- The approved Infisical `dev:/SITE_URL` value was set to
+  `http://127.0.0.1:5000`; activation preflight then passed all 114 checks and
+  injected eight secrets without creating `.env.local`.
 - Starting Auth0 sign-in from `127.0.0.1:5000` redirected back to the hosted
-  `SITE_URL`, so the local browser did not receive a localhost Convex Auth
-  session. The hosted preview then showed the repaired admin shell, not the
-  development-only harness.
+  Vercel URL despite the approved local `SITE_URL` being present and injected,
+  so the local browser did not receive a localhost Convex Auth session. This
+  confirms the current callback path does not consume that Infisical key. The
+  hosted preview then showed the repaired admin shell, not the development-only
+  harness.
 - No query, mutation, provider action, deployment, import, or data write ran.
 
 ## Stop decision
 
 Stop at the callback-binding mismatch. Do not enter credentials again, invent
-tenant or site IDs, or retry the query sequence until the approved development
-callback/SITE_URL path is aligned with the local harness or the smoke is
-explicitly moved to the hosted development route that exposes the same
-generated harness.
+tenant or site IDs, or retry the query sequence until the development callback
+path is explicitly mapped to the local harness or the smoke is explicitly
+moved to a hosted development route that exposes the same generated harness.
+No additional Infisical key or hosted configuration was changed in this phase.
 
 ## Next gate
 
