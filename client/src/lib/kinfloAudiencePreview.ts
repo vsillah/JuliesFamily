@@ -235,16 +235,16 @@ export function filterKinfloPreviewBlocks<T extends { metadata?: Record<string, 
   resolution: KinfloAudiencePreviewResolution,
 ) {
   if (resolution.status !== "ready") return [];
+  const selectedPersona = resolution.context.persona;
+  const selectedJourneyStage = resolution.context.journeyStage;
   return blocks.filter((block) => {
     const persona = typeof block.metadata?.persona === "string" ? block.metadata.persona : undefined;
     const journeyStage = typeof block.metadata?.journeyStage === "string" ? block.metadata.journeyStage : undefined;
-    return evaluateKinfloVisibility({
-      tenantSlug: resolution.context.tenantSlug,
-      siteSlug: resolution.context.siteSlug,
-      persona,
-      journeyStage,
-      isVisible: true,
-    }, resolution.context);
+    // An unqualified public preview represents the complete configured journey.
+    // Apply audience metadata only after an explicit preview selection exists.
+    if (selectedPersona && persona && persona !== selectedPersona) return false;
+    if (selectedJourneyStage && journeyStage && journeyStage !== selectedJourneyStage) return false;
+    return true;
   });
 }
 

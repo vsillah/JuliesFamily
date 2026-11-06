@@ -1,5 +1,5 @@
 import { Link, useRoute } from "wouter";
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { ArrowRight, BriefcaseBusiness, Building2, CheckCircle2, CircleDashed, FileText, Goal, HandHelping, Landmark, LockKeyhole, Mail, MapPin, Network, PackageCheck, Save, UsersRound, Wrench } from "lucide-react";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
 import OrderLifecycleNavigation from "@/components/OrderLifecycleNavigation";
@@ -56,6 +56,89 @@ function getFunnelStage(metadata: Record<string, unknown> | undefined): FunnelSt
   return value === "awareness" || value === "consideration" || value === "decision" || value === "retention"
     ? value
     : "awareness";
+}
+
+const HERO_CROSSFADE_SECONDS = 0.7;
+
+function LoopingHeroVideo({
+  src,
+  poster,
+  objectPosition,
+  heroParallaxY,
+}: {
+  src: string;
+  poster: string;
+  objectPosition: string;
+  heroParallaxY: number;
+}) {
+  const videoRefs = useRef<Array<HTMLVideoElement | null>>([]);
+  const transitionTimer = useRef<number | null>(null);
+  const transitionIndexRef = useRef<number | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [transitionIndex, setTransitionIndex] = useState<number | null>(null);
+
+  useEffect(() => () => {
+    if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
+  }, []);
+
+  const startTransition = (currentIndex: number) => {
+    if (transitionIndexRef.current !== null) return;
+    const nextIndex = currentIndex === 0 ? 1 : 0;
+    const nextVideo = videoRefs.current[nextIndex];
+    const currentVideo = videoRefs.current[currentIndex];
+    if (!nextVideo || !currentVideo) return;
+
+    nextVideo.currentTime = 0;
+    void nextVideo.play();
+    transitionIndexRef.current = nextIndex;
+    setTransitionIndex(nextIndex);
+    transitionTimer.current = window.setTimeout(() => {
+      currentVideo.pause();
+      currentVideo.currentTime = 0;
+      setActiveIndex(nextIndex);
+      transitionIndexRef.current = null;
+      setTransitionIndex(null);
+    }, HERO_CROSSFADE_SECONDS * 1000);
+  };
+
+  return (
+    <div className="kinflo-hero-video-stack absolute inset-0" aria-hidden="true">
+      {[0, 1].map((index) => {
+        const isVisible = transitionIndex === null ? index === activeIndex : index === activeIndex || index === transitionIndex;
+        const opacity = transitionIndex === null
+          ? index === activeIndex ? 1 : 0
+          : index === transitionIndex ? 1 : 0;
+
+        return (
+          <video
+            key={index}
+            ref={(node) => { videoRefs.current[index] = node; }}
+            autoPlay={index === 0}
+            muted
+            playsInline
+            preload="auto"
+            poster={poster}
+            className="kinflo-hero-media kinflo-hero-video absolute inset-0 h-full w-full object-cover"
+            style={{
+              opacity: isVisible ? opacity : 0,
+              objectPosition,
+              transform: `translate3d(0, ${heroParallaxY}px, 0) scale(1.04)`,
+              transition: `opacity ${HERO_CROSSFADE_SECONDS}s ease-in-out`,
+            }}
+            onTimeUpdate={(event) => {
+              const video = event.currentTarget;
+              if (index === activeIndex && Number.isFinite(video.duration) && video.duration - video.currentTime <= HERO_CROSSFADE_SECONDS) {
+                startTransition(index);
+              }
+            }}
+            onEnded={() => startTransition(index)}
+          >
+            <source src={src} type="video/mp4" />
+          </video>
+        );
+      })}
+    </div>
+  );
 }
 
 function FulfillmentWorkflowSection({ block }: { block: KinfloPublicBlock }) {
@@ -420,18 +503,26 @@ function BlockSection({
 
   if (block.type === "hero") {
     return (
-      <section className="relative min-h-[560px] overflow-hidden" data-testid="public-preview-hero">
-        <img
-          src={preview.theme.media.heroImage}
-          alt={preview.theme.media.heroAlt ?? `${preview.site.name} preview`}
-          className="kinflo-hero-media absolute inset-0 h-full w-full object-cover"
-          style={{
-            objectPosition: preview.theme.media.heroPosition ?? "center",
-            transform: `translate3d(0, ${heroParallaxY}px, 0) scale(1.04)`,
-          }}
-        />
+      <section className="relative min-h-[100svh] overflow-hidden" data-testid="public-preview-hero">
+        <div className="kinflo-hero-media-drift absolute inset-[-2%]">
+          <img
+            src={preview.theme.media.heroImage}
+            alt=""
+            aria-hidden="true"
+            className={`kinflo-hero-media-poster absolute inset-0 h-full w-full object-cover ${preview.theme.media.heroVideo ? "kinflo-hero-media-poster-with-video" : ""}`}
+            style={{ objectPosition: preview.theme.media.heroPosition ?? "center" }}
+          />
+          {preview.theme.media.heroVideo && (
+            <LoopingHeroVideo
+              src={preview.theme.media.heroVideo}
+              poster={preview.theme.media.heroImage}
+              objectPosition={preview.theme.media.heroPosition ?? "center"}
+              heroParallaxY={heroParallaxY}
+            />
+          )}
+        </div>
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/45 to-black/70" />
-        <div className="relative mx-auto flex min-h-[560px] max-w-7xl flex-col justify-center px-4 pb-24 pt-32 sm:px-6 lg:px-8">
+        <div className="relative mx-auto flex min-h-[100svh] max-w-7xl flex-col justify-center px-4 pb-24 pt-32 sm:px-6 lg:px-8">
           <Badge className="w-fit bg-white/90 text-slate-950 hover:bg-white">
             {preview.site.slug === VANGUARD_SITE_KEY ? "Engineering and technology services" : preview.site.name}
           </Badge>
@@ -675,14 +766,16 @@ export default function KinfloPublicSitePreview() {
         className={`fixed inset-x-0 top-0 z-40 transition-colors duration-300 ${navSolid ? "bg-background/95 shadow-sm backdrop-blur" : navOverlayClass}`}
         data-nav-state={navSolid ? "solid" : "overlay"}
         data-nav-contrast={composition.theme.navContrast}
-        onMouseEnter={() => setNavInteracted(true)}
-        onMouseLeave={() => setNavInteracted(false)}
-        onFocusCapture={() => setNavFocused(true)}
-        onBlurCapture={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setNavFocused(false);
-        }}
       >
-        <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 py-3 sm:gap-4 sm:px-6 lg:px-8">
+        <div
+          className="mx-auto flex w-fit max-w-full items-center gap-2 px-3 py-3 sm:gap-4 sm:px-6 lg:px-8"
+          onMouseEnter={() => setNavInteracted(true)}
+          onMouseLeave={() => setNavInteracted(false)}
+          onFocusCapture={() => setNavFocused(true)}
+          onBlurCapture={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setNavFocused(false);
+          }}
+        >
           <Link href={`/kinflo-sites/${preview.site.slug}`} className={`flex shrink-0 items-center text-sm font-semibold ${navSolid ? "text-foreground" : "text-white"}`}>
             {logoImage ? (
               <img
@@ -728,17 +821,16 @@ export default function KinfloPublicSitePreview() {
         ) : (
           <>
             {audienceResolution?.status === "ready" && (
-              <div className="border-b border-slate-200 bg-slate-50 px-4 py-3 text-center text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300" data-testid="public-preview-audience-context">
-                Preview only: {preview.context.persona ?? "anonymous"} / {preview.context.journeyStage ?? "default"}.
+              <div className="sr-only" data-testid="public-preview-audience-context" data-contract="public-preview-context">
+                {preview.context.persona ?? "anonymous"} / {preview.context.journeyStage ?? "default"}.
                 {experimentResolution?.status === "ready" && experimentResolution.variant
-                  ? ` Experiment ${experimentResolution.experiment?.label} · ${experimentResolution.variant.label}.`
+                  ? ` ${experimentResolution.experiment?.label} · ${experimentResolution.variant.label}.`
                   : " No experiment selected."}
-                {" "}Deterministic selection only; no live allocation, measurement emission, or persistence is changed.
               </div>
             )}
             {capabilityPreview && (
-              <div className="border-b border-slate-200 bg-slate-50 px-4 py-3 text-center text-xs text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300" data-testid="public-preview-capability-context">
-                Capability simulation: {capabilityPreview.role} · {capabilityPreview.permission}. Capability simulation is display-only; access is not granted, authorization is unchanged, and impersonation is disabled.
+              <div className="sr-only" data-testid="public-preview-capability-context">
+                {capabilityPreview.role} · {capabilityPreview.permission}. Display-only capability simulation.
               </div>
             )}
             {orderedBlocks.map((block) => (

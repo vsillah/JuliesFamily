@@ -49,12 +49,45 @@
   .kinflo-hero-media {
     will-change: transform;
   }
+
+  .kinflo-hero-media-poster-with-video {
+    display: none;
+  }
+
+  .kinflo-hero-media-drift {
+    animation: kinflo-hero-drift 12s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+}
+
+@keyframes kinflo-hero-drift {
+  from {
+    transform: scale(1.04) translate3d(-1.2%, -0.8%, 0);
+  }
+
+  to {
+    transform: scale(1.1) translate3d(1.2%, 0.8%, 0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .kinflo-hero-media {
+  .kinflo-hero-media,
+  .kinflo-hero-media-drift {
     transform: none !important;
     transition: none !important;
+    animation: none !important;
+  }
+
+  .kinflo-hero-media-poster-with-video {
+    display: block;
+  }
+
+  .kinflo-hero-video {
+    display: none;
+  }
+
+  .kinflo-hero-video-stack {
+    display: none;
   }
 }
 
