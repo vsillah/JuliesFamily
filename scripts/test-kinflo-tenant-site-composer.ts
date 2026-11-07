@@ -21,6 +21,22 @@ test("Vanguard preserves the core-first and ReversR-later section order", () => 
   );
 });
 
+test("Julie navigation has rendered Stories and Volunteer sections before intake", () => {
+  const composition = resolveTenantSiteComposition("julies-family");
+  const sections = sortTenantSiteSections(composition.sections);
+  const header = sortTenantSiteNavigation(composition.navigation, "header");
+  const sectionIds = new Set(sections.map((section) => section.key));
+
+  assert.deepEqual(
+    sections.map((section) => section.key),
+    ["hero", "programs", "stories", "volunteer", "intake"],
+  );
+  assert.ok(sectionIds.has("stories"));
+  assert.ok(sectionIds.has("volunteer"));
+  assert.equal(header.find((item) => item.label === "Stories")?.href, "#stories");
+  assert.equal(header.find((item) => item.label === "Volunteer")?.href, "#volunteer");
+});
+
 test("Vanguard navigation keeps tracking separate from the public section flow", () => {
   const composition = resolveTenantSiteComposition("vanguard-enterprises");
   const header = sortTenantSiteNavigation(composition.navigation, "header");

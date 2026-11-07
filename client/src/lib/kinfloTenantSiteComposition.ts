@@ -85,7 +85,9 @@ const compositions: Record<string, TenantSiteComposition> = {
     sections: [
       { key: "hero", blockId: "block_jf_hero", label: "Welcome", description: "Lead with the family learning promise.", kind: "presentation", order: 10, enabled: true, required: true },
       { key: "programs", blockId: "block_jf_services", label: "Programs", description: "Show the program paths families can enter.", kind: "presentation", order: 20, enabled: true },
-      { key: "intake", blockId: "block_jf_lead", label: "Find the right next step", description: "Keep the intake path after the program overview.", kind: "presentation", order: 30, enabled: true },
+      { key: "stories", blockId: "block_jf_stories", label: "Stories", description: "Show how learners and families experience support.", kind: "presentation", order: 30, enabled: true },
+      { key: "volunteer", blockId: "block_jf_volunteer", label: "Volunteer", description: "Offer clear ways to contribute time and skills.", kind: "presentation", order: 40, enabled: true },
+      { key: "intake", blockId: "block_jf_lead", label: "Find the right next step", description: "Keep the intake path after the community story and volunteer paths.", kind: "presentation", order: 50, enabled: true },
     ],
     navigation: [
       { key: "programs", label: "Programs", href: "#programs", placement: "header", order: 10, visible: true },

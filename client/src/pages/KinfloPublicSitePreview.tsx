@@ -1,6 +1,6 @@
 import { Link, useRoute } from "wouter";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { ArrowRight, BriefcaseBusiness, Building2, CheckCircle2, CircleDashed, FileText, Goal, HandHelping, Landmark, LockKeyhole, Mail, MapPin, Network, PackageCheck, Save, UsersRound, Wrench } from "lucide-react";
+import { ArrowRight, BookOpen, BriefcaseBusiness, Building2, CheckCircle2, CircleDashed, FileText, Goal, HandHelping, Landmark, LockKeyhole, Mail, MapPin, Network, PackageCheck, Save, UsersRound, Wrench } from "lucide-react";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
 import OrderLifecycleNavigation from "@/components/OrderLifecycleNavigation";
 import VanguardReversRIntake from "@/components/VanguardReversRIntake";
@@ -42,6 +42,17 @@ function getNumber(metadata: Record<string, unknown> | undefined, key: string, f
 function getItems(metadata: Record<string, unknown> | undefined) {
   const items = metadata?.items;
   return Array.isArray(items) ? items.filter((item): item is string => typeof item === "string") : [];
+}
+
+function getCommunityCards(metadata: Record<string, unknown> | undefined) {
+  const items = metadata?.items;
+  if (!Array.isArray(items)) return [];
+  return items.filter((item): item is { eyebrow: string; title: string; body: string } => (
+    typeof item === "object" && item !== null &&
+    typeof (item as Record<string, unknown>).eyebrow === "string" &&
+    typeof (item as Record<string, unknown>).title === "string" &&
+    typeof (item as Record<string, unknown>).body === "string"
+  ));
 }
 
 function getPersona(metadata: Record<string, unknown> | undefined): Persona {
@@ -245,6 +256,37 @@ function BuildRequestSection({ block }: { block: KinfloPublicBlock }) {
         </div>
         <div className="mt-8">
           <VanguardReversRIntake />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CommunityCardsSection({ block }: { block: KinfloPublicBlock }) {
+  const isVolunteer = block.type === "volunteer";
+  const Icon = isVolunteer ? HandHelping : BookOpen;
+  const cards = getCommunityCards(block.metadata);
+
+  return (
+    <section
+      id={isVolunteer ? "volunteer" : "stories"}
+      className="border-y border-border bg-muted/30 px-4 py-16 sm:px-6 lg:px-8"
+      data-testid={`public-preview-${isVolunteer ? "volunteer" : "stories"}`}
+    >
+      <div className="mx-auto max-w-7xl">
+        <div className="max-w-3xl">
+          <Badge variant="outline"><Icon className="mr-2 h-3.5 w-3.5" />{isVolunteer ? "Volunteer pathways" : "Community stories"}</Badge>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{block.title}</h2>
+          <p className="mt-4 text-base leading-7 text-muted-foreground">{block.body}</p>
+        </div>
+        <div className="mt-8 grid gap-4 md:grid-cols-3">
+          {cards.map((card) => (
+            <article key={card.title} className="rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm">
+              <div className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{card.eyebrow}</div>
+              <h3 className="mt-4 text-lg font-semibold">{card.title}</h3>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{card.body}</p>
+            </article>
+          ))}
         </div>
       </div>
     </section>
@@ -595,6 +637,10 @@ function BlockSection({
         </div>
       </section>
     );
+  }
+
+  if (block.type === "stories" || block.type === "volunteer") {
+    return <CommunityCardsSection block={block} />;
   }
 
   if (block.type === "campaign") {

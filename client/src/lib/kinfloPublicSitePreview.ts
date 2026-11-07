@@ -26,6 +26,8 @@ import {
 export type KinfloPublicBlockType =
   | "hero"
   | "services"
+  | "stories"
+  | "volunteer"
   | "events"
   | "testimonials"
   | "lead_magnet"
@@ -204,12 +206,42 @@ const previews: KinfloPublicSitePreview[] = [
         publishedAt,
       },
       {
+        _id: "block_jf_stories",
+        type: "stories",
+        title: "Stories from the learning community",
+        body: "See how families, learners, and neighbors find practical support through shared learning and steady relationships.",
+        metadata: {
+          items: [
+            { eyebrow: "Adult education", title: "A steadier path back to learning", body: "Flexible support helps adults build confidence while making room for work, family, and the next step." },
+            { eyebrow: "Family development", title: "Learning grows through connection", body: "Families can find guidance, encouragement, and programs shaped around the realities of daily life." },
+            { eyebrow: "Digital access", title: "Tools that meet people where they are", body: "Practical digital support keeps learners connected to information, services, and community." },
+          ],
+        },
+        order: 30,
+        publishedAt,
+      },
+      {
+        _id: "block_jf_volunteer",
+        type: "volunteer",
+        title: "Volunteer in a way that fits",
+        body: "Share time, experience, or encouragement through clear pathways that respect the people and families being served.",
+        metadata: {
+          items: [
+            { eyebrow: "Tutor", title: "Support a learner", body: "Help with reading, digital skills, conversation practice, or a focused learning goal." },
+            { eyebrow: "Family partner", title: "Welcome families", body: "Offer practical guidance and a warm first connection to programs and community resources." },
+            { eyebrow: "Program support", title: "Strengthen the work", body: "Bring organization, outreach, event, or technology skills to the people coordinating each program." },
+          ],
+        },
+        order: 40,
+        publishedAt,
+      },
+      {
         _id: "block_jf_lead",
         type: "lead_magnet",
         title: "Find the right next step",
         body: "Capture interest by persona and journey stage, then route every lead into the CRM.",
         metadata: { source: "family-learning-public-preview", persona: "parent", journeyStage: "awareness" },
-        order: 30,
+        order: 50,
         publishedAt,
       },
     ],
