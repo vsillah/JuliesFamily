@@ -555,6 +555,54 @@
   color: var(--kinflo-muted) !important;
 }
 
+.kinflo-public-surface .kinflo-order-lifecycle {
+  border-color: var(--kinflo-border) !important;
+  background: var(--kinflo-surface) !important;
+  color: var(--kinflo-foreground) !important;
+}
+
+.kinflo-public-surface .kinflo-order-lifecycle-badge,
+.kinflo-public-surface .kinflo-order-lifecycle-item {
+  border-color: var(--kinflo-border) !important;
+  background: var(--kinflo-surface-muted) !important;
+  color: var(--kinflo-foreground) !important;
+}
+
+.kinflo-public-surface .kinflo-order-lifecycle-item:hover {
+  border-color: var(--kinflo-accent) !important;
+  background: var(--kinflo-surface) !important;
+}
+
+.kinflo-public-surface .kinflo-order-lifecycle-item-active {
+  border-color: var(--kinflo-accent) !important;
+  background: var(--kinflo-accent-soft) !important;
+  color: var(--kinflo-accent-soft-foreground) !important;
+}
+
+.kinflo-public-surface .kinflo-order-lifecycle-icon {
+  background: var(--kinflo-surface) !important;
+  color: var(--kinflo-muted) !important;
+}
+
+.kinflo-public-surface .kinflo-order-lifecycle-icon-active {
+  background: var(--kinflo-accent) !important;
+  color: var(--kinflo-accent-foreground) !important;
+}
+
+.kinflo-public-surface .kinflo-order-lifecycle-title {
+  color: var(--kinflo-foreground) !important;
+}
+
+.kinflo-public-surface .kinflo-order-lifecycle-detail,
+.kinflo-public-surface .kinflo-order-lifecycle-arrow {
+  color: var(--kinflo-muted) !important;
+}
+
+.kinflo-public-surface .kinflo-reversr-workspace-canvas {
+  background: var(--kinflo-surface-muted) !important;
+  color: var(--kinflo-foreground) !important;
+}
+
 .dark .kinflo-admin-shell .kinflo-pill-success {
   border-color: hsl(142 35% 38%);
   background-color: hsl(142 30% 18%);
