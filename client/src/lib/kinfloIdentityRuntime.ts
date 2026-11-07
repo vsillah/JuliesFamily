@@ -1,4 +1,4 @@
-export type KinfloIdentityMode = "disabled" | "convex_auth" | "local_fixture";
+export type KinfloIdentityMode = "disabled" | "convex_auth" | "local_fixture" | "review_fixture";
 
 export type KinfloIdentityRuntime = {
   requestedMode: string;
@@ -49,6 +49,24 @@ export function getKinfloIdentityRuntime(): KinfloIdentityRuntime {
       mode: "disabled",
       configured: false,
       gate: "Local fixture identity is never allowed in a production build.",
+    };
+  }
+
+  if (requestedMode === "review_fixture") {
+    if (import.meta.env.VITE_KINFLO_REVIEW_FIXTURE === "true") {
+      return {
+        requestedMode,
+        mode: "review_fixture",
+        configured: true,
+        gate: "Protected review fixture identity is enabled for this preview build only.",
+      };
+    }
+
+    return {
+      requestedMode,
+      mode: "disabled",
+      configured: false,
+      gate: "The review fixture requires the explicit VITE_KINFLO_REVIEW_FIXTURE=true build flag.",
     };
   }
 

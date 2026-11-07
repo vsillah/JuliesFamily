@@ -131,6 +131,20 @@ function LocalFixtureIdentityGate({ children }: { children: ReactNode }) {
   );
 }
 
+function ReviewFixtureIdentityGate({ children }: { children: ReactNode }) {
+  return (
+    <KinfloAdminIdentityProvider value={{ isLoading: false, isAdmin: true, source: "local_fixture" }}>
+      <FixtureKinfloShellSnapshotProvider>
+        <DisabledKinfloPreferencesAdapterProvider>
+          <DisabledKinfloThemeWriteAdapterProvider>
+            <DisabledKinfloCrmWriteAdapterProvider>{children}</DisabledKinfloCrmWriteAdapterProvider>
+          </DisabledKinfloThemeWriteAdapterProvider>
+        </DisabledKinfloPreferencesAdapterProvider>
+      </FixtureKinfloShellSnapshotProvider>
+    </KinfloAdminIdentityProvider>
+  );
+}
+
 function ConvexIdentityGate({ children }: { children: ReactNode }) {
   const { isLoading: authLoading, isAuthenticated } = useConvexAuth();
   const { signIn, signOut } = useAuthActions();
@@ -462,6 +476,10 @@ export default function KinfloAdminRoute({ children }: { children: ReactNode }) 
 
   if (runtime.mode === "local_fixture") {
     return <LocalFixtureIdentityGate>{children}</LocalFixtureIdentityGate>;
+  }
+
+  if (runtime.mode === "review_fixture") {
+    return <ReviewFixtureIdentityGate>{children}</ReviewFixtureIdentityGate>;
   }
 
   if (runtime.mode !== "convex_auth" || !runtime.publicUrl) {
