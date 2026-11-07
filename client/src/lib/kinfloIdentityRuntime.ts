@@ -1,4 +1,4 @@
-export type KinfloIdentityMode = "disabled" | "convex_auth" | "local_fixture";
+export type KinfloIdentityMode = "disabled" | "convex_auth" | "local_fixture" | "review_fixture";
 
 export type KinfloIdentityRuntime = {
   requestedMode: string;
@@ -49,6 +49,34 @@ export function getKinfloIdentityRuntime(): KinfloIdentityRuntime {
       mode: "disabled",
       configured: false,
       gate: "Local fixture identity is never allowed in a production build.",
+    };
+  }
+
+  if (requestedMode === "review_fixture") {
+    const configuredPreviewHostname = readEnvValue(import.meta.env.VITE_KINFLO_REVIEW_FIXTURE_HOSTNAME);
+    const currentHostname = typeof window !== "undefined" ? window.location.hostname : undefined;
+    const isExactProtectedPreview = Boolean(
+      currentHostname
+      && configuredPreviewHostname
+      && currentHostname === configuredPreviewHostname
+      && configuredPreviewHostname.endsWith(".vercel.app")
+      && configuredPreviewHostname !== "kinflo-website.vercel.app",
+    );
+
+    if (import.meta.env.VITE_KINFLO_REVIEW_FIXTURE === "true" && isExactProtectedPreview) {
+      return {
+        requestedMode,
+        mode: "review_fixture",
+        configured: true,
+        gate: "Protected review fixture identity is enabled for this exact preview build only.",
+      };
+    }
+
+    return {
+      requestedMode,
+      mode: "disabled",
+      configured: false,
+      gate: "The review fixture requires its explicit flag and an exact protected Vercel preview hostname.",
     };
   }
 

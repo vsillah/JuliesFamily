@@ -75,6 +75,16 @@ requireIncludes("docs/phase38-access-delegation-shell.md", [
 
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "Access Delegation Packet",
+  "Access review sequence",
+  "data-testid=\"section-kinflo-access-sequence\"",
+  "data-testid={`tab-kinflo-access-stage-${stage.value}`}",
+  "data-testid=\"section-kinflo-access-snapshot\"",
+  "data-testid=\"section-kinflo-access-overview\"",
+  "data-testid=\"section-kinflo-access-scope\"",
+  "data-testid=\"section-kinflo-access-role\"",
+  "data-testid=\"section-kinflo-access-review\"",
+  "data-testid=\"section-kinflo-access-technical-evidence\"",
+  "data-testid=\"section-kinflo-access-launch-gates\"",
   "setAccessInviteEmail",
   "handleAccessTenantChange",
   "setAccessSiteKey",

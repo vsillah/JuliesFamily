@@ -556,6 +556,7 @@ export const provisionTenantAndSite = mutation({
     siteName: v.string(),
     siteSlug: v.string(),
     subdomain: v.optional(v.string()),
+    capabilityKeys: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     const actor = await requirePermission(ctx, { permission: "tenant:create" });
@@ -567,6 +568,12 @@ export const provisionTenantAndSite = mutation({
 
     if (!tenantName || !tenantSlug || !siteName || !siteSlug || !subdomain) {
       throw new Error("Tenant and site names, slugs, and subdomain are required");
+    }
+
+    const allowedCapabilityKeys = new Set(["control", "build", "launch", "growth", "evidence"]);
+    const capabilityKeys = [...new Set(args.capabilityKeys ?? [])];
+    if (capabilityKeys.some((key) => !allowedCapabilityKeys.has(key))) {
+      throw new Error("Unknown tenant capability");
     }
 
     const existingTenant = await ctx.db
@@ -637,6 +644,20 @@ export const provisionTenantAndSite = mutation({
       updatedAt: timestamp,
     });
 
+    if (capabilityKeys.length > 0) {
+      await ctx.db.insert("tenantEntitlements", {
+        tenantId,
+        planKey: "pilot",
+        source: "pilot",
+        status: "active",
+        featureOverrides: Object.fromEntries(capabilityKeys.map((key) => [key, true])),
+        notes: "Initial capability profile selected during governed tenant provisioning.",
+        createdBy: actor._id,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      });
+    }
+
     await writeAuditEvent(ctx, {
       scopeType: "tenant",
       tenantId,
@@ -644,7 +665,7 @@ export const provisionTenantAndSite = mutation({
       action: "tenant_created",
       resourceType: "tenant",
       resourceId: tenantId,
-      metadata: { name: tenantName, slug: tenantSlug, source: "governed_provisioning" },
+      metadata: { name: tenantName, slug: tenantSlug, source: "governed_provisioning", capabilityKeys },
     });
     await writeAuditEvent(ctx, {
       scopeType: "site",

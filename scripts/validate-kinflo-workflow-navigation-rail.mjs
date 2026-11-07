@@ -86,15 +86,34 @@ requireIncludes("docs/kinflo-design-frame-adoption-backlog.json", [
   "\"validationGate\": \"Static validator confirms lane labels, existing tabs remain reachable, and no live action is enabled.\"",
 ]);
 
+const shellContents = read("client/src/pages/AdminKinfloShell.tsx");
+
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "workflowNavigationLanes",
   "workflowNavigationTabCoverage",
-  "section-kinflo-workflow-navigation-rail",
+  "section-kinflo-operator-sidebar",
   "section-kinflo-workflow-navigation-lanes",
-  "label: \"Evidence & Activation\"",
+  "button-kinflo-sidebar-overview",
+  "focusSelectedShellSection",
+  "getKinfloSectionSnapshotMetrics",
+  "section-kinflo-section-snapshot",
+  "data-filter-target={activeTab}",
+  "section-kinflo-crm-lead-table-empty",
+  "No lead records yet",
+  "activeTab === \"overview\" ? null",
+  "section-kinflo-decision-rail",
+  "section-kinflo-next-actions",
+  "section-kinflo-readiness-snapshot",
+  "section-kinflo-linked-data",
+  "Resolve the current gate in order",
+  "Open activation checklist",
+  "Review adapter mapping",
+  "Review launch evidence",
+  "Shared KinFlo navigation for the selected tenant and site.",
+  "label: \"Evidence\"",
   "client sharing gated",
   "provider writes gated",
-  "hosted deployment gated",
+  "hosted activation gated",
   "shellTabLabels[tabValue]",
   "section-kinflo-tenant-control-plane-cards",
   "section-kinflo-site-factory-queue-cards",
@@ -102,12 +121,52 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "className=\"grid gap-2 lg:hidden\"",
 ]);
 
+if (shellContents.includes('data-testid="section-kinflo-contextual-navigation"')) {
+  fail(
+    "admin shell has no duplicate contextual section rail",
+    "Section navigation must remain in the persistent operator sidebar instead of rendering a second horizontal rail.",
+  );
+} else {
+  pass("admin shell has no duplicate contextual section rail");
+}
+
+const sectionSnapshotIndex = shellContents.indexOf("<KinfloSectionSnapshot");
+const dataModeIndex = shellContents.indexOf("<Card className={`${activeWorkflowLane.key === \"evidence\"");
+const operationsWorkspaceIndex = shellContents.indexOf("<KinfloOperationsWorkspace");
+if (
+  sectionSnapshotIndex >= 0
+  && dataModeIndex >= 0
+  && operationsWorkspaceIndex >= 0
+  && sectionSnapshotIndex < dataModeIndex
+  && sectionSnapshotIndex < operationsWorkspaceIndex
+) {
+  pass("section snapshot precedes technical and operations panels");
+} else {
+  fail(
+    "section snapshot precedes technical and operations panels",
+    "Every non-overview workspace must lead with its section snapshot before Data Mode or operations content.",
+  );
+}
+
+for (const pattern of [
+  "<KinfloDashboardShell",
+  "section-kinflo-command-brief",
+  "section-kinflo-launch-summary",
+  "section-kinflo-active-object-detail",
+  "section-kinflo-active-object-unblock-detail",
+]) {
+  if (shellContents.includes(pattern)) {
+    fail(`admin shell excludes ${pattern}`, "The consolidated operator hierarchy must not render duplicate command or workspace surfaces.");
+  } else {
+    pass(`admin shell excludes ${pattern}`);
+  }
+}
+
 requireIncludes("package.json", [
   "\"kinflo:validate-workflow-navigation-rail\"",
 ]);
 
-const shellContents = read("client/src/pages/AdminKinfloShell.tsx");
-const expectedLanes = ["control", "build", "launch", "growth", "evidence"];
+const expectedLanes = ["control", "build", "studio", "launch", "growth", "evidence", "activation"];
 for (const lane of expectedLanes) {
   requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
     `key: "${lane}"`,

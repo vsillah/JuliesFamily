@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 
 const DEFAULT_ENVIRONMENT = "dev";
@@ -24,6 +25,7 @@ prints secret values, or changes the existing 1Password runner.`);
 
 function readConfiguration() {
   const projectId = process.env.INFISICAL_PROJECT_ID?.trim();
+  const projectPointerConfigured = existsSync(".infisical.json");
   const environment = process.env.INFISICAL_ENV?.trim() || DEFAULT_ENVIRONMENT;
   const secretPath = process.env.INFISICAL_PATH?.trim() || DEFAULT_PATH;
   const apiUrl = process.env.INFISICAL_API_URL?.trim();
@@ -40,7 +42,7 @@ function readConfiguration() {
     throw new Error("INFISICAL_API_URL must use HTTPS");
   }
 
-  return { projectId, environment, secretPath, apiUrl };
+  return { projectId, projectPointerConfigured, environment, secretPath, apiUrl };
 }
 
 function hasInfisicalCli() {
@@ -89,7 +91,7 @@ try {
 
   if (args.includes("--check") || command.length === 0) {
     console.log("KinFlo Infisical env contract");
-    console.log(`INFISICAL_PROJECT_ID: ${configuration.projectId ? "configured" : "not configured"}`);
+    console.log(`INFISICAL_PROJECT_ID: ${configuration.projectId || configuration.projectPointerConfigured ? "configured" : "not configured"}`);
     console.log(`INFISICAL_ENV: ${configuration.environment}`);
     console.log(`INFISICAL_PATH: ${configuration.secretPath}`);
     console.log(`INFISICAL_API_URL: ${configuration.apiUrl ? "configured" : "default"}`);

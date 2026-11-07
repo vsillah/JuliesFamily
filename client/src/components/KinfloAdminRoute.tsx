@@ -27,8 +27,14 @@ import {
   DisabledKinfloThemeWriteAdapterProvider,
   LiveKinfloThemeWriteAdapterProvider,
 } from "@/contexts/KinfloThemeWriteAdapterContext";
+import {
+  DisabledKinfloCrmWriteAdapterProvider,
+  LiveKinfloCrmWriteAdapterProvider,
+} from "@/contexts/KinfloCrmWriteAdapterContext";
 import { Phase174GeneratedReadOnlyHarness } from "@/components/Phase174GeneratedReadOnlyHarness";
 import { isPhase174GeneratedReadOnlyHarnessRequested } from "@/lib/kinfloPhase174GeneratedReadOnlyHarness";
+import { Phase175AuthenticatedCrmSmokeHarness } from "@/components/Phase175AuthenticatedCrmSmokeHarness";
+import { isPhase175CrmSmokeHarnessRequested } from "@/lib/kinfloPhase175CrmSmokeHarness";
 
 type ConvexViewer = {
   _id: string;
@@ -116,7 +122,23 @@ function LocalFixtureIdentityGate({ children }: { children: ReactNode }) {
     <KinfloAdminIdentityProvider value={value}>
       <FixtureKinfloShellSnapshotProvider>
         <DisabledKinfloPreferencesAdapterProvider>
-          <DisabledKinfloThemeWriteAdapterProvider>{children}</DisabledKinfloThemeWriteAdapterProvider>
+          <DisabledKinfloThemeWriteAdapterProvider>
+            <DisabledKinfloCrmWriteAdapterProvider>{children}</DisabledKinfloCrmWriteAdapterProvider>
+          </DisabledKinfloThemeWriteAdapterProvider>
+        </DisabledKinfloPreferencesAdapterProvider>
+      </FixtureKinfloShellSnapshotProvider>
+    </KinfloAdminIdentityProvider>
+  );
+}
+
+function ReviewFixtureIdentityGate({ children }: { children: ReactNode }) {
+  return (
+    <KinfloAdminIdentityProvider value={{ isLoading: false, isAdmin: true, source: "local_fixture" }}>
+      <FixtureKinfloShellSnapshotProvider>
+        <DisabledKinfloPreferencesAdapterProvider>
+          <DisabledKinfloThemeWriteAdapterProvider>
+            <DisabledKinfloCrmWriteAdapterProvider>{children}</DisabledKinfloCrmWriteAdapterProvider>
+          </DisabledKinfloThemeWriteAdapterProvider>
         </DisabledKinfloPreferencesAdapterProvider>
       </FixtureKinfloShellSnapshotProvider>
     </KinfloAdminIdentityProvider>
@@ -410,13 +432,25 @@ function ConvexIdentityGate({ children }: { children: ReactNode }) {
     );
   }
 
+  if (isPhase175CrmSmokeHarnessRequested(window.location.search)) {
+    return (
+      <KinfloAdminIdentityProvider
+        value={{ isLoading: false, isAdmin: true, source: "convex_auth" }}
+      >
+        <Phase175AuthenticatedCrmSmokeHarness />
+      </KinfloAdminIdentityProvider>
+    );
+  }
+
   return (
     <KinfloAdminIdentityProvider
       value={{ isLoading: false, isAdmin: true, source: "convex_auth" }}
     >
       <ReadOnlyLiveKinfloShellSnapshotProvider>
         <LiveKinfloPreferencesAdapterProvider>
-          <LiveKinfloThemeWriteAdapterProvider>{children}</LiveKinfloThemeWriteAdapterProvider>
+          <LiveKinfloThemeWriteAdapterProvider>
+            <LiveKinfloCrmWriteAdapterProvider>{children}</LiveKinfloCrmWriteAdapterProvider>
+          </LiveKinfloThemeWriteAdapterProvider>
         </LiveKinfloPreferencesAdapterProvider>
       </ReadOnlyLiveKinfloShellSnapshotProvider>
     </KinfloAdminIdentityProvider>
@@ -442,6 +476,10 @@ export default function KinfloAdminRoute({ children }: { children: ReactNode }) 
 
   if (runtime.mode === "local_fixture") {
     return <LocalFixtureIdentityGate>{children}</LocalFixtureIdentityGate>;
+  }
+
+  if (runtime.mode === "review_fixture") {
+    return <ReviewFixtureIdentityGate>{children}</ReviewFixtureIdentityGate>;
   }
 
   if (runtime.mode !== "convex_auth" || !runtime.publicUrl) {

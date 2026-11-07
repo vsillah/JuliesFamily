@@ -49,12 +49,45 @@
   .kinflo-hero-media {
     will-change: transform;
   }
+
+  .kinflo-hero-media-poster-with-video {
+    display: none;
+  }
+
+  .kinflo-hero-media-drift {
+    animation: kinflo-hero-drift 12s ease-in-out infinite alternate;
+    will-change: transform;
+  }
+}
+
+@keyframes kinflo-hero-drift {
+  from {
+    transform: scale(1.04) translate3d(-1.2%, -0.8%, 0);
+  }
+
+  to {
+    transform: scale(1.1) translate3d(1.2%, 0.8%, 0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .kinflo-hero-media {
+  .kinflo-hero-media,
+  .kinflo-hero-media-drift {
     transform: none !important;
     transition: none !important;
+    animation: none !important;
+  }
+
+  .kinflo-hero-media-poster-with-video {
+    display: block;
+  }
+
+  .kinflo-hero-video {
+    display: none;
+  }
+
+  .kinflo-hero-video-stack {
+    display: none;
   }
 }
 
@@ -297,6 +330,311 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
+}
+
+/* KinFlo admin surfaces use the shared theme tokens instead of light-only slate utilities. */
+.kinflo-admin-shell .bg-white {
+  background-color: hsl(var(--card)) !important;
+}
+
+.kinflo-admin-shell .bg-slate-50 {
+  background-color: hsl(var(--muted)) !important;
+}
+
+/* Keep Tailwind opacity variants on the same theme surface as their solid utilities. */
+.kinflo-admin-shell [class~="bg-slate-50/70"] {
+  background-color: hsl(var(--muted) / 0.7) !important;
+}
+
+.kinflo-admin-shell [class~="bg-slate-50/80"] {
+  background-color: hsl(var(--background) / 0.8) !important;
+}
+
+.kinflo-admin-shell [class~="bg-slate-50/95"] {
+  background-color: hsl(var(--background) / 0.95) !important;
+}
+
+.kinflo-admin-shell .bg-slate-100,
+.kinflo-admin-shell [class~="bg-slate-100/70"] {
+  background-color: hsl(var(--muted)) !important;
+}
+
+.kinflo-admin-shell [class~="bg-white/70"] {
+  background-color: hsl(var(--card) / 0.7) !important;
+}
+
+.kinflo-admin-shell .border-slate-200,
+.kinflo-admin-shell .border-slate-300,
+.kinflo-admin-shell .border-slate-100 {
+  border-color: hsl(var(--border)) !important;
+}
+
+.kinflo-admin-shell .text-slate-950,
+.kinflo-admin-shell .text-slate-900,
+.kinflo-admin-shell .text-slate-800 {
+  color: hsl(var(--foreground)) !important;
+}
+
+.kinflo-admin-shell .text-slate-700,
+.kinflo-admin-shell .text-slate-600,
+.kinflo-admin-shell .text-slate-500,
+.kinflo-admin-shell .text-slate-400 {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.kinflo-admin-shell .kinflo-pill {
+  border-radius: 9999px;
+  font-weight: 600;
+}
+
+.kinflo-admin-shell .kinflo-pill-neutral {
+  border-color: hsl(var(--border));
+  background-color: hsl(var(--muted) / 0.7);
+  color: hsl(var(--foreground));
+}
+
+.kinflo-admin-shell .kinflo-pill-success {
+  border-color: hsl(142 45% 70%);
+  background-color: hsl(142 45% 93%);
+  color: hsl(142 55% 24%);
+}
+
+.kinflo-admin-shell .kinflo-pill-info {
+  border-color: hsl(199 55% 72%);
+  background-color: hsl(199 70% 94%);
+  color: hsl(199 65% 25%);
+}
+
+.kinflo-admin-shell .kinflo-pill-warning {
+  border-color: hsl(40 70% 70%);
+  background-color: hsl(40 90% 94%);
+  color: hsl(32 75% 25%);
+}
+
+.dark .kinflo-admin-shell .bg-amber-50 {
+  background-color: hsl(40 30% 16%) !important;
+}
+
+.dark .kinflo-admin-shell .bg-emerald-50 {
+  background-color: hsl(142 28% 16%) !important;
+}
+
+.dark .kinflo-admin-shell .bg-sky-50,
+.dark .kinflo-admin-shell .bg-blue-50 {
+  background-color: hsl(199 30% 16%) !important;
+}
+
+.dark .kinflo-admin-shell .bg-teal-50 {
+  background-color: hsl(172 28% 16%) !important;
+}
+
+.dark .kinflo-admin-shell .bg-violet-50 {
+  background-color: hsl(262 30% 18%) !important;
+}
+
+.dark .kinflo-admin-shell .bg-violet-100 {
+  background-color: hsl(262 32% 23%) !important;
+}
+
+.dark .kinflo-admin-shell .bg-rose-50 {
+  background-color: hsl(350 30% 18%) !important;
+}
+
+.dark .kinflo-admin-shell .text-amber-950,
+.dark .kinflo-admin-shell .text-amber-900,
+.dark .kinflo-admin-shell .text-amber-800,
+.dark .kinflo-admin-shell .text-amber-700,
+.dark .kinflo-admin-shell .text-emerald-950,
+.dark .kinflo-admin-shell .text-emerald-900,
+.dark .kinflo-admin-shell .text-emerald-800,
+.dark .kinflo-admin-shell .text-emerald-700,
+.dark .kinflo-admin-shell .text-sky-950,
+.dark .kinflo-admin-shell .text-blue-950,
+.dark .kinflo-admin-shell .text-blue-800,
+.dark .kinflo-admin-shell .text-blue-900,
+.dark .kinflo-admin-shell .text-blue-700,
+.dark .kinflo-admin-shell .text-teal-950,
+.dark .kinflo-admin-shell .text-teal-900,
+.dark .kinflo-admin-shell .text-teal-800,
+.dark .kinflo-admin-shell .text-teal-700,
+.dark .kinflo-admin-shell .text-violet-950,
+.dark .kinflo-admin-shell .text-violet-900,
+.dark .kinflo-admin-shell .text-violet-800,
+.dark .kinflo-admin-shell .text-violet-700,
+.dark .kinflo-admin-shell .text-violet-600,
+.dark .kinflo-admin-shell .text-rose-900,
+.dark .kinflo-admin-shell .text-rose-800,
+.dark .kinflo-admin-shell .text-rose-700 {
+  color: hsl(var(--foreground)) !important;
+}
+
+.dark .kinflo-admin-shell .border-amber-100,
+.dark .kinflo-admin-shell .border-amber-200,
+.dark .kinflo-admin-shell .border-amber-300,
+.dark .kinflo-admin-shell .border-blue-100,
+.dark .kinflo-admin-shell .border-blue-200,
+.dark .kinflo-admin-shell .border-blue-300,
+.dark .kinflo-admin-shell .border-emerald-100,
+.dark .kinflo-admin-shell .border-emerald-200,
+.dark .kinflo-admin-shell .border-rose-100,
+.dark .kinflo-admin-shell .border-rose-200,
+.dark .kinflo-admin-shell .border-teal-200,
+.dark .kinflo-admin-shell .border-teal-300,
+.dark .kinflo-admin-shell .border-violet-200,
+.dark .kinflo-admin-shell .border-violet-300 {
+  border-color: hsl(var(--border)) !important;
+}
+
+/* Public preview frames intentionally retain their light client-site palette. */
+.kinflo-admin-shell .kinflo-preview-artifact .bg-white {
+  background-color: hsl(0 0% 100%) !important;
+}
+
+.kinflo-admin-shell .kinflo-preview-artifact .bg-slate-50 {
+  background-color: hsl(210 40% 98%) !important;
+}
+
+.kinflo-admin-shell .kinflo-preview-artifact .bg-slate-100 {
+  background-color: hsl(210 40% 96%) !important;
+}
+
+.kinflo-admin-shell .kinflo-preview-artifact.bg-slate-100 {
+  background-color: hsl(210 40% 96%) !important;
+}
+
+.kinflo-admin-shell .kinflo-preview-artifact .border-slate-200,
+.kinflo-admin-shell .kinflo-preview-artifact .border-slate-100 {
+  border-color: hsl(214 32% 91%) !important;
+}
+
+.kinflo-admin-shell .kinflo-preview-artifact .text-slate-950,
+.kinflo-admin-shell .kinflo-preview-artifact .text-slate-900,
+.kinflo-admin-shell .kinflo-preview-artifact .text-slate-800 {
+  color: hsl(222 47% 11%) !important;
+}
+
+.kinflo-admin-shell .kinflo-preview-artifact .text-slate-700,
+.kinflo-admin-shell .kinflo-preview-artifact .text-slate-600,
+.kinflo-admin-shell .kinflo-preview-artifact .text-slate-500,
+.kinflo-admin-shell .kinflo-preview-artifact .text-slate-400 {
+  color: hsl(215 16% 47%) !important;
+}
+
+/* Public preview blocks use the active tenant palette instead of fixed slate utilities. */
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]).bg-white,
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]) .bg-white {
+  background-color: var(--kinflo-surface) !important;
+}
+
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]).bg-slate-50,
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]) .bg-slate-50 {
+  background-color: var(--kinflo-surface-muted) !important;
+}
+
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]).bg-slate-100,
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]) .bg-slate-100 {
+  background-color: var(--kinflo-surface-muted) !important;
+}
+
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]) .border-slate-100,
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]) .border-slate-200,
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]) .border-slate-300 {
+  border-color: var(--kinflo-border) !important;
+}
+
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]) .text-slate-950,
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]) .text-slate-900,
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]) .text-slate-800 {
+  color: var(--kinflo-foreground) !important;
+}
+
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]) .text-slate-700,
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]) .text-slate-600,
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]) .text-slate-500,
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]) .text-slate-400 {
+  color: var(--kinflo-muted) !important;
+}
+
+.kinflo-public-surface .kinflo-order-lifecycle {
+  border-color: var(--kinflo-border) !important;
+  background: var(--kinflo-surface) !important;
+  color: var(--kinflo-foreground) !important;
+}
+
+.kinflo-public-surface .kinflo-order-lifecycle-badge,
+.kinflo-public-surface .kinflo-order-lifecycle-item {
+  border-color: var(--kinflo-border) !important;
+  background: var(--kinflo-surface-muted) !important;
+  color: var(--kinflo-foreground) !important;
+}
+
+.kinflo-public-surface .kinflo-order-lifecycle-item:hover {
+  border-color: var(--kinflo-accent) !important;
+  background: var(--kinflo-surface) !important;
+}
+
+.kinflo-public-surface .kinflo-order-lifecycle-item-active {
+  border-color: var(--kinflo-accent) !important;
+  background: var(--kinflo-accent-soft) !important;
+  color: var(--kinflo-accent-soft-foreground) !important;
+}
+
+.kinflo-public-surface .kinflo-order-lifecycle-icon {
+  background: var(--kinflo-surface) !important;
+  color: var(--kinflo-muted) !important;
+}
+
+.kinflo-public-surface .kinflo-order-lifecycle-icon-active {
+  background: var(--kinflo-accent) !important;
+  color: var(--kinflo-accent-foreground) !important;
+}
+
+.kinflo-public-surface .kinflo-order-lifecycle-title {
+  color: var(--kinflo-foreground) !important;
+}
+
+.kinflo-public-surface .kinflo-order-lifecycle-detail,
+.kinflo-public-surface .kinflo-order-lifecycle-arrow {
+  color: var(--kinflo-muted) !important;
+}
+
+.kinflo-public-surface .kinflo-reversr-workspace-canvas {
+  background: var(--kinflo-surface-muted) !important;
+  color: var(--kinflo-foreground) !important;
+}
+
+.dark .kinflo-admin-shell .kinflo-pill-success {
+  border-color: hsl(142 35% 38%);
+  background-color: hsl(142 30% 18%);
+  color: hsl(142 55% 80%);
+}
+
+.dark .kinflo-admin-shell .kinflo-pill-info {
+  border-color: hsl(199 40% 40%);
+  background-color: hsl(199 30% 18%);
+  color: hsl(199 70% 82%);
+}
+
+.dark .kinflo-admin-shell .kinflo-pill-warning {
+  border-color: hsl(40 45% 42%);
+  background-color: hsl(40 30% 18%);
+  color: hsl(40 85% 82%);
+}
+
+.kinflo-admin-shell .kinflo-workspace-lane-card {
+  background-color: hsl(var(--card));
+  border-color: hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+
+.dark .kinflo-admin-shell .kinflo-workspace-lane-card {
+  background-color: hsl(0 0% 14%);
+  border-color: hsl(var(--border));
+  color: hsl(0 0% 96%);
+}
+
+.dark .kinflo-admin-shell .kinflo-workspace-lane-card .kinflo-workspace-lane-description {
+  color: hsl(0 0% 78%);
 }
 
 /**

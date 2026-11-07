@@ -100,18 +100,18 @@ requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
   "section-kinflo-client-studio-compact-shell",
   "querySelector('[data-testid=\"section-kinflo-client-studio-compact-shell\"]')",
   "clientWebsiteWorkbenchStage, location",
-  "min-h-screen overflow-x-clip bg-slate-50",
+  "min-h-screen overflow-x-clip bg-background",
   "max-w-7xl overflow-x-clip px-4",
   "flex min-w-0 flex-col gap-2 overflow-x-clip",
   "const shouldShowClientWebsiteStudioContext =",
-  "clientWebsiteStudioLane === \"workbench\" && !isClientWebsiteLaunchWorkbench",
+  "clientWebsiteStudioLane === \"workbench\"",
   "shouldShowClientWebsiteStudioContext ? \"overflow-hidden\" : \"hidden\"",
   "shouldShowClientWebsiteStudioContext ? \"grid\" : \"hidden\"",
   "{clientWebsiteStudioLaneRail}",
   "const laneSectionTestId = clientWebsiteStudioLaneSectionTestIds[lane]",
   "laneSection.scrollTo({ top: 0 })",
   "scrollClientWebsiteStudioLaneToTop(lane)",
-  "order-1 sticky top-0",
+  "order-1 border-b border-border bg-background",
   "order-2 min-w-0",
   "order-3 ${shouldShowClientWebsiteStudioContext",
 ]);
@@ -156,7 +156,6 @@ const siteStudioIndex = shellContents.indexOf('value="site-studio"');
 const compactShellIndex = shellContents.indexOf('data-testid="section-kinflo-client-studio-compact-shell"', siteStudioIndex);
 const railRenderIndex = shellContents.indexOf("{clientWebsiteStudioLaneRail}", compactShellIndex);
 const headerRailRenderIndex = shellContents.indexOf('activeTab === "site-studio" ? clientWebsiteStudioLaneRail : null');
-const persistentIdentityIndex = shellContents.indexOf('data-testid="section-kinflo-persistent-identity-strip"');
 const controlRoomIndex = shellContents.indexOf('data-testid="section-kinflo-client-control-room-frame"', siteStudioIndex);
 const studioContextGuardIndex = shellContents.indexOf("const shouldShowClientWebsiteStudioContext =");
 const commandSurfaceGuardIndex = shellContents.indexOf(
@@ -176,9 +175,7 @@ if (
   compactShellIndex !== -1 &&
   railRenderIndex !== -1 &&
   headerRailRenderIndex === -1 &&
-  persistentIdentityIndex !== -1 &&
   controlRoomIndex !== -1 &&
-  persistentIdentityIndex < compactShellIndex &&
   compactShellIndex < railRenderIndex &&
   railRenderIndex < controlRoomIndex
 ) {
@@ -186,7 +183,7 @@ if (
 } else {
   fail(
     "client Studio lane rail renders first in the compact Site Studio section",
-    "The lane rail must render inside the compact Site Studio shell before the control-room frame so each lane starts from the same top control position."
+    "The Studio context summary must render inside the compact Site Studio shell before the control-room frame."
   );
 }
 
@@ -195,7 +192,7 @@ if (
   controlRoomIndex !== -1 &&
   commandSurfaceGuardIndex !== -1 &&
   queueLaneIndex !== -1 &&
-  shellContents.includes("order-1 sticky top-0") &&
+  shellContents.includes("order-1 border-b border-border bg-background") &&
   shellContents.includes('className="order-2 min-w-0"') &&
   shellContents.includes("order-3 ${shouldShowClientWebsiteStudioContext")
 ) {
@@ -203,7 +200,7 @@ if (
 } else {
   fail(
     "client Studio lanes render above the secondary context stack",
-    "The active Spin up, Configure, Handoff, or Workbench lane must render directly below the lane rail, with secondary context ordered after the active lane workspace."
+    "The active Studio workspace must render below the context summary, with secondary context ordered after the active workspace."
   );
 }
 
@@ -218,7 +215,7 @@ if (
 } else {
   fail(
     "client Studio lane changes preserve the section-top rail anchor",
-    "Changing Site Studio lanes or Workbench stage must keep the lane rail at the Site Studio section top instead of snapping longer lanes to a different viewport position."
+    "Changing Site Studio lanes or Workbench stage must keep the context summary at the Site Studio section top instead of snapping longer lanes to a different viewport position."
   );
 }
 
@@ -226,21 +223,21 @@ if (headerRailRenderIndex === -1) {
   pass("client Studio lane rail is not rendered inside the global page header");
 } else {
   fail(
-    "client Studio lane rail is not rendered inside the global page header",
-    "Render the lane rail in the compact Site Studio shell so it does not scroll away with the global page header."
+    "client Studio context is not rendered inside the global page header",
+    "Render the Studio context summary in the compact Site Studio shell so it does not scroll away with the global page header."
   );
 }
 
 if (
-  shellContents.includes("min-h-screen overflow-x-clip bg-slate-50") &&
+  shellContents.includes("min-h-screen overflow-x-clip bg-background") &&
   shellContents.includes("max-w-7xl overflow-x-clip px-4") &&
   shellContents.includes("flex min-w-0 flex-col gap-2 overflow-x-clip")
 ) {
   pass("client Studio lane rail sticky wrappers use clipped horizontal overflow");
 } else {
   fail(
-    "client Studio lane rail sticky wrappers use clipped horizontal overflow",
-    "The page, main, and compact Site Studio shell wrappers must use overflow-x-clip so they do not create hidden overflow ancestors that break sticky lane rail placement."
+    "client Studio context wrappers use clipped horizontal overflow",
+    "The page, main, and compact Site Studio shell wrappers must use overflow-x-clip so Studio content does not introduce horizontal overflow."
   );
 }
 

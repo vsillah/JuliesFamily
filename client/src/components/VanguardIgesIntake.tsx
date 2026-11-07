@@ -135,7 +135,7 @@ export default function VanguardIgesIntake({ onReviewChange }: { onReviewChange:
             </p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
-            <Button type="button" onClick={openFilePicker} disabled={state === "loading"} className="bg-slate-950 text-white hover:bg-slate-800">
+            <Button type="button" onClick={openFilePicker} disabled={state === "loading"} className="kinflo-accent-solid">
               <FileUp className="mr-2 h-4 w-4" /> {review ? "Choose another" : "Choose IGES file"}
             </Button>
             {review ? <Button type="button" variant="outline" onClick={clearSelection}><X className="mr-2 h-4 w-4" /> Clear</Button> : null}
@@ -150,7 +150,7 @@ export default function VanguardIgesIntake({ onReviewChange }: { onReviewChange:
           data-testid="vanguard-iges-file-input"
           onChange={(event) => void inspectFile(event.currentTarget.files?.[0])}
         />
-        <div className="mt-4 grid gap-2 text-[11px] text-slate-500 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-4 grid gap-2 text-[11px] text-slate-500 dark:text-slate-400 sm:grid-cols-2 lg:grid-cols-4">
           <span>.igs or .iges only</span>
           <span>Maximum {Math.round(KINFLO_IGES_LIMITS.sourceBytes / 1024)} KiB</span>
           <span>Strict 80-column records</span>
@@ -159,13 +159,13 @@ export default function VanguardIgesIntake({ onReviewChange }: { onReviewChange:
       </div>
 
       {state !== "ready" ? (
-        <div className={`rounded-xl border p-5 ${state === "loading" || state === "empty" ? "border-blue-200 bg-blue-50 text-blue-950" : "border-red-200 bg-red-50 text-red-950"}`} role={state === "loading" ? "status" : state === "empty" ? undefined : "alert"}>
+        <div className={`rounded-xl border p-5 ${state === "loading" || state === "empty" ? "border-blue-200 bg-blue-50 text-blue-950 dark:border-blue-900/70 dark:bg-blue-950/35 dark:text-blue-100" : "border-red-200 bg-red-50 text-red-950 dark:border-red-900/70 dark:bg-red-950/35 dark:text-red-100"}`} role={state === "loading" ? "status" : state === "empty" ? undefined : "alert"}>
           <div className="flex items-start gap-3">
             {state === "loading" ? <LoaderCircle className="mt-0.5 h-5 w-5 shrink-0 animate-spin" /> : state === "empty" ? <FileUp className="mt-0.5 h-5 w-5 shrink-0" /> : <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0" />}
             <div>
               <div className="font-semibold capitalize">{state === "too-large" ? "File exceeds a bounded limit" : state === "no-geometry" ? "No triangle geometry" : state}</div>
               <p className="mt-1 text-sm leading-6">{message}</p>
-              {state !== "loading" && state !== "empty" ? <Button type="button" variant="outline" size="sm" onClick={openFilePicker} className="mt-3 bg-white">Choose a different file</Button> : null}
+              {state !== "loading" && state !== "empty" ? <Button type="button" variant="outline" size="sm" onClick={openFilePicker} className="mt-3 bg-white dark:border-blue-800 dark:bg-slate-900 dark:text-blue-100 dark:hover:bg-slate-800">Choose a different file</Button> : null}
             </div>
           </div>
         </div>
@@ -191,13 +191,13 @@ export default function VanguardIgesIntake({ onReviewChange }: { onReviewChange:
                     ? () => downloadDerived(capability.format)
                     : undefined;
                 return (
-                  <div key={capability.format} className={`rounded-lg border p-3 ${capability.available ? "border-blue-200 bg-white" : "border-slate-300 bg-slate-100"}`} data-testid={`${testId}-row`}>
+                  <div key={capability.format} className={`rounded-lg border p-3 ${capability.available ? "border-blue-200 bg-white dark:border-blue-900/70 dark:bg-slate-950" : "border-slate-300 bg-slate-100 dark:border-slate-700 dark:bg-slate-800"}`} data-testid={`${testId}-row`}>
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2"><span className="text-sm font-semibold text-slate-950">{capability.label}</span><code className="rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] text-slate-700">{capability.extension}</code></div>
-                        <p className="mt-1 text-[11px] leading-4 text-slate-700">{capability.detail}</p>
+                        <div className="flex flex-wrap items-center gap-2"><span className="text-sm font-semibold text-slate-950 dark:text-white">{capability.label}</span><code className="rounded border border-slate-200 bg-white px-1.5 py-0.5 text-[10px] text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">{capability.extension}</code></div>
+                        <p className="mt-1 text-[11px] leading-4 text-slate-700 dark:text-slate-300">{capability.detail}</p>
                       </div>
-                      <Button type="button" size="sm" variant="outline" className="border-slate-300 bg-white text-slate-900 hover:bg-slate-100 hover:text-slate-950 disabled:border-slate-300 disabled:bg-slate-200 disabled:text-slate-600" disabled={!capability.available || !handleDownload} onClick={handleDownload} aria-label={capability.available ? `Download ${capability.label} ${capability.extension}` : `${capability.label} export unavailable`} data-testid={testId}>
+                      <Button type="button" size="sm" variant="outline" className="border-slate-300 bg-white text-slate-900 hover:bg-slate-100 hover:text-slate-950 disabled:border-slate-300 disabled:bg-slate-200 disabled:text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800 dark:hover:text-white dark:disabled:border-slate-700 dark:disabled:bg-slate-800 dark:disabled:text-slate-500" disabled={!capability.available || !handleDownload} onClick={handleDownload} aria-label={capability.available ? `Download ${capability.label} ${capability.extension}` : `${capability.label} export unavailable`} data-testid={testId}>
                         <Download className="mr-1.5 h-4 w-4" /> {capability.available ? "Download" : "Unavailable"}
                       </Button>
                     </div>

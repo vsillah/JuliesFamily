@@ -2,6 +2,7 @@ import educationHero from "@assets/generated_images/Hero_education_classroom_sce
 import consultantHero from "@assets/generated_images/Professional_partnership_collaboration_meeting_f14bd523.png";
 import campaignHero from "@assets/generated_images/Hands_together_showing_community_b0e0e375.png";
 import vanguardIndustrialHero from "@assets/generated_images/Vanguard_industrial_welding_fabrication_hero.png";
+import vanguardIndustrialHeroVideo from "@assets/generated_images/Vanguard_industrial_welding_fabrication_hero.mp4";
 import { vanguardWorkflow } from "@/lib/kinfloVanguardWorkflow";
 import {
   resolveTenantPalette,
@@ -88,6 +89,7 @@ export type KinfloPublicSitePreview = {
     };
     media: {
       heroImage: string;
+      heroVideo?: string;
       heroAlt?: string;
       heroPosition?: string;
       treatment: string;
@@ -314,6 +316,7 @@ const previews: KinfloPublicSitePreview[] = [
       radii: { card: 6, control: 6 },
       media: {
         heroImage: vanguardIndustrialHero,
+        heroVideo: vanguardIndustrialHeroVideo,
         heroAlt: "Welders fabricating a structural steel assembly in an industrial workshop",
         heroPosition: "68% center",
         treatment: "industrial-welding-fabrication-build",

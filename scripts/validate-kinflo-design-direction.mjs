@@ -80,12 +80,14 @@ requireIncludes("docs/phase54-kinflo-os-design-direction.md", [
 ]);
 
 requireIncludes("client/src/pages/AdminKinfloShell.tsx", [
-  "Command Brief",
-  "section-kinflo-command-brief",
+  "Next actions",
+  "section-kinflo-decision-rail",
+  "section-kinflo-readiness-snapshot",
+  "section-kinflo-linked-data",
   "commandBrief",
-  "setActiveTab(\"launch-readiness\")",
-  "setActiveTab(\"adapter-switch\")",
-  "setActiveTab(\"hosted-activation\")",
+  "tab: \"launch-readiness\" as ShellTabValue",
+  "tab: \"adapter-switch\" as ShellTabValue",
+  "tab: \"hosted-activation\" as ShellTabValue",
   "Hosted Activation Ledger",
   "Adapter Switch Readiness",
 ]);
@@ -99,6 +101,14 @@ if (shellContents.includes("convex/_generated/api")) {
   fail("design direction shell does not import generated API", "Remove generated API imports until hosted activation approval.");
 } else {
   pass("design direction shell does not import generated API");
+}
+
+for (const pattern of ["section-kinflo-command-brief", "Command Brief", "section-kinflo-launch-summary"]) {
+  if (shellContents.includes(pattern)) {
+    fail(`design direction shell excludes ${pattern}`, "The operator hierarchy should not retain the retired command or launch-summary surfaces.");
+  } else {
+    pass(`design direction shell excludes ${pattern}`);
+  }
 }
 
 const failed = checks.filter((check) => !check.ok);

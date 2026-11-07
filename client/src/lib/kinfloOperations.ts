@@ -1,3 +1,5 @@
+import { getKinfloPlatformAnalyticsSnapshot } from "./kinfloPlatformAnalytics";
+
 export type KinfloOperationsScope = {
   tenantSlug: string;
   siteSlug: string;
@@ -133,6 +135,13 @@ function normalize(value: string | undefined) {
   return value?.trim().toLowerCase() || "";
 }
 
+const analyticsScopeSites: Readonly<Record<string, readonly string[]>> = {
+  "julies-family": ["julies-family-public"],
+  "vanguard-enterprises": ["vanguard-enterprises"],
+  "advisor-client-starter": ["advisor-client-site"],
+  "campaign-microsite-lab": ["campaign-microsite"],
+};
+
 export function isKinfloOperationsScopeMatch(scope: KinfloOperationsScope, candidate: KinfloOperationsScope) {
   return normalize(scope.tenantSlug) === normalize(candidate.tenantSlug)
     && normalize(scope.siteSlug) === normalize(candidate.siteSlug);
@@ -142,7 +151,11 @@ export function resolveKinfloAnalyticsPreview(scope: KinfloOperationsScope): Kin
   if (!scope.tenantSlug.trim() || !scope.siteSlug.trim()) {
     return { status: "invalid", reason: "Analytics preview requires both tenant and site scope." };
   }
-  if (!isKinfloOperationsScopeMatch(scope, { tenantSlug: "vanguard-enterprises", siteSlug: "vanguard-enterprises" })) {
+  const tenantProfile = getKinfloPlatformAnalyticsSnapshot().tenantCoverage.find(
+    (tenant) => tenant.tenantSlug === normalize(scope.tenantSlug),
+  );
+  const supportedSites = analyticsScopeSites[normalize(scope.tenantSlug)] ?? [];
+  if (!tenantProfile || !supportedSites.includes(normalize(scope.siteSlug))) {
     return { status: "invalid", reason: "No analytics preview is registered for this tenant/site scope." };
   }
   return {
