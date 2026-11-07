@@ -847,17 +847,25 @@ export default function KinfloPublicSitePreview() {
         ) : (
           <>
             {audienceResolution?.status === "ready" && (
-              <div className="sr-only" data-testid="public-preview-audience-context" data-contract="public-preview-context">
-                {preview.context.persona ?? "anonymous"} / {preview.context.journeyStage ?? "default"}.
-                {experimentResolution?.status === "ready" && experimentResolution.variant
-                  ? ` ${experimentResolution.experiment?.label} · ${experimentResolution.variant.label}.`
-                  : " No experiment selected."}
-              </div>
+              <div
+                aria-hidden="true"
+                hidden
+                data-testid="public-preview-audience-context"
+                data-contract="public-preview-context"
+                data-persona={preview.context.persona ?? "anonymous"}
+                data-journey-stage={preview.context.journeyStage ?? "default"}
+                data-experiment={experimentResolution?.status === "ready" ? experimentResolution.experiment?.key : undefined}
+                data-variant={experimentResolution?.status === "ready" ? experimentResolution.variant?.key : undefined}
+              />
             )}
             {capabilityPreview && (
-              <div className="sr-only" data-testid="public-preview-capability-context">
-                {capabilityPreview.role} · {capabilityPreview.permission}. Display-only capability simulation.
-              </div>
+              <div
+                aria-hidden="true"
+                hidden
+                data-testid="public-preview-capability-context"
+                data-role={capabilityPreview.role}
+                data-permission={capabilityPreview.permission}
+              />
             )}
             {orderedBlocks.map((block) => (
               <BlockSection key={block._id} block={block} preview={preview} heroParallaxY={heroParallaxY} />
