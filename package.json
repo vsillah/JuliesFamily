@@ -251,6 +251,8 @@
     "kinflo:validate-phase177-ops-hardening": "node scripts/validate-kinflo-phase177-ops-hardening.mjs",
     "kinflo:validate-development-convex-remote-deployment": "node scripts/validate-kinflo-development-convex-remote-deployment.mjs",
     "kinflo:test-scope-policy": "node --import tsx --test scripts/test-kinflo-scope-policy.ts",
+    "kinflo:test-read-adapter": "node --import tsx --test scripts/test-kinflo-read-adapter.ts",
+    "kinflo:test-read-parity": "node --import tsx --test scripts/test-kinflo-read-parity.ts",
     "kinflo:validate-phase1-scope-integrity": "node scripts/validate-kinflo-phase1-scope-integrity.mjs",
     "kinflo:test-audience-policy": "node --import tsx --test scripts/test-kinflo-audience-policy.ts",
     "kinflo:validate-phase2-audience-foundation": "node scripts/validate-kinflo-phase2-audience-foundation.mjs",

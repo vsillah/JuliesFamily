@@ -135,7 +135,7 @@ export default function VanguardIgesIntake({ onReviewChange }: { onReviewChange:
             </p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
-            <Button type="button" onClick={openFilePicker} disabled={state === "loading"} className="bg-slate-950 text-white hover:bg-slate-800">
+            <Button type="button" onClick={openFilePicker} disabled={state === "loading"} className="kinflo-accent-solid">
               <FileUp className="mr-2 h-4 w-4" /> {review ? "Choose another" : "Choose IGES file"}
             </Button>
             {review ? <Button type="button" variant="outline" onClick={clearSelection}><X className="mr-2 h-4 w-4" /> Clear</Button> : null}
