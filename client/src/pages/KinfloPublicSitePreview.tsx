@@ -55,6 +55,16 @@ function getCommunityCards(metadata: Record<string, unknown> | undefined) {
   ));
 }
 
+function getMetricCards(metadata: Record<string, unknown> | undefined) {
+  const items = metadata?.items;
+  if (!Array.isArray(items)) return [];
+  return items.filter((item): item is { value: string; label: string } => (
+    typeof item === "object" && item !== null &&
+    typeof (item as Record<string, unknown>).value === "string" &&
+    typeof (item as Record<string, unknown>).label === "string"
+  ));
+}
+
 function getPersona(metadata: Record<string, unknown> | undefined): Persona {
   const value = metadata?.persona;
   return value === "student" || value === "provider" || value === "parent" || value === "donor" || value === "volunteer"
@@ -287,6 +297,79 @@ function CommunityCardsSection({ block }: { block: KinfloPublicBlock }) {
               <p className="mt-2 text-sm leading-6 text-muted-foreground">{card.body}</p>
             </article>
           ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function JulieCardsSection({ block }: { block: KinfloPublicBlock }) {
+  const sectionId = block.type === "about" ? "about" : block.type;
+  const label = block.type === "about"
+    ? "Our story"
+    : block.type === "testimonials"
+      ? "Participant stories"
+      : block.type === "events"
+        ? "Upcoming events"
+        : "Community partners";
+  const cards = getCommunityCards(block.metadata);
+
+  return (
+    <section id={sectionId} className="border-y border-border bg-background px-4 py-16 sm:px-6 lg:px-8" data-testid={`public-preview-${sectionId}`}>
+      <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-3xl text-center">
+          <Badge variant="outline">{label}</Badge>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{block.title}</h2>
+          <p className="mt-4 text-base leading-7 text-muted-foreground">{block.body}</p>
+        </div>
+        <div className="mt-8 grid gap-4 md:grid-cols-3">
+          {cards.map((card) => (
+            <article key={card.title} className="rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm">
+              <div className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{card.eyebrow}</div>
+              <h3 className="mt-4 text-lg font-semibold">{card.title}</h3>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{card.body}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ImpactSection({ block }: { block: KinfloPublicBlock }) {
+  return (
+    <section id="impact" className="border-y border-border bg-muted/30 px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-impact">
+      <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-3xl text-center">
+          <Badge variant="outline">Our impact</Badge>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{block.title}</h2>
+          <p className="mt-4 text-base leading-7 text-muted-foreground">{block.body}</p>
+        </div>
+        <div className="mt-10 grid grid-cols-2 gap-6 lg:grid-cols-4">
+          {getMetricCards(block.metadata).map((metric) => (
+            <div key={metric.label} className="text-center">
+              <div className="text-4xl font-bold tracking-tight text-primary sm:text-5xl">{metric.value}</div>
+              <div className="mt-2 text-sm text-muted-foreground">{metric.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function DonationSection({ block }: { block: KinfloPublicBlock }) {
+  return (
+    <section id="donation" className="px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-donation">
+      <div className="mx-auto flex max-w-7xl flex-col gap-6 rounded-2xl border border-border bg-card p-8 text-card-foreground shadow-sm sm:p-10 lg:flex-row lg:items-center lg:justify-between">
+        <div className="max-w-2xl">
+          <Badge className="kinflo-accent-solid">Support the work</Badge>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">{block.title}</h2>
+          <p className="mt-4 text-base leading-7 text-muted-foreground">{block.body}</p>
+        </div>
+        <div className="flex flex-col gap-3 sm:flex-row lg:shrink-0">
+          <Button className="kinflo-accent-solid" asChild><a href="#intake">{getString(block.metadata, "primaryCta", "Support the work")}<ArrowRight className="ml-2 h-4 w-4" /></a></Button>
+          <Button variant="outline" asChild><a href={getString(block.metadata, "secondaryHref", "#volunteer")}>{getString(block.metadata, "secondaryCta", "Volunteer")}</a></Button>
         </div>
       </div>
     </section>
@@ -639,8 +722,20 @@ function BlockSection({
     );
   }
 
+  if (block.type === "impact") {
+    return <ImpactSection block={block} />;
+  }
+
+  if (block.type === "about" || block.type === "testimonials" || block.type === "events" || block.type === "sponsors") {
+    return <JulieCardsSection block={block} />;
+  }
+
   if (block.type === "stories" || block.type === "volunteer") {
     return <CommunityCardsSection block={block} />;
+  }
+
+  if (block.type === "donation") {
+    return <DonationSection block={block} />;
   }
 
   if (block.type === "campaign") {

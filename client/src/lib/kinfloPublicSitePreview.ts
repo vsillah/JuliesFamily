@@ -26,10 +26,14 @@ import {
 export type KinfloPublicBlockType =
   | "hero"
   | "services"
+  | "impact"
+  | "about"
   | "stories"
   | "volunteer"
   | "events"
   | "testimonials"
+  | "donation"
+  | "sponsors"
   | "lead_magnet"
   | "form"
   | "build_request"
@@ -206,6 +210,37 @@ const previews: KinfloPublicSitePreview[] = [
         publishedAt,
       },
       {
+        _id: "block_jf_impact",
+        type: "impact",
+        title: "A year of meaningful growth",
+        body: "Julie’s Family Learning Program grows with the people it serves, creating practical paths into education, family development, and community connection.",
+        metadata: {
+          items: [
+            { value: "299", label: "students served in 2024" },
+            { value: "+31%", label: "growth in enrollment" },
+            { value: "+155%", label: "increase in HSE testing" },
+            { value: "95", label: "monthly average enrollment" },
+          ],
+        },
+        order: 30,
+        publishedAt,
+      },
+      {
+        _id: "block_jf_about",
+        type: "about",
+        title: "A learning community built on welcome",
+        body: "For generations, Julie’s Family Learning Program has paired practical education with the relationships that help families keep moving forward.",
+        metadata: {
+          items: [
+            { eyebrow: "Our beginning", title: "Start with dignity", body: "Every learner brings knowledge, responsibility, and a reason to be here. Programs begin with that reality." },
+            { eyebrow: "Our approach", title: "Make room for real life", body: "Flexible schedules, family support, and patient instruction help learning fit alongside work and care." },
+            { eyebrow: "Our future", title: "Keep the door open", body: "The next generation of learners and volunteers should find a clear path into the same welcoming community." },
+          ],
+        },
+        order: 40,
+        publishedAt,
+      },
+      {
         _id: "block_jf_stories",
         type: "stories",
         title: "Stories from the learning community",
@@ -217,7 +252,37 @@ const previews: KinfloPublicSitePreview[] = [
             { eyebrow: "Digital access", title: "Tools that meet people where they are", body: "Practical digital support keeps learners connected to information, services, and community." },
           ],
         },
-        order: 30,
+        order: 50,
+        publishedAt,
+      },
+      {
+        _id: "block_jf_testimonials",
+        type: "testimonials",
+        title: "What our families say",
+        body: "The strongest evidence is the confidence learners carry back into their families, work, and communities.",
+        metadata: {
+          items: [
+            { eyebrow: "Adult learner", title: "I found my next step", body: "The support helped me return to learning without feeling like I had to leave the rest of my life at the door." },
+            { eyebrow: "Family partner", title: "The welcome was real", body: "I knew where to start, who to ask, and how to keep going when the first plan changed." },
+            { eyebrow: "Community partner", title: "The work is connected", body: "Julie’s brings education, family development, and community care into one practical path." },
+          ],
+        },
+        order: 60,
+        publishedAt,
+      },
+      {
+        _id: "block_jf_events",
+        type: "events",
+        title: "Be part of the community",
+        body: "Meet learners, celebrate progress, and find a way to participate at an upcoming community event.",
+        metadata: {
+          items: [
+            { eyebrow: "Open house", title: "Family learning welcome", body: "Visit the program, ask questions, and find the right starting point for your family." },
+            { eyebrow: "Learning fair", title: "Celebrate learner progress", body: "Share work, stories, and the small milestones that make a longer journey visible." },
+            { eyebrow: "Community gathering", title: "Connect with neighbors", body: "Build relationships with volunteers, partners, and families who make the work possible." },
+          ],
+        },
+        order: 70,
         publishedAt,
       },
       {
@@ -232,7 +297,31 @@ const previews: KinfloPublicSitePreview[] = [
             { eyebrow: "Program support", title: "Strengthen the work", body: "Bring organization, outreach, event, or technology skills to the people coordinating each program." },
           ],
         },
-        order: 40,
+        order: 80,
+        publishedAt,
+      },
+      {
+        _id: "block_jf_donation",
+        type: "donation",
+        title: "Help keep learning within reach",
+        body: "Your support helps make flexible learning, family development, and digital access available to more people.",
+        metadata: { primaryCta: "Support the work", secondaryCta: "Volunteer instead", secondaryHref: "#volunteer" },
+        order: 90,
+        publishedAt,
+      },
+      {
+        _id: "block_jf_sponsors",
+        type: "sponsors",
+        title: "Supported by generous partners",
+        body: "Community investment gives learners the time, tools, and encouragement to keep going.",
+        metadata: {
+          items: [
+            { eyebrow: "Education partners", title: "Learning access", body: "Partners help sustain instruction and resources for adult learners and families." },
+            { eyebrow: "Community partners", title: "Shared care", body: "Local organizations connect families to practical support beyond the classroom." },
+            { eyebrow: "Individual supporters", title: "A wider circle", body: "Donors and volunteers turn a single welcome into a lasting community pathway." },
+          ],
+        },
+        order: 100,
         publishedAt,
       },
       {
@@ -241,7 +330,7 @@ const previews: KinfloPublicSitePreview[] = [
         title: "Find the right next step",
         body: "Capture interest by persona and journey stage, then route every lead into the CRM.",
         metadata: { source: "family-learning-public-preview", persona: "parent", journeyStage: "awareness" },
-        order: 50,
+        order: 110,
         publishedAt,
       },
     ],
