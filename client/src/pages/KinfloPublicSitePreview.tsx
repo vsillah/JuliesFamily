@@ -1,6 +1,6 @@
 import { Link, useRoute } from "wouter";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { ArrowRight, BookOpen, BriefcaseBusiness, Building2, CalendarDays, CheckCircle2, CircleDashed, FileText, Goal, HandHelping, Landmark, LockKeyhole, Mail, MapPin, Network, PackageCheck, Quote, Save, UsersRound, Wrench } from "lucide-react";
+import { ArrowRight, BookOpen, BriefcaseBusiness, Building2, CalendarDays, CheckCircle2, CircleDashed, FileText, Goal, HandHelping, Heart, Landmark, LockKeyhole, Mail, MapPin, Network, PackageCheck, Quote, Save, UsersRound, Wrench } from "lucide-react";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
 import OrderLifecycleNavigation from "@/components/OrderLifecycleNavigation";
 import VanguardReversRIntake from "@/components/VanguardReversRIntake";
@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Persona } from "@/contexts/PersonaContext";
 import type { FunnelStage } from "@shared/defaults/personas";
 import buildingExterior from "@assets/Building080711smaller_1762689139944.jpg";
@@ -395,6 +396,135 @@ function CommunityCardsSection({ block }: { block: KinfloPublicBlock }) {
             </div>
           </div>
         )}
+      </div>
+    </section>
+  );
+}
+
+function JulieStorySection({ block }: { block: KinfloPublicBlock }) {
+  const [expandedTab, setExpandedTab] = useState<"origins" | "building" | "founders" | null>(null);
+  const cards = getCommunityCards(block.metadata);
+  const timeline = [
+    { year: "1974", title: "The beginning", body: cards[0]?.body ?? "Julie’s began with educators who built practical support around families in crisis." },
+    { year: "1980", title: "Merger and unity", body: cards[1]?.body ?? "Children’s services and adult learning came together as one two-generation program." },
+    { year: "2004", title: "A home of our own", body: "Julie’s moved into its own South Boston facility and brought its services together under one roof." },
+    { year: "2015", title: "Honoring the founders", body: "The community honored the founders’ decades of service and the people who carried the work forward." },
+  ];
+
+  return (
+    <section id="stories" className="border-y border-border bg-background px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-stories">
+      <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-3xl text-center">
+          <Badge variant="outline"><BookOpen className="mr-2 h-3.5 w-3.5" />Our story</Badge>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{block.title}</h2>
+          <p className="mt-4 text-base leading-7 text-muted-foreground">{block.body}</p>
+        </div>
+
+        <Tabs defaultValue="origins" className="mt-10 w-full">
+          <TabsList className="mx-auto grid h-auto w-full max-w-4xl grid-cols-1 gap-1 sm:grid-cols-3">
+            <TabsTrigger value="origins" data-testid="story-tab-origins">Our origins</TabsTrigger>
+            <TabsTrigger value="building" data-testid="story-tab-building">Historic building</TabsTrigger>
+            <TabsTrigger value="founders" data-testid="story-tab-founders">Our founders</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="origins" className="mt-8">
+            <div className="grid gap-8 lg:grid-cols-[minmax(280px,0.38fr)_minmax(0,0.62fr)] lg:items-start">
+              <figure className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+                <img src={multigenerationalImage} alt="Multigenerational family connected through learning" className="aspect-[4/5] w-full object-cover" loading="lazy" />
+                <figcaption className="px-5 py-4 text-sm leading-6 text-muted-foreground">A two-generation program shaped around family, learning, and belonging.</figcaption>
+              </figure>
+              <div className="rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-sm sm:p-8">
+                <p className="leading-7 text-muted-foreground">Julie’s Family Learning Program grew from a simple conviction: parents and children should be able to learn and move forward together.</p>
+                <button
+                  type="button"
+                  onClick={() => setExpandedTab(expandedTab === "origins" ? null : "origins")}
+                  className="mt-6 inline-flex items-center gap-2 font-medium text-primary transition-[gap] hover:gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  aria-expanded={expandedTab === "origins"}
+                  data-testid="story-learn-more-origins"
+                >
+                  {expandedTab === "origins" ? "Show less" : "Learn more"}<ArrowRight className="h-4 w-4" />
+                </button>
+                {expandedTab === "origins" ? (
+                  <div className="mt-8 space-y-7 border-t border-border pt-8" data-testid="story-origins-timeline">
+                    {timeline.map((item, index) => (
+                      <div key={item.year} className="relative flex gap-4 sm:gap-6">
+                        <div className="flex shrink-0 flex-col items-center">
+                          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                            {index === 0 ? <Heart className="h-5 w-5" /> : index === 1 ? <UsersRound className="h-5 w-5" /> : index === 2 ? <Building2 className="h-5 w-5" /> : <CalendarDays className="h-5 w-5" />}
+                          </span>
+                          {index < timeline.length - 1 ? <span className="mt-2 h-full w-px bg-border" aria-hidden="true" /> : null}
+                        </div>
+                        <div className="pb-7">
+                          <div className="text-sm font-semibold uppercase tracking-[0.16em] text-primary">{item.year}</div>
+                          <h3 className="mt-2 text-xl font-semibold text-foreground">{item.title}</h3>
+                          <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.body}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="building" className="mt-8">
+            <div className="grid gap-8 lg:grid-cols-[minmax(0,0.54fr)_minmax(280px,0.46fr)] lg:items-start">
+              <div className="rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-sm sm:p-8">
+                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">A place with history</div>
+                <h3 className="mt-3 text-2xl font-semibold">A welcoming home for the work</h3>
+                <p className="mt-4 leading-7 text-muted-foreground">Julie’s is housed in a historic South Boston building that began as a public health center and now supports a two-generation learning community.</p>
+                <button
+                  type="button"
+                  onClick={() => setExpandedTab(expandedTab === "building" ? null : "building")}
+                  className="mt-6 inline-flex items-center gap-2 font-medium text-primary transition-[gap] hover:gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  aria-expanded={expandedTab === "building"}
+                  data-testid="story-learn-more-building"
+                >
+                  {expandedTab === "building" ? "Show less" : "Learn more"}<ArrowRight className="h-4 w-4" />
+                </button>
+                {expandedTab === "building" ? (
+                  <div className="mt-8 space-y-4 border-t border-border pt-8" data-testid="story-building-detail">
+                    <p className="text-sm leading-6 text-muted-foreground">The building was presented to the City of Boston in 1927 and later renovated to create a warm, useful home for families, educators, and learners.</p>
+                    <p className="rounded-xl border border-border bg-muted/30 p-4 text-sm italic leading-6 text-muted-foreground">Its history is part of the welcome: a public building kept in service for the people around it.</p>
+                  </div>
+                ) : null}
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+                <img src={building1927} alt="Julie’s historic building in 1927" className="aspect-[4/3] w-full rounded-2xl border border-border object-cover" loading="lazy" />
+                <img src={buildingExterior} alt="Julie’s current historic building" className="aspect-[4/3] w-full rounded-2xl border border-border object-cover" loading="lazy" />
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="founders" className="mt-8">
+            <div className="grid gap-8 lg:grid-cols-[minmax(280px,0.42fr)_minmax(0,0.58fr)] lg:items-start">
+              <figure className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+                <img src={foundersPhoto} alt="Julie’s Family Learning Program founders" className="aspect-[5/3] w-full object-cover" loading="lazy" />
+                <figcaption className="px-5 py-4 text-sm leading-6 text-muted-foreground">The educators whose work made the Julie’s community possible.</figcaption>
+              </figure>
+              <div className="rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-sm sm:p-8">
+                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Two educators, one shared vision</div>
+                <h3 className="mt-3 text-2xl font-semibold">The work began with a belief in people</h3>
+                <p className="mt-4 leading-7 text-muted-foreground">Sister Louise Kearns and Sister Jean Sullivan combined adult education, early childhood development, and a commitment to serving families who had too often been left at the margins.</p>
+                <button
+                  type="button"
+                  onClick={() => setExpandedTab(expandedTab === "founders" ? null : "founders")}
+                  className="mt-6 inline-flex items-center gap-2 font-medium text-primary transition-[gap] hover:gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  aria-expanded={expandedTab === "founders"}
+                  data-testid="story-learn-more-founders"
+                >
+                  {expandedTab === "founders" ? "Show less" : "Learn more"}<ArrowRight className="h-4 w-4" />
+                </button>
+                {expandedTab === "founders" ? (
+                  <div className="mt-8 grid gap-4 border-t border-border pt-8 sm:grid-cols-2" data-testid="story-founders-detail">
+                    <div><h4 className="font-semibold">Sister Louise Kearns, SND</h4><p className="mt-2 text-sm leading-6 text-muted-foreground">Adult education and peer support were central to her vision for families.</p></div>
+                    <div><h4 className="font-semibold">Sister Jean Sullivan, SND</h4><p className="mt-2 text-sm leading-6 text-muted-foreground">Her Montessori work centered confidence, curiosity, and the dignity of every child.</p></div>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </section>
   );
@@ -987,7 +1117,11 @@ function BlockSection({
     return <JulieCardsSection block={block} />;
   }
 
-  if (block.type === "stories" || block.type === "volunteer") {
+  if (block.type === "stories") {
+    return <JulieStorySection block={block} />;
+  }
+
+  if (block.type === "volunteer") {
     return <CommunityCardsSection block={block} />;
   }
 
