@@ -53,12 +53,22 @@ export function getKinfloIdentityRuntime(): KinfloIdentityRuntime {
   }
 
   if (requestedMode === "review_fixture") {
-    if (import.meta.env.VITE_KINFLO_REVIEW_FIXTURE === "true") {
+    const configuredPreviewHostname = readEnvValue(import.meta.env.VITE_KINFLO_REVIEW_FIXTURE_HOSTNAME);
+    const currentHostname = typeof window !== "undefined" ? window.location.hostname : undefined;
+    const isExactProtectedPreview = Boolean(
+      currentHostname
+      && configuredPreviewHostname
+      && currentHostname === configuredPreviewHostname
+      && configuredPreviewHostname.endsWith(".vercel.app")
+      && configuredPreviewHostname !== "kinflo-website.vercel.app",
+    );
+
+    if (import.meta.env.VITE_KINFLO_REVIEW_FIXTURE === "true" && isExactProtectedPreview) {
       return {
         requestedMode,
         mode: "review_fixture",
         configured: true,
-        gate: "Protected review fixture identity is enabled for this preview build only.",
+        gate: "Protected review fixture identity is enabled for this exact preview build only.",
       };
     }
 
@@ -66,7 +76,7 @@ export function getKinfloIdentityRuntime(): KinfloIdentityRuntime {
       requestedMode,
       mode: "disabled",
       configured: false,
-      gate: "The review fixture requires the explicit VITE_KINFLO_REVIEW_FIXTURE=true build flag.",
+      gate: "The review fixture requires its explicit flag and an exact protected Vercel preview hostname.",
     };
   }
 
