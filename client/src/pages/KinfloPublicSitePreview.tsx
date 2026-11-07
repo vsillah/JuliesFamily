@@ -12,6 +12,27 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import type { Persona } from "@/contexts/PersonaContext";
 import type { FunnelStage } from "@shared/defaults/personas";
+import buildingExterior from "@assets/Building080711smaller_1762689139944.jpg";
+import building1927 from "@assets/PictureofWhiteBuilding1927smallforweb_001_1762689139951.jpg";
+import foundersPhoto from "@assets/Juliesfounders-541x180.jpg_1762689139950.webp";
+import educationProgramImage from "@assets/generated_images/Adult_basic_education_571dc60c.png";
+import familyDevelopmentImage from "@assets/generated_images/Family_development_mentoring_0f176b69.png";
+import childrensServicesImage from "@assets/generated_images/Children's_services_classroom_0675fa23.png";
+import digitalAccessImage from "@assets/generated_images/Families_using_nonprofit_platform_together_fed7c053.png";
+import graduateImage from "@assets/generated_images/Adult_student_graduation_portrait_efeec352.png";
+import multigenerationalImage from "@assets/generated_images/Multigenerational_family_portrait_outdoors_48943ef2.png";
+import communityLearningImage from "@assets/generated_images/Adult_education_students_learning_781bb5d3.png";
+import volunteerImage from "@assets/generated_images/Volunteer_tutoring_adult_student_4485b0ce.png";
+import communityEventImage from "@assets/generated_images/Families_at_community_event_c4d29d67.png";
+import graduationEventImage from "@assets/generated_images/Graduation_celebration_ceremony_99c15e90.png";
+import volunteerEventImage from "@assets/generated_images/Volunteers_collaborating_at_event_8c8b3b1f.png";
+import testimonialOneImage from "@assets/generated_images/Testimonial_portrait_woman_22b27ef2.png";
+import testimonialTwoImage from "@assets/generated_images/Testimonial_portrait_woman_2_0247f113.png";
+import testimonialThreeImage from "@assets/generated_images/Testimonial_portrait_woman_3_8f3e6a1d.png";
+import communityHandsImage from "@assets/generated_images/Hands_together_showing_community_b0e0e375.png";
+import cummingsLogo from "@assets/CumminsFoundationlogo_1762691811373.webp";
+import pierceLogo from "@assets/Pierce_VerticalLogoWithTag_Blue_300ppi-550x434.jpg_1762691811374.webp";
+import candidLogo from "@assets/CandidAwardImg.jpg_1762691811371.webp";
 import { vanguardWorkflow } from "@/lib/kinfloVanguardWorkflow";
 import { vanguardOrderLifecycleNavigation } from "@/lib/kinfloVanguardOrderPortal";
 import { useTenantTheme } from "@/hooks/useTenantTheme";
@@ -64,6 +85,48 @@ function getMetricCards(metadata: Record<string, unknown> | undefined) {
     typeof (item as Record<string, unknown>).label === "string"
   ));
 }
+
+type JulieVisual = { src: string; alt: string };
+
+const julieVisuals: Record<string, JulieVisual[]> = {
+  services: [
+    { src: educationProgramImage, alt: "Adult learners studying together in a classroom" },
+    { src: familyDevelopmentImage, alt: "Family development mentoring session" },
+    { src: childrensServicesImage, alt: "Children learning in a bright classroom" },
+    { src: digitalAccessImage, alt: "Families using technology together" },
+  ],
+  about: [
+    { src: building1927, alt: "Historic Julie's building from 1927" },
+    { src: buildingExterior, alt: "Current Julie's Family Learning Program building" },
+    { src: foundersPhoto, alt: "Julie’s Family Learning Program founders" },
+  ],
+  stories: [
+    { src: graduateImage, alt: "Adult learner celebrating graduation" },
+    { src: multigenerationalImage, alt: "Multigenerational family outdoors" },
+    { src: digitalAccessImage, alt: "Families connected through digital learning" },
+  ],
+  testimonials: [
+    { src: testimonialOneImage, alt: "Adult learner portrait" },
+    { src: testimonialTwoImage, alt: "Family learning participant portrait" },
+    { src: testimonialThreeImage, alt: "Community partner portrait" },
+  ],
+  events: [
+    { src: communityEventImage, alt: "Families gathering at a community event" },
+    { src: graduationEventImage, alt: "Learners celebrating graduation" },
+    { src: volunteerEventImage, alt: "Volunteers collaborating at an event" },
+  ],
+  volunteer: [
+    { src: volunteerImage, alt: "Volunteer tutoring an adult learner" },
+    { src: communityLearningImage, alt: "Adult education students learning together" },
+    { src: childrensServicesImage, alt: "Volunteer-supported classroom learning" },
+  ],
+};
+
+const julieSponsorLogos = [
+  { src: cummingsLogo, alt: "Cummings Foundation logo", title: "Cummings Foundation" },
+  { src: pierceLogo, alt: "Pierce Property Services logo", title: "Pierce Property Services" },
+  { src: candidLogo, alt: "Candid Platinum Transparency seal", title: "GuideStar Platinum Seal" },
+];
 
 function getPersona(metadata: Record<string, unknown> | undefined): Persona {
   const value = metadata?.persona;
@@ -276,6 +339,7 @@ function CommunityCardsSection({ block }: { block: KinfloPublicBlock }) {
   const isVolunteer = block.type === "volunteer";
   const Icon = isVolunteer ? HandHelping : BookOpen;
   const cards = getCommunityCards(block.metadata);
+  const visuals = julieVisuals[block.type] ?? [];
 
   return (
     <section
@@ -289,12 +353,51 @@ function CommunityCardsSection({ block }: { block: KinfloPublicBlock }) {
           <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{block.title}</h2>
           <p className="mt-4 text-base leading-7 text-muted-foreground">{block.body}</p>
         </div>
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
-          {cards.map((card) => (
-            <article key={card.title} className="rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm">
-              <div className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{card.eyebrow}</div>
-              <h3 className="mt-4 text-lg font-semibold">{card.title}</h3>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">{card.body}</p>
+        <div className="mt-10 grid gap-5 md:grid-cols-3">
+          {cards.map((card, index) => (
+            <article key={card.title} className="overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sm">
+              <img src={visuals[index % visuals.length].src} alt={visuals[index % visuals.length].alt} className="aspect-[4/3] w-full object-cover" loading="lazy" />
+              <div className="p-5">
+                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{card.eyebrow}</div>
+                <h3 className="mt-4 text-lg font-semibold">{card.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{card.body}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function JulieServicesSection({ block }: { block: KinfloPublicBlock }) {
+  const items = getItems(block.metadata);
+  const visuals = julieVisuals.services;
+  const accentColor = "var(--kinflo-accent)";
+
+  return (
+    <section id="services" className="border-y border-border bg-muted/20 px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-services">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,0.7fr)_minmax(320px,0.3fr)] lg:items-end">
+          <div className="max-w-3xl">
+            <Badge variant="outline">Our programs</Badge>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{block.title}</h2>
+            <p className="mt-4 text-base leading-7 text-muted-foreground">{block.body}</p>
+          </div>
+          <figure className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+            <img src={communityLearningImage} alt="Adult learners working together" className="h-44 w-full object-cover" />
+            <figcaption className="px-4 py-3 text-sm text-muted-foreground">Learning grows through practice, patience, and people.</figcaption>
+          </figure>
+        </div>
+        <div className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+          {items.map((item, index) => (
+            <article key={item} className="overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sm">
+              <img src={visuals[index % visuals.length].src} alt={visuals[index % visuals.length].alt} className="aspect-[4/3] w-full object-cover" loading="lazy" />
+              <div className="p-5">
+                <CheckCircle2 className="h-5 w-5" style={{ color: accentColor }} />
+                <h3 className="mt-4 font-semibold">{item}</h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">A clear pathway shaped around the learner, family, and community.</p>
+              </div>
             </article>
           ))}
         </div>
@@ -313,6 +416,35 @@ function JulieCardsSection({ block }: { block: KinfloPublicBlock }) {
         ? "Upcoming events"
         : "Community partners";
   const cards = getCommunityCards(block.metadata);
+  const visuals = julieVisuals[block.type] ?? [];
+
+  if (block.type === "sponsors") {
+    return (
+      <section id="sponsors" className="border-y border-border bg-background px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-sponsors">
+        <div className="mx-auto max-w-7xl">
+          <div className="mx-auto max-w-3xl text-center">
+            <Badge variant="outline">Community partners</Badge>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{block.title}</h2>
+            <p className="mt-4 text-base leading-7 text-muted-foreground">{block.body}</p>
+          </div>
+          <div className="mt-10 grid gap-5 md:grid-cols-3">
+            {julieSponsorLogos.map((sponsor, index) => {
+              const card = cards[index];
+              return (
+                <article key={sponsor.title} className="rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-sm">
+                  <div className="flex h-32 items-center justify-center rounded-xl bg-white p-4">
+                    <img src={sponsor.src} alt={sponsor.alt} className="h-full w-full object-contain" loading="lazy" />
+                  </div>
+                  <h3 className="mt-5 text-lg font-semibold">{sponsor.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{card?.body}</p>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id={sectionId} className="border-y border-border bg-background px-4 py-16 sm:px-6 lg:px-8" data-testid={`public-preview-${sectionId}`}>
@@ -322,12 +454,15 @@ function JulieCardsSection({ block }: { block: KinfloPublicBlock }) {
           <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{block.title}</h2>
           <p className="mt-4 text-base leading-7 text-muted-foreground">{block.body}</p>
         </div>
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
-          {cards.map((card) => (
-            <article key={card.title} className="rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm">
-              <div className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{card.eyebrow}</div>
-              <h3 className="mt-4 text-lg font-semibold">{card.title}</h3>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">{card.body}</p>
+        <div className="mt-10 grid gap-5 md:grid-cols-3">
+          {cards.map((card, index) => (
+            <article key={card.title} className="overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sm">
+              <img src={visuals[index % visuals.length]?.src} alt={visuals[index % visuals.length]?.alt} className="aspect-[4/3] w-full object-cover" loading="lazy" />
+              <div className="p-5">
+                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{card.eyebrow}</div>
+                <h3 className="mt-4 text-lg font-semibold">{card.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{card.body}</p>
+              </div>
             </article>
           ))}
         </div>
@@ -339,18 +474,61 @@ function JulieCardsSection({ block }: { block: KinfloPublicBlock }) {
 function ImpactSection({ block }: { block: KinfloPublicBlock }) {
   return (
     <section id="impact" className="border-y border-border bg-muted/30 px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-impact">
-      <div className="mx-auto max-w-7xl">
-        <div className="mx-auto max-w-3xl text-center">
+      <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[minmax(0,0.56fr)_minmax(320px,0.44fr)] lg:items-center">
+        <div>
           <Badge variant="outline">Our impact</Badge>
           <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{block.title}</h2>
-          <p className="mt-4 text-base leading-7 text-muted-foreground">{block.body}</p>
+          <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">{block.body}</p>
+          <div className="mt-10 grid grid-cols-2 gap-6 lg:grid-cols-4">
+            {getMetricCards(block.metadata).map((metric) => (
+              <div key={metric.label}>
+                <div className="text-4xl font-bold tracking-tight text-primary sm:text-5xl">{metric.value}</div>
+                <div className="mt-2 text-sm text-muted-foreground">{metric.label}</div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="mt-10 grid grid-cols-2 gap-6 lg:grid-cols-4">
-          {getMetricCards(block.metadata).map((metric) => (
-            <div key={metric.label} className="text-center">
-              <div className="text-4xl font-bold tracking-tight text-primary sm:text-5xl">{metric.value}</div>
-              <div className="mt-2 text-sm text-muted-foreground">{metric.label}</div>
+        <figure className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+          <img src={graduateImage} alt="Adult learner celebrating a graduation milestone" className="aspect-[4/3] w-full object-cover" loading="lazy" />
+          <figcaption className="px-5 py-4 text-sm leading-6 text-muted-foreground">Progress is personal, visible, and worth celebrating.</figcaption>
+        </figure>
+      </div>
+    </section>
+  );
+}
+
+function JulieAboutVisualSection({ block }: { block: KinfloPublicBlock }) {
+  const cards = getCommunityCards(block.metadata);
+  const visuals = julieVisuals.about;
+
+  return (
+    <section id="about" className="border-y border-border bg-background px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-about">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,0.46fr)_minmax(0,0.54fr)] lg:items-center">
+          <figure className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+            <img src={foundersPhoto} alt="Julie’s Family Learning Program founders" className="aspect-[5/3] w-full object-cover" loading="lazy" />
+            <figcaption className="px-5 py-4 text-sm leading-6 text-muted-foreground">A legacy of practical education, welcome, and service.</figcaption>
+          </figure>
+          <div>
+            <Badge variant="outline">Our story</Badge>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{block.title}</h2>
+            <p className="mt-4 text-base leading-7 text-muted-foreground">{block.body}</p>
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <img src={building1927} alt="Julie’s historic building in 1927" className="aspect-[4/3] w-full rounded-xl border border-border object-cover" loading="lazy" />
+              <img src={buildingExterior} alt="Julie’s current historic building" className="aspect-[4/3] w-full rounded-xl border border-border object-cover" loading="lazy" />
             </div>
+          </div>
+        </div>
+        <div className="mt-10 grid gap-5 md:grid-cols-3">
+          {cards.map((card, index) => (
+            <article key={card.title} className="overflow-hidden rounded-2xl border border-border bg-card text-card-foreground shadow-sm">
+              <img src={visuals[index % visuals.length].src} alt={visuals[index % visuals.length].alt} className="aspect-[4/3] w-full object-cover" loading="lazy" />
+              <div className="p-5">
+                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{card.eyebrow}</div>
+                <h3 className="mt-4 text-lg font-semibold">{card.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{card.body}</p>
+              </div>
+            </article>
           ))}
         </div>
       </div>
@@ -360,12 +538,14 @@ function ImpactSection({ block }: { block: KinfloPublicBlock }) {
 
 function DonationSection({ block }: { block: KinfloPublicBlock }) {
   return (
-    <section id="donation" className="px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-donation">
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 rounded-2xl border border-border bg-card p-8 text-card-foreground shadow-sm sm:p-10 lg:flex-row lg:items-center lg:justify-between">
+    <section id="donation" className="relative overflow-hidden px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-donation">
+      <img src={communityHandsImage} alt="Community members joining hands" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+      <div className="absolute inset-0 bg-slate-950/65" />
+      <div className="relative mx-auto flex max-w-7xl flex-col gap-6 rounded-2xl border border-white/20 bg-slate-950/45 p-8 text-white shadow-xl backdrop-blur-sm sm:p-10 lg:flex-row lg:items-center lg:justify-between">
         <div className="max-w-2xl">
           <Badge className="kinflo-accent-solid">Support the work</Badge>
           <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">{block.title}</h2>
-          <p className="mt-4 text-base leading-7 text-muted-foreground">{block.body}</p>
+          <p className="mt-4 text-base leading-7 text-white/85">{block.body}</p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row lg:shrink-0">
           <Button className="kinflo-accent-solid" asChild><a href="#intake">{getString(block.metadata, "primaryCta", "Support the work")}<ArrowRight className="ml-2 h-4 w-4" /></a></Button>
@@ -700,33 +880,18 @@ function BlockSection({
   }
 
   if (block.type === "services") {
-    const items = getItems(block.metadata);
-    return (
-      <section id="services" className="px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-services">
-        <div className="mx-auto max-w-7xl">
-          <div className="max-w-3xl">
-            <Badge variant="outline">Services overview</Badge>
-            <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">{block.title}</h2>
-            <p className="mt-4 text-base leading-7 text-muted-foreground">{block.body}</p>
-          </div>
-          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {items.map((item) => (
-              <div key={item} className="rounded-lg border bg-background p-5">
-                <CheckCircle2 className="h-5 w-5" style={{ color: accent }} />
-                <div className="mt-4 font-medium">{item}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    );
+    return <JulieServicesSection block={block} />;
   }
 
   if (block.type === "impact") {
     return <ImpactSection block={block} />;
   }
 
-  if (block.type === "about" || block.type === "testimonials" || block.type === "events" || block.type === "sponsors") {
+  if (block.type === "about") {
+    return <JulieAboutVisualSection block={block} />;
+  }
+
+  if (block.type === "testimonials" || block.type === "events" || block.type === "sponsors") {
     return <JulieCardsSection block={block} />;
   }
 
