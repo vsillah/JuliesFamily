@@ -1361,7 +1361,7 @@ export default function KinfloPublicSitePreview() {
           </nav>
           <div className="flex shrink-0 items-center gap-1">
             <VanguardThemeControl mode={tenantThemeMode} onChange={setTenantThemeMode} navSolid={navSolid} />
-            <KinfloPublicSiteAccountControls navSolid={navSolid} siteSlug={preview.site.slug} />
+            <KinfloPublicSiteAccountControls navSolid={navSolid} siteSlug={preview.site.slug} tenantSlug={preview.tenant.slug} />
           </div>
         </div>
       </header>
