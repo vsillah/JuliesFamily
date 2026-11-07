@@ -77,6 +77,32 @@ function LoopingHeroVideo({
   const [activeIndex, setActiveIndex] = useState(0);
   const [transitionIndex, setTransitionIndex] = useState<number | null>(null);
 
+  const playVideo = (video: HTMLVideoElement | null) => {
+    if (!video) return;
+    void video.play().catch(() => undefined);
+  };
+
+  useEffect(() => {
+    const video = videoRefs.current[0];
+    if (!video) return undefined;
+
+    const retryPlayback = () => playVideo(video);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") retryPlayback();
+    };
+
+    retryPlayback();
+    video.addEventListener("loadeddata", retryPlayback);
+    video.addEventListener("canplay", retryPlayback);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      video.removeEventListener("loadeddata", retryPlayback);
+      video.removeEventListener("canplay", retryPlayback);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [src]);
+
   useEffect(() => () => {
     if (transitionTimer.current !== null) window.clearTimeout(transitionTimer.current);
   }, []);
@@ -89,7 +115,7 @@ function LoopingHeroVideo({
     if (!nextVideo || !currentVideo) return;
 
     nextVideo.currentTime = 0;
-    void nextVideo.play();
+    playVideo(nextVideo);
     transitionIndexRef.current = nextIndex;
     setTransitionIndex(nextIndex);
     transitionTimer.current = window.setTimeout(() => {

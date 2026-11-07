@@ -520,6 +520,41 @@
   color: hsl(215 16% 47%) !important;
 }
 
+/* Public preview blocks use the active tenant palette instead of fixed slate utilities. */
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]).bg-white,
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]) .bg-white {
+  background-color: var(--kinflo-surface) !important;
+}
+
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]).bg-slate-50,
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]) .bg-slate-50 {
+  background-color: var(--kinflo-surface-muted) !important;
+}
+
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]).bg-slate-100,
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]) .bg-slate-100 {
+  background-color: var(--kinflo-surface-muted) !important;
+}
+
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]) .border-slate-100,
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]) .border-slate-200,
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]) .border-slate-300 {
+  border-color: var(--kinflo-border) !important;
+}
+
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]) .text-slate-950,
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]) .text-slate-900,
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]) .text-slate-800 {
+  color: var(--kinflo-foreground) !important;
+}
+
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]) .text-slate-700,
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]) .text-slate-600,
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]) .text-slate-500,
+.kinflo-public-surface main > :not([data-testid="public-preview-hero"]):not([data-testid="public-preview-audience-blocked"]) .text-slate-400 {
+  color: var(--kinflo-muted) !important;
+}
+
 .dark .kinflo-admin-shell .kinflo-pill-success {
   border-color: hsl(142 35% 38%);
   background-color: hsl(142 30% 18%);
