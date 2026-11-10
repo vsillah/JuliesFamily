@@ -16594,7 +16594,9 @@ async function registerRoutes(app2) {
         });
       } catch (error) {
         console.error("Error fetching user:", error);
-        res.status(500).json({ message: "Failed to fetch user" });
+        if (!res.headersSent && !res.writableEnded) {
+          res.status(500).json({ message: "Failed to fetch user" });
+        }
       }
     });
   }
@@ -24097,6 +24099,9 @@ function ensureReady() {
         const { registerRoutes: registerRoutes2 } = await Promise.resolve().then(() => (init_routes(), routes_exports));
         await registerRoutes2(appInstance);
         appInstance.use((err, req, res, _next) => {
+          if (res.headersSent || res.writableEnded) {
+            return;
+          }
           const status = err.status || err.statusCode || 500;
           const message = err.message || "Internal Server Error";
           const clientMessage = status === 500 ? "Internal Server Error" : message;
