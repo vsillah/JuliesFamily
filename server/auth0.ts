@@ -221,7 +221,13 @@ export async function setupAuth(app: Express) {
     next: Parameters<RequestHandler>[2],
   ) => {
     req.session.save((error) => {
-      if (error) return next(error);
+      if (error) {
+        console.error("[Auth] Preview session save failed:", {
+          code: (error as NodeJS.ErrnoException).code ?? null,
+          message: error.message,
+        });
+        return next(error);
+      }
       passport.authenticate(strategyName, options)(req, res, next);
     });
   };

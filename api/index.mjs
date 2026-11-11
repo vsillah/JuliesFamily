@@ -7276,7 +7276,13 @@ async function setupAuth(app2) {
   passport.deserializeUser((user, cb) => cb(null, user));
   const authenticateWithSavedSession = (strategyName, options, req, res, next) => {
     req.session.save((error) => {
-      if (error) return next(error);
+      if (error) {
+        console.error("[Auth] Preview session save failed:", {
+          code: error.code ?? null,
+          message: error.message
+        });
+        return next(error);
+      }
       passport.authenticate(strategyName, options)(req, res, next);
     });
   };
