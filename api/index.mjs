@@ -42,7 +42,7 @@ var init_security = __esm({
     });
     adminLimiter = rateLimit({
       windowMs: 15 * 60 * 1e3,
-      // 15 minutes
+      // 15 minutes  
       max: 100,
       // Limit admin operations
       message: "Too many requests to admin endpoints, please try again later.",
@@ -1812,7 +1812,7 @@ var init_schema = __esm({
       campaignId: varchar("campaign_id").references(() => emailCampaigns.id, { onDelete: "set null" }),
       trackingToken: varchar("tracking_token").notNull(),
       targetUrl: text("target_url").notNull(),
-      // Original URL being linked to
+      // Original URL being linked to  
       ipAddress: varchar("ip_address"),
       userAgent: text("user_agent"),
       metadata: jsonb("metadata"),
@@ -5480,7 +5480,7 @@ var init_storage = __esm({
       // Lead-level Email Engagement operations
       async getLeadEmailOpens(leadId, limit) {
         const results = await db.execute(sql6`
-      SELECT
+      SELECT 
         eo.id,
         eo.email_log_id as "emailLogId",
         eo.lead_id as "leadId",
@@ -5501,7 +5501,7 @@ var init_storage = __esm({
       }
       async getLeadEmailClicks(leadId, limit) {
         const results = await db.execute(sql6`
-      SELECT
+      SELECT 
         ec.id,
         ec.email_log_id as "emailLogId",
         ec.email_link_id as "emailLinkId",
@@ -5550,7 +5550,7 @@ var init_storage = __esm({
             SELECT * FROM leads ${baseFilterClause}
           ),
           engagement_stats AS (
-            SELECT
+            SELECT 
               fl.id,
               COUNT(DISTINCT eo.id) as open_count,
               COUNT(DISTINCT ec.id) as click_count
@@ -5625,13 +5625,13 @@ var init_storage = __esm({
           FROM filtered_leads fl
           INNER JOIN recent_sends rs ON fl.id = rs.id
           WHERE NOT EXISTS (
-            SELECT 1 FROM email_opens eo
-            WHERE eo.lead_id = fl.id
+            SELECT 1 FROM email_opens eo 
+            WHERE eo.lead_id = fl.id 
               AND eo.opened_at >= CURRENT_TIMESTAMP - INTERVAL '60 days'
           )
           AND NOT EXISTS (
-            SELECT 1 FROM email_clicks ec
-            WHERE ec.lead_id = fl.id
+            SELECT 1 FROM email_clicks ec 
+            WHERE ec.lead_id = fl.id 
               AND ec.clicked_at >= CURRENT_TIMESTAMP - INTERVAL '60 days'
           )
           ORDER BY fl.created_at DESC
@@ -5655,7 +5655,7 @@ var init_storage = __esm({
     `);
         const totalSends = Number(sendCountResult.rows[0]?.count || 0);
         const results = await db.execute(sql6`
-      SELECT
+      SELECT 
         target_url as url,
         COUNT(*) as total_clicks,
         COUNT(DISTINCT email_log_id) as unique_clicks
@@ -5689,7 +5689,7 @@ var init_storage = __esm({
         const statusFilter = metric === "sends" ? `AND status IN ('sent', 'delivered', 'queued')` : "";
         const escapedCampaignId = campaignId.replace(/'/g, "''");
         const results = await db.execute(sql6.raw(`
-      SELECT
+      SELECT 
         date_trunc('${interval}', ${timestampCol}) as bucket,
         COUNT(*) as count
       FROM ${table}
@@ -5717,7 +5717,7 @@ var init_storage = __esm({
           }
           const results = await db.execute(sql6.raw(`
         WITH sends AS (
-          SELECT
+          SELECT 
             el.id as log_id,
             el.sent_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/New_York' as sent_at_ny,
             el.lead_id
@@ -5728,7 +5728,7 @@ var init_storage = __esm({
             ${scopeFilter}
         ),
         open_stats AS (
-          SELECT
+          SELECT 
             eo.email_log_id,
             COUNT(*) as open_count_per_send,
             COUNT(DISTINCT eo.lead_id) as unique_openers,
@@ -5738,7 +5738,7 @@ var init_storage = __esm({
           GROUP BY eo.email_log_id
         ),
         click_stats AS (
-          SELECT
+          SELECT 
             ec.email_log_id,
             COUNT(*) as click_count_per_send
           FROM email_clicks ec
@@ -5770,12 +5770,12 @@ var init_storage = __esm({
           GROUP BY day_of_week, hour_of_day
           HAVING COUNT(*) >= ${minSampleSize}
         )
-        SELECT
+        SELECT 
           a.*,
-          CASE
-            WHEN b.total_sends > 0
+          CASE 
+            WHEN b.total_sends > 0 
             THEN ROUND((b.total_unique_opens::numeric / b.total_sends::numeric) * 10000)
-            ELSE 0
+            ELSE 0 
           END as baseline_open_rate,
           b.total_sends as baseline_send_count
         FROM aggregated a
@@ -6739,8 +6739,8 @@ var init_storage = __esm({
             await db.execute(sql6.raw(`INSERT INTO ${quotedTable} SELECT * FROM ${quotedBackupTable}`));
           } else {
             await db.execute(sql6.raw(`
-          INSERT INTO ${quotedTable}
-          SELECT * FROM ${quotedBackupTable}
+          INSERT INTO ${quotedTable} 
+          SELECT * FROM ${quotedBackupTable} 
           WHERE id NOT IN (SELECT id FROM ${quotedTable})
           ON CONFLICT (id) DO NOTHING
         `));
@@ -6910,7 +6910,7 @@ var init_storage = __esm({
       async getDatabaseStorageMetrics() {
         const LIMIT_BYTES = 10 * 1024 * 1024 * 1024;
         const tableSizesResult = await db.execute(sql6`
-      SELECT
+      SELECT 
         schemaname,
         tablename,
         pg_total_relation_size(schemaname || '.' || tablename) as size_bytes
@@ -7274,15 +7274,21 @@ async function setupAuth(app2) {
   passport.use(browserSafeStrategy);
   passport.serializeUser((user, cb) => cb(null, user));
   passport.deserializeUser((user, cb) => cb(null, user));
+  const authenticateWithSavedSession = (strategyName, options, req, res, next) => {
+    req.session.save((error) => {
+      if (error) return next(error);
+      passport.authenticate(strategyName, options)(req, res, next);
+    });
+  };
   app2.get("/api/login", authLimiter, (req, res, next) => {
     const returnTo = req.query.returnTo;
     if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//") && !returnTo.includes("://")) {
       req.session.returnTo = returnTo;
     }
-    passport.authenticate(STRATEGY_NAME, {
+    authenticateWithSavedSession(STRATEGY_NAME, {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"]
-    })(req, res, next);
+    }, req, res, next);
   });
   app2.get("/api/callback", authLimiter, (req, res, next) => {
     passport.authenticate(STRATEGY_NAME, {
@@ -7295,10 +7301,10 @@ async function setupAuth(app2) {
     if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//") && !returnTo.includes("://")) {
       req.session.returnTo = returnTo;
     }
-    passport.authenticate(BROWSER_SAFE_STRATEGY_NAME, {
+    authenticateWithSavedSession(BROWSER_SAFE_STRATEGY_NAME, {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"]
-    })(req, res, next);
+    }, req, res, next);
   });
   app2.get("/auth/callback", authLimiter, (req, res, next) => {
     passport.authenticate(BROWSER_SAFE_STRATEGY_NAME, {
@@ -7657,7 +7663,7 @@ var init_cacLtgpAnalytics = __esm({
         const channels = await this.storage.getAllAcquisitionChannels();
         const campaigns = await this.storage.getAllMarketingCampaigns();
         const spendResult = await db.execute(sql7`
-      SELECT
+      SELECT 
         COALESCE(SUM(amount_spent), 0) as total_spend,
         COALESCE(SUM(leads_acquired), 0) as total_leads,
         COALESCE(SUM(donors_acquired), 0) as total_donors
@@ -7667,7 +7673,7 @@ var init_cacLtgpAnalytics = __esm({
         const totalLeads = Number(spendResult.rows[0]?.total_leads || 0);
         const totalDonors = Number(spendResult.rows[0]?.total_donors || 0);
         const ltgpResult = await db.execute(sql7`
-      SELECT
+      SELECT 
         COALESCE(AVG(lifetime_gross_profit), 0) as avg_ltgp,
         COALESCE(AVG(customer_acquisition_cost), 0) as avg_cac,
         COALESCE(AVG(ltgp_to_cac_ratio), 0) as avg_ratio
@@ -7679,7 +7685,7 @@ var init_cacLtgpAnalytics = __esm({
         const avgRatio = Number(ltgpResult.rows[0]?.avg_ratio || 0) / 100;
         const topChannelsResult = await db.execute(sql7`
       WITH channel_spend AS (
-        SELECT
+        SELECT 
           channel_id,
           SUM(amount_spent) as spend,
           SUM(leads_acquired) as leads,
@@ -7688,7 +7694,7 @@ var init_cacLtgpAnalytics = __esm({
         GROUP BY channel_id
       ),
       channel_economics AS (
-        SELECT
+        SELECT 
           la.channel_id,
           AVG(de.lifetime_gross_profit) as ltgp,
           AVG(de.ltgp_to_cac_ratio) as ratio
@@ -7697,16 +7703,16 @@ var init_cacLtgpAnalytics = __esm({
         WHERE de.lifetime_gross_profit > 0
         GROUP BY la.channel_id
       )
-      SELECT
+      SELECT 
         c.id as channel_id,
         c.name as channel_name,
         COALESCE(cs.spend, 0) as spend,
         COALESCE(cs.leads, 0) as leads,
         COALESCE(cs.donors, 0) as donors,
-        CASE
-          WHEN COALESCE(cs.donors, 0) > 0
+        CASE 
+          WHEN COALESCE(cs.donors, 0) > 0 
           THEN COALESCE(cs.spend, 0) / cs.donors
-          ELSE 0
+          ELSE 0 
         END as cac,
         COALESCE(ce.ltgp, 0) as ltgp,
         COALESCE(ce.ratio, 0) as ratio
@@ -7746,7 +7752,7 @@ var init_cacLtgpAnalytics = __esm({
       async getChannelPerformance() {
         const result = await db.execute(sql7`
       WITH channel_spend AS (
-        SELECT
+        SELECT 
           channel_id,
           SUM(amount_spent) as total_spend,
           SUM(leads_acquired) as total_leads,
@@ -7755,7 +7761,7 @@ var init_cacLtgpAnalytics = __esm({
         GROUP BY channel_id
       ),
       channel_economics AS (
-        SELECT
+        SELECT 
           la.channel_id,
           AVG(de.lifetime_gross_profit) as avg_donor_ltgp,
           AVG(de.ltgp_to_cac_ratio) as ltgp_to_cac_ratio
@@ -7769,21 +7775,21 @@ var init_cacLtgpAnalytics = __esm({
         FROM marketing_campaigns
         GROUP BY channel_id
       )
-      SELECT
+      SELECT 
         c.id as channel_id,
         c.name as channel_name,
         COALESCE(cs.total_spend, 0) as total_spend,
         COALESCE(cs.total_leads, 0) as total_leads,
         COALESCE(cs.total_donors, 0) as total_donors,
-        CASE
-          WHEN COALESCE(cs.total_leads, 0) > 0
+        CASE 
+          WHEN COALESCE(cs.total_leads, 0) > 0 
           THEN COALESCE(cs.total_spend, 0) / cs.total_leads
-          ELSE 0
+          ELSE 0 
         END as avg_cost_per_lead,
-        CASE
-          WHEN COALESCE(cs.total_donors, 0) > 0
+        CASE 
+          WHEN COALESCE(cs.total_donors, 0) > 0 
           THEN COALESCE(cs.total_spend, 0) / cs.total_donors
-          ELSE 0
+          ELSE 0 
         END as avg_cost_per_donor,
         COALESCE(ce.avg_donor_ltgp, 0) as avg_donor_ltgp,
         COALESCE(ce.ltgp_to_cac_ratio, 0) as ltgp_to_cac_ratio,
@@ -7814,7 +7820,7 @@ var init_cacLtgpAnalytics = __esm({
       async getCampaignPerformance() {
         const result = await db.execute(sql7`
       WITH campaign_spend AS (
-        SELECT
+        SELECT 
           campaign_id,
           SUM(amount_spent) as spent,
           SUM(leads_acquired) as leads,
@@ -7824,7 +7830,7 @@ var init_cacLtgpAnalytics = __esm({
         GROUP BY campaign_id
       ),
       campaign_economics AS (
-        SELECT
+        SELECT 
           la.campaign_id,
           AVG(de.lifetime_gross_profit) as avg_ltgp,
           AVG(de.ltgp_to_cac_ratio) as avg_ratio
@@ -7833,7 +7839,7 @@ var init_cacLtgpAnalytics = __esm({
         WHERE la.campaign_id IS NOT NULL AND de.lifetime_gross_profit > 0
         GROUP BY la.campaign_id
       )
-      SELECT
+      SELECT 
         mc.id as campaign_id,
         mc.name as campaign_name,
         c.name as channel_name,
@@ -7841,17 +7847,17 @@ var init_cacLtgpAnalytics = __esm({
         COALESCE(cs.spent, 0) as spent,
         COALESCE(cs.leads, 0) as leads,
         COALESCE(cs.donors, 0) as donors,
-        CASE
-          WHEN COALESCE(cs.donors, 0) > 0
+        CASE 
+          WHEN COALESCE(cs.donors, 0) > 0 
           THEN COALESCE(cs.spent, 0) / cs.donors
-          ELSE 0
+          ELSE 0 
         END as cac,
         COALESCE(ce.avg_ltgp, 0) as ltgp,
         COALESCE(ce.avg_ratio, 0) as ratio,
-        CASE
-          WHEN COALESCE(cs.spent, 0) > 0
+        CASE 
+          WHEN COALESCE(cs.spent, 0) > 0 
           THEN ((COALESCE(ce.avg_ltgp, 0) * COALESCE(cs.donors, 0)) - COALESCE(cs.spent, 0)) / cs.spent * 100
-          ELSE 0
+          ELSE 0 
         END as roi
       FROM marketing_campaigns mc
       LEFT JOIN acquisition_channels c ON mc.channel_id = c.id
@@ -7880,7 +7886,7 @@ var init_cacLtgpAnalytics = __esm({
       async getCohortAnalysis(periodType = "month") {
         const result = await db.execute(sql7`
       WITH period_spend AS (
-        SELECT
+        SELECT 
           period_key,
           period_start,
           period_end,
@@ -7892,7 +7898,7 @@ var init_cacLtgpAnalytics = __esm({
         GROUP BY period_key, period_start, period_end
       ),
       period_economics AS (
-        SELECT
+        SELECT 
           ps.period_key,
           AVG(de.lifetime_gross_profit) as current_ltgp,
           AVG(de.ltgp_to_cac_ratio) as current_ratio
@@ -7902,17 +7908,17 @@ var init_cacLtgpAnalytics = __esm({
         WHERE de.lifetime_gross_profit > 0
         GROUP BY ps.period_key
       )
-      SELECT
+      SELECT 
         ps.period_key,
         ps.period_start::text,
         ps.period_end::text,
         COALESCE(ps.spend, 0) as spend,
         COALESCE(ps.leads_acquired, 0) as leads_acquired,
         COALESCE(ps.donors_acquired, 0) as donors_acquired,
-        CASE
-          WHEN COALESCE(ps.donors_acquired, 0) > 0
+        CASE 
+          WHEN COALESCE(ps.donors_acquired, 0) > 0 
           THEN COALESCE(ps.spend, 0) / ps.donors_acquired
-          ELSE 0
+          ELSE 0 
         END as cac,
         COALESCE(pe.current_ltgp, 0) as current_ltgp,
         COALESCE(pe.current_ratio, 0) as current_ratio,
@@ -7974,7 +7980,7 @@ var init_adminEntitlementService = __esm({
       /**
        * Deactivates an admin entitlement and cleans up all associated test data
        * Transactional: soft-deletes entitlement + hard-deletes test enrollments/logs
-       *
+       * 
        * @throws Error if entitlement not found or cleanup fails
        */
       async deactivateEntitlement(entitlementId) {
@@ -9080,7 +9086,7 @@ Analyze the image and provide:
    - Primary activity (reading, playing, learning, speaking)
    - Setting/location if relevant (outdoor, library, classroom)
    - Visual composition (closeup, wide_angle, group)
-
+   
    Examples:
    - "children_reading_circle"
    - "outdoor_playground_activities"
@@ -9158,7 +9164,7 @@ async function analyzeYouTubeVideoThumbnail(thumbnailUrl, videoTitle, videoDescr
   const arrayBuffer = await response.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
   const base64Image = buffer.toString("base64");
-  const prompt = `You are analyzing a thumbnail from a YouTube video${videoTitle ? ` titled "${videoTitle}"` : ""}${videoDescription ? ` with description: "${videoDescription}"` : ""}.
+  const prompt = `You are analyzing a thumbnail from a YouTube video${videoTitle ? ` titled "${videoTitle}"` : ""}${videoDescription ? ` with description: "${videoDescription}"` : ""}. 
 
 Based on the thumbnail image${videoTitle ? ", title," : ""}${videoDescription ? " and description," : ""} extract or suggest the following:
 
@@ -13598,13 +13604,13 @@ var init_metricEvaluator = __esm({
       }
       /**
        * Convert score to percentile (0-100)
-       *
+       * 
        * STUB: This is a simplified approximation that maps 0-10000 score to percentile.
        * In production, this should use actual historical distribution data by:
        * 1. Querying all historical scores for this content type/persona/funnel stage
        * 2. Calculating the empirical cumulative distribution function (eCDF)
        * 3. Finding where the current score falls in that distribution
-       *
+       * 
        * For now, using linear mapping as placeholder until we have sufficient historical data.
        */
       scoreToPercentile(score) {
@@ -14209,16 +14215,16 @@ var init_statisticalCalculator = __esm({
       }
       /**
        * Compare variants using actual conversion metrics for Bayesian testing
-       *
+       * 
        * FIXED: This now accepts actual conversion counts (events/views) instead of composite scores.
        * Composite scores are NOT Bernoulli metrics and should not be used with Bayesian Beta distribution testing.
-       *
+       * 
        * @param controlConversions - Number of successful conversions in control group (e.g., clicks, signups)
        * @param controlTrials - Total number of views/impressions in control group
        * @param challengerConversions - Number of successful conversions in challenger group
        * @param challengerTrials - Total number of views/impressions in challenger group
        * @param config - Statistical configuration (confidence threshold, minimum sample size, etc.)
-       *
+       * 
        * @example
        * // Testing CTA click rates
        * const result = compareVariants(
@@ -14364,18 +14370,18 @@ async function createGraduationPathCampaign() {
       htmlContent: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2>Thank you for your gift, {{firstName}}!</h2>
-
+          
           <p>Your generous donation just made a real difference for families in our community.</p>
-
+          
           <p><strong>What happens next?</strong></p>
           <ul>
             <li>Your gift will directly support families gaining literacy skills</li>
             <li>You'll receive updates on the impact you're making</li>
             <li>We'll share stories from families you're helping</li>
           </ul>
-
+          
           <p>Watch your inbox over the next few months - I'll be sharing exclusive updates about the families you're empowering.</p>
-
+          
           <p>With gratitude,<br/>
           Julie & The Family Learning Team</p>
         </div>
@@ -14395,16 +14401,16 @@ async function createGraduationPathCampaign() {
       htmlContent: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2>Your impact in action, {{firstName}}</h2>
-
+          
           <p>Last week, your gift helped Maria and her 6-year-old daughter attend our family literacy program.</p>
-
+          
           <p><strong>Maria's Story:</strong></p>
           <p>"I came to this country with big dreams but couldn't read English. Now my daughter and I are learning together. She reads me bedtime stories in English!"</p>
-
+          
           <p>This is the kind of transformation your gift makes possible.</p>
-
+          
           <p><strong>Coming up:</strong> Next month, I'll share how our program is expanding to serve even more families.</p>
-
+          
           <p>Thank you for being part of this,<br/>
           Julie</p>
         </div>
@@ -14424,20 +14430,20 @@ async function createGraduationPathCampaign() {
       htmlContent: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2>One month of transformation, {{firstName}}</h2>
-
+          
           <p>It's been 30 days since you joined our mission. Here's the impact donors like you made this month:</p>
-
+          
           <ul>
             <li><strong>47 families</strong> participated in our literacy programs</li>
             <li><strong>89 children</strong> improved their reading levels</li>
             <li><strong>23 parents</strong> gained job-ready English skills</li>
           </ul>
-
+          
           <p><strong>Would you consider joining our monthly giving community?</strong></p>
           <p>For just $25/month, you can ensure families receive consistent support throughout their learning journey.</p>
-
+          
           <a href="{{donationUrl}}" style="display: inline-block; background: #4A90E2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 16px 0;">Become a Monthly Partner</a>
-
+          
           <p>With gratitude,<br/>
           Julie</p>
         </div>
@@ -14457,22 +14463,22 @@ async function createGraduationPathCampaign() {
       htmlContent: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2>Two months later, {{firstName}}</h2>
-
+          
           <p>Remember Maria from my last email? Her daughter just won a reading competition at her school.</p>
-
+          
           <p>That's the ripple effect of your generosity.</p>
-
+          
           <p><strong>Your 2-month impact report:</strong></p>
           <ul>
             <li>Your gift has touched <strong>6 families</strong> directly</li>
             <li>Those families have shared their new skills with <strong>24 neighbors</strong></li>
             <li>The community is seeing <strong>measurable improvements</strong> in family engagement</li>
           </ul>
-
+          
           <p><strong>What's next?</strong> We're planning a special community celebration in 4 months. I'd love for you to attend and meet the families you're helping.</p>
-
+          
           <p>I'll send you an invitation as we get closer.</p>
-
+          
           <p>With deep appreciation,<br/>
           Julie</p>
         </div>
@@ -14492,26 +14498,26 @@ async function createGraduationPathCampaign() {
       htmlContent: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2>Six months of changing lives, {{firstName}}</h2>
-
+          
           <p>Half a year ago, you made your first gift to our family literacy program.</p>
-
+          
           <p><strong>Since then:</strong></p>
           <ul>
             <li>94 families graduated from our program</li>
             <li>67% of participants got better jobs or promotions</li>
             <li>Children's reading levels improved by an average of 2.3 grade levels</li>
           </ul>
-
+          
           <p>You helped make this happen.</p>
-
+          
           <p><strong>SPECIAL INVITATION:</strong> Join us for our "Celebrating Families" graduation ceremony. Meet Maria, hear success stories, and see the impact of your generosity firsthand.</p>
-
+          
           <a href="{{donationUrl}}" style="display: inline-block; background: #4A90E2; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 16px 0;">RSVP for Celebration</a>
-
+          
           <p><strong>Looking forward:</strong> Would you consider a year-end gift to help us serve even more families in 2025?</p>
-
+          
           <p>Your partnership means the world to us.</p>
-
+          
           <p>With immense gratitude,<br/>
           Julie & The Entire Family Learning Team</p>
         </div>
@@ -14854,8 +14860,8 @@ function formatReportEmail(schedule, reportData) {
           <div class="campaign">
             <div class="campaign-name">${campaign.name}</div>
             <div class="campaign-stats">
-              ${campaign.totalSent} sent \u2022
-              ${campaign.totalOpens} opens (${(campaign.openRate * 100).toFixed(1)}%) \u2022
+              ${campaign.totalSent} sent \u2022 
+              ${campaign.totalOpens} opens (${(campaign.openRate * 100).toFixed(1)}%) \u2022 
               ${campaign.totalClicks} clicks (${(campaign.clickRate * 100).toFixed(1)}%)
             </div>
           </div>
@@ -17940,7 +17946,7 @@ async function registerRoutes(app2) {
       console.log("[funnel-stats] About to execute recent history query");
       const personaSQLFilter = persona && persona !== "all" ? sql13`AND l.persona = ${persona}` : sql13``;
       const recentHistory = await db.execute(sql13`
-        SELECT
+        SELECT 
           fph.id,
           fph.lead_id as "leadId",
           fph.from_stage as "fromStage",
@@ -18002,7 +18008,7 @@ async function registerRoutes(app2) {
       const personaFilter = persona && persona !== "all" ? sql13`AND l.persona = ${persona}` : sql13``;
       const velocityQuery = await db.execute(sql13`
         WITH stage_transitions AS (
-          SELECT
+          SELECT 
             l.persona,
             h.lead_id,
             h.to_stage,
@@ -18012,7 +18018,7 @@ async function registerRoutes(app2) {
           INNER JOIN leads l ON h.lead_id = l.id
           WHERE l.persona IS NOT NULL ${personaFilter}
         )
-        SELECT
+        SELECT 
           persona,
           ROUND(AVG(EXTRACT(EPOCH FROM (created_at - prev_created_at)) / 86400)::numeric, 1) as avg_days
         FROM stage_transitions
@@ -22442,7 +22448,7 @@ You're receiving this notification because you're a member of this campaign. You
                           </p>
                         </div>
                         <p style="color: #666; font-size: 14px;">
-                          You're receiving this notification because you're a member of this campaign.
+                          You're receiving this notification because you're a member of this campaign. 
                           You can manage your notification preferences from your campaign dashboard.
                         </p>
                       </div>

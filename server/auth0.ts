@@ -213,15 +213,28 @@ export async function setupAuth(app: Express) {
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
+  const authenticateWithSavedSession = (
+    strategyName: string,
+    options: Parameters<typeof passport.authenticate>[1],
+    req: Parameters<RequestHandler>[0],
+    res: Parameters<RequestHandler>[1],
+    next: Parameters<RequestHandler>[2],
+  ) => {
+    req.session.save((error) => {
+      if (error) return next(error);
+      passport.authenticate(strategyName, options)(req, res, next);
+    });
+  };
+
   app.get("/api/login", authLimiter, (req, res, next) => {
     const returnTo = req.query.returnTo as string;
     if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//") && !returnTo.includes("://")) {
       (req.session as typeof req.session & { returnTo?: string }).returnTo = returnTo;
     }
-    passport.authenticate(STRATEGY_NAME, {
+    authenticateWithSavedSession(STRATEGY_NAME, {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
-    })(req, res, next);
+    }, req, res, next);
   });
 
   app.get("/api/callback", authLimiter, (req, res, next) => {
@@ -236,10 +249,10 @@ export async function setupAuth(app: Express) {
     if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//") && !returnTo.includes("://")) {
       (req.session as typeof req.session & { returnTo?: string }).returnTo = returnTo;
     }
-    passport.authenticate(BROWSER_SAFE_STRATEGY_NAME, {
+    authenticateWithSavedSession(BROWSER_SAFE_STRATEGY_NAME, {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
-    })(req, res, next);
+    }, req, res, next);
   });
 
   app.get("/auth/callback", authLimiter, (req, res, next) => {
