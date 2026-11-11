@@ -14,6 +14,9 @@ function ensureReady(): Promise<void> {
         await registerRoutes(appInstance);
 
         appInstance.use((err: any, req: Request, res: Response, _next: NextFunction) => {
+          if (res.headersSent || res.writableEnded) {
+            return;
+          }
           const status = err.status || err.statusCode || 500;
           const message = err.message || "Internal Server Error";
           const clientMessage = status === 500 ? "Internal Server Error" : message;

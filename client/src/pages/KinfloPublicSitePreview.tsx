@@ -1,6 +1,6 @@
 import { Link, useRoute } from "wouter";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { ArrowRight, BriefcaseBusiness, Building2, CheckCircle2, CircleDashed, FileText, Goal, HandHelping, Landmark, LockKeyhole, Mail, MapPin, Network, PackageCheck, Save, UsersRound, Wrench } from "lucide-react";
+import { ArrowRight, BookOpen, BriefcaseBusiness, Building2, CalendarDays, CheckCircle2, CircleDashed, FileText, Goal, HandHelping, Heart, Landmark, LockKeyhole, Mail, MapPin, Network, PackageCheck, Quote, Save, UsersRound, Wrench } from "lucide-react";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
 import OrderLifecycleNavigation from "@/components/OrderLifecycleNavigation";
 import VanguardReversRIntake from "@/components/VanguardReversRIntake";
@@ -10,8 +10,30 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Persona } from "@/contexts/PersonaContext";
 import type { FunnelStage } from "@shared/defaults/personas";
+import buildingExterior from "@assets/Building080711smaller_1762689139944.jpg";
+import building1927 from "@assets/PictureofWhiteBuilding1927smallforweb_001_1762689139951.jpg";
+import foundersPhoto from "@assets/Juliesfounders-541x180.jpg_1762689139950.webp";
+import educationProgramImage from "@assets/generated_images/Adult_basic_education_571dc60c.png";
+import familyDevelopmentImage from "@assets/generated_images/Family_development_mentoring_0f176b69.png";
+import childrensServicesImage from "@assets/generated_images/Children's_services_classroom_0675fa23.png";
+import digitalAccessImage from "@assets/generated_images/Families_using_nonprofit_platform_together_fed7c053.png";
+import graduateImage from "@assets/generated_images/Adult_student_graduation_portrait_efeec352.png";
+import multigenerationalImage from "@assets/generated_images/Multigenerational_family_portrait_outdoors_48943ef2.png";
+import communityLearningImage from "@assets/generated_images/Adult_education_students_learning_781bb5d3.png";
+import volunteerImage from "@assets/generated_images/Volunteer_tutoring_adult_student_4485b0ce.png";
+import communityEventImage from "@assets/generated_images/Families_at_community_event_c4d29d67.png";
+import graduationEventImage from "@assets/generated_images/Graduation_celebration_ceremony_99c15e90.png";
+import volunteerEventImage from "@assets/generated_images/Volunteers_collaborating_at_event_8c8b3b1f.png";
+import testimonialOneImage from "@assets/generated_images/Testimonial_portrait_woman_22b27ef2.png";
+import testimonialTwoImage from "@assets/generated_images/Testimonial_portrait_woman_2_0247f113.png";
+import testimonialThreeImage from "@assets/generated_images/Testimonial_portrait_woman_3_8f3e6a1d.png";
+import communityHandsImage from "@assets/generated_images/Hands_together_showing_community_b0e0e375.png";
+import cummingsLogo from "@assets/CumminsFoundationlogo_1762691811373.webp";
+import pierceLogo from "@assets/Pierce_VerticalLogoWithTag_Blue_300ppi-550x434.jpg_1762691811374.webp";
+import candidLogo from "@assets/CandidAwardImg.jpg_1762691811371.webp";
 import { vanguardWorkflow } from "@/lib/kinfloVanguardWorkflow";
 import { vanguardOrderLifecycleNavigation } from "@/lib/kinfloVanguardOrderPortal";
 import { useTenantTheme } from "@/hooks/useTenantTheme";
@@ -43,6 +65,69 @@ function getItems(metadata: Record<string, unknown> | undefined) {
   const items = metadata?.items;
   return Array.isArray(items) ? items.filter((item): item is string => typeof item === "string") : [];
 }
+
+function getCommunityCards(metadata: Record<string, unknown> | undefined) {
+  const items = metadata?.items;
+  if (!Array.isArray(items)) return [];
+  return items.filter((item): item is { eyebrow: string; title: string; body: string } => (
+    typeof item === "object" && item !== null &&
+    typeof (item as Record<string, unknown>).eyebrow === "string" &&
+    typeof (item as Record<string, unknown>).title === "string" &&
+    typeof (item as Record<string, unknown>).body === "string"
+  ));
+}
+
+function getMetricCards(metadata: Record<string, unknown> | undefined) {
+  const items = metadata?.items;
+  if (!Array.isArray(items)) return [];
+  return items.filter((item): item is { value: string; label: string } => (
+    typeof item === "object" && item !== null &&
+    typeof (item as Record<string, unknown>).value === "string" &&
+    typeof (item as Record<string, unknown>).label === "string"
+  ));
+}
+
+type JulieVisual = { src: string; alt: string };
+
+const julieVisuals: Record<string, JulieVisual[]> = {
+  services: [
+    { src: educationProgramImage, alt: "Adult learners studying together in a classroom" },
+    { src: familyDevelopmentImage, alt: "Family development mentoring session" },
+    { src: childrensServicesImage, alt: "Children learning in a bright classroom" },
+    { src: digitalAccessImage, alt: "Families using technology together" },
+  ],
+  about: [
+    { src: building1927, alt: "Historic Julie's building from 1927" },
+    { src: buildingExterior, alt: "Current Julie's Family Learning Program building" },
+    { src: foundersPhoto, alt: "Julie’s Family Learning Program founders" },
+  ],
+  stories: [
+    { src: graduateImage, alt: "Adult learner celebrating graduation" },
+    { src: multigenerationalImage, alt: "Multigenerational family outdoors" },
+    { src: digitalAccessImage, alt: "Families connected through digital learning" },
+  ],
+  testimonials: [
+    { src: testimonialOneImage, alt: "Adult learner portrait" },
+    { src: testimonialTwoImage, alt: "Family learning participant portrait" },
+    { src: testimonialThreeImage, alt: "Community partner portrait" },
+  ],
+  events: [
+    { src: communityEventImage, alt: "Families gathering at a community event" },
+    { src: graduationEventImage, alt: "Learners celebrating graduation" },
+    { src: volunteerEventImage, alt: "Volunteers collaborating at an event" },
+  ],
+  volunteer: [
+    { src: volunteerImage, alt: "Volunteer tutoring an adult learner" },
+    { src: communityLearningImage, alt: "Adult education students learning together" },
+    { src: childrensServicesImage, alt: "Volunteer-supported classroom learning" },
+  ],
+};
+
+const julieSponsorLogos = [
+  { src: cummingsLogo, alt: "Cummings Foundation logo", title: "Cummings Foundation" },
+  { src: pierceLogo, alt: "Pierce Property Services logo", title: "Pierce Property Services" },
+  { src: candidLogo, alt: "Candid Platinum Transparency seal", title: "GuideStar Platinum Seal" },
+];
 
 function getPersona(metadata: Record<string, unknown> | undefined): Persona {
   const value = metadata?.persona;
@@ -245,6 +330,448 @@ function BuildRequestSection({ block }: { block: KinfloPublicBlock }) {
         </div>
         <div className="mt-8">
           <VanguardReversRIntake />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CommunityCardsSection({ block }: { block: KinfloPublicBlock }) {
+  const isVolunteer = block.type === "volunteer";
+  const Icon = isVolunteer ? HandHelping : BookOpen;
+  const cards = getCommunityCards(block.metadata);
+  const visuals = julieVisuals[block.type] ?? [];
+
+  return (
+    <section
+      id={isVolunteer ? "volunteer" : "stories"}
+      className="border-y border-border bg-muted/30 px-4 py-16 sm:px-6 lg:px-8"
+      data-testid={`public-preview-${isVolunteer ? "volunteer" : "stories"}`}
+    >
+      <div className="mx-auto max-w-7xl">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,0.66fr)_minmax(280px,0.34fr)] lg:items-end">
+          <div className="max-w-3xl">
+            <Badge variant="outline"><Icon className="mr-2 h-3.5 w-3.5" />{isVolunteer ? "Volunteer pathways" : "Community stories"}</Badge>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{block.title}</h2>
+            <p className="mt-4 text-base leading-7 text-muted-foreground">{block.body}</p>
+          </div>
+          <figure className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+            <img src={visuals[0]?.src} alt={visuals[0]?.alt} className="aspect-[5/3] w-full object-cover" loading="lazy" />
+            <figcaption className="px-4 py-3 text-sm text-muted-foreground">
+              {isVolunteer ? "A clear way to bring time, experience, or encouragement." : "Small moments of learning become shared momentum."}
+            </figcaption>
+          </figure>
+        </div>
+        {isVolunteer ? (
+          <div className="mt-10 grid gap-5 md:grid-cols-3">
+            {cards.map((card, index) => (
+              <article key={card.title} className="rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-sm">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">{String(index + 1).padStart(2, "0")}</span>
+                  <Icon className="h-5 w-5 text-primary" aria-hidden="true" />
+                </div>
+                <div className="mt-5 text-xs font-semibold uppercase tracking-[0.16em] text-primary">{card.eyebrow}</div>
+                <h3 className="mt-3 text-lg font-semibold">{card.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{card.body}</p>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <div className="relative mt-12">
+            <div className="absolute bottom-5 left-4 top-5 w-px bg-border md:left-1/2" aria-hidden="true" />
+            <div className="space-y-8">
+              {cards.map((card, index) => (
+                <article key={card.title} className={`relative grid gap-5 md:grid-cols-2 md:gap-10 ${index % 2 === 1 ? "md:[&>div:first-child]:order-2" : ""}`}>
+                  <span className="absolute left-[0.6rem] top-6 z-10 h-7 w-7 rounded-full border-4 border-background bg-primary md:left-1/2 md:-translate-x-1/2" aria-hidden="true" />
+                  <div className="pl-12 md:pl-0 md:pr-12 md:text-right">
+                    <div className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{card.eyebrow}</div>
+                    <h3 className="mt-3 text-xl font-semibold text-foreground">{card.title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">{card.body}</p>
+                  </div>
+                  <figure className={`max-w-md overflow-hidden rounded-2xl border border-border bg-card shadow-sm ${index % 2 === 1 ? "md:justify-self-end" : "md:justify-self-start"}`}>
+                    <img src={visuals[(index + 1) % visuals.length]?.src} alt={visuals[(index + 1) % visuals.length]?.alt} className="aspect-[4/3] w-full object-cover" loading="lazy" />
+                  </figure>
+                </article>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function JulieStorySection({ block }: { block: KinfloPublicBlock }) {
+  const [expandedTab, setExpandedTab] = useState<"origins" | "building" | "founders" | null>(null);
+  const cards = getCommunityCards(block.metadata);
+  const timeline = [
+    { year: "1974", title: "The beginning", body: cards[0]?.body ?? "Julie’s began with educators who built practical support around families in crisis." },
+    { year: "1980", title: "Merger and unity", body: cards[1]?.body ?? "Children’s services and adult learning came together as one two-generation program." },
+    { year: "2004", title: "A home of our own", body: "Julie’s moved into its own South Boston facility and brought its services together under one roof." },
+    { year: "2015", title: "Honoring the founders", body: "The community honored the founders’ decades of service and the people who carried the work forward." },
+  ];
+
+  return (
+    <section id="stories" className="border-y border-border bg-background px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-stories">
+      <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-3xl text-center">
+          <Badge variant="outline"><BookOpen className="mr-2 h-3.5 w-3.5" />Our story</Badge>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{block.title}</h2>
+          <p className="mt-4 text-base leading-7 text-muted-foreground">{block.body}</p>
+        </div>
+
+        <Tabs defaultValue="origins" className="mt-10 w-full">
+          <TabsList className="mx-auto grid h-auto w-full max-w-4xl grid-cols-1 gap-1 sm:grid-cols-3">
+            <TabsTrigger value="origins" data-testid="story-tab-origins">Our origins</TabsTrigger>
+            <TabsTrigger value="building" data-testid="story-tab-building">Historic building</TabsTrigger>
+            <TabsTrigger value="founders" data-testid="story-tab-founders">Our founders</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="origins" className="mt-8">
+            <div className="grid gap-8 lg:grid-cols-[minmax(280px,0.38fr)_minmax(0,0.62fr)] lg:items-start">
+              <figure className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+                <img src={multigenerationalImage} alt="Multigenerational family connected through learning" className="aspect-[4/5] w-full object-cover" loading="lazy" />
+                <figcaption className="px-5 py-4 text-sm leading-6 text-muted-foreground">A two-generation program shaped around family, learning, and belonging.</figcaption>
+              </figure>
+              <div className="rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-sm sm:p-8">
+                <p className="leading-7 text-muted-foreground">Julie’s Family Learning Program grew from a simple conviction: parents and children should be able to learn and move forward together.</p>
+                <button
+                  type="button"
+                  onClick={() => setExpandedTab(expandedTab === "origins" ? null : "origins")}
+                  className="mt-6 inline-flex items-center gap-2 font-medium text-primary transition-[gap] hover:gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  aria-expanded={expandedTab === "origins"}
+                  data-testid="story-learn-more-origins"
+                >
+                  {expandedTab === "origins" ? "Show less" : "Learn more"}<ArrowRight className="h-4 w-4" />
+                </button>
+                {expandedTab === "origins" ? (
+                  <div className="mt-8 space-y-7 border-t border-border pt-8" data-testid="story-origins-timeline">
+                    {timeline.map((item, index) => (
+                      <div key={item.year} className="relative flex gap-4 sm:gap-6">
+                        <div className="flex shrink-0 flex-col items-center">
+                          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                            {index === 0 ? <Heart className="h-5 w-5" /> : index === 1 ? <UsersRound className="h-5 w-5" /> : index === 2 ? <Building2 className="h-5 w-5" /> : <CalendarDays className="h-5 w-5" />}
+                          </span>
+                          {index < timeline.length - 1 ? <span className="mt-2 h-full w-px bg-border" aria-hidden="true" /> : null}
+                        </div>
+                        <div className="pb-7">
+                          <div className="text-sm font-semibold uppercase tracking-[0.16em] text-primary">{item.year}</div>
+                          <h3 className="mt-2 text-xl font-semibold text-foreground">{item.title}</h3>
+                          <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.body}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="building" className="mt-8">
+            <div className="grid gap-8 lg:grid-cols-[minmax(0,0.54fr)_minmax(280px,0.46fr)] lg:items-start">
+              <div className="rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-sm sm:p-8">
+                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">A place with history</div>
+                <h3 className="mt-3 text-2xl font-semibold">A welcoming home for the work</h3>
+                <p className="mt-4 leading-7 text-muted-foreground">Julie’s is housed in a historic South Boston building that began as a public health center and now supports a two-generation learning community.</p>
+                <button
+                  type="button"
+                  onClick={() => setExpandedTab(expandedTab === "building" ? null : "building")}
+                  className="mt-6 inline-flex items-center gap-2 font-medium text-primary transition-[gap] hover:gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  aria-expanded={expandedTab === "building"}
+                  data-testid="story-learn-more-building"
+                >
+                  {expandedTab === "building" ? "Show less" : "Learn more"}<ArrowRight className="h-4 w-4" />
+                </button>
+                {expandedTab === "building" ? (
+                  <div className="mt-8 space-y-4 border-t border-border pt-8" data-testid="story-building-detail">
+                    <p className="text-sm leading-6 text-muted-foreground">The building was presented to the City of Boston in 1927 and later renovated to create a warm, useful home for families, educators, and learners.</p>
+                    <p className="rounded-xl border border-border bg-muted/30 p-4 text-sm italic leading-6 text-muted-foreground">Its history is part of the welcome: a public building kept in service for the people around it.</p>
+                  </div>
+                ) : null}
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+                <img src={building1927} alt="Julie’s historic building in 1927" className="aspect-[4/3] w-full rounded-2xl border border-border object-cover" loading="lazy" />
+                <img src={buildingExterior} alt="Julie’s current historic building" className="aspect-[4/3] w-full rounded-2xl border border-border object-cover" loading="lazy" />
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="founders" className="mt-8">
+            <div className="grid gap-8 lg:grid-cols-[minmax(280px,0.42fr)_minmax(0,0.58fr)] lg:items-start">
+              <figure className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+                <img src={foundersPhoto} alt="Julie’s Family Learning Program founders" className="aspect-[5/3] w-full object-cover" loading="lazy" />
+                <figcaption className="px-5 py-4 text-sm leading-6 text-muted-foreground">The educators whose work made the Julie’s community possible.</figcaption>
+              </figure>
+              <div className="rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-sm sm:p-8">
+                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Two educators, one shared vision</div>
+                <h3 className="mt-3 text-2xl font-semibold">The work began with a belief in people</h3>
+                <p className="mt-4 leading-7 text-muted-foreground">Sister Louise Kearns and Sister Jean Sullivan combined adult education, early childhood development, and a commitment to serving families who had too often been left at the margins.</p>
+                <button
+                  type="button"
+                  onClick={() => setExpandedTab(expandedTab === "founders" ? null : "founders")}
+                  className="mt-6 inline-flex items-center gap-2 font-medium text-primary transition-[gap] hover:gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  aria-expanded={expandedTab === "founders"}
+                  data-testid="story-learn-more-founders"
+                >
+                  {expandedTab === "founders" ? "Show less" : "Learn more"}<ArrowRight className="h-4 w-4" />
+                </button>
+                {expandedTab === "founders" ? (
+                  <div className="mt-8 grid gap-4 border-t border-border pt-8 sm:grid-cols-2" data-testid="story-founders-detail">
+                    <div><h4 className="font-semibold">Sister Louise Kearns, SND</h4><p className="mt-2 text-sm leading-6 text-muted-foreground">Adult education and peer support were central to her vision for families.</p></div>
+                    <div><h4 className="font-semibold">Sister Jean Sullivan, SND</h4><p className="mt-2 text-sm leading-6 text-muted-foreground">Her Montessori work centered confidence, curiosity, and the dignity of every child.</p></div>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </section>
+  );
+}
+
+function JulieServicesSection({ block }: { block: KinfloPublicBlock }) {
+  const items = getItems(block.metadata);
+  const accentColor = "var(--kinflo-accent)";
+
+  return (
+    <section id="services" className="border-y border-border bg-muted/20 px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-services">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,0.7fr)_minmax(320px,0.3fr)] lg:items-end">
+          <div className="max-w-3xl">
+            <Badge variant="outline">Our programs</Badge>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{block.title}</h2>
+            <p className="mt-4 text-base leading-7 text-muted-foreground">{block.body}</p>
+          </div>
+          <figure className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+            <img src={communityLearningImage} alt="Adult learners working together" className="h-44 w-full object-cover" />
+            <figcaption className="px-4 py-3 text-sm text-muted-foreground">Learning grows through practice, patience, and people.</figcaption>
+          </figure>
+        </div>
+        <div className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+          {items.map((item) => (
+            <article key={item} className="rounded-2xl border border-border bg-card p-5 text-card-foreground shadow-sm">
+              <div className="flex items-center gap-3">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10">
+                  <CheckCircle2 className="h-5 w-5" style={{ color: accentColor }} />
+                </span>
+                <h3 className="font-semibold">{item}</h3>
+              </div>
+              <p className="mt-4 text-sm leading-6 text-muted-foreground">A clear pathway shaped around the learner, family, and community.</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function JulieCardsSection({ block }: { block: KinfloPublicBlock }) {
+  const sectionId = block.type === "about" ? "about" : block.type;
+  const label = block.type === "about"
+    ? "Our story"
+    : block.type === "testimonials"
+      ? "Participant stories"
+      : block.type === "events"
+        ? "Upcoming events"
+        : "Community partners";
+  const cards = getCommunityCards(block.metadata);
+  const visuals = julieVisuals[block.type] ?? [];
+
+  if (block.type === "sponsors") {
+    return (
+      <section id="sponsors" className="border-y border-border bg-background px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-sponsors">
+        <div className="mx-auto max-w-7xl">
+          <div className="mx-auto max-w-3xl text-center">
+            <Badge variant="outline">Community partners</Badge>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{block.title}</h2>
+            <p className="mt-4 text-base leading-7 text-muted-foreground">{block.body}</p>
+          </div>
+          <div className="mt-10 grid gap-5 md:grid-cols-3">
+            {julieSponsorLogos.map((sponsor, index) => {
+              const card = cards[index];
+              return (
+                <article key={sponsor.title} className="rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-sm">
+                  <div className="flex h-32 items-center justify-center rounded-xl bg-white p-4">
+                    <img src={sponsor.src} alt={sponsor.alt} className="h-full w-full object-contain" loading="lazy" />
+                  </div>
+                  <h3 className="mt-5 text-lg font-semibold">{sponsor.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{card?.body}</p>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (block.type === "testimonials") {
+    return (
+      <section id="testimonials" className="border-y border-border bg-muted/30 px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-testimonials">
+        <div className="mx-auto max-w-7xl">
+          <div className="mx-auto max-w-3xl text-center">
+            <Badge variant="outline"><Quote className="mr-2 h-3.5 w-3.5" />Participant stories</Badge>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{block.title}</h2>
+            <p className="mt-4 text-base leading-7 text-muted-foreground">{block.body}</p>
+          </div>
+          <div className="mt-10 grid gap-5 lg:grid-cols-3">
+            {cards.map((card, index) => (
+              <article key={card.title} className="flex flex-col rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-sm">
+                <div className="flex items-center gap-3 border-b border-border pb-4">
+                  <img src={visuals[index % visuals.length].src} alt={visuals[index % visuals.length].alt} className="h-12 w-12 rounded-full border border-border object-cover" loading="lazy" />
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{card.eyebrow}</div>
+                    <div className="mt-1 text-xs text-muted-foreground">From the Julie’s community</div>
+                  </div>
+                </div>
+                <blockquote className="mt-6 flex-1 text-lg leading-8 text-foreground">“{card.body}”</blockquote>
+                <div className="mt-6 text-sm font-semibold text-primary">{card.title}</div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (block.type === "events") {
+    return (
+      <section id="events" className="border-y border-border bg-background px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-events">
+        <div className="mx-auto max-w-7xl">
+          <div className="mx-auto max-w-3xl text-center">
+            <Badge variant="outline"><CalendarDays className="mr-2 h-3.5 w-3.5" />Upcoming events</Badge>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{block.title}</h2>
+            <p className="mt-4 text-base leading-7 text-muted-foreground">{block.body}</p>
+          </div>
+          <div className="mx-auto mt-10 max-w-4xl divide-y divide-border rounded-2xl border border-border bg-card shadow-sm">
+            {cards.map((card, index) => (
+              <article key={card.title} className="grid gap-5 p-5 sm:grid-cols-[128px_minmax(0,1fr)] sm:items-center sm:p-6">
+                <img src={visuals[index % visuals.length].src} alt={visuals[index % visuals.length].alt} className="aspect-[4/3] w-full rounded-xl object-cover" loading="lazy" />
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{card.eyebrow}</div>
+                  <h3 className="mt-2 text-xl font-semibold text-foreground">{card.title}</h3>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">{card.body}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section id={sectionId} className="border-y border-border bg-background px-4 py-16 sm:px-6 lg:px-8" data-testid={`public-preview-${sectionId}`}>
+      <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-3xl text-center">
+          <Badge variant="outline">{label}</Badge>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{block.title}</h2>
+          <p className="mt-4 text-base leading-7 text-muted-foreground">{block.body}</p>
+        </div>
+        <div className="mt-10 grid gap-5 md:grid-cols-3">
+          {cards.map((card, index) => (
+            <article key={card.title} className="rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-sm">
+              <div className="flex items-center gap-4">
+                {block.type === "testimonials" && visuals[index % visuals.length] ? (
+                  <img src={visuals[index % visuals.length].src} alt={visuals[index % visuals.length].alt} className="h-12 w-12 rounded-full border border-border object-cover" loading="lazy" />
+                ) : (
+                  <span className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <Landmark className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                )}
+                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{card.eyebrow}</div>
+              </div>
+              <h3 className="mt-5 text-lg font-semibold">{card.title}</h3>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{card.body}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ImpactSection({ block }: { block: KinfloPublicBlock }) {
+  return (
+    <section id="impact" className="border-y border-border bg-muted/30 px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-impact">
+      <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[minmax(0,0.56fr)_minmax(320px,0.44fr)] lg:items-center">
+        <div>
+          <Badge variant="outline">Our impact</Badge>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{block.title}</h2>
+          <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">{block.body}</p>
+          <div className="mt-10 grid grid-cols-2 gap-6 lg:grid-cols-4">
+            {getMetricCards(block.metadata).map((metric) => (
+              <div key={metric.label}>
+                <div className="text-4xl font-bold tracking-tight text-primary sm:text-5xl">{metric.value}</div>
+                <div className="mt-2 text-sm text-muted-foreground">{metric.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <figure className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+          <img src={graduateImage} alt="Adult learner celebrating a graduation milestone" className="aspect-[4/3] w-full object-cover" loading="lazy" />
+          <figcaption className="px-5 py-4 text-sm leading-6 text-muted-foreground">Progress is personal, visible, and worth celebrating.</figcaption>
+        </figure>
+      </div>
+    </section>
+  );
+}
+
+function JulieAboutVisualSection({ block }: { block: KinfloPublicBlock }) {
+  const cards = getCommunityCards(block.metadata);
+
+  return (
+    <section id="about" className="border-y border-border bg-background px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-about">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,0.46fr)_minmax(0,0.54fr)] lg:items-center">
+          <figure className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+            <img src={foundersPhoto} alt="Julie’s Family Learning Program founders" className="aspect-[5/3] w-full object-cover" loading="lazy" />
+            <figcaption className="px-5 py-4 text-sm leading-6 text-muted-foreground">A legacy of practical education, welcome, and service.</figcaption>
+          </figure>
+          <div>
+            <Badge variant="outline">Our story</Badge>
+            <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{block.title}</h2>
+            <p className="mt-4 text-base leading-7 text-muted-foreground">{block.body}</p>
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <img src={building1927} alt="Julie’s historic building in 1927" className="aspect-[4/3] w-full rounded-xl border border-border object-cover" loading="lazy" />
+              <img src={buildingExterior} alt="Julie’s current historic building" className="aspect-[4/3] w-full rounded-xl border border-border object-cover" loading="lazy" />
+            </div>
+          </div>
+        </div>
+        <div className="mt-10 grid gap-5 md:grid-cols-3">
+          {cards.map((card) => (
+            <article key={card.title} className="rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-sm">
+              <div className="flex items-center gap-3">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Landmark className="h-5 w-5" aria-hidden="true" />
+                </span>
+                <div className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{card.eyebrow}</div>
+              </div>
+              <h3 className="mt-5 text-lg font-semibold">{card.title}</h3>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{card.body}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function DonationSection({ block }: { block: KinfloPublicBlock }) {
+  return (
+    <section id="donation" className="relative overflow-hidden px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-donation">
+      <img src={communityHandsImage} alt="Community members joining hands" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+      <div className="absolute inset-0 bg-slate-950/65" />
+      <div className="relative mx-auto flex max-w-7xl flex-col gap-6 rounded-2xl border border-white/20 bg-slate-950/45 p-8 text-white shadow-xl backdrop-blur-sm sm:p-10 lg:flex-row lg:items-center lg:justify-between">
+        <div className="max-w-2xl">
+          <Badge className="kinflo-accent-solid">Support the work</Badge>
+          <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">{block.title}</h2>
+          <p className="mt-4 text-base leading-7 text-white/85">{block.body}</p>
+        </div>
+        <div className="flex flex-col gap-3 sm:flex-row lg:shrink-0">
+          <Button className="kinflo-accent-solid" asChild><a href="#intake">{getString(block.metadata, "primaryCta", "Support the work")}<ArrowRight className="ml-2 h-4 w-4" /></a></Button>
+          <Button variant="outline" asChild><a href={getString(block.metadata, "secondaryHref", "#volunteer")}>{getString(block.metadata, "secondaryCta", "Volunteer")}</a></Button>
         </div>
       </div>
     </section>
@@ -575,26 +1102,31 @@ function BlockSection({
   }
 
   if (block.type === "services") {
-    const items = getItems(block.metadata);
-    return (
-      <section id="services" className="px-4 py-16 sm:px-6 lg:px-8" data-testid="public-preview-services">
-        <div className="mx-auto max-w-7xl">
-          <div className="max-w-3xl">
-            <Badge variant="outline">Services overview</Badge>
-            <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">{block.title}</h2>
-            <p className="mt-4 text-base leading-7 text-muted-foreground">{block.body}</p>
-          </div>
-          <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {items.map((item) => (
-              <div key={item} className="rounded-lg border bg-background p-5">
-                <CheckCircle2 className="h-5 w-5" style={{ color: accent }} />
-                <div className="mt-4 font-medium">{item}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    );
+    return <JulieServicesSection block={block} />;
+  }
+
+  if (block.type === "impact") {
+    return <ImpactSection block={block} />;
+  }
+
+  if (block.type === "about") {
+    return <JulieAboutVisualSection block={block} />;
+  }
+
+  if (block.type === "testimonials" || block.type === "events" || block.type === "sponsors") {
+    return <JulieCardsSection block={block} />;
+  }
+
+  if (block.type === "stories") {
+    return <JulieStorySection block={block} />;
+  }
+
+  if (block.type === "volunteer") {
+    return <CommunityCardsSection block={block} />;
+  }
+
+  if (block.type === "donation") {
+    return <DonationSection block={block} />;
   }
 
   if (block.type === "campaign") {
@@ -829,7 +1361,7 @@ export default function KinfloPublicSitePreview() {
           </nav>
           <div className="flex shrink-0 items-center gap-1">
             <VanguardThemeControl mode={tenantThemeMode} onChange={setTenantThemeMode} navSolid={navSolid} />
-            <KinfloPublicSiteAccountControls navSolid={navSolid} siteSlug={preview.site.slug} />
+            <KinfloPublicSiteAccountControls navSolid={navSolid} siteSlug={preview.site.slug} tenantSlug={preview.tenant.slug} />
           </div>
         </div>
       </header>
@@ -847,17 +1379,25 @@ export default function KinfloPublicSitePreview() {
         ) : (
           <>
             {audienceResolution?.status === "ready" && (
-              <div className="sr-only" data-testid="public-preview-audience-context" data-contract="public-preview-context">
-                {preview.context.persona ?? "anonymous"} / {preview.context.journeyStage ?? "default"}.
-                {experimentResolution?.status === "ready" && experimentResolution.variant
-                  ? ` ${experimentResolution.experiment?.label} · ${experimentResolution.variant.label}.`
-                  : " No experiment selected."}
-              </div>
+              <div
+                aria-hidden="true"
+                hidden
+                data-testid="public-preview-audience-context"
+                data-contract="public-preview-context"
+                data-persona={preview.context.persona ?? "anonymous"}
+                data-journey-stage={preview.context.journeyStage ?? "default"}
+                data-experiment={experimentResolution?.status === "ready" ? experimentResolution.experiment?.key : undefined}
+                data-variant={experimentResolution?.status === "ready" ? experimentResolution.variant?.key : undefined}
+              />
             )}
             {capabilityPreview && (
-              <div className="sr-only" data-testid="public-preview-capability-context">
-                {capabilityPreview.role} · {capabilityPreview.permission}. Display-only capability simulation.
-              </div>
+              <div
+                aria-hidden="true"
+                hidden
+                data-testid="public-preview-capability-context"
+                data-role={capabilityPreview.role}
+                data-permission={capabilityPreview.permission}
+              />
             )}
             {orderedBlocks.map((block) => (
               <BlockSection key={block._id} block={block} preview={preview} heroParallaxY={heroParallaxY} />

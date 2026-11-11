@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { LogIn, LogOut, Shield, User } from "lucide-react";
+import { LayoutDashboard, LogIn, LogOut, Shield, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -39,6 +39,22 @@ export default function KinfloPublicSiteAccountControls({
   return (
     <div className="flex items-center gap-1.5" data-testid="kinflo-public-account-controls">
       {!isAdmin && isAuthenticated && <DevAdminButton />}
+      {isAdmin && (
+        <Link href={adminHref}>
+          <Button
+            type="button"
+            size="sm"
+            variant={navSolid ? "outline" : "ghost"}
+            className={navSolid ? "kinflo-accent-solid" : "border border-white/30 text-white hover:bg-white/10 hover:text-white"}
+            aria-label="Open KinFlo admin"
+            title="Open KinFlo admin"
+            data-testid="link-public-kinflo-admin"
+          >
+            <LayoutDashboard className="mr-2 h-4 w-4" />
+            <span className="hidden sm:inline">KinFlo</span>
+          </Button>
+        </Link>
+      )}
       {isAdmin && <AdminPreviewDropdown isScrolled={navSolid} kinfloPalette siteSlug={siteSlug} tenantSlug={tenantSlug} />}
       {isAuthenticated && user ? (
         <DropdownMenu>
