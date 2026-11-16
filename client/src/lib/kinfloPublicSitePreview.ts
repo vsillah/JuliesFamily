@@ -121,6 +121,7 @@ export type KinfloPublicSitePreview = {
     device?: "desktop" | "tablet" | "mobile";
     studioSite?: string;
     reviewSource?: string;
+    demoMode?: boolean;
     audience?: KinfloAudiencePreviewResolution;
     experiment?: KinfloExperimentPreviewResolution;
     capabilityPreview?: KinfloCapabilityPreviewMarker;
@@ -137,6 +138,7 @@ export type KinfloPublicSitePreviewOptions = {
   device?: "desktop" | "tablet" | "mobile";
   studioSite?: string;
   reviewSource?: string;
+  demoMode?: boolean;
   experimentKey?: string;
   variantKey?: string;
   capabilityMode?: string;
@@ -645,11 +647,72 @@ export function resolveKinfloPublicSitePreview(siteSlug = "julies-family") {
   } satisfies KinfloPublicSitePreview;
 }
 
+function resolveKinfloDemoPresentation(preview: KinfloPublicSitePreview): KinfloPublicSitePreview {
+  if (preview.site.slug !== "vanguard-enterprises") return preview;
+
+  const demoCopy: Record<string, { title: string; body: string }> = {
+    block_vanguard_hero: {
+      title: "A clear path from idea to delivered work",
+      body: "See how KinFlo brings a public site, a structured request, and a visible delivery journey into one practical demo.",
+    },
+    block_vanguard_services: {
+      title: "A reusable operating layer for service teams",
+      body: "Show capabilities, qualify the request, and keep the next decision visible without losing the context that brought someone to the site.",
+    },
+    block_vanguard_source_parity: {
+      title: "The service story stays connected to the work",
+      body: "Use the same presentation pattern to explain capabilities, proof, roles, and the operating method behind a client-facing service.",
+    },
+    block_vanguard_order_backbone: {
+      title: "One workspace keeps the request and decisions together",
+      body: "Start with what is known, make the missing inputs visible, and carry the request through review, scope, delivery, and acceptance.",
+    },
+    block_vanguard_process: {
+      title: "A prepared request starts a structured review",
+      body: "The demo shows how a team can check feasibility, record assumptions, and make ownership and next steps clear before work begins.",
+    },
+    block_vanguard_request: {
+      title: "Prepare a request for the next conversation",
+      body: "Describe the outcome, attach the materials available on this device, and see how a request becomes a reviewable package without sending it anywhere.",
+    },
+  };
+
+  return {
+    ...preview,
+    tenant: { ...preview.tenant, name: "KinFlo Demo" },
+    site: { ...preview.site, name: "KinFlo Demo" },
+    theme: {
+      ...preview.theme,
+      media: {
+        ...preview.theme.media,
+        logoImage: undefined,
+        logoImageOnDark: undefined,
+        logoAlt: undefined,
+      },
+    },
+    page: {
+      ...preview.page,
+      seo: { title: "KinFlo Demo | A connected service experience" },
+    },
+    blocks: preview.blocks.map((block) => {
+      const copy = demoCopy[block._id];
+      if (!copy) return block;
+      return {
+        ...block,
+        ...copy,
+        metadata: { ...block.metadata, demoMode: true, source: "kinflo-generic-demo" },
+      };
+    }),
+  };
+}
+
 export function resolveKinfloPublicSitePreviewWithContext(
   siteSlug = "julies-family",
   options: KinfloPublicSitePreviewOptions = {},
 ) {
-  const preview = resolveKinfloPublicSitePreview(siteSlug);
+  const sourcePreview = resolveKinfloPublicSitePreview(siteSlug);
+  const demoMode = options.demoMode === true;
+  const preview = demoMode ? resolveKinfloDemoPresentation(sourcePreview) : sourcePreview;
   const route = options.route?.trim() || preview.context.route;
   const persona = options.persona?.trim() || undefined;
   const journeyStage = options.journeyStage?.trim() || undefined;
@@ -700,6 +763,7 @@ export function resolveKinfloPublicSitePreviewWithContext(
       device: options.device,
       studioSite,
       reviewSource,
+      demoMode,
       audience: scopedAudience,
       experiment: scopedExperiment,
       capabilityPreview,

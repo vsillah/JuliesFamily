@@ -27,6 +27,7 @@ import volunteerImage from "@assets/generated_images/Volunteer_tutoring_adult_st
 import communityEventImage from "@assets/generated_images/Families_at_community_event_c4d29d67.png";
 import graduationEventImage from "@assets/generated_images/Graduation_celebration_ceremony_99c15e90.png";
 import volunteerEventImage from "@assets/generated_images/Volunteers_collaborating_at_event_8c8b3b1f.png";
+import consultantHero from "@assets/generated_images/Professional_partnership_collaboration_meeting_f14bd523.png";
 import testimonialOneImage from "@assets/generated_images/Testimonial_portrait_woman_22b27ef2.png";
 import testimonialTwoImage from "@assets/generated_images/Testimonial_portrait_woman_2_0247f113.png";
 import testimonialThreeImage from "@assets/generated_images/Testimonial_portrait_woman_3_8f3e6a1d.png";
@@ -252,7 +253,7 @@ function LoopingHeroVideo({
   );
 }
 
-function FulfillmentWorkflowSection({ block }: { block: KinfloPublicBlock }) {
+function FulfillmentWorkflowSection({ block, demoMode }: { block: KinfloPublicBlock; demoMode: boolean }) {
   const operationalChecks = [
     {
       title: "Feasibility review",
@@ -260,7 +261,9 @@ function FulfillmentWorkflowSection({ block }: { block: KinfloPublicBlock }) {
     },
     {
       title: "Quote and scope",
-      detail: "Vanguard records assumptions, timing, cost, and acceptance criteria for client review before assignment.",
+      detail: demoMode
+        ? "The team records assumptions, timing, cost, and acceptance criteria for review before assignment."
+        : "Vanguard records assumptions, timing, cost, and acceptance criteria for client review before assignment.",
     },
     {
       title: "Controlled delivery",
@@ -290,7 +293,9 @@ function FulfillmentWorkflowSection({ block }: { block: KinfloPublicBlock }) {
             <LockKeyhole className="kinflo-accent-text h-5 w-5" />
             <h3 className="mt-4 font-semibold">A prepared request starts the review</h3>
             <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">
-              The receipt confirms that Vanguard has enough context to begin. It does not approve scope, price, assignment, or production.
+              {demoMode
+                ? "The receipt confirms that the team has enough context to begin. It does not approve scope, price, assignment, or production."
+                : "The receipt confirms that Vanguard has enough context to begin. It does not approve scope, price, assignment, or production."}
             </p>
             <div className="mt-4 space-y-2">
               {vanguardWorkflow.sampleOrder.missingInputs.map((item) => (
@@ -307,29 +312,37 @@ function FulfillmentWorkflowSection({ block }: { block: KinfloPublicBlock }) {
   );
 }
 
-function BuildRequestSection({ block }: { block: KinfloPublicBlock }) {
+function BuildRequestSection({ block, demoMode }: { block: KinfloPublicBlock; demoMode: boolean }) {
+  const lifecycleItems = demoMode
+    ? vanguardOrderLifecycleNavigation.map((item) => ({
+        ...item,
+        href: item.key === "prepare" ? "#build-request" : "#order-journey",
+        detail: item.key === "assist" ? "Choose what the demo team can review with you." : item.detail,
+      }))
+    : [...vanguardOrderLifecycleNavigation];
+
   return (
     <section id="build-request" className="scroll-mt-24 bg-white px-4 py-16 dark:bg-slate-950 sm:px-6 lg:px-8" data-testid="public-preview-vanguard-build-request">
       <div className="mx-auto max-w-[1500px]">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
-            <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">Vanguard order workspace</Badge>
+            <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200">{demoMode ? "KinFlo demo workspace" : "Vanguard order workspace"}</Badge>
             <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-4xl">{block.title}</h2>
             <p className="mt-4 text-base leading-7 text-slate-600 dark:text-slate-300">{block.body}</p>
           </div>
           <Button asChild variant="outline" className="w-fit border-slate-300 bg-white text-slate-950 dark:border-slate-700 dark:bg-slate-900 dark:text-white">
-            <a href="/kinflo-sites/vanguard-enterprises/orders#order-tracking">Track an existing order <ArrowRight className="ml-2 h-4 w-4" /></a>
+            <a href={demoMode ? "#order-journey" : "/kinflo-sites/vanguard-enterprises/orders#order-tracking"}>{demoMode ? "Review the demo journey" : "Track an existing order"} <ArrowRight className="ml-2 h-4 w-4" /></a>
           </Button>
         </div>
         <div className="mt-8 overflow-hidden rounded-2xl border border-slate-800 shadow-xl shadow-slate-950/10" data-testid="vanguard-build-order-navigation">
           <OrderLifecycleNavigation
             activeKey="prepare"
-            eyebrow="ReversR is your Vanguard order workspace"
-            items={[...vanguardOrderLifecycleNavigation]}
+            eyebrow={demoMode ? "ReversR is the KinFlo demo workspace" : "ReversR is your Vanguard order workspace"}
+            items={lifecycleItems}
           />
         </div>
         <div className="mt-8">
-          <VanguardReversRIntake />
+          <VanguardReversRIntake demoMode={demoMode} />
         </div>
       </div>
     </section>
@@ -530,7 +543,7 @@ function JulieStorySection({ block }: { block: KinfloPublicBlock }) {
   );
 }
 
-function JulieServicesSection({ block }: { block: KinfloPublicBlock }) {
+function JulieServicesSection({ block, demoMode }: { block: KinfloPublicBlock; demoMode: boolean }) {
   const items = getItems(block.metadata);
   const accentColor = "var(--kinflo-accent)";
 
@@ -539,13 +552,13 @@ function JulieServicesSection({ block }: { block: KinfloPublicBlock }) {
       <div className="mx-auto max-w-7xl">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,0.7fr)_minmax(320px,0.3fr)] lg:items-end">
           <div className="max-w-3xl">
-            <Badge variant="outline">Our programs</Badge>
+            <Badge variant="outline">{demoMode ? "Capabilities" : "Our programs"}</Badge>
             <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">{block.title}</h2>
             <p className="mt-4 text-base leading-7 text-muted-foreground">{block.body}</p>
           </div>
           <figure className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-            <img src={communityLearningImage} alt="Adult learners working together" className="h-44 w-full object-cover" />
-            <figcaption className="px-4 py-3 text-sm text-muted-foreground">Learning grows through practice, patience, and people.</figcaption>
+            <img src={demoMode ? consultantHero : communityLearningImage} alt={demoMode ? "A team reviewing a service workflow" : "Adult learners working together"} className="h-44 w-full object-cover" />
+            <figcaption className="px-4 py-3 text-sm text-muted-foreground">{demoMode ? "Good service starts with shared context and a clear next step." : "Learning grows through practice, patience, and people."}</figcaption>
           </figure>
         </div>
         <div className="mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
@@ -557,7 +570,7 @@ function JulieServicesSection({ block }: { block: KinfloPublicBlock }) {
                 </span>
                 <h3 className="font-semibold">{item}</h3>
               </div>
-              <p className="mt-4 text-sm leading-6 text-muted-foreground">A clear pathway shaped around the learner, family, and community.</p>
+              <p className="mt-4 text-sm leading-6 text-muted-foreground">{demoMode ? "A focused pathway shaped around the request, the people involved, and the next decision." : "A clear pathway shaped around the learner, family, and community."}</p>
             </article>
           ))}
         </div>
@@ -778,7 +791,7 @@ function DonationSection({ block }: { block: KinfloPublicBlock }) {
   );
 }
 
-function OrderBackboneSection({ block }: { block: KinfloPublicBlock }) {
+function OrderBackboneSection({ block, demoMode }: { block: KinfloPublicBlock; demoMode: boolean }) {
   const actions = [
     {
       icon: PackageCheck,
@@ -793,7 +806,7 @@ function OrderBackboneSection({ block }: { block: KinfloPublicBlock }) {
       label: "Save and return",
       detail: "Account-based drafts will carry the request across sessions and devices.",
       state: "Account access required",
-      href: "/kinflo-sites/vanguard-enterprises/orders",
+      href: demoMode ? "#build-request" : "/kinflo-sites/vanguard-enterprises/orders",
       cta: "Review save status",
     },
     {
@@ -801,7 +814,7 @@ function OrderBackboneSection({ block }: { block: KinfloPublicBlock }) {
       label: "Bring in an associate",
       detail: "Choose the fields an associate can review, edit, or prepare for your confirmation.",
       state: "Account access required",
-      href: "/kinflo-sites/vanguard-enterprises/orders#associate-support",
+      href: demoMode ? "#build-request" : "/kinflo-sites/vanguard-enterprises/orders#associate-support",
       cta: "See support options",
     },
   ];
@@ -817,7 +830,7 @@ function OrderBackboneSection({ block }: { block: KinfloPublicBlock }) {
           </div>
           <div className="rounded-xl border border-slate-200 bg-white p-5 dark:border-white/10 dark:bg-white/5">
             <div className="kinflo-accent-text text-xs font-semibold uppercase tracking-[0.18em]">Order promise</div>
-            <p className="mt-3 text-sm leading-6 text-slate-700 dark:text-slate-200">You will always be able to see the current owner, the next decision, the evidence attached to the work, and what Vanguard needs from you.</p>
+            <p className="mt-3 text-sm leading-6 text-slate-700 dark:text-slate-200">{demoMode ? "You will be able to see the current owner, the next decision, the evidence attached to the work, and what the team needs from you." : "You will always be able to see the current owner, the next decision, the evidence attached to the work, and what Vanguard needs from you."}</p>
           </div>
         </div>
 
@@ -857,8 +870,49 @@ function OrderBackboneSection({ block }: { block: KinfloPublicBlock }) {
   );
 }
 
-function VanguardSourceParitySection({ block }: { block: KinfloPublicBlock }) {
-  const source = vanguardWorkflow.sourceSite;
+function VanguardSourceParitySection({ block, demoMode }: { block: KinfloPublicBlock; demoMode: boolean }) {
+  const source = demoMode
+    ? {
+        coverage: ["Capabilities", "Proof", "Roles", "Locations", "Service method", "Contact"],
+        serviceDetails: [
+          { key: "project-management", title: "Project delivery", summary: "Make ownership, milestones, decisions, and delivery evidence visible from the first request.", highlights: ["Clear requirements", "Visible ownership", "Decision records", "Acceptance checkpoints"] },
+          { key: "it-infrastructure", title: "Connected operations", summary: "Keep tools, people, access rules, and follow-up work connected as a service moves forward.", highlights: ["Shared context", "Role-aware access", "Reliable handoffs", "Reusable workflows"] },
+          { key: "engineering-cad-cam", title: "Technical review", summary: "Turn files, measurements, notes, or an idea into a reviewable package with the next question made clear.", highlights: ["Source materials", "Constraint capture", "Structured review", "Delivery record"] },
+        ],
+        projectPhases: ["Discover", "Frame", "Review", "Deliver", "Learn"].map((label) => ({ label })),
+        about: {
+          summary: "KinFlo helps organizations turn public interest into organized follow-through. This demo keeps the presentation layer, request flow, and operating record in one place.",
+          experience: "Use the public page to establish context before the visitor enters a structured request.",
+          operatingModel: "Use the same content and workflow pattern across client sites without carrying one customer's brand into the next demo.",
+          locations: [{ label: "Workspace", city: "Browser-based demo" }, { label: "Scope", city: "Tenant-ready" }],
+        },
+        leadership: [
+          { name: "Client sponsor", role: "Direction", focus: "Sets the promise, audience, and decision the site should make easier." },
+          { name: "Service owner", role: "Delivery", focus: "Keeps the request, review, and delivery record connected." },
+          { name: "Operations partner", role: "Enablement", focus: "Maintains the systems, access, and follow-up that keep work moving." },
+        ],
+        proof: {
+          customerPosture: "The demo shows how one operating pattern can support advisory work, technical services, community programs, and other relationship-led organizations.",
+          customerExamples: ["Advisory services", "Technical delivery", "Community programs", "Professional teams"],
+          gsa: "Use this area to show the proof, credentials, or service commitments that matter for the next client.",
+          gsaLinks: ["Case studies", "Service guide"],
+          naics: [{ code: "DEMO", label: "Replace with the client's validated service classification" }],
+        },
+        careers: {
+          values: ["Clarity", "Care", "Ownership", "Learning", "Follow-through"],
+          equalOpportunity: "A reusable demo leaves room for the client's own team story.",
+          roles: [
+            { title: "Service owner", summary: "Keeps the promise, intake, and delivery record aligned.", experience: "Replace with the client's role summary and expectations." },
+            { title: "Delivery associate", summary: "Reviews context, closes gaps, and guides the next decision.", experience: "Replace with the client's role summary and expectations." },
+            { title: "Operations partner", summary: "Maintains the systems and evidence that help work move.", experience: "Replace with the client's role summary and expectations." },
+          ],
+        },
+        contact: {
+          summary: "Use this demo contact area to show the next action without exposing a customer's real contact details.",
+          locationPosture: "Replace this placeholder with the client's approved contact and location posture before publishing.",
+        },
+      }
+    : vanguardWorkflow.sourceSite;
 
   return (
     <section data-testid="public-preview-vanguard-source-parity">
@@ -904,9 +958,9 @@ function VanguardSourceParitySection({ block }: { block: KinfloPublicBlock }) {
               <div>
                 <Badge className="border-slate-300 bg-white text-slate-800 hover:bg-white dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/10">Service method</Badge>
                 <h3 className="mt-3 text-xl font-semibold">A clear method for complex service work</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">For consulting and project work beyond an individual ReversR order, Vanguard uses a five-phase management method to keep scope, risk, delivery, and acceptance visible.</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-300">{demoMode ? "For work beyond an individual ReversR request, this five-phase method keeps scope, risk, delivery, and acceptance visible." : "For consulting and project work beyond an individual ReversR order, Vanguard uses a five-phase management method to keep scope, risk, delivery, and acceptance visible."}</p>
               </div>
-              <ol className="flex flex-wrap gap-2" aria-label="Vanguard service method phases">
+              <ol className="flex flex-wrap gap-2" aria-label={demoMode ? "Demo service method phases" : "Vanguard service method phases"}>
                 {source.projectPhases.map((phase, index) => (
                   <li key={phase.label} className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-medium dark:border-slate-700 dark:bg-slate-900">
                     <span className="kinflo-accent-text">{String(index + 1).padStart(2, "0")}</span>
@@ -923,7 +977,7 @@ function VanguardSourceParitySection({ block }: { block: KinfloPublicBlock }) {
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-8 lg:grid-cols-[minmax(0,0.72fr)_minmax(320px,0.28fr)]">
             <div>
-              <Badge variant="outline">About Vanguard</Badge>
+              <Badge variant="outline">{demoMode ? "About this demo" : "About Vanguard"}</Badge>
               <h2 className="mt-4 text-3xl font-bold tracking-tight text-slate-950 dark:text-white sm:text-4xl">A distributed team built around technical work</h2>
               <p className="mt-4 text-base leading-7 text-slate-600 dark:text-slate-300">{source.about.summary}</p>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -964,7 +1018,7 @@ function VanguardSourceParitySection({ block }: { block: KinfloPublicBlock }) {
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-8 lg:grid-cols-[minmax(0,0.68fr)_minmax(360px,0.32fr)]">
             <div>
-              <Badge className="border-slate-300 bg-slate-100 text-slate-800 hover:bg-slate-100 dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/10">Commercial and government sectors</Badge>
+              <Badge className="border-slate-300 bg-slate-100 text-slate-800 hover:bg-slate-100 dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/10">{demoMode ? "Example delivery contexts" : "Commercial and government sectors"}</Badge>
               <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">Customer and procurement experience</h2>
               <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-300">{source.proof.customerPosture}</p>
               <div className="mt-6 flex flex-wrap gap-2">
@@ -975,7 +1029,7 @@ function VanguardSourceParitySection({ block }: { block: KinfloPublicBlock }) {
             </div>
             <aside className="kinflo-accent-soft rounded-xl border p-5">
               <Landmark className="kinflo-accent-text h-5 w-5" />
-              <h3 className="mt-3 text-lg font-semibold">Government procurement profile</h3>
+              <h3 className="mt-3 text-lg font-semibold">{demoMode ? "Proof and commitments" : "Government procurement profile"}</h3>
               <p className="mt-2 text-sm leading-6 text-slate-700 dark:text-slate-200">{source.proof.gsa}</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {source.proof.gsaLinks.map((label) => <Badge key={label} variant="outline" className="kinflo-accent-soft">{label} reference</Badge>)}
@@ -1017,7 +1071,7 @@ function VanguardSourceParitySection({ block }: { block: KinfloPublicBlock }) {
           </div>
           <div className="kinflo-accent-soft mt-6 flex items-start gap-3 rounded-lg border p-4 text-sm leading-6">
             <LockKeyhole className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>Online applications are not available here. Contact Vanguard directly before sending a resume or personal information.</span>
+            <span>{demoMode ? "This is placeholder content for a future client's team and hiring story." : "Online applications are not available here. Contact Vanguard directly before sending a resume or personal information."}</span>
           </div>
         </div>
       </div>
@@ -1025,13 +1079,11 @@ function VanguardSourceParitySection({ block }: { block: KinfloPublicBlock }) {
       <div id="contact-details" className="border-t border-slate-200 bg-white px-4 py-16 dark:border-slate-800 dark:bg-slate-950 sm:px-6 lg:px-8" data-testid="public-preview-vanguard-contact-location">
         <div className="mx-auto grid max-w-7xl gap-6 rounded-2xl border border-slate-200 bg-slate-100 p-6 text-slate-950 dark:border-slate-700 dark:bg-slate-900 dark:text-white sm:p-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
           <div>
-            <div className="kinflo-accent-text flex items-center gap-2 text-sm font-semibold"><Building2 className="h-4 w-4" /> Vanguard Enterprises and Associates Inc.</div>
+            <div className="kinflo-accent-text flex items-center gap-2 text-sm font-semibold"><Building2 className="h-4 w-4" /> {demoMode ? "KinFlo demo workspace" : "Vanguard Enterprises and Associates Inc."}</div>
             <h2 className="mt-3 text-2xl font-semibold sm:text-3xl">Have a service question or a build to scope?</h2>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600 dark:text-slate-300">{source.contact.summary}</p>
             <div className="mt-4 flex flex-col gap-2 text-sm text-slate-700 dark:text-slate-200 sm:flex-row sm:gap-5">
-              <span>{vanguardWorkflow.company.email}</span>
-              <span>{vanguardWorkflow.company.phone}</span>
-              <span>{vanguardWorkflow.company.location}</span>
+              {demoMode ? <><span>demo@kinflo.example</span><span>Browser-based demo</span><span>Replace before publishing</span></> : <><span>{vanguardWorkflow.company.email}</span><span>{vanguardWorkflow.company.phone}</span><span>{vanguardWorkflow.company.location}</span></>}
             </div>
           </div>
           <Button size="lg" className="kinflo-accent-solid" asChild>
@@ -1053,6 +1105,7 @@ function BlockSection({
   heroParallaxY: number;
 }) {
   const accent = "var(--kinflo-accent)";
+  const demoMode = preview.context.demoMode === true;
 
   if (block.type === "hero") {
     return (
@@ -1077,7 +1130,7 @@ function BlockSection({
         <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/45 to-black/70" />
         <div className="relative mx-auto flex min-h-[100svh] max-w-7xl flex-col justify-center px-4 pb-24 pt-32 sm:px-6 lg:px-8">
           <Badge className="w-fit bg-white/90 text-slate-950 hover:bg-white">
-            {preview.site.slug === VANGUARD_SITE_KEY ? "Engineering and technology services" : preview.site.name}
+            {demoMode ? "KinFlo demo experience" : preview.site.slug === VANGUARD_SITE_KEY ? "Engineering and technology services" : preview.site.name}
           </Badge>
           <h1 className="mt-5 max-w-4xl text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
             {block.title}
@@ -1102,7 +1155,7 @@ function BlockSection({
   }
 
   if (block.type === "services") {
-    return <JulieServicesSection block={block} />;
+    return <JulieServicesSection block={block} demoMode={demoMode} />;
   }
 
   if (block.type === "impact") {
@@ -1166,19 +1219,19 @@ function BlockSection({
   }
 
   if (block.type === "fulfillment_workflow") {
-    return <FulfillmentWorkflowSection block={block} />;
+    return <FulfillmentWorkflowSection block={block} demoMode={demoMode} />;
   }
 
   if (block.type === "build_request") {
-    return <BuildRequestSection block={block} />;
+    return <BuildRequestSection block={block} demoMode={demoMode} />;
   }
 
   if (block.type === "order_backbone") {
-    return <OrderBackboneSection block={block} />;
+    return <OrderBackboneSection block={block} demoMode={demoMode} />;
   }
 
   if (block.type === "source_parity") {
-    return <VanguardSourceParitySection block={block} />;
+    return <VanguardSourceParitySection block={block} demoMode={demoMode} />;
   }
 
   if (block.type === "lead_magnet" || block.type === "form") {
@@ -1223,6 +1276,7 @@ function BlockSection({
 export default function KinfloPublicSitePreview() {
   const [, params] = useRoute("/kinflo-sites/:siteSlug");
   const searchParams = new URLSearchParams(window.location.search);
+  const demoMode = searchParams.get("demo") === "1";
   const preview = resolveKinfloPublicSitePreviewWithContext(params?.siteSlug, {
     route: searchParams.get("route") ?? undefined,
     persona: searchParams.get("persona") ?? undefined,
@@ -1230,6 +1284,7 @@ export default function KinfloPublicSitePreview() {
     tenantSlug: searchParams.get("studioTenant") ?? undefined,
     studioSite: searchParams.get("studioSite") ?? undefined,
     reviewSource: searchParams.get("source") ?? undefined,
+    demoMode,
     experimentKey: searchParams.get("experiment") ?? undefined,
     variantKey: searchParams.get("experimentVariant") ?? undefined,
     capabilityMode: searchParams.get("capabilityMode") ?? undefined,
@@ -1281,7 +1336,7 @@ export default function KinfloPublicSitePreview() {
   const navOverlayClass = composition.theme.navContrast === "dark"
     ? "bg-white/85 text-slate-950 backdrop-blur"
     : "bg-transparent text-white";
-  const useDarkLogo = preview.site.slug === VANGUARD_SITE_KEY && (resolvedMode === "dark" || !navSolid);
+  const useDarkLogo = !demoMode && preview.site.slug === VANGUARD_SITE_KEY && (resolvedMode === "dark" || !navSolid);
   const logoImage = useDarkLogo
     ? preview.theme.media.logoImageOnDark ?? preview.theme.media.logoImage
     : preview.theme.media.logoImage;
@@ -1410,7 +1465,7 @@ export default function KinfloPublicSitePreview() {
         <div className="mx-auto flex max-w-7xl flex-col gap-4 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
           <div>
             <div className="font-medium text-foreground">{preview.tenant.name}</div>
-            {preview.site.slug === VANGUARD_SITE_KEY ? (
+            {!demoMode && preview.site.slug === VANGUARD_SITE_KEY ? (
               <div className="mt-2">{vanguardWorkflow.company.location} · {vanguardWorkflow.company.email} · {vanguardWorkflow.company.phone}</div>
             ) : (
               <div>{preview.site.name}</div>

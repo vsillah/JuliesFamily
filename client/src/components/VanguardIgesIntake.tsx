@@ -40,7 +40,13 @@ function formatDimensions(value: [number, number, number]) {
   return value.map((item) => `${item.toFixed(2)} mm`).join(" × ");
 }
 
-export default function VanguardIgesIntake({ onReviewChange }: { onReviewChange: (review: KinfloEngineeringReview | null) => void }) {
+export default function VanguardIgesIntake({
+  demoMode = false,
+  onReviewChange,
+}: {
+  demoMode?: boolean;
+  onReviewChange: (review: KinfloEngineeringReview | null) => void;
+}) {
   const inputRef = useRef<HTMLInputElement>(null);
   const selectionIdRef = useRef(0);
   const [state, setState] = useState<CadState>("empty");
@@ -131,7 +137,7 @@ export default function VanguardIgesIntake({ onReviewChange }: { onReviewChange:
             </div>
             <h5 className="mt-3 text-lg font-semibold text-slate-950 dark:text-white">Inspect a real model before the request handoff</h5>
             <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-600 dark:text-slate-300">
-              The browser reads and renders the selected file locally. The source file and triangle geometry are never uploaded, saved to Vanguard, or attached to the receipt.
+              The browser reads and renders the selected file locally. The source file and triangle geometry are never uploaded, saved to {demoMode ? "the demo workspace" : "Vanguard"}, or attached to the receipt.
             </p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">

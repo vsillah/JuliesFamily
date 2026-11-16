@@ -7,6 +7,18 @@ import {
   sortTenantSiteSections,
 } from "../client/src/lib/kinfloTenantSiteComposition";
 
+test("public preview exposes an explicit neutral KinFlo demo mode", () => {
+  const previewSource = readFileSync("client/src/lib/kinfloPublicSitePreview.ts", "utf8");
+  const rendererSource = readFileSync("client/src/pages/KinfloPublicSitePreview.tsx", "utf8");
+
+  assert.match(previewSource, /demoMode\?: boolean/);
+  assert.match(previewSource, /KinFlo Demo/);
+  assert.match(previewSource, /kinflo-generic-demo/);
+  assert.match(rendererSource, /searchParams\.get\("demo"\) === "1"/);
+  assert.match(rendererSource, /KinFlo demo experience/);
+  assert.match(rendererSource, /demoMode \? "KinFlo demo workspace"/);
+});
+
 test("Vanguard preserves the core-first and ReversR-later section order", () => {
   const composition = resolveTenantSiteComposition("vanguard-enterprises");
   const sections = sortTenantSiteSections(composition.sections);
