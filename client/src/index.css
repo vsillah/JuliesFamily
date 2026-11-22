@@ -50,10 +50,6 @@
     will-change: transform;
   }
 
-  .kinflo-hero-media-poster-with-video {
-    display: none;
-  }
-
   .kinflo-hero-media-drift {
     animation: kinflo-hero-drift 12s ease-in-out infinite alternate;
     will-change: transform;

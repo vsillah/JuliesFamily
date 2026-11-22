@@ -1400,7 +1400,7 @@ export default function KinfloPublicSitePreview() {
             ) : preview.site.name}
           </Link>
           <nav
-            className={`flex min-w-0 flex-1 items-stretch gap-2 overflow-x-auto overscroll-x-contain text-xs [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:justify-center md:overflow-visible md:text-sm ${navSolid ? "text-muted-foreground" : "text-white/90"}`}
+            className={`flex min-w-0 flex-1 items-stretch gap-2 overflow-x-auto overscroll-x-contain pl-2 text-xs [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:justify-center md:overflow-visible md:text-sm ${navSolid ? "text-muted-foreground" : "text-white/90"}`}
             aria-label="Primary page navigation"
             data-testid="public-preview-primary-navigation"
           >
