@@ -1389,7 +1389,7 @@ export default function KinfloPublicSitePreview() {
             if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setNavFocused(false);
           }}
         >
-          <Link href={`/kinflo-sites/${preview.site.slug}`} className={`mr-1 flex shrink-0 items-center text-sm font-semibold ${navSolid ? "text-foreground" : "text-white"}`}>
+          <Link href={`/kinflo-sites/${preview.site.slug}`} className={`mr-1 flex shrink-0 items-center border-r pr-4 text-sm font-semibold ${navSolid ? "border-border text-foreground" : "border-white/25 text-white"}`}>
             {logoImage ? (
               <img
                 src={logoImage}
