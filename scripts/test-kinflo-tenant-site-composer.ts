@@ -7,6 +7,18 @@ import {
   sortTenantSiteSections,
 } from "../client/src/lib/kinfloTenantSiteComposition";
 
+test("public preview exposes an explicit neutral KinFlo demo mode", () => {
+  const previewSource = readFileSync("client/src/lib/kinfloPublicSitePreview.ts", "utf8");
+  const rendererSource = readFileSync("client/src/pages/KinfloPublicSitePreview.tsx", "utf8");
+
+  assert.match(previewSource, /demoMode\?: boolean/);
+  assert.match(previewSource, /KinFlo Demo/);
+  assert.match(previewSource, /kinflo-generic-demo/);
+  assert.match(rendererSource, /searchParams\.get\("demo"\) === "1"/);
+  assert.match(rendererSource, /KinFlo demo experience/);
+  assert.match(rendererSource, /demoMode \? "KinFlo demo workspace"/);
+});
+
 test("Vanguard preserves the core-first and ReversR-later section order", () => {
   const composition = resolveTenantSiteComposition("vanguard-enterprises");
   const sections = sortTenantSiteSections(composition.sections);
@@ -19,6 +31,29 @@ test("Vanguard preserves the core-first and ReversR-later section order", () => 
     composition.reversrArtifacts.map((artifact) => artifact.key),
     ["order-journey", "desktop-workspace", "iges-review", "tracking"],
   );
+});
+
+test("Julie preserves the full public journey before intake", () => {
+  const composition = resolveTenantSiteComposition("julies-family");
+  const sections = sortTenantSiteSections(composition.sections);
+  const header = sortTenantSiteNavigation(composition.navigation, "header");
+  const sectionIds = new Set(sections.map((section) => section.key));
+
+  assert.deepEqual(
+    sections.map((section) => section.key),
+    ["hero", "programs", "impact", "about", "stories", "testimonials", "events", "volunteer", "donation", "sponsors", "intake"],
+  );
+  assert.ok(sectionIds.has("impact"));
+  assert.ok(sectionIds.has("about"));
+  assert.ok(sectionIds.has("stories"));
+  assert.ok(sectionIds.has("testimonials"));
+  assert.ok(sectionIds.has("events"));
+  assert.ok(sectionIds.has("volunteer"));
+  assert.ok(sectionIds.has("donation"));
+  assert.ok(sectionIds.has("sponsors"));
+  assert.equal(header.find((item) => item.label === "Stories")?.href, "#stories");
+  assert.equal(header.find((item) => item.label === "Volunteer")?.href, "#volunteer");
+  assert.equal(header.find((item) => item.label === "Donate")?.href, "#donation");
 });
 
 test("Vanguard navigation keeps tracking separate from the public section flow", () => {
