@@ -1381,7 +1381,7 @@ export default function KinfloPublicSitePreview() {
         data-nav-contrast={composition.theme.navContrast}
       >
         <div
-          className="mx-auto flex w-fit max-w-full items-center gap-2 px-3 py-3 sm:gap-4 sm:px-6 lg:px-8"
+          className="mx-auto flex w-fit max-w-full items-center gap-3 px-3 py-3 sm:gap-4 sm:px-6 lg:px-8"
           onMouseEnter={() => setNavInteracted(true)}
           onMouseLeave={() => setNavInteracted(false)}
           onFocusCapture={() => setNavFocused(true)}
@@ -1389,7 +1389,7 @@ export default function KinfloPublicSitePreview() {
             if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setNavFocused(false);
           }}
         >
-          <Link href={`/kinflo-sites/${preview.site.slug}`} className={`flex shrink-0 items-center text-sm font-semibold ${navSolid ? "text-foreground" : "text-white"}`}>
+          <Link href={`/kinflo-sites/${preview.site.slug}`} className={`mr-1 flex shrink-0 items-center text-sm font-semibold ${navSolid ? "text-foreground" : "text-white"}`}>
             {logoImage ? (
               <img
                 src={logoImage}
@@ -1400,7 +1400,7 @@ export default function KinfloPublicSitePreview() {
             ) : preview.site.name}
           </Link>
           <nav
-            className={`flex min-w-0 flex-1 items-stretch gap-1 overflow-x-auto overscroll-x-contain text-xs [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:gap-2 md:justify-center md:overflow-visible md:text-sm ${navSolid ? "text-muted-foreground" : "text-white/90"}`}
+            className={`flex min-w-0 flex-1 items-stretch gap-2 overflow-x-auto overscroll-x-contain text-xs [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:justify-center md:overflow-visible md:text-sm ${navSolid ? "text-muted-foreground" : "text-white/90"}`}
             aria-label="Primary page navigation"
             data-testid="public-preview-primary-navigation"
           >
