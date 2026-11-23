@@ -143,6 +143,7 @@ import {
   summarizeTenantOrderQueue,
 } from "@/lib/kinfloOrderOperationsWorkbench";
 import KinfloOperationsWorkspace from "@/components/KinfloOperationsWorkspace";
+import KinfloOperatorWorkspace, { type KinfloOperatorPlatformReviewTarget } from "@/components/KinfloOperatorWorkspace";
 import KinfloHostedActivationReadinessPanel from "@/components/KinfloHostedActivationReadinessPanel";
 import {
   buildKinfloAudiencePreviewHref,
@@ -1058,6 +1059,16 @@ function readInitialShellTab(): ShellTabValue {
   }
   const tab = new URLSearchParams(window.location.search).get("tab");
   return shellTabValues.includes(tab as ShellTabValue) ? (tab as ShellTabValue) : "overview";
+}
+
+// The operator workspace is the default admin surface. Platform review opens
+// when it is requested explicitly or when the URL is an existing shell deep link.
+function readInitialOperatorWorkspaceActive(): boolean {
+  if (typeof window === "undefined") {
+    return true;
+  }
+  const params = new URLSearchParams(window.location.search);
+  return params.get("surface") !== "platform-review" && !params.has("tab") && !params.has("workspace");
 }
 
 function readInitialClientWebsiteStudioLane(): ClientWebsiteStudioLane {
@@ -6057,6 +6068,12 @@ export default function AdminKinfloShell() {
       }
     : scopedFixtureExperiencePreferences;
   const [activeTab, setActiveTab] = useState<ShellTabValue>(readInitialShellTab);
+  const [operatorWorkspaceActive, setOperatorWorkspaceActive] = useState(readInitialOperatorWorkspaceActive);
+  useEffect(() => {
+    const syncAdminSurface = () => setOperatorWorkspaceActive(readInitialOperatorWorkspaceActive());
+    window.addEventListener("popstate", syncAdminSurface);
+    return () => window.removeEventListener("popstate", syncAdminSurface);
+  }, []);
   const [activeWorkspaceKey, setActiveWorkspaceKey] = useState<string | null>(() => (
     typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("workspace")
   ));
@@ -7434,7 +7451,9 @@ export default function AdminKinfloShell() {
       params.delete("studioTenant");
     }
     const query = params.toString();
-    navigate(query ? `/admin/kinflo-os?${query}` : "/admin/kinflo-os");
+    // Keep the fixture demo on its own route; every other entry point uses the admin route.
+    const shellPath = location === "/kinflo-demo/admin" ? location : "/admin/kinflo-os";
+    navigate(query ? `${shellPath}?${query}` : shellPath);
   };
 
   const scrollClientWebsiteStudioLaneToTop = (lane: ClientWebsiteStudioLane) => {
@@ -8263,6 +8282,53 @@ export default function AdminKinfloShell() {
     return null;
   }
 
+  const openPlatformReview = (target: KinfloOperatorPlatformReviewTarget) => {
+    const params = new URLSearchParams(window.location.search);
+    for (const key of ["section", "filter", "stage"]) {
+      params.delete(key);
+    }
+    params.set("surface", "platform-review");
+    window.history.pushState({}, "", `${window.location.pathname}?${params.toString()}`);
+    setOperatorWorkspaceActive(false);
+    if (target === "overview") {
+      setActiveTab("overview");
+      setActiveWorkspaceKey(null);
+    } else {
+      selectShellTab(target);
+    }
+    window.scrollTo({ top: 0, behavior: "auto" });
+  };
+
+  const returnToOperatorWorkspace = () => {
+    const current = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams();
+    for (const key of ["demo", "tenant", "site"]) {
+      const value = current.get(key);
+      if (value) {
+        params.set(key, value);
+      }
+    }
+    const query = params.toString();
+    window.history.pushState({}, "", `${window.location.pathname}${query ? `?${query}` : ""}`);
+    setOperatorWorkspaceActive(true);
+    window.scrollTo({ top: 0, behavior: "auto" });
+  };
+
+  if (operatorWorkspaceActive) {
+    return (
+      <KinfloOperatorWorkspace
+        tenant={adminScope.tenant}
+        site={adminScope.site}
+        snapshot={snapshot}
+        leads={crmWorkspace.leads}
+        pipelineStages={crmWorkspace.pipelineStages}
+        tasks={crmWorkspace.tasks}
+        onChangeScope={adminScope.changeScope}
+        onOpenPlatformReview={openPlatformReview}
+      />
+    );
+  }
+
   const readOnlyReview = snapshot.dataMode.source === "fixture"
     || snapshot.dataMode.runtimeMode === "read_only_live_ready";
 
@@ -8314,6 +8380,18 @@ export default function AdminKinfloShell() {
         <div className="min-w-0">
       <div className="border-b border-border bg-card/95">
         <div className={`mx-auto flex max-w-7xl flex-col px-4 sm:px-6 lg:px-8 ${activeTab === "site-studio" ? "gap-2 py-3" : "gap-5 py-6"}`}>
+          <div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={returnToOperatorWorkspace}
+              data-testid="button-kinflo-return-operator-workspace"
+            >
+              <ChevronLeft className="mr-1.5 h-4 w-4" aria-hidden="true" />
+              Back to workspace
+            </Button>
+          </div>
           <Breadcrumbs
             items={[
               { label: "KinFlo platform", href: "/admin/kinflo-os?view=platform" },
