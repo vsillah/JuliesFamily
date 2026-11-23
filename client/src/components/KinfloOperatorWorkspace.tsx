@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
+  ArrowLeft,
   ArrowRight,
   BarChart3,
+  Building2,
   ClipboardList,
   ExternalLink,
   Globe2,
@@ -18,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { KinfloShellSnapshot, ShellLead, ShellPipelineStage, ShellTask } from "@/lib/kinfloShellData";
+import { buildKinfloPlatformHref } from "@/lib/kinfloAdminLevels";
 import {
   filterKinfloOperatorInquiries,
   filterKinfloOperatorTasks,
@@ -463,9 +466,20 @@ export default function KinfloOperatorWorkspace({
   return (
     <div className="kinflo-admin-shell min-h-screen bg-muted/30 text-foreground" data-testid="section-kinflo-operator-workspace">
       <div className="mx-auto grid max-w-[1500px] grid-cols-[minmax(0,1fr)] lg:grid-cols-[240px_minmax(0,1fr)]">
-        <aside className="min-w-0 border-b border-border bg-card lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:border-b-0 lg:border-r" data-testid="section-kinflo-operator-navigation">
+        <aside className="min-w-0 border-b border-border bg-card lg:sticky lg:top-[var(--kinflo-level-bar,0px)] lg:h-[calc(100vh-var(--kinflo-level-bar,0px))] lg:overflow-y-auto lg:border-b-0 lg:border-r" data-testid="section-kinflo-operator-navigation">
           <div className="border-b border-border px-4 py-4">
-            <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Workspace</div>
+            <a
+              href={buildKinfloPlatformHref()}
+              className="mb-3 inline-flex items-center gap-1.5 rounded-md text-xs font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              data-testid="link-kinflo-operator-back-to-platform"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+              Platform · all tenants
+            </a>
+            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+              <Building2 className="h-4 w-4" aria-hidden="true" />
+              Tenant workspace
+            </div>
             <div className="mt-1 truncate text-sm font-semibold" title={tenant.name}>{tenant.name}</div>
             <div className="truncate text-xs text-muted-foreground" title={site.name}>{site.name}</div>
           </div>
@@ -496,7 +510,7 @@ export default function KinfloOperatorWorkspace({
             })}
           </nav>
           <div className="border-t border-border p-2">
-            <div className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Platform</div>
+            <div className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Tenant setup</div>
             <button
               type="button"
               onClick={() => onOpenPlatformReview("overview")}
@@ -504,7 +518,7 @@ export default function KinfloOperatorWorkspace({
               data-testid="button-kinflo-operator-open-platform-review"
             >
               <Rocket className="h-4 w-4 shrink-0" aria-hidden="true" />
-              <span className="flex-1">Platform preview &amp; launch review</span>
+              <span className="flex-1">Site setup &amp; launch review</span>
             </button>
           </div>
         </aside>
@@ -513,19 +527,29 @@ export default function KinfloOperatorWorkspace({
           <header className="border-b border-border bg-card px-4 py-3 sm:px-6">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div className="min-w-0">
-                <h1 className="text-xl font-semibold leading-tight">{sectionMeta[route.section].label}</h1>
+                <div className="truncate text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Tenant workspace / {sectionMeta[route.section].label}
+                </div>
+                <h1 className="mt-0.5 text-xl font-semibold leading-tight">{sectionMeta[route.section].label}</h1>
                 <p className="mt-0.5 truncate text-sm text-muted-foreground" data-testid="text-kinflo-operator-scope">
                   {tenant.name} / {site.name}
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <span
-                  className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-900 dark:border-amber-500/40 dark:bg-amber-950/40 dark:text-amber-100"
-                  data-testid="badge-kinflo-operator-read-only"
-                >
-                  <LockKeyhole className="h-3.5 w-3.5" aria-hidden="true" />
-                  {fixtureMode ? "Read-only · fixture data" : "Read-only view"}
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                  <Settings2 className="h-3.5 w-3.5" aria-hidden="true" />
+                  Tenant view · one tenant/site scope
                 </span>
+                {/* Fixture mode shows the shared read-only boundary in the KinFlo level bar. */}
+                {fixtureMode ? null : (
+                  <span
+                    className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-900 dark:border-amber-500/40 dark:bg-amber-950/40 dark:text-amber-100"
+                    data-testid="badge-kinflo-operator-read-only"
+                  >
+                    <LockKeyhole className="h-3.5 w-3.5" aria-hidden="true" />
+                    Read-only view
+                  </span>
+                )}
                 <Button type="button" size="sm" variant="outline" onClick={onChangeScope} data-testid="button-kinflo-operator-change-scope">
                   Change scope
                 </Button>

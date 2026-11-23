@@ -378,6 +378,11 @@
   color: hsl(var(--muted-foreground)) !important;
 }
 
+/* Platform-level cards share the tenant workspace's card radius. */
+.kinflo-admin-shell .kinflo-platform-level [class~="border"][class~="shadow-sm"] {
+  border-radius: 0.75rem;
+}
+
 .kinflo-admin-shell .kinflo-pill {
   border-radius: 9999px;
   font-weight: 600;

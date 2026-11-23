@@ -8394,7 +8394,8 @@ export default function AdminKinfloShell() {
           </div>
           <Breadcrumbs
             items={[
-              { label: "KinFlo platform", href: "/admin/kinflo-os?view=platform" },
+              // Keep the fixture demo on its own route when stepping up to the platform parent.
+              { label: "KinFlo platform", href: location === "/kinflo-demo/admin" ? "/kinflo-demo/admin?demo=1&view=platform" : "/admin/kinflo-os?view=platform" },
               { label: `${adminScope.tenant.name} workspace` },
             ]}
             showHome={false}

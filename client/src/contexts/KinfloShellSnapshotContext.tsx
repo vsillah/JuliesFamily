@@ -1,5 +1,6 @@
 import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 import { useQuery } from "convex/react";
+import { useSearch } from "wouter";
 import { getKinfloConvexRuntime } from "@/lib/kinfloConvexRuntime";
 import { api } from "@kinflo-phase174-generated-api";
 import {
@@ -11,6 +12,7 @@ import {
 } from "@/lib/kinfloShellData";
 import { resolveTenantPaletteId } from "@/lib/kinfloPaletteRegistry";
 import KinfloPlatformFeatureCatalog from "@/components/KinfloPlatformFeatureCatalog";
+import KinfloLevelBar from "@/components/KinfloLevelBar";
 import {
   resolveKinfloAdminScope,
   scopeFixtureKinfloShellSnapshot,
@@ -352,6 +354,8 @@ function readinessStages(readiness: LaunchReadiness): ShellLaunchReadinessStage[
 
 export function FixtureKinfloShellSnapshotProvider({ children }: { children: ReactNode }) {
   const fixture = useMemo(fixtureSnapshot, []);
+  // Re-render when the query string changes so in-app links can switch between the platform and tenant levels.
+  useSearch();
   const initialSelection = useMemo(initialScopeSelection, []);
   const [selection, setSelection] = useState(initialSelection);
   const [isProvisionConfirmationPending, setIsProvisionConfirmationPending] = useState(false);
@@ -373,11 +377,16 @@ export function FixtureKinfloShellSnapshotProvider({ children }: { children: Rea
   const scope = resolveKinfloAdminScope(scopedTenantOptions, scopedSiteOptions, selection);
 
   if (isKinfloPlatformView()) {
-    return <KinfloPlatformFeatureCatalog />;
+    return (
+      <KinfloLevelBar level="platform">
+        <KinfloPlatformFeatureCatalog />
+      </KinfloLevelBar>
+    );
   }
 
   if (scope.status !== "ready") {
     return (
+      <KinfloLevelBar level="tenant">
       <KinfloAdminScopeGate
         tenants={scopedTenantOptions}
         sites={scopedSiteOptions}
@@ -399,6 +408,7 @@ export function FixtureKinfloShellSnapshotProvider({ children }: { children: Rea
         }}
         onCancelProvision={() => setIsProvisionConfirmationPending(false)}
       />
+      </KinfloLevelBar>
     );
   }
 
@@ -411,7 +421,9 @@ export function FixtureKinfloShellSnapshotProvider({ children }: { children: Rea
   return (
     <KinfloAdminScopeContext.Provider value={scopeValue}>
       <KinfloShellSnapshotContext.Provider key={`${scope.tenant.id}:${scope.site.id}`} value={snapshot}>
-        {children}
+        <KinfloLevelBar level="tenant" scope={{ tenantName: scope.tenant.name, siteName: scope.site.name }}>
+          {children}
+        </KinfloLevelBar>
       </KinfloShellSnapshotContext.Provider>
     </KinfloAdminScopeContext.Provider>
   );

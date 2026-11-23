@@ -8,7 +8,9 @@ import advisorDoorImage from "@assets/generated_images/Professional_partnership_
 import industrialDoorImage from "@assets/generated_images/Vanguard_industrial_welding_fabrication_hero.png";
 import campaignDoorImage from "@assets/generated_images/Hands_together_showing_community_b0e0e375.png";
 
-const ADMIN_DEMO_PATH = "/kinflo-demo/admin?demo=1";
+// The admin demo opens at the platform level; tenant-level links name their tenant and site explicitly.
+const ADMIN_DEMO_PATH = "/kinflo-demo/admin?demo=1&view=platform&platformSection=overview";
+const TENANT_DEMO_PATH = "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises";
 const PUBLIC_DEMO_PATH = "/kinflo-sites/vanguard-enterprises?demo=1#top";
 
 const tenantPaths: Record<string, string> = {
@@ -480,7 +482,7 @@ export default function KinfloHome() {
                 label="Insight"
                 title="You see what is working."
                 body="Analytics show which pages and journeys lead to inquiries. Run two versions of a page or headline side by side, then keep the one more people respond to."
-                action={<Link href={ADMIN_DEMO_PATH} className={textLink}>See analytics in the admin demo {arrow}</Link>}
+                action={<Link href={`${TENANT_DEMO_PATH}&section=analytics`} className={textLink}>See analytics in the admin demo {arrow}</Link>}
               >
                 <div className="kf-lift mx-auto w-[92%]" style={cssVars({ "--r": "1deg" })}><InsightCard /></div>
               </StoryStep>
@@ -491,7 +493,7 @@ export default function KinfloHome() {
                 label="Follow-up"
                 title="Someone owns the next step."
                 body="Every inquiry gets an owner, a next action, and a due date. The relationship keeps going after the form is sent."
-                action={<Link href={ADMIN_DEMO_PATH} className={textLink}>See follow-up in the admin demo {arrow}</Link>}
+                action={<Link href={`${TENANT_DEMO_PATH}&section=tasks`} className={textLink}>See follow-up in the admin demo {arrow}</Link>}
               >
                 <div className="relative pb-[4em]">
                   <div

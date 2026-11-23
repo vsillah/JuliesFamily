@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { ArrowLeft, Eye, ShieldCheck } from "lucide-react";
 import { Link } from "wouter";
 import AdminKinfloShell from "@/pages/AdminKinfloShell";
 import { ReviewFixtureIdentityGate } from "@/components/KinfloAdminRoute";
@@ -27,7 +26,9 @@ export default function KinfloDemoAdmin() {
       return true;
     }
     const params = new URLSearchParams(window.location.search);
-    if (!params.has("tenant") || !params.has("site")) {
+    // The platform level and the scope chooser have no tenant selected; only the tenant level gets a default scope.
+    const tenantLevel = params.get("view") !== "platform" && params.get("scope") !== "choose";
+    if (tenantLevel && (!params.has("tenant") || !params.has("site"))) {
       params.set("tenant", "vanguard-enterprises");
       params.set("site", "vanguard-enterprises");
       window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}${window.location.hash}`);
@@ -41,28 +42,8 @@ export default function KinfloDemoAdmin() {
 
   return (
     <ReviewFixtureIdentityGate>
-      <div className="min-h-screen bg-background text-foreground">
-        <div className="sticky top-0 z-50 border-b border-emerald-300/25 bg-slate-950 px-4 py-3 text-white shadow-lg sm:px-6">
-          <div className="mx-auto flex max-w-[1600px] flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 items-start gap-3">
-              <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-emerald-300 text-slate-950">
-                <Eye className="h-4 w-4" aria-hidden="true" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold">KinFlo admin demo</p>
-                <p className="text-xs leading-5 text-slate-300">Read-only fixture workspace for presentations. No sign-in, tenant writes, provider calls, or live data.</p>
-              </div>
-            </div>
-            <div className="flex shrink-0 items-center gap-2">
-              <span className="hidden items-center gap-1.5 text-xs text-emerald-200 sm:inline-flex"><ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" /> Fixture-backed</span>
-              <Button asChild size="sm" variant="outline" className="border-white/25 bg-white/5 text-white hover:bg-white/10 hover:text-white">
-                <Link href="/"><ArrowLeft className="mr-2 h-4 w-4" aria-hidden="true" /> KinFlo home</Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-        <AdminKinfloShell />
-      </div>
+      {/* The shared KinFlo level bar (brand, platform/tenant level, fixture boundary) comes from the fixture provider. */}
+      <AdminKinfloShell />
     </ReviewFixtureIdentityGate>
   );
 }

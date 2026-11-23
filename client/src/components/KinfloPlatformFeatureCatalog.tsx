@@ -14,7 +14,14 @@ import {
   Settings2,
   X,
 } from "lucide-react";
+import {
+  buildKinfloPlatformHref,
+  buildKinfloTenantScopeHref,
+  buildKinfloTenantWorkspaceHref,
+  kinfloFixtureBoundary,
+} from "../lib/kinfloAdminLevels";
 import { getKinfloPlatformAnalyticsSnapshot } from "../lib/kinfloPlatformAnalytics";
+import { resolveKinfloPublicSitePreview } from "../lib/kinfloPublicSitePreview";
 
 type PlatformSection =
   "overview" | "control" | "build" | "launch" | "growth" | "evidence";
@@ -327,19 +334,333 @@ function PlatformMetricGrid({
   );
 }
 
+function PlatformConceptVisuals({
+  snapshot,
+  selectedTenantSlugs,
+}: {
+  snapshot: ReturnType<typeof getKinfloPlatformAnalyticsSnapshot>;
+  selectedTenantSlugs: readonly string[];
+}) {
+  const visibleTenants = snapshot.tenantCoverage.filter((tenant) =>
+    tenantIsVisible(tenant.tenantSlug, selectedTenantSlugs),
+  );
+  const activityMax = Math.max(...snapshot.activityTrend.map((day) => day.events), 1);
+  const selectedTenant = selectedTenantSlugs.length === 1
+    ? visibleTenants[0]
+    : undefined;
+  const journeyTenant = selectedTenant
+    ? snapshot.journeyByTenant.find((journey) => journey.tenantSlug === selectedTenant.tenantSlug)
+    : undefined;
+  const journeyStages = journeyTenant
+    ? journeyTenant.stages
+    : snapshot.journeyByTenant[0]?.stages.map((stage) => ({
+        ...stage,
+        count: snapshot.journeyByTenant.reduce(
+          (total, journey) => total + (journey.stages.find((candidate) => candidate.key === stage.key)?.count ?? 0),
+          0,
+        ),
+      })) ?? [];
+  const campaignPreview = resolveKinfloPublicSitePreview("campaign-microsite");
+  const campaignBlock = campaignPreview.blocks.find((block) => block.type === "campaign");
+  const campaignGoal = Number(campaignBlock?.metadata?.goal ?? 0);
+  const campaignRaised = Number(campaignBlock?.metadata?.raised ?? 0);
+  const campaignSupporters = Number(campaignBlock?.metadata?.supporters ?? 0);
+  const campaignProgress = campaignGoal > 0
+    ? Math.min(Math.round((campaignRaised / campaignGoal) * 100), 100)
+    : 0;
+  const campaignJourney = snapshot.journeyByTenant.find((journey) => journey.tenantSlug === "campaign-microsite-lab");
+  const campaignStages = campaignJourney?.stages.filter((stage) => ["configured", "preview", "launch"].includes(stage.key)) ?? [];
+  const tenantLink = (section: PlatformSection) =>
+    buildKinfloPlatformHref({ section, tenantSlug: selectedTenant?.tenantSlug });
+
+  return (
+    <section
+      className="mt-8 border-t border-slate-300 pt-8"
+      aria-labelledby="platform-concept-visuals-heading"
+      data-testid="section-kinflo-platform-concept-visuals"
+    >
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Visual operating layer</div>
+          <h2 id="platform-concept-visuals-heading" className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+            The mockups, backed by platform state
+          </h2>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+            These are live admin views of the current read-only fixture snapshot, not product screenshots. Each panel opens the underlying platform lane.
+          </p>
+        </div>
+        <span className="text-sm font-medium text-slate-500">Source: {snapshot.sourceLabel}</span>
+      </div>
+
+      <div className="mt-5 grid gap-4 xl:grid-cols-3">
+        <a
+          href={tenantLink("growth")}
+          className="group border border-slate-300 bg-white p-5 shadow-sm transition hover:border-slate-950"
+          data-testid="card-kinflo-visual-operating-workspace"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Operating workspace</div>
+              <h3 className="mt-2 text-lg font-semibold text-slate-950">Activity and capacity</h3>
+            </div>
+            <ArrowRight className="h-4 w-4 text-slate-400 transition group-hover:text-slate-950" aria-hidden="true" />
+          </div>
+          <div className="mt-5 flex h-28 items-end gap-2 border-b border-slate-200 px-1" aria-label="Activity trend">
+            {snapshot.activityTrend.map((day) => (
+              <div key={day.label} className="flex min-w-0 flex-1 flex-col items-center gap-2">
+                <div
+                  className="w-full max-w-8 bg-slate-950 transition group-hover:bg-emerald-500"
+                  style={{ height: `${Math.max(10, Math.round((day.events / activityMax) * 88))}%` }}
+                  title={`${day.label}: ${day.events} events`}
+                />
+                <span className="text-[10px] text-slate-500">{day.label}</span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+            <div><div className="text-xs text-slate-500">Tenants</div><div className="mt-1 font-semibold text-slate-950">{visibleTenants.length}</div></div>
+            <div><div className="text-xs text-slate-500">Sites</div><div className="mt-1 font-semibold text-slate-950">{visibleTenants.reduce((total, tenant) => total + tenant.sites, 0)}</div></div>
+          </div>
+        </a>
+
+        <a
+          href={tenantLink("growth")}
+          className="group border border-slate-300 bg-white p-5 shadow-sm transition hover:border-slate-950"
+          data-testid="card-kinflo-visual-audience-journey"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Audience journeys</div>
+              <h3 className="mt-2 text-lg font-semibold text-slate-950">From entry to operation</h3>
+            </div>
+            <ArrowRight className="h-4 w-4 text-slate-400 transition group-hover:text-slate-950" aria-hidden="true" />
+          </div>
+          <div className="mt-5 space-y-3" aria-label="Journey stages">
+            {journeyStages.slice(0, 5).map((stage) => {
+              const maxStage = Math.max(...journeyStages.map((candidate) => candidate.count), 1);
+              return (
+                <div key={stage.key}>
+                  <div className="mb-1 flex items-center justify-between gap-3 text-xs">
+                    <span className="font-medium text-slate-700">{stage.label}</span>
+                    <span className="text-slate-500">{stage.count}</span>
+                  </div>
+                  <div className="h-2 overflow-hidden bg-slate-100"><div className="h-full bg-emerald-400 transition group-hover:bg-emerald-500" style={{ width: `${Math.max(stage.count ? 12 : 0, Math.round((stage.count / maxStage) * 100))}%` }} /></div>
+                </div>
+              );
+            })}
+          </div>
+          <p className="mt-4 text-xs leading-5 text-slate-500">{selectedTenant ? `Scoped to ${selectedTenant.tenant}` : "Aggregated across the selected tenant lens"}</p>
+        </a>
+
+        <a
+          href={tenantLink("control")}
+          className="group border border-slate-300 bg-white p-5 shadow-sm transition hover:border-slate-950"
+          data-testid="card-kinflo-visual-tenant-delivery"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Tenant-ready delivery</div>
+              <h3 className="mt-2 text-lg font-semibold text-slate-950">One platform, many front doors</h3>
+            </div>
+            <ArrowRight className="h-4 w-4 text-slate-400 transition group-hover:text-slate-950" aria-hidden="true" />
+          </div>
+          <div className="mt-5 space-y-3" aria-label="Tenant delivery coverage">
+            {visibleTenants.map((tenant) => (
+              <div key={tenant.tenantSlug} className="border-b border-slate-200 pb-3 last:border-0 last:pb-0">
+                <div className="flex items-center justify-between gap-3 text-sm">
+                  <span className="truncate font-medium text-slate-800">{tenant.tenant}</span>
+                  <span className={`shrink-0 text-xs font-semibold ${tenant.status === "active" ? "text-emerald-700" : "text-amber-700"}`}>{tenant.status}</span>
+                </div>
+                <div className="mt-2 flex items-center gap-2 text-xs text-slate-500">
+                  <div className="h-1.5 flex-1 bg-slate-100"><div className="h-full bg-slate-800 transition group-hover:bg-emerald-500" style={{ width: `${Math.max(18, tenant.capabilities * 20)}%` }} /></div>
+                  <span>{tenant.sites} {tenant.sites === 1 ? "site" : "sites"}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </a>
+      </div>
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
+        <a
+          href={tenantLink("growth")}
+          className="group border border-slate-300 bg-white p-5 shadow-sm transition hover:border-slate-950"
+          data-testid="card-kinflo-visual-fundraising"
+        >
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Fundraising and campaigns</div>
+              <h3 className="mt-2 text-lg font-semibold text-slate-950">Campaign progress that can be inspected</h3>
+              <p className="mt-2 max-w-xl text-sm leading-6 text-slate-600">This panel reads the campaign preview block and keeps donation transaction metrics separate until a source is connected.</p>
+            </div>
+            <ArrowRight className="h-4 w-4 shrink-0 text-slate-400 transition group-hover:text-slate-950" aria-hidden="true" />
+          </div>
+          <div className="mt-6 grid gap-6 sm:grid-cols-[150px_minmax(0,1fr)] sm:items-center">
+            <div className="flex justify-center">
+              <div
+                className="relative flex h-32 w-32 items-center justify-center rounded-full"
+                style={{ background: `conic-gradient(#10b981 ${campaignProgress}%, #e2e8f0 0)` }}
+                aria-label={`${campaignProgress}% of campaign goal raised`}
+              >
+                <div className="flex h-24 w-24 flex-col items-center justify-center rounded-full bg-white">
+                  <span className="text-2xl font-semibold text-slate-950">{campaignProgress}%</span>
+                  <span className="text-[10px] uppercase tracking-[0.12em] text-slate-500">of goal</span>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <div className="flex items-center justify-between gap-3 text-sm"><span className="font-medium text-slate-700">Raised</span><span className="font-semibold text-slate-950">${campaignRaised.toLocaleString()}</span></div>
+                <div className="mt-2 h-3 overflow-hidden bg-slate-100"><div className="h-full bg-emerald-400 transition group-hover:bg-emerald-500" style={{ width: `${campaignProgress}%` }} /></div>
+              </div>
+              <div>
+                <div className="flex items-center justify-between gap-3 text-sm"><span className="font-medium text-slate-700">Remaining</span><span className="font-semibold text-slate-950">${Math.max(campaignGoal - campaignRaised, 0).toLocaleString()}</span></div>
+                <div className="mt-2 h-3 overflow-hidden bg-slate-100"><div className="h-full bg-slate-700" style={{ width: `${Math.max(0, 100 - campaignProgress)}%` }} /></div>
+              </div>
+              <div className="flex flex-wrap gap-3 text-xs text-slate-500"><span>{campaignSupporters} supporters</span><span>Goal ${campaignGoal.toLocaleString()}</span><span>Campaign preview fixture</span></div>
+            </div>
+          </div>
+        </a>
+
+        <a
+          href={tenantLink("launch")}
+          className="group border border-slate-300 bg-white p-5 shadow-sm transition hover:border-slate-950"
+          data-testid="card-kinflo-visual-campaign-readiness"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700">Campaign readiness</div>
+              <h3 className="mt-2 text-lg font-semibold text-slate-950">From draft to public ask</h3>
+            </div>
+            <ArrowRight className="h-4 w-4 text-slate-400 transition group-hover:text-slate-950" aria-hidden="true" />
+          </div>
+          <div className="mt-6 space-y-4" aria-label="Campaign readiness stages">
+            {campaignStages.map((stage) => (
+              <div key={stage.key}>
+                <div className="mb-1 flex items-center justify-between gap-3 text-sm"><span className="font-medium text-slate-700">{stage.label}</span><span className="text-xs text-slate-500">{stage.count} site{stage.count === 1 ? "" : "s"}</span></div>
+                <div className="h-3 overflow-hidden bg-slate-100"><div className={`h-full transition ${stage.count > 0 ? "bg-emerald-400 group-hover:bg-emerald-500" : "bg-slate-300"}`} style={{ width: `${Math.max(stage.count > 0 ? 18 : 0, Math.min(stage.count * 50, 100))}%` }} /></div>
+                <div className="mt-1 text-xs text-slate-500">{stage.detail}</div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-5 border-t border-slate-200 pt-4 text-xs leading-5 text-slate-500">Julie&apos;s donation path is configured in the public fixture; donation totals remain unavailable until a read-only source is bound.</div>
+        </a>
+      </div>
+    </section>
+  );
+}
+
+function PlatformTenantLens({
+  snapshot,
+  selectedTenantSlugs,
+  onTenantChange,
+}: {
+  snapshot: ReturnType<typeof getKinfloPlatformAnalyticsSnapshot>;
+  selectedTenantSlugs: readonly string[];
+  onTenantChange: (tenantSlugs: string[]) => void;
+}) {
+  const allTenants = snapshot.tenantCoverage;
+  const visibleTenants = allTenants.filter((tenant) =>
+    tenantIsVisible(tenant.tenantSlug, selectedTenantSlugs),
+  );
+  const selectedTenant =
+    selectedTenantSlugs.length === 1 ? visibleTenants[0] : undefined;
+  const tenantLensLabel =
+    selectedTenantSlugs.length === 0
+      ? "All tenants"
+      : selectedTenant
+        ? selectedTenant.tenant
+        : `${selectedTenantSlugs.length} tenants selected`;
+
+  function toggleTenant(tenantSlug: string) {
+    const nextSelection =
+      selectedTenantSlugs.length === 0
+        ? allTenants
+            .filter((tenant) => tenant.tenantSlug !== tenantSlug)
+            .map((tenant) => tenant.tenantSlug)
+        : selectedTenantSlugs.includes(tenantSlug)
+          ? selectedTenantSlugs.filter((slug) => slug !== tenantSlug)
+          : [...selectedTenantSlugs, tenantSlug];
+    onTenantChange(
+      nextSelection.length === allTenants.length ? [] : nextSelection,
+    );
+  }
+
+  return (
+    <div
+      className="mt-3 flex flex-col gap-3 border-t border-border pt-3 sm:flex-row sm:items-center sm:justify-between"
+      data-testid="section-kinflo-platform-portfolio-scope"
+    >
+      <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+        <span className="shrink-0 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+          Portfolio scope
+        </span>
+        <details
+          className="relative w-full sm:w-72"
+          data-testid="select-kinflo-platform-tenant-lens"
+        >
+          <summary className="flex h-9 cursor-pointer list-none items-center justify-between gap-2 rounded-md border border-border bg-background px-3 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+            <span className="truncate">{tenantLensLabel}</span>
+            <ChevronDown
+              className="h-4 w-4 shrink-0 text-slate-500"
+              aria-hidden="true"
+            />
+          </summary>
+          <div className="absolute left-0 top-full z-20 mt-2 w-full min-w-72 rounded-md border border-border bg-white p-2 text-sm text-slate-800 shadow-lg">
+            <label className="flex cursor-pointer items-center gap-3 rounded px-3 py-2 hover:bg-slate-50">
+              <input
+                type="checkbox"
+                checked={selectedTenantSlugs.length === 0}
+                onChange={() => onTenantChange([])}
+                className="h-4 w-4 accent-primary"
+              />
+              <span>All tenants</span>
+            </label>
+            <div className="my-1 border-t border-slate-200" />
+            {allTenants.map((tenant) => (
+              <label
+                key={tenant.tenantSlug}
+                className="flex cursor-pointer items-start gap-3 rounded px-3 py-2 hover:bg-slate-50"
+              >
+                <input
+                  type="checkbox"
+                  checked={
+                    selectedTenantSlugs.length === 0 ||
+                    selectedTenantSlugs.includes(tenant.tenantSlug)
+                  }
+                  onChange={() => toggleTenant(tenant.tenantSlug)}
+                  className="mt-0.5 h-4 w-4 accent-primary"
+                />
+                <span>{tenant.tenant}</span>
+              </label>
+            ))}
+          </div>
+        </details>
+      </div>
+      <div className="text-xs text-slate-500 sm:text-right">
+        <span className="font-medium text-slate-700">
+          {selectedTenant
+            ? `Showing ${selectedTenant.tenant}`
+            : selectedTenantSlugs.length === 0
+              ? `Showing all ${snapshot.tenantCount} fixture tenants`
+              : `Showing ${visibleTenants.length} selected fixture tenants`}
+        </span>{" "}
+        · {kinfloFixtureBoundary.badge}
+      </div>
+    </div>
+  );
+}
+
 function PlatformAnalyticsWorkspace({
   selectedTenantSlugs,
   timeRange,
-  onTenantChange,
   onTimeRangeChange,
 }: {
   selectedTenantSlugs: readonly string[];
   timeRange: PlatformTimeRange;
-  onTenantChange: (tenantSlugs: string[]) => void;
   onTimeRangeChange: (timeRange: PlatformTimeRange) => void;
 }) {
   const snapshot = getKinfloPlatformAnalyticsSnapshot();
-  const allTenants = snapshot.tenantCoverage;
   const visibleTenants = snapshot.tenantCoverage.filter(
     (tenant) => tenantIsVisible(tenant.tenantSlug, selectedTenantSlugs),
   );
@@ -363,7 +684,7 @@ function PlatformAnalyticsWorkspace({
       ).length,
     }),
   );
-  const radarColors = ["#020617", "#334155", "#64748b", "#cbd5e1"];
+  const radarColors = ["#0f766e", "#2563eb", "#7c3aed", "#d97706"];
   const radarWebs = visibleTenants.map((tenant, tenantIndex) => {
     const points = visibleCapabilityAdoption
       .map(({ key }, capabilityIndex) => {
@@ -384,29 +705,10 @@ function PlatformAnalyticsWorkspace({
   });
   const selectedTenant =
     selectedTenantSlugs.length === 1 ? visibleTenants[0] : undefined;
-  const tenantLensLabel =
-    selectedTenantSlugs.length === 0
-      ? "All tenants"
-      : selectedTenant
-        ? selectedTenant.tenant
-        : `${selectedTenantSlugs.length} tenants selected`;
   const timeRangeLabel = platformTimeRanges.find(
     (range) => range.key === timeRange,
   )?.label;
 
-  function toggleTenant(tenantSlug: string) {
-    const nextSelection =
-      selectedTenantSlugs.length === 0
-        ? allTenants
-            .filter((tenant) => tenant.tenantSlug !== tenantSlug)
-            .map((tenant) => tenant.tenantSlug)
-        : selectedTenantSlugs.includes(tenantSlug)
-          ? selectedTenantSlugs.filter((slug) => slug !== tenantSlug)
-          : [...selectedTenantSlugs, tenantSlug];
-    onTenantChange(
-      nextSelection.length === allTenants.length ? [] : nextSelection,
-    );
-  }
   const visibleSessionStarts = visibleTenants.reduce(
     (total, tenant) => total + tenant.sessions,
     0,
@@ -440,16 +742,16 @@ function PlatformAnalyticsWorkspace({
       ]
     : snapshot.sessionFlow;
   const seriesColors = [
-    "bg-slate-950",
-    "bg-slate-700",
-    "bg-slate-500",
-    "bg-slate-300",
+    "bg-sky-500",
+    "bg-emerald-500",
+    "bg-violet-500",
+    "bg-amber-400",
   ];
   const infrastructureColors = [
-    "bg-slate-950",
-    "bg-slate-700",
-    "bg-slate-500",
-    "bg-slate-300",
+    "bg-emerald-500",
+    "bg-sky-500",
+    "bg-violet-500",
+    "bg-amber-400",
   ];
   const visibleInfrastructure = snapshot.infrastructureByTenant.filter(
     (tenant) => tenantIsVisible(tenant.tenantSlug, selectedTenantSlugs),
@@ -577,7 +879,12 @@ function PlatformAnalyticsWorkspace({
     journeyStages.reduce((max, stage) => Math.max(max, stage.count), 0),
   );
   const platformLaneHref = (tenantSlug: string, lane: string) =>
-    `/admin/kinflo-os?view=platform&platformTenant=${tenantSlug}&platformSection=${lane}`;
+    buildKinfloPlatformHref({ section: lane, tenantSlug });
+  const journeyPriorityClasses: Record<string, string> = {
+    high: "border-red-200 bg-red-50 text-red-800",
+    medium: "border-amber-200 bg-amber-50 text-amber-800",
+    low: "border-emerald-200 bg-emerald-50 text-emerald-800",
+  };
 
   return (
     <section
@@ -610,44 +917,6 @@ function PlatformAnalyticsWorkspace({
 
       <div className="mt-5 flex flex-col gap-4 border border-slate-300 bg-white p-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-          <div className="grid gap-2 text-sm font-semibold text-slate-800">
-            <span>Tenant lens</span>
-            <details className="relative min-w-64" data-testid="select-kinflo-platform-tenant-lens">
-            <summary className="flex h-10 cursor-pointer list-none items-center justify-between rounded-md border border-slate-300 bg-white px-3 font-normal text-slate-950 outline-none ring-slate-950 focus:ring-2 [&::-webkit-details-marker]:hidden">
-              <span>{tenantLensLabel}</span>
-              <ChevronDown className="h-4 w-4 text-slate-500" aria-hidden="true" />
-            </summary>
-            <div className="absolute left-0 top-full z-20 mt-2 w-full min-w-72 border border-slate-300 bg-white p-2 font-normal text-slate-800 shadow-lg">
-              <label className="flex cursor-pointer items-center gap-3 px-3 py-2 hover:bg-slate-50">
-                <input
-                  type="checkbox"
-                  checked={selectedTenantSlugs.length === 0}
-                  onChange={() => onTenantChange([])}
-                  className="h-4 w-4 accent-slate-950"
-                />
-                <span>All tenants</span>
-              </label>
-              <div className="my-1 border-t border-slate-200" />
-              {allTenants.map((tenant) => (
-                <label
-                  key={tenant.tenantSlug}
-                  className="flex cursor-pointer items-start gap-3 px-3 py-2 hover:bg-slate-50"
-                >
-                  <input
-                    type="checkbox"
-                    checked={
-                      selectedTenantSlugs.length === 0 ||
-                      selectedTenantSlugs.includes(tenant.tenantSlug)
-                    }
-                    onChange={() => toggleTenant(tenant.tenantSlug)}
-                    className="mt-0.5 h-4 w-4 accent-slate-950"
-                  />
-                  <span>{tenant.tenant}</span>
-                </label>
-              ))}
-            </div>
-            </details>
-          </div>
           <label className="grid gap-2 text-sm font-semibold text-slate-800">
             <span>Time range</span>
             <select
@@ -667,13 +936,6 @@ function PlatformAnalyticsWorkspace({
           </label>
         </div>
         <div className="grid gap-1 text-sm text-slate-600 sm:text-right">
-          <span>
-            {selectedTenant
-              ? `Showing ${selectedTenant.tenant}`
-              : selectedTenantSlugs.length === 0
-                ? `Showing all ${snapshot.tenantCount} fixture tenants`
-                : `Showing ${visibleTenants.length} selected fixture tenants`}
-          </span>
           <span className="text-xs text-slate-500">
             Activity: {timeRangeLabel} fixture window
           </span>
@@ -698,10 +960,15 @@ function PlatformAnalyticsWorkspace({
             `${visibleTenants.length} tenants`,
             selectedTenant ? "Selected tenant" : "Cross-tenant snapshot",
           ],
-        ].map(([label, value, detail]) => (
+        ].map(([label, value, detail], metricIndex) => (
           <div
             key={label}
-            className="border border-slate-300 bg-white px-4 py-4 shadow-sm"
+            className={`border border-slate-300 border-l-4 bg-white px-4 py-4 shadow-sm ${[
+              "border-l-sky-500",
+              "border-l-emerald-500",
+              "border-l-violet-500",
+              "border-l-amber-500",
+            ][metricIndex]}`}
           >
             <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
               {label}
@@ -728,7 +995,7 @@ function PlatformAnalyticsWorkspace({
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-                Infrastructure health
+                <span className="text-sky-700">Infrastructure health</span>
               </div>
               <h3
                 id="platform-network-heading"
@@ -775,7 +1042,7 @@ function PlatformAnalyticsWorkspace({
                   aria-label={`${tenant.tenant} network utilization ${tenant.networkUtilizationPercent} percent`}
                 >
                   <div
-                    className="h-full bg-slate-700"
+                    className={`h-full ${tenant.networkUtilizationPercent >= 80 ? "bg-red-500" : tenant.networkUtilizationPercent >= 60 ? "bg-amber-500" : "bg-emerald-500"}`}
                     style={{ width: `${tenant.networkUtilizationPercent}%` }}
                   />
                 </div>
@@ -800,7 +1067,7 @@ function PlatformAnalyticsWorkspace({
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-                Runtime health
+              <span className="text-violet-700">Runtime health</span>
               </div>
               <h3
                 id="platform-load-balancing-heading"
@@ -886,7 +1153,7 @@ function PlatformAnalyticsWorkspace({
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-              Journey health
+              <span className="text-amber-700">Journey health</span>
             </div>
             <h3
               id="platform-journey-heading"
@@ -1019,7 +1286,11 @@ function PlatformAnalyticsWorkspace({
                           {leak.tenant} · {leak.affectedCount} affected · {leak.sharePercent}% of tenant sites
                         </div>
                       </div>
-                      <span className="shrink-0 text-xs font-semibold uppercase tracking-[0.1em] text-slate-500">
+                      <span
+                        className={`shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.1em] ${journeyPriorityClasses[leak.priority] ?? "border-slate-200 bg-slate-50 text-slate-700"}`}
+                        role="status"
+                        aria-label={`Priority: ${leak.priority}`}
+                      >
                         {leak.priority}
                       </span>
                     </div>
@@ -1127,7 +1398,7 @@ function PlatformAnalyticsWorkspace({
         >
           <div>
             <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-              Capability mix
+              <span className="text-violet-700">Capability mix</span>
             </div>
             <h3
               id="platform-capability-heading"
@@ -1253,7 +1524,7 @@ function PlatformAnalyticsWorkspace({
           className="border border-slate-300 bg-white p-5 shadow-sm"
           aria-labelledby="platform-flow-heading"
         >
-          <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+          <div className="text-xs font-semibold uppercase tracking-[0.12em] text-sky-700">
             Session paths
           </div>
           <h3
@@ -1266,7 +1537,12 @@ function PlatformAnalyticsWorkspace({
             {flowValues.map((stage, index) => (
               <div
                 key={stage.label}
-                className="border border-slate-200 bg-slate-50 px-3 py-3"
+                className={`border border-slate-200 border-t-2 bg-slate-50 px-3 py-3 ${[
+                  "border-t-sky-500",
+                  "border-t-violet-500",
+                  "border-t-amber-500",
+                  "border-t-emerald-500",
+                ][index]}`}
               >
                 <div className="text-xs font-semibold text-slate-400">
                   {String(index + 1).padStart(2, "0")}
@@ -1290,7 +1566,7 @@ function PlatformAnalyticsWorkspace({
           className="border border-slate-300 bg-white p-5 shadow-sm"
           aria-labelledby="platform-economics-heading"
         >
-          <div className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+          <div className="text-xs font-semibold uppercase tracking-[0.12em] text-emerald-700">
             Usage economics
           </div>
           <h3
@@ -1352,13 +1628,19 @@ function PlatformAnalyticsWorkspace({
                 <th className="px-3 py-3 font-semibold">Status</th>
                 <th className="px-3 py-3 font-semibold">Capabilities</th>
                 <th className="px-3 py-3 font-semibold">Activity</th>
+                <th className="px-3 py-3 text-right font-semibold">Workspace</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 text-slate-700">
               {visibleTenants.map((tenant) => (
                 <tr key={tenant.tenant}>
                   <td className="px-3 py-3 font-semibold text-slate-900">
-                    {tenant.tenant}
+                    <a
+                      href={buildKinfloTenantWorkspaceHref(tenant.tenantSlug)}
+                      className="underline-offset-4 hover:underline"
+                    >
+                      {tenant.tenant}
+                    </a>
                   </td>
                   <td className="px-3 py-3 align-top">
                     <div className="font-semibold text-slate-900">
@@ -1371,15 +1653,99 @@ function PlatformAnalyticsWorkspace({
                     </div>
                   </td>
                   <td className="px-3 py-3">{tenant.sites}</td>
-                  <td className="px-3 py-3 capitalize">{tenant.status}</td>
+                    <td className="px-3 py-3">
+                      <span
+                        className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold capitalize ${tenant.status === "active" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-amber-200 bg-amber-50 text-amber-800"}`}
+                      >
+                        {tenant.status}
+                      </span>
+                    </td>
                   <td className="px-3 py-3">{tenant.capabilities} of 5</td>
                   <td className="px-3 py-3">{tenant.activity}</td>
+                  <td className="px-3 py-3 text-right">
+                    <a
+                      href={buildKinfloTenantWorkspaceHref(tenant.tenantSlug)}
+                      className="inline-flex items-center gap-1 whitespace-nowrap text-xs font-semibold text-primary"
+                      data-testid={`link-kinflo-platform-open-workspace-${tenant.tenantSlug}`}
+                    >
+                      Open workspace
+                      <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+                    </a>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </section>
+    </section>
+  );
+}
+
+function PlatformTenantWorkspaces({
+  snapshot,
+  selectedTenantSlugs,
+}: {
+  snapshot: ReturnType<typeof getKinfloPlatformAnalyticsSnapshot>;
+  selectedTenantSlugs: readonly string[];
+}) {
+  const visibleTenants = snapshot.tenantCoverage.filter((tenant) =>
+    tenantIsVisible(tenant.tenantSlug, selectedTenantSlugs),
+  );
+  return (
+    <section
+      className="mb-6"
+      aria-labelledby="platform-tenant-workspaces-heading"
+      data-testid="section-kinflo-platform-tenant-workspaces"
+    >
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+            Tenant workspaces
+          </div>
+          <h2
+            id="platform-tenant-workspaces-heading"
+            className="mt-1 text-lg font-semibold text-slate-950"
+          >
+            Open a tenant to work inside its scope
+          </h2>
+        </div>
+        <span className="text-xs text-slate-500">
+          {visibleTenants.length} of {snapshot.tenantCoverage.length} fixture tenants in scope
+        </span>
+      </div>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {visibleTenants.map((tenant) => (
+          <a
+            key={tenant.tenantSlug}
+            href={buildKinfloTenantWorkspaceHref(tenant.tenantSlug)}
+            className="group flex min-w-0 flex-col border border-slate-300 bg-white p-4 shadow-sm transition-colors hover:border-primary/50"
+            data-testid={`card-kinflo-platform-tenant-${tenant.tenantSlug}`}
+          >
+            <span className="flex items-start justify-between gap-2">
+              <span className="min-w-0 truncate text-sm font-semibold text-slate-950">
+                {tenant.tenant}
+              </span>
+              <span
+                className={`shrink-0 rounded-full border px-2 py-0.5 text-[11px] font-semibold capitalize ${tenant.status === "active" ? "border-emerald-200 bg-emerald-50 text-emerald-800" : "border-amber-200 bg-amber-50 text-amber-800"}`}
+              >
+                {tenant.status}
+              </span>
+            </span>
+            <span className="mt-1 flex-1 text-xs leading-5 text-slate-500">
+              {tenant.profileLabel} · {tenant.sites}{" "}
+              {tenant.sites === 1 ? "site" : "sites"}
+            </span>
+            <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary">
+              Open workspace
+              <ArrowRight
+                className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5"
+                aria-hidden="true"
+              />
+            </span>
+          </a>
+        ))}
+      </div>
     </section>
   );
 }
@@ -1607,12 +1973,15 @@ function PlatformLaneAnalytics({
         </div>
         <div className="mt-3 flex flex-wrap gap-2">
           {filteredTenants.map((tenant) => (
-            <span
+            <a
               key={tenant.tenant}
-              className="border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700"
+              href={buildKinfloTenantWorkspaceHref(tenant.tenantSlug)}
+              title={`Open the ${tenant.tenant} workspace`}
+              className="inline-flex items-center gap-1.5 border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-medium text-slate-700 transition hover:border-primary/50"
             >
               {tenant.tenant}
-            </span>
+              <ArrowRight className="h-3 w-3" aria-hidden="true" />
+            </a>
           ))}
         </div>
       </div>
@@ -1629,6 +1998,7 @@ function PlatformLaneView({
 }) {
   const lane = platformSections.find((item) => item.key === section)!;
   const Icon = lane.icon;
+  const tenantScopeHref = buildKinfloTenantScopeHref();
   return (
     <section data-testid={`section-kinflo-platform-${section}`}>
       <div className="flex items-start gap-3 border-b border-slate-300 pb-5">
@@ -1659,7 +2029,7 @@ function PlatformLaneView({
           </p>
         </div>
         <a
-          href="/admin/kinflo-os"
+          href={tenantScopeHref}
           className="inline-flex shrink-0 items-center justify-center gap-2 rounded-md bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
           data-testid={`link-kinflo-${section}-tenant-scope`}
         >
@@ -1974,31 +2344,32 @@ export default function KinfloPlatformFeatureCatalog({
     (section) => section.key === activeSection,
   )!;
   const ActiveIcon = active.icon;
+  const tenantScopeHref = buildKinfloTenantScopeHref();
   return (
     <main
-      className="min-h-screen bg-slate-100 text-slate-950"
+      className="kinflo-admin-shell kinflo-platform-level min-h-screen bg-muted/30 text-foreground"
       data-testid="section-kinflo-platform-catalog"
     >
-      <div className="flex min-h-screen flex-col lg:flex-row">
+      <div className="mx-auto flex min-h-screen max-w-[1500px] flex-col lg:flex-row">
         <aside
-          className="w-full shrink-0 border-b border-slate-300 bg-slate-950 text-white lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:border-b-0 lg:border-r lg:border-slate-800"
+          className="w-full shrink-0 border-b border-border bg-card text-foreground lg:sticky lg:top-[var(--kinflo-level-bar,0px)] lg:h-[calc(100vh-var(--kinflo-level-bar,0px))] lg:w-60 lg:overflow-y-auto lg:border-b-0 lg:border-r"
           aria-label="KinFlo platform navigation"
         >
-          <div className="flex h-full flex-col p-4 sm:p-5">
-            <div className="flex items-center gap-2 px-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
+          <div className="flex h-full flex-col p-2 py-4">
+            <div className="flex items-center gap-2 px-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
               <LockKeyhole className="h-4 w-4" aria-hidden="true" /> KinFlo
               platform
             </div>
             <div className="mt-3 px-2">
-              <div className="text-xl font-semibold">
+              <div className="text-sm font-semibold">
                 Platform control plane
               </div>
-              <p className="mt-2 text-sm leading-6 text-slate-400">
+              <p className="mt-1 text-xs leading-5 text-slate-400">
                 The parent workspace for tenant relationships and platform
                 capacity.
               </p>
             </div>
-            <nav className="mt-6 grid gap-1" aria-label="Platform sections">
+            <nav className="mt-4 grid gap-0.5 border-t border-border pt-2" aria-label="Platform sections">
               {platformSections.map((section) => {
                 const Icon = section.icon;
                 const selected = section.key === activeSection;
@@ -2008,11 +2379,11 @@ export default function KinfloPlatformFeatureCatalog({
                     type="button"
                     aria-current={selected ? "page" : undefined}
                     onClick={() => selectSection(section.key)}
-                    className={`flex items-start gap-3 rounded-md px-3 py-3 text-left transition ${selected ? "bg-white text-slate-950" : "text-slate-300 hover:bg-slate-800 hover:text-white"}`}
+                    className={`flex items-start gap-2.5 rounded-md px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${selected ? "bg-primary/10 text-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
                     data-testid={`nav-kinflo-platform-${section.key}`}
                   >
                     <Icon
-                      className="mt-0.5 h-5 w-5 shrink-0"
+                      className="mt-0.5 h-4 w-4 shrink-0"
                       aria-hidden="true"
                     />
                     <span className="min-w-0">
@@ -2020,7 +2391,7 @@ export default function KinfloPlatformFeatureCatalog({
                         {section.label}
                       </span>
                       <span
-                        className={`mt-1 block text-xs leading-5 ${selected ? "text-slate-600" : "text-slate-400"}`}
+                        className={`mt-0.5 block text-[11px] leading-4 ${selected ? "text-slate-600" : "text-slate-400"}`}
                       >
                         {section.children}
                       </span>
@@ -2029,10 +2400,13 @@ export default function KinfloPlatformFeatureCatalog({
                 );
               })}
             </nav>
-            <div className="mt-auto hidden border-t border-slate-800 pt-5 lg:block">
+            <div className="mt-auto hidden border-t border-border px-1 pt-3 lg:block">
+              <div className="px-2 pb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                Tenant workspaces
+              </div>
               <a
-                href="/admin/kinflo-os"
-                className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-slate-700 px-3 py-2.5 text-sm font-semibold text-slate-200 transition hover:bg-slate-800"
+                href={tenantScopeHref}
+                className="inline-flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 data-testid="link-kinflo-choose-tenant-site"
               >
                 <Building2 className="h-4 w-4" aria-hidden="true" /> Open
@@ -2042,31 +2416,38 @@ export default function KinfloPlatformFeatureCatalog({
           </div>
         </aside>
         <div className="min-w-0 flex-1">
-          <header className="border-b border-slate-800 bg-slate-950 text-white">
-            <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-7 sm:px-6 lg:px-10">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <header className="border-b border-border bg-card">
+            <div className="flex flex-col px-4 py-3 sm:px-6">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div className="min-w-0">
-                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                  <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
                     KinFlo platform / {active.label}
                   </div>
-                  <h1 className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
+                  <h1 className="mt-0.5 text-xl font-semibold leading-tight">
                     {active.label}
                   </h1>
-                  <p className="mt-3 max-w-2xl text-base leading-7 text-slate-300">
+                  <p className="mt-0.5 max-w-2xl text-sm text-slate-500">
                     {active.description}
                   </p>
                 </div>
-                <div className="flex shrink-0 items-center gap-2 rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-300">
+                <div className="flex shrink-0 items-center gap-1.5 self-start rounded-full border border-border bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground md:self-auto">
                   <Settings2 className="h-4 w-4" aria-hidden="true" /> Parent
                   view · no tenant selected
                 </div>
               </div>
+              {activeSection === "overview" ? (
+                <PlatformTenantLens
+                  snapshot={platformAnalyticsSnapshot}
+                  selectedTenantSlugs={selectedTenantSlugs}
+                  onTenantChange={selectTenants}
+                />
+              ) : null}
             </div>
           </header>
-          <div className="mx-auto max-w-7xl px-4 py-7 sm:px-6 lg:px-10 lg:py-9">
+          <div className="px-4 py-5 sm:px-6">
             <div className="mb-6 flex items-center gap-2 text-sm text-slate-500 lg:hidden">
               <a
-                href="/admin/kinflo-os"
+                href={tenantScopeHref}
                 className="font-semibold text-slate-700"
               >
                 Tenant/site scope
@@ -2076,6 +2457,10 @@ export default function KinfloPlatformFeatureCatalog({
             </div>
             {activeSection === "overview" ? (
               <>
+                <PlatformTenantWorkspaces
+                  snapshot={platformAnalyticsSnapshot}
+                  selectedTenantSlugs={selectedTenantSlugs}
+                />
                 <PlatformMetricGrid
                   snapshot={platformAnalyticsSnapshot}
                   selectedTenantSlugs={selectedTenantSlugs}
@@ -2083,8 +2468,11 @@ export default function KinfloPlatformFeatureCatalog({
                 <PlatformAnalyticsWorkspace
                   selectedTenantSlugs={selectedTenantSlugs}
                   timeRange={timeRange}
-                  onTenantChange={selectTenants}
                   onTimeRangeChange={selectTimeRange}
+                />
+                <PlatformConceptVisuals
+                  snapshot={platformAnalyticsSnapshot}
+                  selectedTenantSlugs={selectedTenantSlugs}
                 />
                 <section
                   className="mt-8"
@@ -2154,7 +2542,7 @@ export default function KinfloPlatformFeatureCatalog({
                     </p>
                   </div>
                   <a
-                    href="/admin/kinflo-os"
+                    href={tenantScopeHref}
                     className="inline-flex h-fit items-center justify-center gap-2 rounded-md bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
                     data-testid="link-kinflo-choose-tenant-site"
                   >
