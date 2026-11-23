@@ -462,8 +462,8 @@ export default function KinfloOperatorWorkspace({
 
   return (
     <div className="kinflo-admin-shell min-h-screen bg-muted/30 text-foreground" data-testid="section-kinflo-operator-workspace">
-      <div className="mx-auto grid max-w-[1500px] lg:grid-cols-[240px_minmax(0,1fr)]">
-        <aside className="border-b border-border bg-card lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:border-b-0 lg:border-r" data-testid="section-kinflo-operator-navigation">
+      <div className="mx-auto grid max-w-[1500px] grid-cols-[minmax(0,1fr)] lg:grid-cols-[240px_minmax(0,1fr)]">
+        <aside className="min-w-0 border-b border-border bg-card lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:border-b-0 lg:border-r" data-testid="section-kinflo-operator-navigation">
           <div className="border-b border-border px-4 py-4">
             <div className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Workspace</div>
             <div className="mt-1 truncate text-sm font-semibold" title={tenant.name}>{tenant.name}</div>
@@ -536,7 +536,7 @@ export default function KinfloOperatorWorkspace({
           <main className="space-y-5 px-4 py-5 sm:px-6">
             {route.section === "overview" ? (
               <>
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" data-testid="section-kinflo-operator-summary">
+                <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4" data-testid="section-kinflo-operator-summary">
                   {summaryCards.map((card) => {
                     const Icon = card.icon;
                     return (
@@ -544,7 +544,7 @@ export default function KinfloOperatorWorkspace({
                         key={card.key}
                         type="button"
                         onClick={card.onOpen}
-                        className="group flex flex-col rounded-xl border border-border bg-card p-4 text-left shadow-sm transition-colors hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        className="group flex min-w-0 flex-col break-words rounded-xl border border-border bg-card p-4 text-left shadow-sm transition-colors hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         data-testid={`card-kinflo-operator-${card.key}`}
                       >
                         <span className="flex items-center justify-between gap-2 text-sm font-medium text-muted-foreground">
