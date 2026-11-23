@@ -131,7 +131,7 @@ function LocalFixtureIdentityGate({ children }: { children: ReactNode }) {
   );
 }
 
-function ReviewFixtureIdentityGate({ children }: { children: ReactNode }) {
+export function ReviewFixtureIdentityGate({ children }: { children: ReactNode }) {
   return (
     <KinfloAdminIdentityProvider value={{ isLoading: false, isAdmin: true, source: "local_fixture" }}>
       <FixtureKinfloShellSnapshotProvider>

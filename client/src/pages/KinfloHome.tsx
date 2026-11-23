@@ -1,9 +1,12 @@
-import { ArrowRight, Boxes, CheckCircle2, ExternalLink, Layers3, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, Boxes, CheckCircle2, ExternalLink, Layers3, Monitor, ShieldCheck, Sparkles } from "lucide-react";
 import { Link } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { listKinfloPublicSitePreviews } from "@/lib/kinfloPublicSitePreview";
 import heroImage from "@assets/generated_images/Kinflo_hero_kinship_workflows_af05fdad.png";
+import dashboardImage from "@assets/generated_images/Laptop_showing_CRM_dashboard_9926f587.png";
+import phoneImage from "@assets/generated_images/Phone_showing_campaign_app_1bfd93e5.png";
+import devicesImage from "@assets/generated_images/Laptop_and_phone_together_b8fedbcb.png";
 
 const tenantPaths: Record<string, string> = {
   "julies-family": "/kinflo-sites/julies-family",
@@ -32,12 +35,12 @@ export default function KinfloHome() {
           </Link>
           <nav className="hidden items-center gap-6 text-sm text-slate-200 md:flex" aria-label="KinFlo navigation">
             <a href="#tenant-sites" className="transition-colors hover:text-white">Tenant sites</a>
-            <a href="#operating-layer" className="transition-colors hover:text-white">Operating layer</a>
-            <Link href="/admin/kinflo-os" className="transition-colors hover:text-white">Admin</Link>
+            <a href="#showcase" className="transition-colors hover:text-white">See the layer</a>
+            <Link href="/kinflo-demo/admin?demo=1" className="transition-colors hover:text-white">Admin demo</Link>
           </nav>
           <Button asChild size="sm" className="bg-white text-slate-950 hover:bg-slate-100">
-            <Link href="/kinflo-sites/vanguard-enterprises?demo=1#top">
-              Open demo <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
+            <Link href="/kinflo-demo/admin?demo=1">
+              Open admin demo <ArrowRight className="ml-2 h-4 w-4" aria-hidden="true" />
             </Link>
           </Button>
         </div>
@@ -66,7 +69,7 @@ export default function KinfloHome() {
                 <a href="#tenant-sites">Explore tenant sites <ArrowRight className="ml-2 h-5 w-5" aria-hidden="true" /></a>
               </Button>
               <Button asChild size="lg" variant="outline" className="border-white/30 bg-white/5 text-white hover:bg-white/10 hover:text-white">
-                <Link href="/kinflo-sites/vanguard-enterprises?demo=1#top">View the neutral demo</Link>
+                <Link href="/kinflo-sites/vanguard-enterprises?demo=1#top">View the public demo</Link>
               </Button>
             </div>
           </div>
@@ -110,6 +113,39 @@ export default function KinfloHome() {
         </div>
       </section>
 
+      <section id="showcase" className="border-b border-slate-200 bg-slate-50 py-20 text-slate-950 dark:border-white/10 dark:bg-slate-900 dark:text-white sm:py-28">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">See the layer</p>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-5xl">The website is only the front door.</h2>
+              <p className="mt-5 text-lg leading-8 text-slate-600 dark:text-slate-300">Show a prospective client how a public site, an intake journey, and an operating workspace fit together before discussing live connections.</p>
+            </div>
+            <Button asChild size="lg" className="shrink-0 bg-slate-950 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200">
+              <Link href="/kinflo-demo/admin?demo=1"><Monitor className="mr-2 h-5 w-5" aria-hidden="true" /> Open the admin demo</Link>
+            </Button>
+          </div>
+          <div className="mt-12 grid gap-5 lg:grid-cols-3">
+            {[
+              { image: dashboardImage, label: "Operating workspace", title: "A control plane for the work behind the site.", body: "Review tenants, sites, launch gates, and relationship context in one read-only surface." },
+              { image: phoneImage, label: "Audience journeys", title: "A clear next step on every screen.", body: "Show how a visitor moves from interest to request without losing the story that brought them there." },
+              { image: devicesImage, label: "Tenant-ready delivery", title: "One platform, many front doors.", body: "Switch from a public tenant experience to the operating layer while keeping scope visible." },
+            ].map((item) => (
+              <figure key={item.label} className="overflow-hidden border border-slate-200 bg-white shadow-sm dark:border-white/10 dark:bg-slate-950/60">
+                <div className="aspect-[4/3] overflow-hidden bg-slate-100 dark:bg-slate-800">
+                  <img src={item.image} alt="" className="h-full w-full object-cover" />
+                </div>
+                <figcaption className="p-6">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-300">{item.label}</p>
+                  <h3 className="mt-3 text-xl font-semibold">{item.title}</h3>
+                  <p className="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">{item.body}</p>
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section id="operating-layer" className="bg-slate-950 py-20 sm:py-28">
         <div className="mx-auto grid max-w-7xl gap-12 px-5 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
           <div>
@@ -137,7 +173,10 @@ export default function KinfloHome() {
       <footer className="border-t border-white/10 bg-slate-950 px-5 py-8 text-sm text-slate-400 sm:px-8">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <span>KinFlo · A multitenant web and relationship platform</span>
-          <Link href="/admin/kinflo-os" className="text-slate-200 hover:text-white">Open KinFlo admin</Link>
+          <div className="flex flex-wrap items-center gap-4">
+            <Link href="/kinflo-demo/admin?demo=1" className="text-slate-200 hover:text-white">Open admin demo</Link>
+            <Link href="/admin/kinflo-os" className="text-slate-500 hover:text-white">Live admin sign-in</Link>
+          </div>
         </div>
       </footer>
     </main>

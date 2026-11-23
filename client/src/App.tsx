@@ -51,6 +51,7 @@ function RoutedApplication() {
     || location === "/kinflo"
     || location === "/admin/kinflo-os"
     || location === "/kinflo-sites/vanguard-enterprises/orders"
+    || location === "/kinflo-demo/admin"
   ) {
     return <Router />;
   }
@@ -103,6 +104,7 @@ import KinfloAdminRoute from "@/components/KinfloAdminRoute";
 import AppointmentScheduling from "@/pages/AppointmentScheduling";
 import ProductLanding from "@/pages/ProductLanding";
 import KinfloPublicSitePreview from "@/pages/KinfloPublicSitePreview";
+import KinfloDemoAdmin from "@/pages/KinfloDemoAdmin";
 import VanguardOrderPortal from "@/pages/VanguardOrderPortal";
 import ImageComparison from "@/pages/ImageComparison";
 import TechGoesHomeLanding from "@/pages/TechGoesHomeLanding";
@@ -163,6 +165,7 @@ function Router() {
           <AdminKinfloShell />
         </KinfloAdminRoute>
       </Route>
+      <Route path="/kinflo-demo/admin" component={KinfloDemoAdmin} />
       <Route path="/admin/preferences" component={AdminPreferences} />
       <Route path="/schedule" component={AppointmentScheduling} />
       <Route path="/product" component={ProductLanding} />
