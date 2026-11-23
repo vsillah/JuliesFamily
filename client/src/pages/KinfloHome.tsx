@@ -1,11 +1,8 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { ArrowRight, ArrowUpRight, CheckCircle2, Layers3, Monitor, ShieldCheck, Sparkles } from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { Link } from "wouter";
 import { listKinfloPublicSitePreviews } from "@/lib/kinfloPublicSitePreview";
 import flowImage from "@assets/generated_images/Kinflo_hero_kinship_workflows_af05fdad.png";
-import dashboardImage from "@assets/generated_images/Laptop_showing_CRM_dashboard_9926f587.png";
-import phoneImage from "@assets/generated_images/Phone_showing_campaign_app_1bfd93e5.png";
-import devicesImage from "@assets/generated_images/Laptop_and_phone_together_b8fedbcb.png";
 import learningDoorImage from "@assets/generated_images/Hero_education_classroom_scene_8eef647c.png";
 import advisorDoorImage from "@assets/generated_images/Professional_partnership_collaboration_meeting_f14bd523.png";
 import industrialDoorImage from "@assets/generated_images/Vanguard_industrial_welding_fabrication_hero.png";
@@ -28,7 +25,7 @@ const tenantRoles: Record<string, string> = {
   "campaign-microsite": "Campaign and outreach site",
 };
 
-// Each tenant's own hero photograph doubles as its "front door" on the platform home.
+// Each tenant's own hero photograph is the texture of its front door on the platform home.
 const tenantDoors: Record<string, { image: string; position: string }> = {
   "julies-family": { image: learningDoorImage, position: "50% 50%" },
   "advisor-client-site": { image: advisorDoorImage, position: "32% 50%" },
@@ -40,79 +37,101 @@ const fallbackDoor = { image: flowImage, position: "50% 70%" };
 
 const focusRing =
   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400";
-
-const ctaBase = `inline-flex h-12 items-center justify-center gap-2 px-5 text-sm font-semibold transition-colors duration-200 ${focusRing}`;
+const ctaBase = `inline-flex h-12 items-center justify-center gap-2 rounded-full px-6 text-sm font-semibold transition-colors duration-200 ${focusRing}`;
 const ctaAmber = `${ctaBase} bg-amber-300 text-stone-950 hover:bg-amber-200`;
-const ctaGhostOnDark = `${ctaBase} border border-white/25 text-white hover:border-white hover:bg-white/5`;
+const ctaGhost = `${ctaBase} border border-white/25 text-white hover:border-white hover:bg-white/5`;
+const mono = "font-mono text-[10px] font-medium uppercase tracking-[0.2em]";
 
-const eyebrow = "flex items-center gap-3 font-mono text-[11px] font-medium uppercase tracking-[0.22em]";
+const grainUrl =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E\")";
 
-const homeMotionCss = `
-@keyframes kinflo-home-flow { to { stroke-dashoffset: -44; } }
-@keyframes kinflo-home-rise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes kinflo-home-pulse { from { stroke-dashoffset: 16; } to { stroke-dashoffset: -100; } }
-@keyframes kinflo-home-arrive { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-.kinflo-home-flow { animation: kinflo-home-flow 2.6s linear infinite; }
-.kinflo-home-rise { animation: kinflo-home-rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
-/* Hero: one request leaves the active door and lands on the operating layer. */
-.kinflo-home-pulse { stroke-dashoffset: 16; animation: kinflo-home-pulse 1.5s cubic-bezier(0.45, 0, 0.2, 1) 0.15s forwards; }
-.kinflo-home-arrive { transform-origin: left; animation: kinflo-home-arrive 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) 1.3s backwards; }
+const homeCss = `
+/* Uses the translate property so it never fights the transforms that position doors and outputs. */
+@keyframes kf-rise { from { opacity: 0; translate: 0 18px; } to { opacity: 1; translate: 0 0; } }
+@keyframes kf-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes kf-breathe { 0%, 100% { opacity: 0.7; transform: scale(1); } 50% { opacity: 1; transform: scale(1.07); } }
+@keyframes kf-flow { to { stroke-dashoffset: -44; } }
+.kf-rise { animation: kf-rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) backwards; }
+.kf-draw { stroke-dasharray: 1; animation: kf-draw 1.8s cubic-bezier(0.45, 0, 0.2, 1) backwards; }
+.kf-breathe { transform-box: fill-box; transform-origin: center; animation: kf-breathe 6s ease-in-out infinite; }
+.kf-flow { animation: kf-flow 2.6s linear infinite; }
 /* Pointer depth (--mx / --my) and scroll drift (--p) are written by useHomeMotion. */
-.kinflo-home-depth {
+.kf-depth {
   transform: translate3d(calc(var(--mx, 0) * var(--d, 0) * 1px), calc(var(--my, 0) * var(--d, 0) * 1px), 0);
   transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
-.kinflo-home-drift { transform: translate3d(0, calc((var(--p, 0.5) - 0.5) * var(--d, 0) * 1px), 0); }
-.kinflo-home-thread { transform-origin: top; transform: scaleY(clamp(0, calc(var(--p, 1) * 2 - 0.3), 1)); }
-/* Request trail: a pinned scene whose progress (--t) is the scroll position. */
-.kinflo-home-pin { height: 240vh; }
-.kinflo-home-pin-inner { position: sticky; top: 0; height: 100vh; height: 100svh; }
-.kinflo-home-trace-fill { transform-origin: left; transform: scaleX(var(--t, 1)); }
-.kinflo-home-token { left: calc(var(--t, 1) * 100%); }
-@media (min-width: 1024px) { .kinflo-home-pin { height: 280vh; } }
+.kf-drift { transform: translate3d(0, calc((var(--p, 0.5) - 0.5) * var(--d, 0) * 1px), 0); }
+.kf-move {
+  transition: transform 1s cubic-bezier(0.2, 0.7, 0.2, 1), opacity 0.7s ease, left 1s cubic-bezier(0.2, 0.7, 0.2, 1),
+    top 1s cubic-bezier(0.2, 0.7, 0.2, 1), stroke-dashoffset 1.4s cubic-bezier(0.45, 0, 0.2, 1), max-height 0.7s ease;
+}
+.kf-grain::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  background-image: ${grainUrl}; opacity: 0.16; mix-blend-mode: overlay;
+}
+/* The film: a pinned scene whose progress (--t) is the scroll position. */
+.kf-pin { height: 440vh; }
+.kf-pin-inner { position: sticky; top: 0; height: 100vh; height: 100svh; }
+.kf-thread { transform-origin: top; transform: scaleY(var(--t, 1)); }
 @media (prefers-reduced-motion: reduce) {
-  .kinflo-home-flow, .kinflo-home-rise, .kinflo-home-pulse, .kinflo-home-arrive { animation: none; }
-  .kinflo-home-pulse { stroke-dashoffset: 16; }
-  .kinflo-home-depth, .kinflo-home-drift { transform: none; transition: none; }
-  .kinflo-home-thread { transform: none; }
-  .kinflo-home-pin { height: auto; }
-  .kinflo-home-pin-inner { position: static; height: auto; }
+  .kf-rise, .kf-draw, .kf-breathe, .kf-flow { animation: none; }
+  .kf-draw { stroke-dashoffset: 0; }
+  .kf-depth, .kf-drift { transform: none; transition: none; }
+  .kf-move { transition: none; }
+  .kf-pin { height: auto; }
+  .kf-pin-inner { position: static; height: auto; }
 }
 `;
 
 const cssVars = (vars: Record<string, string | number>) => vars as CSSProperties;
-
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
 
-// The request trail is illustrative copy about how a request moves. It reads no tenant data.
-const trailStages = [
-  { label: "Front door", title: "A visitor asks at one door.", body: "The request starts on a tenant's own public route, in that tenant's voice.", field: "Origin", value: "Tenant public route" },
-  { label: "Request", title: "The ask becomes a record.", body: "Intake turns interest into a structured request with its source page attached.", field: "Request", value: "Structured intake, source kept" },
-  { label: "Scope", title: "It stays inside its tenant.", body: "Tenant, site, and relationship context travel with the request from here on.", field: "Scope", value: "Tenant, site, relationship" },
-  { label: "Review", title: "A person reviews it.", body: "Gates and evidence sit beside the request, so the decision can be seen and explained.", field: "Review", value: "Human gate, evidence attached" },
-  { label: "Next action", title: "It leaves with an owner.", body: "The trail ends as a named next step in the operating workspace.", field: "Next action", value: "Owner and follow-up set" },
+// The film is illustrative copy about what KinFlo does behind a front door. It reads no tenant data.
+const filmStages = [
+  { verb: "Shape", title: "Shape the front door.", body: "Each tenant gets a public experience built for its audience, with its own content, navigation, theme, and route." },
+  { verb: "Observe", title: "See how people move through it.", body: "Visits, paths, and requests are read as signals, tied to the door and the page they came from." },
+  { verb: "Test", title: "Test a variant against it.", body: "Run two versions of an experience side by side and let behavior show which one earns the next step." },
+  { verb: "Capture", title: "Keep the relationship.", body: "A request becomes a contact record that carries its source, its variant, and its tenant scope." },
+  { verb: "Operate", title: "Run the follow-through.", body: "A person reviews it with the evidence beside it, and it leaves with an owner and a next action." },
+];
+const LAST_STAGE = filmStages.length - 1;
+
+const recordRows = [
+  { k: "Relationship", v: "Visitor → contact", at: 3 },
+  { k: "Source", v: "Door · page · variant B", at: 3 },
+  { k: "Scope", v: "Tenant · site", at: 3 },
+  { k: "Gate", v: "Human review", at: 4 },
+  { k: "Owner", v: "Assigned", at: 4 },
+  { k: "Next action", v: "Follow-up set", at: 4 },
 ];
 
-const LAST_STAGE = trailStages.length - 1;
+const boundaries = [
+  { title: "Tenant-specific presentation", body: "Each organization keeps its own content, navigation, theme, and public route." },
+  { title: "Scoped by design", body: "Tenant, site, identity, and operating boundaries stay visible as the platform grows." },
+  { title: "Evidence beside decisions", body: "Signals, variants, and review notes sit next to the request they explain." },
+  { title: "Ready for review", body: "Preview an experience safely before anything is published or connected to live operations." },
+];
 
 /**
  * One motion driver for the page.
- * - Scroll: every [data-kinflo-scene] gets --p (0..1) as it crosses the viewport; the pinned
- *   request trail also gets --t and reports the stage it has reached.
+ * - Scroll: every [data-kinflo-scene] gets --p (0..1) as it crosses the viewport; the pinned film
+ *   gets --t and reports the stage it has reached.
  * - Pointer: the hero gets --mx / --my (-1..1) from a mouse pointer.
- * - Reduced motion: no pointer depth, no pin; the trail renders complete.
- * - QA: ?s=<0..1> holds the trail at a fixed progress so a state can be reproduced.
+ * - Reduced motion: no pointer depth, no pin; the film renders its settled final state.
+ * - QA: ?s=<0..1> holds the film at a fixed progress so a state can be reproduced.
  */
 function useHomeMotion() {
   const rootRef = useRef<HTMLElement>(null);
   const [stage, setStage] = useState(0);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [portrait, setPortrait] = useState(false);
 
   useEffect(() => {
     const root = rootRef.current;
     if (!root || typeof window === "undefined") return;
 
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const narrow = window.matchMedia("(max-width: 639px)");
     const forcedParam = new URLSearchParams(window.location.search).get("s");
     const forcedNumber = forcedParam === null || forcedParam === "" ? Number.NaN : Number(forcedParam);
     const forced = Number.isFinite(forcedNumber) ? clamp01(forcedNumber) : null;
@@ -127,93 +146,66 @@ function useHomeMotion() {
         const rect = scene.getBoundingClientRect();
         if (scene.dataset.kinfloScene === "pin") {
           const raw = media.matches ? 1 : forced ?? clamp01(-rect.top / Math.max(rect.height - viewport, 1));
-          // Finish the trail at 86% of the pin so the settled record holds before release.
-          const trail = clamp01(raw / 0.86);
-          scene.style.setProperty("--t", trail.toFixed(4));
-          setStage(Math.min(LAST_STAGE, Math.floor(trail * LAST_STAGE + 0.04)));
+          // Finish at 90% of the pin so the settled record holds before release.
+          const film = clamp01(raw / 0.9);
+          scene.style.setProperty("--t", film.toFixed(4));
+          setStage(Math.min(LAST_STAGE, Math.floor(film * filmStages.length)));
         } else {
           scene.style.setProperty("--p", clamp01((viewport - rect.top) / (viewport + rect.height)).toFixed(4));
         }
       }
     };
-
     const schedule = () => {
       if (!frame) frame = window.requestAnimationFrame(measure);
     };
-
-    const onPointerMove = (event: PointerEvent) => {
-      if (!hero || event.pointerType !== "mouse" || media.matches) return;
+    const onPointer = (event: PointerEvent) => {
+      if (!hero || media.matches || event.pointerType !== "mouse") return;
       const rect = hero.getBoundingClientRect();
-      hero.style.setProperty("--mx", (((event.clientX - rect.left) / Math.max(rect.width, 1) - 0.5) * 2).toFixed(3));
-      hero.style.setProperty("--my", (((event.clientY - rect.top) / Math.max(rect.height, 1) - 0.5) * 2).toFixed(3));
+      hero.style.setProperty("--mx", (((event.clientX - rect.left) / rect.width) * 2 - 1).toFixed(3));
+      hero.style.setProperty("--my", (((event.clientY - rect.top) / rect.height) * 2 - 1).toFixed(3));
     };
-
-    const onPointerLeave = () => {
-      hero?.style.setProperty("--mx", "0");
-      hero?.style.setProperty("--my", "0");
-    };
-
-    const onMotionPreference = () => {
+    const onMedia = () => {
       setReducedMotion(media.matches);
-      if (media.matches) onPointerLeave();
+      setPortrait(narrow.matches);
       schedule();
     };
 
-    setReducedMotion(media.matches);
+    onMedia();
     measure();
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", schedule);
-    media.addEventListener("change", onMotionPreference);
-    hero?.addEventListener("pointermove", onPointerMove);
-    hero?.addEventListener("pointerleave", onPointerLeave);
-
+    hero?.addEventListener("pointermove", onPointer);
+    media.addEventListener("change", onMedia);
+    narrow.addEventListener("change", onMedia);
     return () => {
       if (frame) window.cancelAnimationFrame(frame);
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
-      media.removeEventListener("change", onMotionPreference);
-      hero?.removeEventListener("pointermove", onPointerMove);
-      hero?.removeEventListener("pointerleave", onPointerLeave);
+      hero?.removeEventListener("pointermove", onPointer);
+      media.removeEventListener("change", onMedia);
+      narrow.removeEventListener("change", onMedia);
     };
   }, []);
 
-  return { rootRef, stage, reducedMotion };
+  return { rootRef, stage, reducedMotion, portrait };
 }
 
-/**
- * Hero beat: after a quiet hold, one front door at a time sends a request down its trace.
- * Hovering or focusing a door takes over; reduced motion leaves every trace at rest.
- */
+/** The hero follows one front door at a time. Hover or focus holds a door; reduced motion holds the first. */
 function useActiveDoor(doorCount: number, reducedMotion: boolean) {
-  const [activeDoor, setActiveDoor] = useState<number | null>(null);
+  const [activeDoor, setActiveDoor] = useState(0);
   const [held, setHeld] = useState(false);
 
   useEffect(() => {
-    if (reducedMotion) {
-      setActiveDoor(null);
-      return;
-    }
-    if (held || doorCount < 1) return;
-    const advance = () => setActiveDoor((current) => (current === null ? 0 : (current + 1) % doorCount));
-    let interval = 0;
-    const start = window.setTimeout(() => {
-      advance();
-      interval = window.setInterval(advance, 3600);
-    }, 1800);
-    return () => {
-      window.clearTimeout(start);
-      if (interval) window.clearInterval(interval);
-    };
+    if (reducedMotion || held || doorCount < 2) return;
+    const interval = window.setInterval(() => setActiveDoor((current) => (current + 1) % doorCount), 4200);
+    return () => window.clearInterval(interval);
   }, [doorCount, held, reducedMotion]);
 
   const hold = (index: number) => {
-    if (reducedMotion) return;
     setHeld(true);
     setActiveDoor(index);
   };
-  const release = () => setHeld(false);
-
-  return { activeDoor, hold, release };
+  return { activeDoor, hold, release: () => setHeld(false) };
 }
 
 function KinfloMark({ className }: { className?: string }) {
@@ -230,524 +222,426 @@ function KinfloMark({ className }: { className?: string }) {
   );
 }
 
-const showcaseNotes = [
-  { label: "Operating workspace", title: "A control plane for the work behind the site.", body: "Review tenants, sites, launch gates, and relationship context in one read-only surface." },
-  { label: "Audience journeys", title: "A clear next step on every screen.", body: "Show how a visitor moves from interest to request without losing the story that brought them there." },
-];
+type TenantSite = ReturnType<typeof listKinfloPublicSitePreviews>[number];
+type Pt = readonly [number, number];
 
-const layerPrinciples = [
-  { icon: Layers3, title: "Tenant-specific presentation", body: "Each organization gets its own content, navigation, theme, and public route." },
-  { icon: Sparkles, title: "Structured journeys", body: "Turn interest into a clear next step without losing the context that brought someone there." },
-  { icon: ShieldCheck, title: "Scoped by design", body: "Keep tenant, site, identity, and operating boundaries visible as the platform grows." },
-  { icon: CheckCircle2, title: "Ready for review", body: "Preview experiences safely before anything is published or connected to live operations." },
+const doorLanes = [-0.78, -0.26, 0.26, 0.78];
+const outLanes = [-0.62, 0, 0.62];
+const outputs = [
+  { title: "Analytics", note: "door · page · variant" },
+  { title: "Relationship", note: "contact, scoped" },
+  { title: "Next action", note: "owner, follow-up" },
 ];
+// Twelve signals: which door they leave, which variant they see, where they resolve.
+const signals = Array.from({ length: 12 }, (_, n) => ({ door: n % 4, branch: (n * 3 + (n >> 2)) % 2, out: (n * 5 + 1) % 3, dur: 8 + (n % 3) * 1.3, begin: -(n * 0.83) }));
+
+/**
+ * The hero instrument. Positions are authored along the flow (u: 0..1) and across it (v: -1..1),
+ * then mapped left-to-right on wide screens and top-to-bottom on narrow ones, so the same system
+ * recomposes instead of shrinking. Illustrative only: it reads no tenant data.
+ */
+function systemGeometry(portrait: boolean) {
+  const W = portrait ? 400 : 1000;
+  const H = portrait ? 640 : 600;
+  const at = ([u, v]: Pt): Pt => (portrait ? [200 + v * 170, 30 + u * 580] : [24 + u * 890, 312 + v * 250]);
+  const xy = (point: Pt) => at(point).map((n) => n.toFixed(1)).join(" ");
+  const seg = (from: Pt, to: Pt) => {
+    const mid = (from[0] + to[0]) / 2;
+    return `C ${xy([mid, from[1]])} ${xy([mid, to[1]])} ${xy(to)}`;
+  };
+  const pct = (point: Pt) => {
+    const [x, y] = at(point);
+    return { left: `${(x / W) * 100}%`, top: `${(y / H) * 100}%` };
+  };
+  const u = portrait
+    ? { door: 0.1, start: 0.185, meet: 0.4, fork: 0.52, lens: 0.66, out: 0.86 }
+    : { door: 0.07, start: 0.118, meet: 0.36, fork: 0.48, lens: 0.62, out: 0.845 };
+  const meet: Pt = [u.meet, 0];
+  const lens: Pt = [u.lens, 0];
+  const forks: Pt[] = [[u.fork, -0.34], [u.fork, 0.34]];
+  const starts: Pt[] = doorLanes.map((v) => [u.start, v]);
+  const outs: Pt[] = outLanes.map((v) => [u.out, v]);
+  return {
+    W, H, at, pct, u, forks, outs,
+    lens: at(lens),
+    doorPaths: starts.map((start) => `M ${xy(start)} ${seg(start, meet)}`),
+    forkPaths: forks.map((fork) => `M ${xy(meet)} ${seg(meet, fork)} ${seg(fork, lens)}`),
+    outPaths: outs.map((out) => `M ${xy(lens)} ${seg(lens, out)}`),
+    signalPath: (door: number, branch: number, out: number) =>
+      `M ${xy(starts[door])} ${seg(starts[door], meet)} ${seg(meet, forks[branch])} ${seg(forks[branch], lens)} ${seg(lens, outs[out])}`,
+  };
+}
+
+function LivingSystem({ sites, activeDoor, hold, release, portrait, reducedMotion }: {
+  sites: TenantSite[]; activeDoor: number; hold: (index: number) => void; release: () => void; portrait: boolean; reducedMotion: boolean;
+}) {
+  const g = useMemo(() => systemGeometry(portrait), [portrait]);
+  const doors = sites.slice(0, doorLanes.length);
+  const label = (x: number, y: number) => ({ left: `${(x / g.W) * 100}%`, top: `${(y / g.H) * 100}%` });
+  const stations = portrait
+    ? [{ text: "Front doors", ...label(14, 14) }, { text: "Audience signals", ...label(14, 196) }, { text: "Experiment", ...label(14, 336) }, { text: "Operating layer", ...label(14, 384) }]
+    : [{ text: "Front doors", ...label(40, 16) }, { text: "Audience signals", ...label(190, 16) }, { text: "Experiment", ...label(410, 16) }, { text: "KinFlo operating layer", ...label(480, 584) }, { text: "What you operate", ...label(776, 16) }];
+
+  return (
+    <div className="relative w-full" style={{ aspectRatio: `${g.W} / ${g.H}` }} data-testid="kinflo-home-system">
+      <svg viewBox={`0 0 ${g.W} ${g.H}`} className="absolute inset-0 h-full w-full overflow-visible" fill="none" aria-hidden="true">
+        <defs>
+          <radialGradient id="kf-lens" cx="50%" cy="50%" r="50%">
+            <stop offset="0" stopColor="#fde68a" stopOpacity="0.95" />
+            <stop offset="0.45" stopColor="#f59e0b" stopOpacity="0.5" />
+            <stop offset="1" stopColor="#2dd4bf" stopOpacity="0" />
+          </radialGradient>
+          <filter id="kf-glow" x="-200%" y="-200%" width="500%" height="500%"><feGaussianBlur stdDeviation="14" /></filter>
+        </defs>
+        {g.doorPaths.map((d, index) => (
+          <path key={d} d={d} pathLength={1} className="kf-draw" strokeWidth={index === activeDoor ? 1.6 : 1} stroke={index === activeDoor ? "#fcd34d" : "rgba(255,255,255,0.2)"} style={{ animationDelay: `${0.3 + index * 0.12}s`, transition: "stroke 0.6s ease" }} />
+        ))}
+        {g.forkPaths.map((d, index) => (
+          <path key={d} d={d} pathLength={1} className="kf-draw" strokeWidth={1.2} stroke={index === 0 ? "rgba(252,211,77,0.55)" : "rgba(94,234,212,0.6)"} style={{ animationDelay: "1s" }} />
+        ))}
+        {g.outPaths.map((d, index) => (
+          <path key={d} d={d} pathLength={1} className="kf-draw" strokeWidth={1.2} stroke="rgba(255,255,255,0.3)" style={{ animationDelay: `${1.7 + index * 0.1}s` }} />
+        ))}
+        {/* The operating layer: every current passes through one membrane. */}
+        <g className="kf-breathe">
+          <ellipse cx={g.lens[0]} cy={g.lens[1]} rx={portrait ? 168 : 46} ry={portrait ? 40 : 250} fill="url(#kf-lens)" filter="url(#kf-glow)" opacity="0.55" />
+          <ellipse cx={g.lens[0]} cy={g.lens[1]} rx={portrait ? 150 : 7} ry={portrait ? 6 : 226} fill="url(#kf-lens)" />
+        </g>
+        <ellipse cx={g.lens[0]} cy={g.lens[1]} rx={portrait ? 158 : 14} ry={portrait ? 13 : 236} stroke="rgba(253,230,138,0.45)" strokeWidth="1" />
+        {[g.at([g.u.meet, 0]), ...g.outs.map(g.at)].map(([x, y]) => (
+          <circle key={`${x}-${y}`} cx={x} cy={y} r="3.5" fill="#0c0a09" stroke="rgba(255,255,255,0.6)" strokeWidth="1.2" />
+        ))}
+        {g.forks.map((fork, index) => {
+          const [x, y] = g.at(fork);
+          return (
+            <g key={index}>
+              <circle cx={x} cy={y} r="11" fill="#0c0a09" stroke={index === 0 ? "#fcd34d" : "#5eead4"} strokeWidth="1.2" />
+              <text x={x} y={y + 3.6} textAnchor="middle" fontSize="10" fontFamily="ui-monospace, monospace" fill={index === 0 ? "#fcd34d" : "#5eead4"}>{index === 0 ? "A" : "B"}</text>
+            </g>
+          );
+        })}
+        {!reducedMotion && signals.map((signal, n) => {
+          const live = signal.door === activeDoor;
+          return (
+            <circle key={`${portrait}-${n}`} r={live ? 4 : 2.6} fill={live ? "#fcd34d" : "rgba(255,255,255,0.6)"} style={{ transition: "fill 0.6s ease" }}>
+              <animateMotion dur={`${signal.dur}s`} begin={`${signal.begin}s`} repeatCount="indefinite" path={g.signalPath(signal.door, signal.branch, signal.out)} />
+              <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.06;0.92;1" dur={`${signal.dur}s`} begin={`${signal.begin}s`} repeatCount="indefinite" />
+            </circle>
+          );
+        })}
+      </svg>
+
+      {stations.map((station) => (
+        <span key={station.text} className={`absolute whitespace-nowrap text-stone-400 ${mono}`} style={{ left: station.left, top: station.top }}>{station.text}</span>
+      ))}
+
+      {doors.map((site, index) => {
+        const door = tenantDoors[site.slug] ?? fallbackDoor;
+        const active = index === activeDoor;
+        return (
+          <Link
+            key={site.slug}
+            href={tenantPaths[site.slug] ?? `/kinflo-sites/${site.slug}`}
+            aria-label={`${site.name}: ${tenantRoles[site.slug] ?? "Tenant site"}. Open this front door.`}
+            onMouseEnter={() => hold(index)}
+            onMouseLeave={release}
+            onFocus={() => hold(index)}
+            onBlur={release}
+            className={`kf-rise absolute block -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-t-full rounded-b-md ring-1 transition-[box-shadow,filter] duration-500 ${focusRing} ${active ? "shadow-[0_0_44px_-6px_rgba(252,211,77,0.75)] ring-amber-300" : "ring-white/25 saturate-[0.6]"}`}
+            style={{ ...g.pct([g.u.door, doorLanes[index]]), width: portrait ? "17%" : "8.4%", aspectRatio: "3 / 4", animationDelay: `${index * 0.12}s` }}
+          >
+            <span className="absolute inset-0 bg-cover" style={{ backgroundImage: `url(${door.image})`, backgroundPosition: door.position }} />
+            <span className={`absolute inset-0 bg-stone-950 transition-opacity duration-500 ${active ? "opacity-10" : "opacity-45"}`} />
+          </Link>
+        );
+      })}
+
+      {outputs.map((output, index) => (
+        <Link
+          key={output.title}
+          href={ADMIN_DEMO_PATH}
+          aria-label={`${output.title}: ${output.note}. Open the admin demo.`}
+          className={`kf-rise group absolute block whitespace-nowrap ${portrait ? "-translate-x-1/2 text-center" : "-translate-y-1/2"} ${focusRing}`}
+          style={{ ...g.pct([g.u.out + (portrait ? 0.035 : 0.022), outLanes[index]]), animationDelay: `${2 + index * 0.12}s` }}
+        >
+          <span className="block font-serif text-base leading-tight text-white transition-colors group-hover:text-amber-200 sm:text-xl">{output.title}</span>
+          <span className="mt-1 block font-mono text-[10px] text-stone-400">{output.note}</span>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+/** The film's specimen: one front door that is shaped, observed, tested, captured, and operated. */
+function FilmStage({ stage }: { stage: number }) {
+  const plateA = [{ l: 30, t: 3, s: 1.08, r: 0 }, { l: 5, t: 8, s: 1, r: 22 }, { l: 6, t: 6, s: 1, r: 0 }, { l: 0, t: 8, s: 0.6, r: 0 }, { l: 0, t: 8, s: 0.6, r: 0 }][stage];
+  const plateB = [{ l: 30, t: 3, s: 0.94, o: 0 }, { l: 5, t: 8, s: 0.94, o: 0 }, { l: 54, t: 6, s: 1, o: 1 }, { l: 17, t: 22, s: 0.6, o: 1 }, { l: 17, t: 22, s: 0.6, o: 1 }][stage];
+  const show = (visible: boolean): CSSProperties => ({ opacity: visible ? 1 : 0, transform: visible ? "none" : "translateY(14px)" });
+  const plate = "kf-move absolute w-[38%] origin-top-left rounded-t-full rounded-b-xl bg-[#f5f1e8] p-[3%] shadow-2xl shadow-black/70";
+  const badge = "kf-move absolute right-0 top-0 flex h-6 w-6 items-center justify-center rounded-full bg-stone-950 font-mono text-[11px] ring-1";
+
+  return (
+    <div className="relative aspect-[5/4] w-full" aria-hidden="true">
+      <div className="pointer-events-none absolute -inset-[12%] rounded-full bg-[radial-gradient(closest-side,rgba(245,158,11,0.16),transparent)]" />
+
+      {/* Variant B waits behind A until the experiment begins. */}
+      <div className={plate} style={{ left: `${plateB.l}%`, top: `${plateB.t}%`, opacity: plateB.o, transform: `scale(${plateB.s})` }}>
+        <div className="h-[14px] w-full rounded-full bg-teal-500" />
+        <div className="mt-[8%] aspect-square rounded-t-full rounded-b-md bg-cover" style={{ backgroundImage: `url(${industrialDoorImage})`, backgroundPosition: "30% 50%" }} />
+        <div className="mt-[8%] h-[5px] w-2/3 rounded-full bg-stone-900/80" />
+        <div className="mt-[5%] h-[4px] w-5/6 rounded-full bg-stone-900/30" />
+        <span className={`${badge} text-teal-300 ring-teal-300`}>B</span>
+      </div>
+
+      <div className={plate} style={{ left: `${plateA.l}%`, top: `${plateA.t}%`, transform: `perspective(900px) rotateY(${plateA.r}deg) scale(${plateA.s})` }}>
+        <div className="aspect-[4/5] rounded-t-full rounded-b-md bg-cover" style={{ backgroundImage: `url(${industrialDoorImage})`, backgroundPosition: "76% 50%" }} />
+        <div className="mt-[8%] h-[5px] w-3/4 rounded-full bg-stone-900/80" />
+        <div className="mt-[5%] h-[4px] w-1/2 rounded-full bg-stone-900/30" />
+        <div className="mt-[7%] h-[12px] w-2/5 rounded-full bg-amber-400" />
+        <span className={`${badge} text-amber-300 ring-amber-300`} style={{ opacity: stage >= 2 ? 1 : 0 }}>A</span>
+      </div>
+
+      {/* Shape: what a tenant controls about its own door. */}
+      <div className={`kf-move absolute left-[74%] top-[18%] space-y-3 text-stone-400 ${mono}`} style={show(stage === 0)}>
+        {["Content", "Navigation", "Theme", "Route"].map((item, index) => (
+          <div key={item} className="flex items-center gap-2.5"><span className={`h-2.5 w-2.5 rounded-full ${["bg-amber-300", "bg-teal-300", "bg-stone-200", "bg-orange-400"][index]}`} />{item}</div>
+        ))}
+      </div>
+
+      {/* Observe: a visitor's path leaves the page and becomes a reading. */}
+      <svg viewBox="0 0 100 80" preserveAspectRatio="none" className="kf-move absolute inset-0 h-full w-full" style={{ opacity: stage === 1 ? 1 : 0 }}>
+        <path d="M14 20 C 26 16, 30 34, 21 40 S 30 62, 36 52 S 50 30, 60 34" fill="none" stroke="#fcd34d" strokeWidth="1.6" strokeLinecap="round" vectorEffect="non-scaling-stroke" pathLength={1} className="kf-move" style={{ strokeDasharray: 1, strokeDashoffset: stage >= 1 ? 0 : 1 }} />
+      </svg>
+      {[[14, 20], [21, 40], [36, 52]].map(([x, y], index) => (
+        <span key={index} className="kf-move absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-300 shadow-[0_0_18px_rgba(252,211,77,0.9)]" style={{ left: `${x}%`, top: `${(y / 80) * 100}%`, opacity: stage === 1 ? 1 : 0, transitionDelay: `${0.3 + index * 0.25}s` }} />
+      ))}
+      <div className="kf-move absolute left-[60%] top-[26%] w-[38%]" style={show(stage === 1)}>
+        <p className={`text-stone-400 ${mono}`}>Behavior by door · illustrative</p>
+        <svg viewBox="0 0 100 40" className="mt-3 w-full overflow-visible">
+          <path d="M0 34 C 14 30, 20 12, 34 18 S 56 30, 66 14 S 88 4, 100 8" fill="none" stroke="#5eead4" strokeWidth="1.4" strokeLinecap="round" pathLength={1} className="kf-move" style={{ strokeDasharray: 1, strokeDashoffset: stage >= 1 ? 0 : 1, transitionDelay: "0.5s" }} />
+        </svg>
+        {[["Entry page", 82], ["Path depth", 58], ["Request started", 36]].map(([name, width], index) => (
+          <div key={name} className="mt-2.5 flex items-center gap-3 font-mono text-[10px] text-stone-300">
+            <span className="w-24 shrink-0 sm:w-28">{name}</span>
+            <span className="h-px flex-1 bg-white/10"><span className="kf-move block h-px origin-left bg-teal-300" style={{ width: `${width}%`, transform: `scaleX(${stage === 1 ? 1 : 0})`, transitionDelay: `${0.6 + index * 0.15}s` }} /></span>
+          </div>
+        ))}
+      </div>
+
+      {/* Test: the split between two variants. */}
+      <div className="kf-move absolute bottom-0 left-[6%] w-[86%]" style={show(stage === 2)}>
+        <div className="flex h-1.5 overflow-hidden rounded-full bg-white/10">
+          <span className="kf-move h-full bg-amber-300" style={{ width: stage === 2 ? "44%" : "50%", transition: "width 1.4s cubic-bezier(0.2,0.7,0.2,1) 0.6s" }} />
+          <span className="h-full flex-1 bg-teal-300" />
+        </div>
+        <div className={`mt-2.5 flex justify-between text-stone-400 ${mono}`}><span>Variant A</span><span className="text-teal-300">Variant B leading · illustrative</span></div>
+      </div>
+
+      {/* Capture and operate: the signal settles into a relationship record with an owner. */}
+      <span className="kf-move absolute left-[38%] top-[30%] h-px w-[9%] origin-left bg-amber-300" style={{ transform: `scaleX(${stage >= 3 ? 1 : 0})` }} />
+      <div className="kf-move absolute left-[48%] top-[6%] w-[52%]" style={show(stage >= 3)}>
+        <p className={`text-amber-300 ${mono}`}>Relationship record · demo state</p>
+        <dl className="mt-3 border-t border-white/15">
+          {recordRows.map((row, index) => (
+            <div key={row.k} className="kf-move flex items-baseline justify-between gap-2 border-b border-white/10 py-1.5 sm:py-2.5" style={{ opacity: stage >= row.at ? 1 : 0.14, transitionDelay: `${(index % 3) * 0.14}s` }}>
+              <dt className="font-mono text-[9px] uppercase tracking-[0.14em] text-stone-500 sm:text-[10px]">{row.k}</dt>
+              <dd className={`text-right font-serif text-[11px] sm:text-base ${row.at === 4 && stage >= 4 ? "text-amber-200" : "text-stone-100"}`}>{row.v}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </div>
+  );
+}
 
 export default function KinfloHome() {
   const tenantSites = listKinfloPublicSitePreviews();
-  const doorCount = Math.max(tenantSites.length, 1);
-  const { rootRef, stage, reducedMotion } = useHomeMotion();
-  const { activeDoor, hold, release } = useActiveDoor(tenantSites.length, reducedMotion);
-  const activeSite = activeDoor === null ? undefined : tenantSites[activeDoor];
-  const currentStage = trailStages[stage] ?? trailStages[0];
-  const trailDone = stage >= LAST_STAGE;
+  const { rootRef, stage, reducedMotion, portrait } = useHomeMotion();
+  const { activeDoor, hold, release } = useActiveDoor(Math.min(tenantSites.length, doorLanes.length), reducedMotion);
+  const activeSite = tenantSites[activeDoor];
+  const doorShapes = ["aspect-[3/4.6] lg:mt-24", "aspect-[3/3.7]", "aspect-[3/5] lg:mt-12", "aspect-[3/4] lg:mt-36"];
+  const doorDepth = [36, -24, 54, -40];
 
   return (
-    <main ref={rootRef} className="min-h-screen bg-stone-950 text-white antialiased" data-testid="kinflo-home">
-      <style>{homeMotionCss}</style>
+    <main ref={rootRef} className="min-h-screen overflow-x-clip bg-stone-950 text-white antialiased" data-testid="kinflo-home">
+      <style>{homeCss}</style>
 
-      <header className="absolute inset-x-0 top-0 z-20 border-b border-white/10">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
+      {/* Scene 1: the living system. */}
+      <section data-kinflo-hero className="kf-grain relative isolate overflow-hidden">
+        <div className="kf-depth pointer-events-none absolute -left-[10%] top-[-20%] -z-10 h-[90%] w-[70%] rounded-full bg-[radial-gradient(closest-side,rgba(245,158,11,0.2),transparent)]" style={cssVars({ "--d": -40 })} />
+        <div className="kf-depth pointer-events-none absolute -right-[15%] bottom-[-30%] -z-10 h-[90%] w-[70%] rounded-full bg-[radial-gradient(closest-side,rgba(45,212,191,0.13),transparent)]" style={cssVars({ "--d": 50 })} />
+
+        <header className="relative z-10 mx-auto flex max-w-[92rem] items-center justify-between gap-4 px-5 py-5 sm:px-8">
           <Link href="/" aria-label="KinFlo home" className={`inline-flex items-center gap-2.5 ${focusRing}`}>
-            <KinfloMark className="h-7 w-7 text-amber-300" />
-            <span className="text-xl font-semibold tracking-tight text-white">KinFlo</span>
+            <KinfloMark className="h-6 w-6 text-amber-300" />
+            <span className="font-serif text-xl tracking-tight">KinFlo</span>
           </Link>
-          <nav className="hidden items-center gap-8 text-sm text-stone-300 md:flex" aria-label="KinFlo navigation">
-            <a href="#tenant-sites" className="transition-colors hover:text-white">Tenant sites</a>
-            <a href="#request-trail" className="hidden transition-colors hover:text-white lg:inline">Request trail</a>
-            <a href="#showcase" className="transition-colors hover:text-white">See the layer</a>
-            <Link href={ADMIN_DEMO_PATH} className="transition-colors hover:text-white">Admin demo</Link>
+          <nav aria-label="Primary" className="hidden items-center gap-7 text-sm text-stone-300 md:flex">
+            <a href="#request-trail" className={`transition-colors hover:text-white ${focusRing}`}>What it does</a>
+            <a href="#tenant-sites" className={`transition-colors hover:text-white ${focusRing}`}>Tenant sites</a>
+            <a href="#operating-layer" className={`transition-colors hover:text-white ${focusRing}`}>Operating layer</a>
           </nav>
-          <Link
-            href={ADMIN_DEMO_PATH}
-            className={`group inline-flex h-10 items-center gap-2 bg-white px-4 text-sm font-semibold text-stone-950 transition-colors hover:bg-amber-300 ${focusRing}`}
-          >
-            Open admin demo
-            <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden="true" />
+          <Link href={ADMIN_DEMO_PATH} className={`inline-flex h-10 items-center gap-2 rounded-full border border-white/25 px-4 text-sm font-medium transition-colors hover:border-amber-300 hover:text-amber-200 ${focusRing}`}>
+            Admin demo <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
           </Link>
-        </div>
-      </header>
+        </header>
 
-      {/* Hero: many front doors flowing into one operating layer */}
-      <section data-kinflo-hero className="relative overflow-hidden border-b border-white/10">
-        {/* Twelve fine column rules: a calm, measured field for the doors to sit in. */}
-        <div
-          className="pointer-events-none absolute inset-0 [mask-image:linear-gradient(to_bottom,black,transparent_85%)]"
-          style={{ backgroundImage: "repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 1px, transparent 1px calc(100% / 12))" }}
-          aria-hidden="true"
-        />
-        <div className="relative mx-auto grid max-w-7xl gap-12 px-5 pb-16 pt-28 sm:px-8 sm:pb-20 sm:pt-32 lg:min-h-[min(100vh,880px)] lg:grid-cols-12 lg:items-center lg:gap-10 lg:pb-16">
-          <div className="lg:col-span-5">
-            <p className={`${eyebrow} text-amber-300`}>
-              <span className="h-px w-8 bg-amber-300" aria-hidden="true" />
-              Multitenant operating layer
-            </p>
-            <h1 className="mt-6 font-serif text-[2.375rem] font-medium leading-[1.02] tracking-tight text-white sm:text-6xl xl:text-7xl">
-              One platform.
-              <span className="block italic text-amber-300">Many front doors.</span>
+        <div className="relative z-10 mx-auto grid max-w-[92rem] items-center gap-8 px-5 pb-20 pt-6 sm:px-8 lg:gap-6 lg:pt-8 xl:min-h-[calc(100svh-5rem)] xl:grid-cols-[minmax(0,5fr)_minmax(0,8fr)] xl:pb-24 xl:pt-0">
+          <div className="kf-rise max-w-2xl">
+            <p className={`text-amber-300 ${mono}`}>CRM · Analytics · Experiments · Experience engine</p>
+            <h1 className="mt-5 font-serif text-[2.6rem] font-medium leading-[1.02] tracking-tight sm:text-6xl xl:text-[4.2rem]">
+              Behind every front door, <em className="text-amber-200">one system</em> doing the work.
             </h1>
-            <p className="mt-6 max-w-md text-base leading-7 text-stone-300 sm:text-lg sm:leading-8">
-              KinFlo runs each organization&rsquo;s public site, relationship journeys, and operating workspace from one shared layer. Every tenant keeps its own story, style, and scope.
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-stone-300 sm:text-lg">
+              KinFlo shapes each tenant's public experience, reads how people move through it, tests what works, keeps the relationship, and runs the follow-through. Many doors. One scoped operating layer.
             </p>
-            <div className="mt-8 flex gap-3">
-              <Link href={ADMIN_DEMO_PATH} className={`group flex-1 whitespace-nowrap !px-3 text-[13px] sm:flex-none sm:!px-5 sm:text-sm ${ctaAmber}`}>
-                <Monitor className="hidden h-4 w-4 sm:block" aria-hidden="true" />
-                Open admin demo
-                <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden="true" />
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link href={ADMIN_DEMO_PATH} className={`group ${ctaAmber}`}>
+                Open the admin demo <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
               </Link>
-              <a href="#tenant-sites" className={`flex-1 whitespace-nowrap !px-3 text-[13px] sm:flex-none sm:!px-5 sm:text-sm ${ctaGhostOnDark}`}>Explore tenant sites</a>
+              <a href="#request-trail" className={ctaGhost}>Watch it work</a>
             </div>
-            <p className="mt-6 text-sm text-stone-400">
-              Prefer the visitor&rsquo;s side first?{" "}
-              <Link href={PUBLIC_DEMO_PATH} className={`font-medium text-white underline decoration-amber-300/60 underline-offset-4 transition-colors hover:decoration-amber-300 ${focusRing}`}>
-                View the public demo
-              </Link>
-            </p>
+            <a href="#request-trail" className={`mt-8 flex flex-wrap items-center gap-x-3 gap-y-1 text-stone-400 transition-colors hover:text-white ${mono} ${focusRing}`}>
+              {filmStages.map((item, index) => (
+                <span key={item.verb} className="flex items-center gap-3">{index > 0 && <span className="h-px w-4 bg-amber-300/60" />}{item.verb}</span>
+              ))}
+            </a>
           </div>
 
-          <div className="lg:col-span-7">
-            <div className="flex items-baseline justify-between gap-4 font-mono text-[11px] uppercase tracking-[0.2em] text-stone-400">
-              <span>{String(tenantSites.length).padStart(2, "0")} front doors</span>
-              <span className="hidden sm:inline">Each on its own tenant route</span>
-            </div>
-            <ul
-              className="mt-3 grid gap-2 sm:gap-3"
-              style={{ gridTemplateColumns: `repeat(${doorCount}, minmax(0, 1fr))` }}
-            >
-              {tenantSites.map((site, index) => {
-                const door = tenantDoors[site.slug] ?? fallbackDoor;
-                const path = tenantPaths[site.slug] ?? `/kinflo-sites/${site.slug}`;
-                const isActive = activeDoor === index;
-                return (
-                  <li key={site.slug} className="kinflo-home-rise" style={{ animationDelay: `${120 + index * 90}ms` }}>
-                    <Link
-                      href={path}
-                      aria-label={`Open the ${site.tenant} site`}
-                      onMouseEnter={() => hold(index)}
-                      onMouseLeave={release}
-                      onFocus={() => hold(index)}
-                      onBlur={release}
-                      className={`group relative block aspect-[2/3] overflow-hidden border bg-stone-900 transition duration-500 hover:-translate-y-1 hover:border-amber-300 sm:aspect-[3/4] ${isActive ? "-translate-y-1 border-amber-300" : "border-white/15"} ${focusRing}`}
-                    >
-                      {/* Each door sits at its own depth, so the pointer separates them into distinct worlds. */}
-                      <span className="kinflo-home-depth absolute -inset-2 block" style={cssVars({ "--d": 3 + ((index * 2) % 5) })} aria-hidden="true">
-                        <img
-                          src={door.image}
-                          alt=""
-                          className={`absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-105 group-hover:opacity-100 ${isActive ? "opacity-100" : "opacity-75"}`}
-                          style={{ objectPosition: door.position }}
-                        />
-                      </span>
-                      <span className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/25 to-stone-950/10" aria-hidden="true" />
-                      <span className={`absolute inset-x-0 top-0 h-0.5 origin-left bg-amber-300 transition-transform duration-300 group-hover:scale-x-100 ${isActive ? "scale-x-100" : "scale-x-0"}`} aria-hidden="true" />
-                      <span className="absolute left-2 top-2 font-mono text-[11px] text-white/85 sm:left-3 sm:top-3" aria-hidden="true">
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
-                      <ArrowUpRight className="absolute right-2 top-2 h-4 w-4 text-amber-300 opacity-0 transition-opacity duration-300 group-hover:opacity-100 sm:right-3 sm:top-3" aria-hidden="true" />
-                      <span className="absolute inset-x-3 bottom-3 hidden text-xs font-medium leading-snug text-white sm:block" aria-hidden="true">
-                        {site.tenant}
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-
-            <svg className="block h-10 w-full sm:h-14" viewBox="0 0 400 56" preserveAspectRatio="none" fill="none" aria-hidden="true">
-              {tenantSites.map((site, index) => {
-                const x = ((index + 0.5) / doorCount) * 400;
-                const d = `M${x} 0 C${x} 34 200 22 200 56`;
-                return (
-                  <g key={site.slug}>
-                    <path d={d} stroke="rgba(255,255,255,0.16)" strokeWidth="1" vectorEffect="non-scaling-stroke" />
-                    <path d={d} stroke="#fcd34d" strokeWidth="1.5" strokeDasharray="5 17" strokeLinecap="round" vectorEffect="non-scaling-stroke" className="kinflo-home-flow transition-opacity duration-500" style={{ animationDelay: `${index * -0.6}s`, opacity: activeDoor === null || activeDoor === index ? 1 : 0.35 }} />
-                    {activeDoor === index ? (
-                      <path d={d} pathLength={100} stroke="#fff7d6" strokeWidth="2" strokeDasharray="16 100" strokeLinecap="round" className="kinflo-home-pulse" />
-                    ) : null}
-                  </g>
-                );
-              })}
-            </svg>
-
-            <Link
-              href={ADMIN_DEMO_PATH}
-              className={`kinflo-home-rise group relative block border border-white/15 bg-stone-900 transition-colors duration-300 hover:border-amber-300 ${focusRing}`}
-              style={{ animationDelay: "520ms" }}
-            >
-              <span className="flex items-center justify-between gap-3 border-b border-white/10 px-3 py-2.5 font-mono text-[11px] uppercase tracking-[0.18em] text-stone-200">
-                <span className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 bg-amber-300" aria-hidden="true" />
-                  One operating layer
-                </span>
-                <span className="text-stone-500">Read-only <span className="hidden sm:inline">· fixture data</span></span>
-              </span>
-              {/* Arrival: the request that left the active door lands here, still carrying its tenant. */}
-              <span className="relative flex h-9 items-center gap-2 overflow-hidden border-b border-white/10 px-3 font-mono text-[11px] tracking-[0.04em] text-stone-400" aria-hidden="true">
-                {activeSite && activeDoor !== null ? (
-                  <>
-                    <span key={`line-${activeDoor}`} className="kinflo-home-arrive absolute inset-x-0 top-0 h-px bg-amber-300" />
-                    <span key={`text-${activeDoor}`} className="kinflo-home-rise flex min-w-0 items-center gap-2" style={{ animationDelay: "1.3s" }}>
-                      <span className="text-amber-300">{String(activeDoor + 1).padStart(2, "0")}</span>
-                      <span className="truncate text-stone-200">{activeSite.tenant}</span>
-                      <span className="hidden shrink-0 text-stone-500 sm:inline">→ routed to its own scoped workspace</span>
-                    </span>
-                  </>
-                ) : (
-                  <span className="truncate">Every door routes to its own scoped workspace</span>
-                )}
-              </span>
-              <span className="relative block aspect-[16/9] overflow-hidden bg-stone-200 sm:aspect-[2/1]">
-                <img
-                  src={devicesImage}
-                  alt="The KinFlo operating workspace on a laptop and a phone"
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
-                />
-                <span className="absolute bottom-0 right-0 inline-flex items-center gap-2 bg-stone-950 px-4 py-3 text-sm font-semibold text-white transition-colors duration-300 group-hover:bg-amber-300 group-hover:text-stone-950">
-                  Open admin demo
-                  <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden="true" />
-                </span>
-              </span>
-            </Link>
+          <div className="kf-depth min-w-0" style={cssVars({ "--d": 10 })}>
+            <LivingSystem sites={tenantSites} activeDoor={activeDoor} hold={hold} release={release} portrait={portrait} reducedMotion={reducedMotion} />
+            <p className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] text-stone-400" aria-live="off">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-300" />
+              <span className="text-stone-200">{activeSite ? tenantRoles[activeSite.slug] ?? activeSite.name : "Tenant front door"}</span>
+              <span>{activeSite ? tenantPaths[activeSite.slug] ?? `/kinflo-sites/${activeSite.slug}` : ""}</span>
+              <span className="text-stone-500">Illustrative flow. No live data.</span>
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Tenant directory: an editorial index, one row per front door */}
-      <section id="tenant-sites" className="scroll-mt-4 bg-[#f5f1e8] py-20 text-stone-950 dark:bg-stone-900 dark:text-stone-50 sm:py-28">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8">
-          <div className="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-10">
-            <div className="lg:col-span-7">
-              <p className={`${eyebrow} text-orange-800 dark:text-amber-300`}>
-                <span className="h-px w-8 bg-current" aria-hidden="true" />
-                Tenant directory
-              </p>
-              <h2 className="mt-5 font-serif text-4xl font-medium leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
-                The platform starts with the organization.
+      {/* Scene 2: the film. One door is shaped, observed, tested, captured, and operated as you scroll. */}
+      <section id="request-trail" data-kinflo-scene="pin" aria-labelledby="request-trail-title" className="kf-pin kf-grain relative isolate -mt-10 bg-[linear-gradient(180deg,transparent,#0c0a09_6rem)]">
+        <div className="kf-pin-inner flex items-center overflow-hidden">
+          <div className="mx-auto grid w-full max-w-[92rem] items-center gap-6 px-5 py-8 sm:px-8 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-14">
+            <div className="order-2 lg:order-1">
+              <p className={`hidden text-amber-300 sm:block ${mono}`}>What happens behind the door</p>
+              <h2 id="request-trail-title" className="font-serif text-2xl font-medium leading-tight tracking-tight sm:mt-4 sm:text-4xl lg:text-5xl">
+                A website shows a page. <span className="text-stone-400">KinFlo runs what follows.</span>
               </h2>
+              <div className="relative mt-5 pl-6 sm:mt-8">
+                <span className="absolute bottom-1 left-[3px] top-1 w-px bg-white/15" />
+                <span className="kf-thread absolute bottom-1 left-[3px] top-1 w-px bg-amber-300" />
+                <ol>
+                  {filmStages.map((item, index) => {
+                    const open = reducedMotion || index === stage;
+                    return (
+                      <li key={item.verb} className="relative py-1 sm:py-2" aria-current={index === stage ? "step" : undefined}>
+                        <span className={`kf-move absolute -left-[26px] top-[11px] h-[7px] w-[7px] rounded-full sm:top-[17px] ${index <= stage ? "bg-amber-300" : "bg-stone-600"}`} />
+                        <p className={`kf-move ${mono} ${open ? "text-amber-300" : index < stage ? "text-stone-300" : "text-stone-500"}`}>0{index + 1} · {item.verb}</p>
+                        <div className="kf-move overflow-hidden" style={{ maxHeight: open ? "12rem" : 0, opacity: open ? 1 : 0 }}>
+                          <p className="mt-1.5 font-serif text-xl leading-snug sm:text-2xl">{item.title}</p>
+                          <p className="mt-1.5 max-w-md text-sm leading-relaxed text-stone-300 sm:text-base">{item.body}</p>
+                          {index === LAST_STAGE && (
+                            <Link href={ADMIN_DEMO_PATH} tabIndex={open ? 0 : -1} className={`group mt-3 inline-flex items-center gap-2 text-sm font-semibold text-amber-200 underline decoration-amber-300/50 underline-offset-4 hover:decoration-amber-300 ${focusRing}`}>
+                              See this record in the admin demo <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                            </Link>
+                          )}
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ol>
+              </div>
             </div>
-            <p className="text-base leading-7 text-stone-600 dark:text-stone-300 sm:text-lg sm:leading-8 lg:col-span-5">
-              These are separate site experiences carried by the same KinFlo foundation. Open one to review its public presentation on its own route.
+            <div className="order-1 mx-auto w-full max-w-[21rem] sm:max-w-xl lg:order-2 lg:max-w-none">
+              <FilmStage stage={stage} />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Scene 3: the doors themselves. Paper rises over the film; each door keeps its own route. */}
+      <section id="tenant-sites" data-kinflo-scene="doors" className="relative z-10 -mt-16 scroll-mt-4 rounded-t-[2.5rem] bg-[#f5f1e8] pb-40 pt-20 text-stone-950 shadow-[0_-30px_80px_-20px_rgba(0,0,0,0.6)] dark:bg-stone-900 dark:text-stone-50 sm:rounded-t-[5rem] sm:pb-56 sm:pt-28">
+        <div className="mx-auto max-w-[92rem] px-5 sm:px-8">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,6fr)_minmax(0,5fr)] lg:items-end">
+            <div>
+              <p className={`text-amber-700 dark:text-amber-300 ${mono}`}>Tenant front doors</p>
+              <h2 className="mt-4 font-serif text-4xl font-medium leading-[1.04] tracking-tight sm:text-6xl">Each door keeps its own name, voice, and route.</h2>
+            </div>
+            <p className="max-w-md text-base leading-relaxed text-stone-700 dark:text-stone-300 lg:justify-self-end">
+              KinFlo stays neutral underneath. A tenant's audience sees that tenant's site. The operating layer keeps every request inside the tenant it came from.
             </p>
           </div>
 
-          {/* The shared layer, drawn as one thread that runs past every door as the list scrolls. */}
-          <div data-kinflo-scene className="relative mt-12 pb-10 sm:mt-16">
-          <span className="kinflo-home-thread pointer-events-none absolute bottom-0 left-0 top-0 z-10 w-px bg-orange-700 dark:bg-amber-300" aria-hidden="true" />
-          <ul className="border-b border-stone-950/15 dark:border-white/15">
-            {tenantSites.map((site, index) => {
+          <ul className="relative mt-14 grid grid-cols-2 gap-x-5 gap-y-10 lg:mt-10 lg:grid-cols-4 lg:gap-x-10">
+            {tenantSites.slice(0, 4).map((site, index) => {
               const door = tenantDoors[site.slug] ?? fallbackDoor;
               const path = tenantPaths[site.slug] ?? `/kinflo-sites/${site.slug}`;
               return (
-                <li key={site.slug}>
-                  <Link
-                    href={path}
-                    className={`group relative grid grid-cols-[4.5rem_minmax(0,1fr)_auto] items-center gap-x-4 border-t border-stone-950/15 py-5 transition-colors duration-300 hover:bg-stone-950/[0.04] dark:border-white/15 dark:hover:bg-white/[0.04] sm:grid-cols-[8rem_minmax(0,1fr)_auto] sm:gap-x-8 sm:py-6 lg:grid-cols-[11rem_minmax(0,1.3fr)_minmax(0,1fr)_auto] ${focusRing}`}
-                  >
-                    <span className="absolute inset-y-0 left-0 w-0.5 origin-top scale-y-0 bg-orange-700 transition-transform duration-300 group-hover:scale-y-100 dark:bg-amber-300" aria-hidden="true" />
-                    <span className="relative block aspect-[4/5] overflow-hidden bg-stone-300 transition-transform duration-300 group-hover:translate-x-2 dark:bg-stone-800 sm:aspect-[4/3] sm:group-hover:translate-x-4">
-                      <img
-                        src={door.image}
-                        alt=""
-                        loading="lazy"
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        style={{ objectPosition: door.position }}
-                      />
-                    </span>
-                    <span className="min-w-0 transition-transform duration-300 sm:group-hover:translate-x-2">
-                      <span className="block font-mono text-[11px] uppercase tracking-[0.18em] text-orange-800 dark:text-amber-300">
-                        {String(index + 1).padStart(2, "0")} — {tenantRoles[site.slug] ?? site.templateKey}
-                      </span>
-                      <span className="mt-2 block font-serif text-2xl font-medium leading-tight tracking-tight sm:text-3xl lg:text-4xl">
-                        {site.tenant}
-                      </span>
-                      <span className="mt-2 block truncate font-mono text-xs text-stone-500 dark:text-stone-400 lg:hidden">{path}</span>
-                    </span>
-                    <span className="hidden min-w-0 lg:block">
-                      <span className="block text-sm text-stone-700 dark:text-stone-300">{site.name}</span>
-                      <span className="mt-1.5 block truncate font-mono text-xs text-stone-500 dark:text-stone-400">{path}</span>
-                      <span className="mt-1.5 block text-[11px] font-medium uppercase tracking-[0.14em] text-stone-500 dark:text-stone-500">Tenant-scoped route</span>
-                    </span>
-                    <span className="flex items-center gap-3 pr-1 text-sm font-semibold sm:pr-3">
-                      <span className="hidden sm:inline">Open site</span>
-                      <span className="inline-flex h-11 w-11 items-center justify-center border border-stone-950/25 transition-colors duration-300 group-hover:border-stone-950 group-hover:bg-stone-950 group-hover:text-white dark:border-white/25 dark:group-hover:border-amber-300 dark:group-hover:bg-amber-300 dark:group-hover:text-stone-950">
-                        <ArrowUpRight className="h-5 w-5 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true" />
-                        <span className="sr-only sm:hidden">Open site</span>
+                <li key={site.slug} className={`kf-drift ${index % 2 === 1 ? "mt-12 lg:mt-0" : ""}`} style={cssVars({ "--d": doorDepth[index] })}>
+                  <Link href={path} className={`group block ${focusRing}`}>
+                    <span className={`relative block overflow-hidden rounded-t-full rounded-b-lg shadow-2xl shadow-stone-950/25 ${doorShapes[index]}`}>
+                      <span className="absolute inset-0 bg-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105" style={{ backgroundImage: `url(${door.image})`, backgroundPosition: door.position }} />
+                      <span className="absolute inset-0 bg-gradient-to-t from-stone-950/70 via-transparent to-transparent" />
+                      <span className="absolute bottom-4 left-4 right-4 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.16em] text-white">
+                        Enter <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true" />
                       </span>
                     </span>
+                    <span className="mt-4 block font-serif text-xl leading-tight sm:text-2xl">{site.name}</span>
+                    <span className="mt-1 block text-sm text-stone-600 dark:text-stone-400">{tenantRoles[site.slug] ?? site.tenant}</span>
+                    <span className="mt-2 block break-all font-mono text-[10px] text-stone-500 dark:text-stone-500">{path}</span>
                   </Link>
                 </li>
               );
             })}
           </ul>
-          </div>
-
-          <Link
-            href={ADMIN_DEMO_PATH}
-            className={`group flex flex-col gap-4 bg-stone-950 p-6 text-white transition-colors duration-300 hover:bg-stone-800 dark:bg-stone-50 dark:text-stone-950 dark:hover:bg-white sm:flex-row sm:items-center sm:justify-between sm:p-8 ${focusRing}`}
-          >
-            <span>
-              <span className="block font-mono text-[11px] uppercase tracking-[0.2em] text-amber-300 dark:text-orange-800">Behind every door</span>
-              <span className="mt-2 block font-serif text-2xl font-medium tracking-tight sm:text-3xl">See the layer these sites share.</span>
-            </span>
-            <span className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold">
-              <Monitor className="h-5 w-5" aria-hidden="true" />
-              Open admin demo
-              <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" aria-hidden="true" />
-            </span>
-          </Link>
         </div>
       </section>
 
-      {/* Request trail: one request leaves a front door and is carried, by scroll, into the operating layer */}
-      <section
-        id="request-trail"
-        data-kinflo-scene="pin"
-        aria-labelledby="request-trail-title"
-        className="kinflo-home-pin relative border-t border-white/10 bg-stone-950 text-white"
-      >
-        <div className="kinflo-home-pin-inner flex flex-col justify-center overflow-hidden py-8 sm:py-12">
-          <div className="mx-auto w-full max-w-7xl px-5 sm:px-8">
-            <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-3">
-              <div>
-                <p className={`${eyebrow} text-amber-300`}>
-                  <span className="h-px w-8 bg-amber-300" aria-hidden="true" />
-                  The request trail
-                </p>
-                <h2 id="request-trail-title" className="mt-4 font-serif text-3xl font-medium leading-[1.05] tracking-tight sm:mt-5 sm:text-5xl">
-                  Follow one request <span className="italic text-amber-300">past the door.</span>
-                </h2>
-              </div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-stone-500">Illustrative trace · no live data</p>
-            </div>
+      {/* Scene 4: the handoff. Every door's current resolves into the operating layer. */}
+      <section id="operating-layer" data-kinflo-scene="handoff" className="kf-grain relative isolate z-20 -mt-24 scroll-mt-4 overflow-hidden rounded-t-[2.5rem] bg-stone-950 pt-24 sm:-mt-36 sm:rounded-t-[5rem] sm:pt-36">
+        <svg viewBox="0 0 1000 400" preserveAspectRatio="none" className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[26rem] w-full" fill="none" aria-hidden="true">
+          {[120, 370, 630, 880].map((x, index) => (
+            <path key={x} d={`M ${x} 0 C ${x} 190, 500 150, 500 400`} stroke={index === 2 ? "#fcd34d" : "rgba(255,255,255,0.22)"} strokeWidth="1.3" strokeDasharray="5 6" vectorEffect="non-scaling-stroke" className="kf-flow" />
+          ))}
+        </svg>
+        <div className="kf-drift pointer-events-none absolute left-1/2 top-[22rem] -z-10 h-24 w-[min(70rem,120%)] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgba(253,230,138,0.5),rgba(245,158,11,0.16)_55%,transparent)] blur-xl" style={cssVars({ "--d": -60 })} />
 
-            <div className="relative mx-2 mt-8 h-12 sm:mt-12 sm:h-14" aria-hidden="true">
-              <span className="absolute inset-x-0 top-3 h-px bg-white/15" />
-              <span className="kinflo-home-trace-fill absolute inset-x-0 top-3 h-px bg-amber-300" />
-              {trailStages.map((item, index) => {
-                const reached = index <= stage;
-                const edge = index === 0 ? "start" : index === LAST_STAGE ? "end" : "middle";
-                return (
-                  <span
-                    key={item.label}
-                    className={`absolute top-0 flex flex-col ${edge === "start" ? "items-start" : edge === "end" ? "items-end" : "items-center"}`}
-                    style={{
-                      left: `${(index / LAST_STAGE) * 100}%`,
-                      transform: edge === "start" ? "translateX(-5px)" : edge === "end" ? "translateX(calc(-100% + 5px))" : "translateX(-50%)",
-                    }}
-                  >
-                    <span className={`mt-[7px] block h-[11px] w-[11px] border transition-colors duration-500 ${reached ? "border-amber-300 bg-amber-300" : "border-white/30 bg-stone-950"}`} />
-                    <span className={`mt-3 whitespace-nowrap font-mono text-[10px] uppercase tracking-[0.16em] transition-colors duration-500 ${index === stage ? "text-amber-300" : reached ? "text-stone-300" : "text-stone-600"}`}>
-                      {String(index + 1).padStart(2, "0")}
-                      <span className="hidden sm:inline"> · {item.label}</span>
-                    </span>
-                  </span>
-                );
-              })}
-              <span className="kinflo-home-token absolute top-3 block h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-amber-300 shadow-[0_0_0_6px_rgba(252,211,77,0.18)]" />
-            </div>
-
-            <div className="mt-6 grid gap-5 sm:mt-10 lg:grid-cols-12 lg:items-center lg:gap-10">
-              <div className="min-h-[4.5rem] sm:min-h-[9.5rem] lg:col-span-5">
-                <div key={stage} className="kinflo-home-rise">
-                  <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-amber-300">
-                    {String(stage + 1).padStart(2, "0")} / {String(trailStages.length).padStart(2, "0")} · {currentStage.label}
-                  </p>
-                  <p className="mt-3 font-serif text-2xl font-medium leading-tight tracking-tight sm:text-4xl">{currentStage.title}</p>
-                  <p className="mt-3 hidden max-w-md text-base leading-7 text-stone-300 sm:block">{currentStage.body}</p>
-                </div>
-              </div>
-
-              <div className={`border bg-stone-900 transition-colors duration-500 lg:col-span-7 ${trailDone ? "border-amber-300" : "border-white/15"}`}>
-                <div className="flex items-center justify-between gap-3 px-3 py-2.5 font-mono text-[11px] uppercase tracking-[0.18em] text-stone-200 sm:px-4">
-                  <span className="flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 bg-amber-300" aria-hidden="true" />
-                    Request record
-                  </span>
-                  <span className="text-stone-500">Demo · read-only</span>
-                </div>
-                <ol>
-                  {trailStages.map((item, index) => {
-                    const filled = index <= stage;
-                    return (
-                      <li
-                        key={item.field}
-                        className={`grid grid-cols-[5.5rem_minmax(0,1fr)_1rem] items-center gap-3 border-t border-white/10 px-3 py-2.5 transition-opacity duration-500 sm:grid-cols-[7.5rem_minmax(0,1fr)_1rem] sm:px-4 sm:py-3 ${filled ? "opacity-100" : "opacity-40"}`}
-                      >
-                        <span className={`font-mono text-[11px] uppercase tracking-[0.14em] ${index === stage ? "text-amber-300" : "text-stone-400"}`}>{item.field}</span>
-                        <span className="truncate text-sm text-white">{filled ? item.value : "Pending"}</span>
-                        {filled ? (
-                          <CheckCircle2 className="h-4 w-4 text-amber-300" aria-hidden="true" />
-                        ) : (
-                          <span className="mx-auto block h-2 w-2 border border-white/40" aria-hidden="true" />
-                        )}
-                      </li>
-                    );
-                  })}
-                </ol>
-                <Link
-                  href={ADMIN_DEMO_PATH}
-                  className={`group flex items-center justify-between gap-3 border-t px-3 py-3 text-sm font-semibold transition-colors duration-500 sm:px-4 ${trailDone ? "border-amber-300 bg-amber-300 text-stone-950 hover:bg-amber-200" : "border-white/10 text-stone-400 hover:text-white"} ${focusRing}`}
-                >
-                  Continue in the operating layer
-                  <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden="true" />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Showcase: the product behind the front door */}
-      <section id="showcase" className="scroll-mt-4 border-t border-stone-950/10 bg-[#fbf9f4] py-20 text-stone-950 dark:border-white/10 dark:bg-stone-950 dark:text-stone-50 sm:py-28">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8">
-          <div className="grid gap-6 lg:grid-cols-12 lg:items-end lg:gap-10">
-            <div className="lg:col-span-7">
-              <p className={`${eyebrow} text-orange-800 dark:text-amber-300`}>
-                <span className="h-px w-8 bg-current" aria-hidden="true" />
-                See the layer
-              </p>
-              <h2 className="mt-5 font-serif text-4xl font-medium leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">
-                The website is only the <span className="italic text-orange-800 dark:text-amber-300">front door.</span>
-              </h2>
-            </div>
-            <p className="text-base leading-7 text-stone-600 dark:text-stone-300 sm:text-lg sm:leading-8 lg:col-span-5">
-              Show a prospective client how a public site, an intake journey, and an operating workspace fit together before discussing live connections.
-            </p>
+        <div className="mx-auto max-w-[92rem] px-5 pb-20 pt-[17rem] text-center sm:px-8 sm:pb-28">
+          <p className={`text-amber-300 ${mono}`}>The operating layer</p>
+          <h2 className="mx-auto mt-5 max-w-4xl font-serif text-5xl font-medium leading-[1.02] tracking-tight sm:text-7xl">Step behind the door.</h2>
+          <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-stone-300 sm:text-lg">
+            The admin demo is a read-only workspace on fixture data. Walk the tenants, sites, gates, and relationship context a team would work from.
+          </p>
+          <div className="mt-9 flex flex-wrap justify-center gap-3">
+            <Link href={ADMIN_DEMO_PATH} className={`group ${ctaAmber}`}>
+              Open the admin demo <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+            </Link>
+            <Link href={PUBLIC_DEMO_PATH} className={ctaGhost}>Walk a tenant journey</Link>
           </div>
 
-          <div data-kinflo-scene className="mt-12 grid gap-x-6 gap-y-10 sm:mt-16 lg:grid-cols-12">
-            {[
-              { ...showcaseNotes[0], image: dashboardImage, alt: "A laptop showing an operating dashboard with charts and progress tracking", span: "lg:col-span-7", aspect: "aspect-[4/3] sm:aspect-[16/10] lg:aspect-auto lg:h-[30rem]", position: "50% 50%", drift: -28 },
-              { ...showcaseNotes[1], image: phoneImage, alt: "A phone showing a campaign screen with progress toward a goal and a clear call to action", span: "lg:col-span-5", aspect: "aspect-[4/5] sm:aspect-[16/10] lg:aspect-auto lg:h-[30rem]", position: "50% 42%", drift: 28 },
-            ].map((item, index) => (
-              <figure key={item.label} className={`group ${item.span}`}>
-                <div className={`relative overflow-hidden bg-[#ebe6da] dark:bg-stone-200 ${item.aspect}`}>
-                  {/* The two frames drift against each other on scroll; the wrapper keeps its own paper tone so the multiply blend survives the transform. */}
-                  <div className="kinflo-home-drift absolute inset-x-0 -inset-y-4 bg-[#ebe6da] dark:bg-stone-200" style={cssVars({ "--d": item.drift })}>
-                    <img
-                      src={item.image}
-                      alt={item.alt}
-                      loading="lazy"
-                      className="h-full w-full object-cover mix-blend-multiply transition-transform duration-700 group-hover:scale-[1.04] dark:mix-blend-normal"
-                      style={{ objectPosition: item.position }}
-                    />
-                  </div>
-                  <span className="absolute left-0 top-0 bg-stone-950 px-3 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-white">
-                    {String(index + 1).padStart(2, "0")} · {item.label}
-                  </span>
-                </div>
-                <figcaption className="mt-5 grid gap-2 border-t border-stone-950/15 pt-5 dark:border-white/15 sm:grid-cols-2 sm:gap-8">
-                  <h3 className="font-serif text-xl font-medium leading-snug tracking-tight sm:text-2xl">{item.title}</h3>
-                  <p className="text-sm leading-6 text-stone-600 dark:text-stone-300">{item.body}</p>
-                </figcaption>
-              </figure>
+          <dl className="mx-auto mt-20 grid max-w-5xl gap-x-12 text-left sm:grid-cols-2">
+            {boundaries.map((item) => (
+              <div key={item.title} className="border-t border-white/15 py-6">
+                <dt className="font-serif text-xl">{item.title}</dt>
+                <dd className="mt-2 text-sm leading-relaxed text-stone-400">{item.body}</dd>
+              </div>
             ))}
-          </div>
-
-          <div className="mt-14 grid gap-6 border-t border-stone-950/15 pt-8 dark:border-white/15 lg:grid-cols-12 lg:items-center lg:gap-10">
-            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-orange-800 dark:text-amber-300 lg:col-span-2">03 · Tenant-ready delivery</p>
-            <p className="font-serif text-xl leading-snug tracking-tight sm:text-2xl lg:col-span-6">
-              One platform, many front doors. Switch from a public tenant experience to the operating layer while keeping scope visible.
-            </p>
-            <div className="flex flex-wrap gap-3 lg:col-span-4 lg:justify-end">
-              <Link
-                href={ADMIN_DEMO_PATH}
-                className={`group ${ctaBase} bg-stone-950 text-white hover:bg-orange-800 dark:bg-amber-300 dark:text-stone-950 dark:hover:bg-amber-200`}
-              >
-                <Monitor className="h-4 w-4" aria-hidden="true" />
-                Open the admin demo
-              </Link>
-              <Link
-                href={PUBLIC_DEMO_PATH}
-                className={`${ctaBase} border border-stone-950/30 hover:border-stone-950 dark:border-white/30 dark:hover:border-white`}
-              >
-                View the public demo
-              </Link>
-            </div>
-          </div>
+          </dl>
         </div>
+
+        <footer className="border-t border-white/10">
+          <div className="mx-auto flex max-w-[92rem] flex-col gap-4 px-5 py-8 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-8">
+            <span className="inline-flex items-center gap-2.5 text-stone-300"><KinfloMark className="h-5 w-5 text-amber-300" />KinFlo. The operating layer behind many front doors.</span>
+            <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2">
+              <a href="#tenant-sites" className={`text-stone-300 transition-colors hover:text-white ${focusRing}`}>Tenant sites</a>
+              <Link href={ADMIN_DEMO_PATH} className={`text-stone-200 transition-colors hover:text-white ${focusRing}`}>Open admin demo</Link>
+              <Link href="/admin/kinflo-os" className={`text-stone-500 transition-colors hover:text-white ${focusRing}`}>Live admin sign-in</Link>
+            </nav>
+          </div>
+        </footer>
       </section>
-
-      {/* The KinFlo layer: principles, then the current underneath */}
-      <section id="operating-layer" className="scroll-mt-4 relative isolate overflow-hidden bg-stone-950 pt-20 sm:pt-28">
-        <div className="mx-auto grid max-w-7xl gap-12 px-5 sm:px-8 lg:grid-cols-12 lg:gap-10">
-          <div className="lg:col-span-5">
-            <p className={`${eyebrow} text-amber-300`}>
-              <span className="h-px w-8 bg-amber-300" aria-hidden="true" />
-              The KinFlo layer
-            </p>
-            <h2 className="mt-5 font-serif text-4xl font-medium leading-[1.05] tracking-tight sm:text-5xl">
-              Presentation, relationship, and follow-through in one place.
-            </h2>
-            <p className="mt-6 max-w-md text-base leading-7 text-stone-300 sm:text-lg sm:leading-8">
-              Tenant websites are the visible edge. KinFlo keeps the content, audience, request path, and operating context connected behind it.
-            </p>
-          </div>
-          <ol className="grid gap-x-10 sm:grid-cols-2 lg:col-span-7">
-            {layerPrinciples.map(({ icon: Icon, title, body }, index) => (
-              <li key={title} className="group border-t border-white/15 py-7 transition-colors duration-300 hover:border-amber-300">
-                <div className="flex items-center justify-between">
-                  <Icon className="h-6 w-6 text-amber-300" aria-hidden="true" />
-                  <span className="font-mono text-[11px] text-stone-500 transition-colors duration-300 group-hover:text-amber-300" aria-hidden="true">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                </div>
-                <h3 className="mt-5 text-lg font-semibold text-white">{title}</h3>
-                <p className="mt-2 text-sm leading-6 text-stone-300">{body}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
-
-        <div data-kinflo-scene className="relative mt-10 h-[30rem] overflow-hidden sm:mt-16 sm:h-[28rem]">
-          <img
-            src={flowImage}
-            alt=""
-            loading="lazy"
-            className="kinflo-home-drift absolute inset-x-0 -top-10 -z-10 h-[calc(100%+5rem)] w-full object-cover object-bottom"
-            style={cssVars({ "--d": 64 })}
-          />
-          <div className="absolute inset-x-0 top-0 -z-10 h-1/2 bg-gradient-to-b from-stone-950 via-stone-950/70 to-transparent" aria-hidden="true" />
-          <div className="absolute inset-x-0 bottom-0 -z-10 h-3/5 bg-gradient-to-t from-stone-950 via-stone-950/75 to-transparent sm:h-1/2 sm:via-stone-950/50" aria-hidden="true" />
-          <div className="mx-auto flex h-full max-w-7xl flex-col justify-end px-5 pb-12 sm:px-8 sm:pb-14">
-            <p className="max-w-xl font-serif text-3xl font-medium leading-tight tracking-tight text-white sm:text-4xl">
-              Many doors up front. <span className="italic text-amber-300">One current underneath.</span>
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link href={ADMIN_DEMO_PATH} className={`group ${ctaAmber}`}>
-                Open admin demo
-                <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden="true" />
-              </Link>
-              <a href="#tenant-sites" className={`${ctaGhostOnDark} bg-stone-950/40`}>Back to tenant sites</a>
-            </div>
-            <p className="mt-5 font-mono text-[11px] tracking-[0.04em] text-stone-400">
-              <span className="text-amber-300">{ADMIN_DEMO_PATH}</span> · read-only workspace on fixture data
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <footer className="border-t border-white/10 bg-stone-950 px-5 py-8 text-sm text-stone-400 sm:px-8">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <span className="inline-flex items-center gap-2">
-            <KinfloMark className="h-4 w-4 text-amber-300" />
-            KinFlo · A multitenant web and relationship platform
-          </span>
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-            <Link href={ADMIN_DEMO_PATH} className="text-stone-200 transition-colors hover:text-white">Open admin demo</Link>
-            <Link href="/admin/kinflo-os" className="text-stone-500 transition-colors hover:text-white">Live admin sign-in</Link>
-          </div>
-        </div>
-      </footer>
     </main>
   );
 }
