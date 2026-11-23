@@ -46,7 +46,10 @@ function LegacyApplication() {
 function RoutedApplication() {
   const [location] = useLocation();
   if (
-    location === "/admin/kinflo-os"
+    location === "/"
+    || location === "/product"
+    || location === "/kinflo"
+    || location === "/admin/kinflo-os"
     || location === "/kinflo-sites/vanguard-enterprises/orders"
   ) {
     return <Router />;
@@ -54,7 +57,7 @@ function RoutedApplication() {
 
   return <LegacyApplication />;
 }
-import Home from "@/pages/Home";
+import KinfloHome from "@/pages/KinfloHome";
 import HowItWorks from "@/pages/HowItWorks";
 import VirtualTour from "@/pages/VirtualTour";
 import Donate from "@/pages/Donate";
@@ -113,7 +116,7 @@ import NotFound from "@/pages/not-found";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
+      <Route path="/" component={KinfloHome} />
       <Route path="/how-it-works" component={HowItWorks} />
       <Route path="/virtual-tour" component={VirtualTour} />
       <Route path="/donate" component={Donate} />
