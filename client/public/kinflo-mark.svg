@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="KinFlo">
+  <defs>
+    <linearGradient id="kinflo" x1="12" y1="52" x2="53" y2="10" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#e85d04"/>
+      <stop offset="1" stop-color="#f9b233"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="#10131b"/>
+  <path d="M32 55V35M32 35c0-13-18-12-18-24M32 35V17M32 35c0-13 18-12 18-24" fill="none" stroke="url(#kinflo)" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="14" cy="10" r="4" fill="#e85d04"/>
+  <circle cx="32" cy="10" r="4" fill="#f28c06"/>
+  <circle cx="50" cy="10" r="4" fill="#f9b233"/>
+</svg>
