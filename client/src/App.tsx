@@ -97,6 +97,7 @@ import AdminAutomationConfig from "@/pages/AdminAutomationConfig";
 import AdminRoleProvisioning from "@/pages/AdminRoleProvisioning";
 import AdminKinfloShell from "@/pages/AdminKinfloShell";
 import KinfloAdminRoute from "@/components/KinfloAdminRoute";
+import KinfloHome from "@/pages/KinfloHome";
 import AppointmentScheduling from "@/pages/AppointmentScheduling";
 import ProductLanding from "@/pages/ProductLanding";
 import KinfloPublicSitePreview from "@/pages/KinfloPublicSitePreview";
@@ -113,7 +114,7 @@ import NotFound from "@/pages/not-found";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
+      <Route path="/" component={KinfloHome} />
       <Route path="/how-it-works" component={HowItWorks} />
       <Route path="/virtual-tour" component={VirtualTour} />
       <Route path="/donate" component={Donate} />
