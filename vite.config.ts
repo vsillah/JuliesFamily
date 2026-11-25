@@ -7,6 +7,9 @@ export default defineConfig(({ command }) => {
   const phase174GeneratedApi = command === "serve" && !useLocalAdminSmokeStub
     ? path.resolve(import.meta.dirname, "convex", "_generated", "api")
     : path.resolve(import.meta.dirname, "client", "src", "lib", "kinfloPhase174GeneratedApiBuildStub.ts");
+  const phase175GeneratedApi = command === "serve" && !useLocalAdminSmokeStub
+    ? path.resolve(import.meta.dirname, "convex", "_generated", "api")
+    : path.resolve(import.meta.dirname, "client", "src", "lib", "kinfloPhase175GeneratedApiBuildStub.ts");
 
   return {
     plugins: [react()],
@@ -16,6 +19,7 @@ export default defineConfig(({ command }) => {
         "@shared": path.resolve(import.meta.dirname, "shared"),
         "@assets": path.resolve(import.meta.dirname, "attached_assets"),
         "@kinflo-phase174-generated-api": phase174GeneratedApi,
+        "@kinflo-phase175-generated-api": phase175GeneratedApi,
       },
     },
     root: path.resolve(import.meta.dirname, "client"),

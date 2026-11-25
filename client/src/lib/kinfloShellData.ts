@@ -2176,6 +2176,9 @@ export type ShellAccessDelegation = {
 };
 
 export type ShellLead = {
+  id?: string;
+  tenantSlug: string;
+  siteKey: string;
   name: string;
   email: string;
   site: string;
@@ -2194,6 +2197,8 @@ export type ShellPipelineStage = {
 };
 
 export type ShellTask = {
+  tenantSlug: string;
+  siteKey: string;
   title: string;
   lead: string;
   owner: string;
@@ -2694,6 +2699,7 @@ const fixtureNavigationDraft: ShellNavigationDraft = {
   siteOptions: [
     { key: "julies-family-public", label: "Julie Family Public Site", previewPath: "/kinflo-sites/julies-family" },
     { key: "advisor-client-site", label: "Advisor Client Site", previewPath: "/kinflo-sites/advisor-client-site" },
+    { key: "vanguard-enterprises", label: "Vanguard Enterprises", previewPath: "/kinflo-sites/vanguard-enterprises" },
     { key: "campaign-microsite", label: "Campaign Microsite", previewPath: "/kinflo-sites/campaign-microsite" },
   ],
   placementOptions: [
@@ -6734,11 +6740,13 @@ const fixtureAccessDelegation: ShellAccessDelegation = {
   defaultRoleKey: "tenant.admin",
   tenantOptions: [
     { slug: "julies-family", label: "Julie's Family Learning Program" },
+    { slug: "vanguard-enterprises", label: "Vanguard Enterprises" },
     { slug: "advisor-client-starter", label: "Advisor Client Starter" },
     { slug: "campaign-microsite-lab", label: "Campaign Microsite Lab" },
   ],
   siteOptions: [
     { key: "julies-family-public", label: "Julie Family Public Site", tenantSlug: "julies-family" },
+    { key: "vanguard-enterprises", label: "Vanguard Enterprises", tenantSlug: "vanguard-enterprises" },
     { key: "advisor-client-site", label: "Advisor Client Site", tenantSlug: "advisor-client-starter" },
     { key: "campaign-microsite", label: "Campaign Microsite", tenantSlug: "campaign-microsite-lab" },
   ],
@@ -6781,6 +6789,8 @@ const fixtureAccessDelegation: ShellAccessDelegation = {
 
 const fixtureLeads: ShellLead[] = [
   {
+    tenantSlug: "julies-family",
+    siteKey: "julies-family-public",
     name: "Maria Alvarez",
     email: "maria@example.invalid",
     site: "Julie Family Public Site",
@@ -6791,6 +6801,8 @@ const fixtureLeads: ShellLead[] = [
     lastEvent: "Submitted family learning intake",
   },
   {
+    tenantSlug: "julies-family",
+    siteKey: "julies-family-public",
     name: "Devon Price",
     email: "devon@example.invalid",
     site: "Tech Goes Home Cohort",
@@ -6801,6 +6813,8 @@ const fixtureLeads: ShellLead[] = [
     lastEvent: "Assigned follow-up task",
   },
   {
+    tenantSlug: "advisor-client-starter",
+    siteKey: "advisor-client-site",
     name: "Aisha Grant",
     email: "aisha@example.invalid",
     site: "Advisor Client Site",
@@ -6820,6 +6834,8 @@ const fixturePipelineStages: ShellPipelineStage[] = [
 
 const fixtureTasks: ShellTask[] = [
   {
+    tenantSlug: "julies-family",
+    siteKey: "julies-family-public",
     title: "Call Maria about evening classes",
     lead: "Maria Alvarez",
     owner: "Program lead",
@@ -6827,6 +6843,8 @@ const fixtureTasks: ShellTask[] = [
     status: "pending",
   },
   {
+    tenantSlug: "julies-family",
+    siteKey: "julies-family-public",
     title: "Send volunteer orientation packet",
     lead: "Devon Price",
     owner: "Volunteer coordinator",
@@ -10655,6 +10673,67 @@ const fixtureLaunchReadiness: ShellLaunchReadiness = {
       ],
     },
     {
+      key: "vanguard-enterprises",
+      label: "Vanguard Enterprises",
+      tenant: "Vanguard Enterprises",
+      previewPath: "/kinflo-sites/vanguard-enterprises",
+      readinessPercent: 72,
+      launchDecision: "needs_work",
+      blockerSummary: "Vanguard preview is available; launch waits on domain, provider smoke, and hosted Convex activation evidence.",
+      stages: [
+        {
+          key: "site-factory",
+          label: "Tenant and site packet",
+          surface: "Site Factory",
+          status: "ready",
+          owner: "Super admin",
+          evidence: "Vanguard tenant, site, and launch packet are represented in the local fixture.",
+          gate: "Live mutation gated",
+          convexFunctions: ["controlPlane.createTenant", "siteFactory.createSiteFromTemplate"],
+        },
+        {
+          key: "brand-content-nav",
+          label: "Brand, content, and navigation",
+          surface: "Build workspace",
+          status: "ready",
+          owner: "Site admin",
+          evidence: "Vanguard brand, draft content, and navigation are available in the scoped preview.",
+          gate: "Live save and publish gated",
+          convexFunctions: ["controlPlane.updateThemeTokens", "siteBuilder.updateContentBlock", "siteBuilder.upsertNavigationItem"],
+        },
+        {
+          key: "preview-crm",
+          label: "Preview and CRM intake",
+          surface: "Preview and Growth",
+          status: "ready",
+          owner: "Super admin",
+          evidence: "The public preview path and scoped lead review contract are represented locally.",
+          gate: "Live lead smoke gated",
+          convexFunctions: ["publicSite.resolvePublishedSite", "crm.submitLead", "crm.listLeads"],
+        },
+        {
+          key: "domain",
+          label: "Domain readiness",
+          surface: "Domain Readiness",
+          status: "pending",
+          owner: "Super admin",
+          evidence: "Domain metadata is reviewable, but ownership and SSL provider proof are not live.",
+          gate: "Live DNS save gated",
+          convexFunctions: ["siteBuilder.upsertDomain", "entitlements.checkEntitlementLimit"],
+        },
+        {
+          key: "providers",
+          label: "Provider and hosted activation",
+          surface: "Activation",
+          status: "blocked",
+          owner: "Super admin",
+          evidence: "Provider smoke, generated API bindings, and hosted Convex activation remain pending.",
+          gate: "Deployment and provider actions gated",
+          convexFunctions: ["integrations.listIntegrationSettings", "launchReadiness.getSiteLaunchReadiness", "activation.readiness"],
+        },
+      ],
+    },
+    {
       key: "campaign-microsite",
       label: "Campaign Microsite",
       tenant: "Campaign Microsite Lab",
@@ -10840,7 +10919,7 @@ function buildMetrics(): ShellMetric[] {
     {
       label: "Launch Gates",
       value: `${completeGates}/${fixtureLaunchGates.length}`,
-      detail: "Convex auth, codegen, and live execution remain",
+      detail: "Live connection and launch review remain",
       iconKey: "launchGates",
     },
   ];

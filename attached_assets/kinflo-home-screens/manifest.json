@@ -1,0 +1,439 @@
+{
+  "purpose": "Real product screenshots used on the KinFlo homepage (client/src/pages/KinfloHome.tsx) in place of hand-built product panels.",
+  "app": {
+    "baseUrl": "http://127.0.0.1:5241",
+    "build": {
+      "indexJs": "/assets/index-CiFs04aF.js",
+      "indexCss": "/assets/index-C484BSPy.css",
+      "demoFlag": "VITE_KINFLO_PUBLIC_DEMO=true"
+    },
+    "dataBoundary": "Read-only fixture/demo data. No sign-in, tenant writes, provider calls, or live data."
+  },
+  "capture": {
+    "browser": "Google Chrome (headless, Playwright)",
+    "reducedMotion": true,
+    "note": "Rendered from this worktree's dist/public (the same build the Vite preview serves at http://127.0.0.1:5241, matched by bundle file names above), served by a static SPA file server on 127.0.0.1:5241 inside Claude's sandbox because the sandbox cannot reach the Mac's loopback interface. Google Fonts requests were answered with local Inter and Playfair Display files (@fontsource-variable); all other external requests (js.stripe.com) were blocked."
+  },
+  "screenshots": [
+    {
+      "file": "platform-overview--desktop-1440x900.png",
+      "description": "Platform control plane overview (all fixture tenants)",
+      "route": "/kinflo-demo/admin?demo=1&view=platform&platformSection=overview",
+      "finalUrl": "/kinflo-demo/admin?demo=1&view=platform&platformSection=overview",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900,
+        "deviceScaleFactor": 1
+      },
+      "imagePixels": {
+        "width": 1440,
+        "height": 900
+      },
+      "horizontalOverflowPx": 0,
+      "scroll": "top of page, viewport only",
+      "sha256": "8e1aae854edfba9594d4b4715763c38e985ab5e1197acdef0956814332751c80",
+      "capturedAt": "2026-11-24T10:28:56.120Z"
+    },
+    {
+      "file": "tenant-workspace-overview--desktop-1440x900.png",
+      "description": "Vanguard Enterprises tenant workspace overview",
+      "route": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises",
+      "finalUrl": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900,
+        "deviceScaleFactor": 1
+      },
+      "imagePixels": {
+        "width": 1440,
+        "height": 900
+      },
+      "horizontalOverflowPx": 0,
+      "scroll": "top of page, viewport only",
+      "sha256": "f745b515a7745537a43388b501ba1b5161047b7a411bdcbea163ebf18e2b6505",
+      "capturedAt": "2026-11-24T10:28:58.572Z"
+    },
+    {
+      "file": "tenant-pipeline--desktop-1440x900.png",
+      "description": "Vanguard Enterprises tenant workspace: pipeline board",
+      "route": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises&section=pipeline",
+      "finalUrl": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises&section=pipeline",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900,
+        "deviceScaleFactor": 1
+      },
+      "imagePixels": {
+        "width": 1440,
+        "height": 900
+      },
+      "horizontalOverflowPx": 0,
+      "scroll": "top of page, viewport only",
+      "sha256": "6fc94c903ef7399d9a88236cce68f863bd68940c2711a1444930bc1322e312a9",
+      "capturedAt": "2026-11-24T10:29:01.060Z"
+    },
+    {
+      "file": "tenant-inquiries--desktop-1440x900.png",
+      "description": "Vanguard Enterprises tenant workspace: website inquiries",
+      "route": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises&section=inquiries",
+      "finalUrl": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises&section=inquiries",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900,
+        "deviceScaleFactor": 1
+      },
+      "imagePixels": {
+        "width": 1440,
+        "height": 900
+      },
+      "horizontalOverflowPx": 0,
+      "scroll": "top of page, viewport only",
+      "sha256": "de1ff3ee0fc72500b1ed8622b6c777a79753c7cbfd4184b7d2341e9ab54c580b",
+      "capturedAt": "2026-11-24T10:29:03.571Z"
+    },
+    {
+      "file": "tenant-follow-up--desktop-1440x900.png",
+      "description": "Vanguard Enterprises tenant workspace: tasks / follow-up",
+      "route": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises&section=tasks",
+      "finalUrl": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises&section=tasks",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900,
+        "deviceScaleFactor": 1
+      },
+      "imagePixels": {
+        "width": 1440,
+        "height": 900
+      },
+      "horizontalOverflowPx": 0,
+      "scroll": "top of page, viewport only",
+      "sha256": "1f424a837fb4cdfcd8b42f3e3ab13ac2e793a09e4f436f3d3369395409756e3a",
+      "capturedAt": "2026-11-24T10:29:05.985Z"
+    },
+    {
+      "file": "tenant-analytics--desktop-1440x900.png",
+      "description": "Vanguard Enterprises tenant workspace: analytics",
+      "route": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises&section=analytics",
+      "finalUrl": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises&section=analytics",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900,
+        "deviceScaleFactor": 1
+      },
+      "imagePixels": {
+        "width": 1440,
+        "height": 900
+      },
+      "horizontalOverflowPx": 0,
+      "scroll": "top of page, viewport only",
+      "sha256": "5ba714a6569619cceee0dfab4b28c379e84f7db74f4c7f33ab69c803563a530c",
+      "capturedAt": "2026-11-24T10:29:08.410Z"
+    },
+    {
+      "file": "tenant-public-site--desktop-1440x900.png",
+      "description": "Vanguard Enterprises public tenant site (demo experience), top of page",
+      "route": "/kinflo-sites/vanguard-enterprises?demo=1#top",
+      "finalUrl": "/kinflo-sites/vanguard-enterprises?demo=1#top",
+      "viewport": {
+        "name": "desktop",
+        "width": 1440,
+        "height": 900,
+        "deviceScaleFactor": 1
+      },
+      "imagePixels": {
+        "width": 1440,
+        "height": 900
+      },
+      "horizontalOverflowPx": 0,
+      "scroll": "top of page, viewport only",
+      "sha256": "ff70714d60fe872b00121b862f058b87bde749ff7b6bfd2634e9fbfe76f0ed93",
+      "capturedAt": "2026-11-24T10:29:20.651Z"
+    },
+    {
+      "file": "platform-overview--tablet-1024x768.png",
+      "description": "Platform control plane overview (all fixture tenants)",
+      "route": "/kinflo-demo/admin?demo=1&view=platform&platformSection=overview",
+      "finalUrl": "/kinflo-demo/admin?demo=1&view=platform&platformSection=overview",
+      "viewport": {
+        "name": "tablet",
+        "width": 1024,
+        "height": 768,
+        "deviceScaleFactor": 1
+      },
+      "imagePixels": {
+        "width": 1024,
+        "height": 768
+      },
+      "horizontalOverflowPx": 0,
+      "scroll": "top of page, viewport only",
+      "sha256": "79a64b40583e55d9800e82f57ea19d729926c24807e168b2caecd73cd1ae0856",
+      "capturedAt": "2026-11-24T10:29:23.488Z"
+    },
+    {
+      "file": "tenant-workspace-overview--tablet-1024x768.png",
+      "description": "Vanguard Enterprises tenant workspace overview",
+      "route": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises",
+      "finalUrl": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises",
+      "viewport": {
+        "name": "tablet",
+        "width": 1024,
+        "height": 768,
+        "deviceScaleFactor": 1
+      },
+      "imagePixels": {
+        "width": 1024,
+        "height": 768
+      },
+      "horizontalOverflowPx": 0,
+      "scroll": "top of page, viewport only",
+      "sha256": "e7fc2b728b4a54949ce9aa0f994f4e4cfba3eafaad4176911017c4f4402557b1",
+      "capturedAt": "2026-11-24T10:29:25.982Z"
+    },
+    {
+      "file": "tenant-pipeline--tablet-1024x768.png",
+      "description": "Vanguard Enterprises tenant workspace: pipeline board",
+      "route": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises&section=pipeline",
+      "finalUrl": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises&section=pipeline",
+      "viewport": {
+        "name": "tablet",
+        "width": 1024,
+        "height": 768,
+        "deviceScaleFactor": 1
+      },
+      "imagePixels": {
+        "width": 1024,
+        "height": 768
+      },
+      "horizontalOverflowPx": 0,
+      "scroll": "top of page, viewport only",
+      "sha256": "6fc78e9dd17a1f5f11f4d505017c74c36534f0868ae0d35f954d52b38efcf9af",
+      "capturedAt": "2026-11-24T10:29:28.435Z"
+    },
+    {
+      "file": "tenant-inquiries--tablet-1024x768.png",
+      "description": "Vanguard Enterprises tenant workspace: website inquiries",
+      "route": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises&section=inquiries",
+      "finalUrl": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises&section=inquiries",
+      "viewport": {
+        "name": "tablet",
+        "width": 1024,
+        "height": 768,
+        "deviceScaleFactor": 1
+      },
+      "imagePixels": {
+        "width": 1024,
+        "height": 768
+      },
+      "horizontalOverflowPx": 0,
+      "scroll": "top of page, viewport only",
+      "sha256": "352bd2208100bbe4f0c8ab4b8a37bb3665b0fb698a9fb997dcb368246046c301",
+      "capturedAt": "2026-11-24T10:29:30.907Z"
+    },
+    {
+      "file": "tenant-follow-up--tablet-1024x768.png",
+      "description": "Vanguard Enterprises tenant workspace: tasks / follow-up",
+      "route": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises&section=tasks",
+      "finalUrl": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises&section=tasks",
+      "viewport": {
+        "name": "tablet",
+        "width": 1024,
+        "height": 768,
+        "deviceScaleFactor": 1
+      },
+      "imagePixels": {
+        "width": 1024,
+        "height": 768
+      },
+      "horizontalOverflowPx": 0,
+      "scroll": "top of page, viewport only",
+      "sha256": "66293b9221326dbc070d0f0fe90ad87b1210acc9c6efe92b98c9f22ba62f98e2",
+      "capturedAt": "2026-11-24T10:29:33.334Z"
+    },
+    {
+      "file": "tenant-analytics--tablet-1024x768.png",
+      "description": "Vanguard Enterprises tenant workspace: analytics",
+      "route": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises&section=analytics",
+      "finalUrl": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises&section=analytics",
+      "viewport": {
+        "name": "tablet",
+        "width": 1024,
+        "height": 768,
+        "deviceScaleFactor": 1
+      },
+      "imagePixels": {
+        "width": 1024,
+        "height": 768
+      },
+      "horizontalOverflowPx": 0,
+      "scroll": "top of page, viewport only",
+      "sha256": "8432434788042ba2788de95355bcdacdceffa74b618b495c097de035cb40e59b",
+      "capturedAt": "2026-11-24T10:29:35.802Z"
+    },
+    {
+      "file": "tenant-public-site--tablet-1024x768.png",
+      "description": "Vanguard Enterprises public tenant site (demo experience), top of page",
+      "route": "/kinflo-sites/vanguard-enterprises?demo=1#top",
+      "finalUrl": "/kinflo-sites/vanguard-enterprises?demo=1#top",
+      "viewport": {
+        "name": "tablet",
+        "width": 1024,
+        "height": 768,
+        "deviceScaleFactor": 1
+      },
+      "imagePixels": {
+        "width": 1024,
+        "height": 768
+      },
+      "horizontalOverflowPx": 0,
+      "scroll": "top of page, viewport only",
+      "sha256": "1ebbaf9ebd775dabb66cad5ec0e2721b3ab82109ed8a75521466cbc43697e1bb",
+      "capturedAt": "2026-11-24T10:29:48.057Z"
+    },
+    {
+      "file": "platform-overview--mobile-390x844.png",
+      "description": "Platform control plane overview (all fixture tenants)",
+      "route": "/kinflo-demo/admin?demo=1&view=platform&platformSection=overview",
+      "finalUrl": "/kinflo-demo/admin?demo=1&view=platform&platformSection=overview",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844,
+        "deviceScaleFactor": 2
+      },
+      "imagePixels": {
+        "width": 780,
+        "height": 1688
+      },
+      "horizontalOverflowPx": 0,
+      "scroll": "top of page, viewport only",
+      "sha256": "ca66f987f256ff1baf384e2fc81f4ed9ca6f70a0b9b99f85522b7858cfed61e3",
+      "capturedAt": "2026-11-24T10:29:51.000Z"
+    },
+    {
+      "file": "tenant-workspace-overview--mobile-390x844.png",
+      "description": "Vanguard Enterprises tenant workspace overview",
+      "route": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises",
+      "finalUrl": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844,
+        "deviceScaleFactor": 2
+      },
+      "imagePixels": {
+        "width": 780,
+        "height": 1688
+      },
+      "horizontalOverflowPx": 0,
+      "scroll": "top of page, viewport only",
+      "sha256": "0d38ff8b8e874f53307468dfa49d3ceba4bb9f1789cb0dc4f1af74274d1de319",
+      "capturedAt": "2026-11-24T10:29:53.537Z"
+    },
+    {
+      "file": "tenant-pipeline--mobile-390x844.png",
+      "description": "Vanguard Enterprises tenant workspace: pipeline board",
+      "route": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises&section=pipeline",
+      "finalUrl": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises&section=pipeline",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844,
+        "deviceScaleFactor": 2
+      },
+      "imagePixels": {
+        "width": 780,
+        "height": 1688
+      },
+      "horizontalOverflowPx": 0,
+      "scroll": "top of page, viewport only",
+      "sha256": "3e0c7fd1e210a8aff6ad341c0f7215d737c2b32ccb3270c1bd03944fa82e6437",
+      "capturedAt": "2026-11-24T10:29:56.067Z"
+    },
+    {
+      "file": "tenant-inquiries--mobile-390x844.png",
+      "description": "Vanguard Enterprises tenant workspace: website inquiries",
+      "route": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises&section=inquiries",
+      "finalUrl": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises&section=inquiries",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844,
+        "deviceScaleFactor": 2
+      },
+      "imagePixels": {
+        "width": 780,
+        "height": 1688
+      },
+      "horizontalOverflowPx": 0,
+      "scroll": "top of page, viewport only",
+      "sha256": "2c6f7b0c112fed13df9a1e2405bc90a2fd7438422e4c5f04da0170179c09fa23",
+      "capturedAt": "2026-11-24T10:29:58.645Z"
+    },
+    {
+      "file": "tenant-follow-up--mobile-390x844.png",
+      "description": "Vanguard Enterprises tenant workspace: tasks / follow-up",
+      "route": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises&section=tasks",
+      "finalUrl": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises&section=tasks",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844,
+        "deviceScaleFactor": 2
+      },
+      "imagePixels": {
+        "width": 780,
+        "height": 1688
+      },
+      "horizontalOverflowPx": 0,
+      "scroll": "top of page, viewport only",
+      "sha256": "a105ddab44d2ac956236b110ee677e7eda015191c3e4dde9eb5d05eb5df6f960",
+      "capturedAt": "2026-11-24T10:30:01.161Z"
+    },
+    {
+      "file": "tenant-analytics--mobile-390x844.png",
+      "description": "Vanguard Enterprises tenant workspace: analytics",
+      "route": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises&section=analytics",
+      "finalUrl": "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises&section=analytics",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844,
+        "deviceScaleFactor": 2
+      },
+      "imagePixels": {
+        "width": 780,
+        "height": 1688
+      },
+      "horizontalOverflowPx": 0,
+      "scroll": "top of page, viewport only",
+      "sha256": "98b4b3a018276811d3549e96e724fa8bb67a18fba17ac04c7088e90b74797a34",
+      "capturedAt": "2026-11-24T10:30:03.670Z"
+    },
+    {
+      "file": "tenant-public-site--mobile-390x844.png",
+      "description": "Vanguard Enterprises public tenant site (demo experience), top of page",
+      "route": "/kinflo-sites/vanguard-enterprises?demo=1#top",
+      "finalUrl": "/kinflo-sites/vanguard-enterprises?demo=1#top",
+      "viewport": {
+        "name": "mobile",
+        "width": 390,
+        "height": 844,
+        "deviceScaleFactor": 2
+      },
+      "imagePixels": {
+        "width": 780,
+        "height": 1688
+      },
+      "horizontalOverflowPx": 0,
+      "scroll": "top of page, viewport only",
+      "sha256": "13038e7c4071b7b781870954fb1e33349dca2151e6eee95f2e37bd7796b4bfe3",
+      "capturedAt": "2026-11-24T10:30:16.010Z"
+    }
+  ]
+}

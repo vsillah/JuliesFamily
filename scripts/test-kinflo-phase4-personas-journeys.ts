@@ -57,6 +57,18 @@ test("fails closed for cross-site visibility rules and missing targeted context"
   ], resolution).length, 1);
 });
 
+test("keeps the full configured journey visible without an audience selection", () => {
+  const resolution = resolveKinfloAudiencePreview("vanguard-enterprises");
+  assert.equal(resolution.status, "ready");
+  if (resolution.status !== "ready") return;
+  assert.deepEqual(filterKinfloPreviewBlocks([
+    { _id: "hero", metadata: {} },
+    { _id: "order-journey", metadata: { persona: "provider", journeyStage: "consideration" } },
+    { _id: "fulfillment", metadata: { persona: "provider", journeyStage: "consideration" } },
+    { _id: "build-request", metadata: { persona: "provider", journeyStage: "decision" } },
+  ], resolution).map((block) => block._id), ["hero", "order-journey", "fulfillment", "build-request"]);
+});
+
 test("marks the preview contract as non-persistent and non-allocating", () => {
   const resolution = resolveKinfloAudiencePreview("vanguard-enterprises", { persona: "provider", journeyStage: "awareness" });
   assert.equal(isKinfloAudiencePreviewOnly(resolution), true);

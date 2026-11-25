@@ -1,6 +1,6 @@
 # Phase 81: Workflow Navigation Rail
 
-Phase 81 implements the sixth provider-light design item from the Phase 75 design-frame backlog: group the feature-rich Kinflo OS shell into operational lanes so super admins can scan the system by work mode instead of raw feature count.
+Phase 81 implements the provider-light workflow navigation rail for the Kinflo OS shell: group the feature-rich admin experience into five operational workspaces so super admins can scan the system by work mode instead of raw feature count.
 
 Command:
 
@@ -18,14 +18,12 @@ npm run kinflo:validate-workflow-navigation-rail
   - `button-kinflo-workflow-lane-launch`
   - `button-kinflo-workflow-lane-growth`
   - `button-kinflo-workflow-lane-evidence`
-  - `button-kinflo-workflow-lane-hosted-activation`
 - Lane tab-dot groups:
   - `section-kinflo-workflow-lane-tabs-control`
   - `section-kinflo-workflow-lane-tabs-build`
   - `section-kinflo-workflow-lane-tabs-launch`
   - `section-kinflo-workflow-lane-tabs-growth`
   - `section-kinflo-workflow-lane-tabs-evidence`
-  - `section-kinflo-workflow-lane-tabs-hosted-activation`
 
 ## What Changed
 
@@ -35,8 +33,7 @@ The previous admin navigation was a flat strip of 21 tabs. This phase keeps ever
 - `Build`: Factory, Studio, Content, Brand, Navigation, Assets, and Templates.
 - `Launch`: Launch, Preview, and Domains.
 - `Growth`: CRM, Campaigns, and Integrations.
-- `Evidence`: AI Review and Adapter Switch.
-- `Hosted Activation`: Activation.
+- `Evidence & Activation`: AI Review, Adapter Switch, and Hosted Activation.
 
 Each lane shows its tab count, state dots, the active tab, and a short blocked live-action line so operators can see which work is local-review-safe and which action remains gated.
 

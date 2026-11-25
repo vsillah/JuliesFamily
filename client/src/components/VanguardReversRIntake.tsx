@@ -34,7 +34,8 @@ const workspaceTools = [
   { label: "History", icon: History, active: false },
 ];
 
-export default function VanguardReversRIntake() {
+export default function VanguardReversRIntake({ demoMode = false }: { demoMode?: boolean }) {
+  const displayBrand = demoMode ? "KinFlo demo" : "Vanguard";
   const [step, setStep] = useState(0);
   const [sourcePackage, setSourcePackage] = useState<string[]>([]);
   const [goal, setGoal] = useState("");
@@ -67,6 +68,10 @@ export default function VanguardReversRIntake() {
   }
 
   function continueToOrderPortal() {
+    if (demoMode) {
+      window.location.hash = "order-journey";
+      return;
+    }
     const receipt = createVanguardLocalReceipt({
       sourcePackage,
       goal: goal.trim(),
@@ -90,7 +95,7 @@ export default function VanguardReversRIntake() {
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-xl font-black tracking-[0.18em] text-slate-950 dark:text-white" data-testid="vanguard-reversr-wordmark">REVERSR</span>
                 <Badge className="bg-emerald-600 text-white hover:bg-emerald-600 dark:bg-[#00ff9d] dark:text-slate-950 dark:hover:bg-[#00ff9d]">ReversR order request</Badge>
-                <Badge variant="outline">Vanguard client journey</Badge>
+                <Badge variant="outline">{displayBrand} journey</Badge>
               </div>
               <p className="mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">Machine reconstruction · Request to delivery</p>
             </div>
@@ -128,7 +133,7 @@ export default function VanguardReversRIntake() {
             })}
             <ArrowRight className="h-4 w-4 shrink-0 text-emerald-500 dark:text-[#00ff9d]" />
             <div className="min-w-[190px] rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-blue-950 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-100">
-              <div className="flex items-center gap-2 text-xs font-semibold"><UserRound className="h-4 w-4" /> Vanguard fulfillment</div>
+              <div className="flex items-center gap-2 text-xs font-semibold"><UserRound className="h-4 w-4" /> {displayBrand} fulfillment</div>
               <p className="mt-1 text-[10px] leading-4 text-blue-800 dark:text-blue-200">An associate confirms scope, ownership, quality, and delivery.</p>
             </div>
           </div>
@@ -136,7 +141,7 @@ export default function VanguardReversRIntake() {
         <div className="border-t border-slate-100 px-4 py-2 dark:border-slate-800 sm:px-5" data-testid="vanguard-reversr-input-checklist">
           <div className="mb-2 flex items-center justify-between gap-3">
             <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500 dark:text-slate-400">Input checklist</span>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400">Complete this before Vanguard can review the request</span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400">Complete this before {displayBrand} can review the request</span>
           </div>
           <ol className="flex gap-2 overflow-x-auto pb-1" aria-label="ReversR request checklist">
             {vanguardWorkflow.intakeStages.map((stage, index) => {
@@ -175,9 +180,9 @@ export default function VanguardReversRIntake() {
           </div>
         </nav>
 
-        <main className="min-w-0 bg-[#f4f6fb] p-3 dark:bg-[#08090c] sm:p-5" data-testid="vanguard-reversr-workspace-canvas">
+        <main className="kinflo-reversr-workspace-canvas min-w-0 p-3 sm:p-5" data-testid="vanguard-reversr-workspace-canvas">
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-            <div><div className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700 dark:text-[#00ff9d]">{currentStage.label}</div><h3 className="mt-1 text-xl font-semibold text-slate-950 dark:text-white">Assemble the request Vanguard can review</h3></div>
+            <div><div className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700 dark:text-[#00ff9d]">{currentStage.label}</div><h3 className="mt-1 text-xl font-semibold text-slate-950 dark:text-white">Assemble the request {displayBrand} can review</h3></div>
             <Badge variant="outline" className="w-fit border-emerald-200 bg-emerald-50 text-emerald-800">Available now</Badge>
           </div>
 
@@ -198,7 +203,7 @@ export default function VanguardReversRIntake() {
                     );
                   })}
                 </div>
-                <VanguardIgesIntake onReviewChange={(review) => {
+                <VanguardIgesIntake demoMode={demoMode} onReviewChange={(review) => {
                   setEngineeringReview(review);
                   setReceiptReady(false);
                   if (review) setSourcePackage((current) => current.includes("CAD or 3D model") ? current : [...current, "CAD or 3D model"]);
@@ -219,7 +224,7 @@ export default function VanguardReversRIntake() {
               <div data-testid="vanguard-intake-discipline">
                 <Badge variant="outline">Work routing</Badge>
                 <h4 className="mt-3 text-2xl font-semibold text-slate-950 dark:text-white">Which team should begin the review?</h4>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">Choose a starting discipline. A Vanguard associate confirms the route before scope and pricing.</p>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">Choose a starting discipline. A {displayBrand} associate confirms the route before scope and pricing.</p>
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">
                   {vanguardWorkflow.disciplines.map((item) => (
                     <button key={item.label} type="button" onClick={() => { setDiscipline(item.label); setReceiptReady(false); }} className={`rounded-xl border p-4 text-left transition ${discipline === item.label ? "border-emerald-500 bg-emerald-50 shadow-sm dark:border-[#00ff9d]/70 dark:bg-[#00ff9d]/10" : "border-slate-200 hover:border-slate-300 dark:border-[#262b36] dark:hover:border-slate-600"}`} aria-pressed={discipline === item.label}>
@@ -244,15 +249,15 @@ export default function VanguardReversRIntake() {
               <div data-testid="vanguard-intake-readiness">
                 <Badge variant="outline">Request review</Badge>
                 <h4 className="mt-3 text-2xl font-semibold text-slate-950 dark:text-white">Check the package before handoff</h4>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">A complete request gives Vanguard enough context to begin an associate review. Scope, price, assignment, and production still require later decisions.</p>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300">A complete request gives {displayBrand} enough context to begin an associate review. Scope, price, assignment, and production still require later decisions.</p>
                 <div className="mt-6 grid gap-3 sm:grid-cols-2">{[["Available materials", sourcePackage.join(", ") || "Missing"], ["Build goal", goal.trim() || "Missing"], ["Starting discipline", discipline || "Missing"], ["Constraints", [...constraints, constraintNotes.trim()].filter(Boolean).join(", ") || "Missing"], ["IGES engineering review", engineeringReview ? `${engineeringReview.fileName} · ${engineeringReview.receiptId}` : "No local model attached"]].map(([label, value]) => <div key={label} className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-900"><div className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{label}</div><div className="mt-2 break-words text-sm leading-6 text-slate-800 dark:text-slate-200">{value}</div></div>)}</div>
                 <Button type="button" disabled={!readyForQuoteReview} onClick={() => setReceiptReady(true)} className="mt-5 h-auto w-full whitespace-normal bg-blue-600 py-2.5 text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400" data-testid="vanguard-generate-local-receipt"><PackageCheck className="mr-2 h-4 w-4" /> Prepare request receipt</Button>
-                {receiptReady ? <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-5 dark:border-emerald-800 dark:bg-emerald-950/40" role="status" data-testid="vanguard-build-request-receipt"><div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><div className="flex items-center gap-2 font-semibold text-emerald-950 dark:text-emerald-100"><PackageCheck className="h-5 w-5" /> Request receipt ready</div><p className="mt-2 text-sm leading-6 text-emerald-900 dark:text-emerald-200">Continue to review this package beside the Vanguard order path. Nothing has been sent.</p></div><Badge className="w-fit bg-emerald-700 hover:bg-emerald-700">Browser draft</Badge></div><Button type="button" onClick={continueToOrderPortal} className="mt-4 h-auto w-full whitespace-normal bg-slate-950 py-2.5 text-white hover:bg-slate-800" data-testid="vanguard-continue-to-order-portal"><LockKeyhole className="mr-2 h-4 w-4" /> Continue to secure order portal</Button></div> : null}
+                {receiptReady ? <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-5 dark:border-emerald-800 dark:bg-emerald-950/40" role="status" data-testid="vanguard-build-request-receipt"><div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><div className="flex items-center gap-2 font-semibold text-emerald-950 dark:text-emerald-100"><PackageCheck className="h-5 w-5" /> Request receipt ready</div><p className="mt-2 text-sm leading-6 text-emerald-900 dark:text-emerald-200">{demoMode ? "Review this package in the demo journey. Nothing has been sent." : "Continue to review this package beside the Vanguard order path. Nothing has been sent."}</p></div><Badge className="w-fit bg-emerald-700 hover:bg-emerald-700">Browser draft</Badge></div><Button type="button" onClick={continueToOrderPortal} className="kinflo-accent-solid mt-4 h-auto w-full whitespace-normal py-2.5" data-testid="vanguard-continue-to-order-portal"><LockKeyhole className="mr-2 h-4 w-4" /> {demoMode ? "Return to demo journey" : "Continue to secure order portal"}</Button></div> : null}
               </div>
             ) : null}
           </section>
 
-          <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-950"><Button type="button" variant="outline" onClick={() => goToStep(step - 1)} disabled={step === 0}><ArrowLeft className="mr-2 h-4 w-4" /> Back</Button><div className="text-center text-xs text-slate-500 dark:text-slate-400">Item {step + 1} of {vanguardWorkflow.intakeStages.length}</div><Button type="button" onClick={() => goToStep(step + 1)} disabled={step === vanguardWorkflow.intakeStages.length - 1} className="bg-slate-950 hover:bg-slate-800">Continue <ArrowRight className="ml-2 h-4 w-4" /></Button></div>
+          <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 dark:border-slate-700 dark:bg-slate-950"><Button type="button" variant="outline" onClick={() => goToStep(step - 1)} disabled={step === 0}><ArrowLeft className="mr-2 h-4 w-4" /> Back</Button><div className="text-center text-xs text-slate-500 dark:text-slate-400">Item {step + 1} of {vanguardWorkflow.intakeStages.length}</div><Button type="button" onClick={() => goToStep(step + 1)} disabled={step === vanguardWorkflow.intakeStages.length - 1} className="kinflo-accent-solid">Continue <ArrowRight className="ml-2 h-4 w-4" /></Button></div>
         </main>
 
         <aside className="border-t border-slate-200 bg-white p-4 dark:border-[#262b36] dark:bg-[#101218] xl:min-h-[660px] xl:border-l xl:border-t-0" data-testid="vanguard-reversr-workspace-inspector">
@@ -262,7 +267,7 @@ export default function VanguardReversRIntake() {
             <dl className="mt-3 space-y-3 text-xs">
               <div><dt className="text-blue-700 dark:text-blue-300">Current owner</dt><dd className="mt-1 font-semibold text-slate-950 dark:text-white">You, until the request is saved</dd></div>
               <div><dt className="text-blue-700 dark:text-blue-300">Next decision</dt><dd className="mt-1 leading-5 text-slate-700 dark:text-slate-200">Finish the open input items, then review the receipt before sign-in.</dd></div>
-              <div><dt className="text-blue-700 dark:text-blue-300">Vanguard handoff</dt><dd className="mt-1 leading-5 text-slate-700 dark:text-slate-200">An associate reviews only the fields you choose to share after account access opens.</dd></div>
+              <div><dt className="text-blue-700 dark:text-blue-300">{displayBrand} handoff</dt><dd className="mt-1 leading-5 text-slate-700 dark:text-slate-200">An associate reviews only the fields you choose to share after account access opens.</dd></div>
             </dl>
           </div>
           <div className="mt-4 space-y-2">

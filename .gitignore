@@ -12,3 +12,4 @@ vite.config.ts.*
 
 # Convex generated API remains gated until live activation approval.
 convex/_generated/
+.vercel

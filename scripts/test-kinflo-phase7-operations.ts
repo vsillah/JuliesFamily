@@ -21,6 +21,8 @@ test("analytics is scoped, source-labelled, and preview-only", () => {
     assert.equal(preview.preview.persistence, "disabled");
     assert.ok(preview.preview.metrics.every((metric) => metric.source.startsWith("preview_")));
   }
+  const juliePreview = resolveKinfloAnalyticsPreview({ tenantSlug: "julies-family", siteSlug: "julies-family-public" });
+  assert.equal(juliePreview.status, "ready");
   assert.equal(resolveKinfloAnalyticsPreview({ tenantSlug: "julies-family", siteSlug: "julies-family" }).status, "invalid");
   assert.equal(resolveKinfloAnalyticsPreview({ tenantSlug: "vanguard-enterprises", siteSlug: "julies-family" }).status, "invalid");
 });

@@ -6,6 +6,11 @@ import {
   resolveKinfloAdminScope,
   type KinfloAdminScopeOption,
 } from "../client/src/lib/kinfloAdminContext";
+import {
+  buildKinfloPlatformHref,
+  buildKinfloTenantScopeHref,
+  buildKinfloTenantWorkspaceHref,
+} from "../client/src/lib/kinfloAdminLevels";
 
 const scopes: KinfloAdminScopeOption[] = [
   { key: "vanguard-enterprises", tenantSlug: "vanguard-enterprises", label: "Vanguard Enterprises" },
@@ -51,6 +56,65 @@ test("site-scoped links stay on the KinFlo route and carry both scopes", () => {
   assert.match(href, /studioSite=vanguard-enterprises/);
   assert.match(href, /studioTenant=vanguard-enterprises/);
   assert.equal(href.includes("/admin?"), false);
+});
+
+test("KinFlo shell names the platform parent before the tenant workspace", () => {
+  const source = readFileSync("client/src/pages/AdminKinfloShell.tsx", "utf8");
+  const breadcrumbs = source.slice(source.indexOf("<Breadcrumbs"), source.indexOf("{clientWebsiteAdminScope.status"));
+  assert.match(breadcrumbs, /KinFlo platform/);
+  assert.match(breadcrumbs, /admin\/kinflo-os\?view=platform/);
+  assert.match(breadcrumbs, /adminScope\.tenant\.name.*workspace/);
+  assert.match(breadcrumbs, /showHome=\{false\}/);
+  assert.match(source, /Child entry point · active tenant\/site scope/);
+  assert.match(source, /Parent platform: KinFlo platform/);
+});
+
+test("platform view is tenant-independent and offers a scoped entry point", () => {
+  const context = readFileSync("client/src/contexts/KinfloShellSnapshotContext.tsx", "utf8");
+  const catalog = readFileSync("client/src/components/KinfloPlatformFeatureCatalog.tsx", "utf8");
+  assert.match(context, /get\("view"\) === "platform"/);
+  assert.match(context, /<KinfloPlatformFeatureCatalog/);
+  assert.match(catalog, /Platform control plane/);
+  assert.match(catalog, /tenant and site workspaces are children/i);
+  assert.match(catalog, /href=\{tenantScopeHref\}/);
+  assert.equal(buildKinfloTenantScopeHref("/admin/kinflo-os"), "/admin/kinflo-os");
+  assert.match(catalog, /input-kinflo-source-website-url/);
+  assert.match(catalog, /button-review-kinflo-tenant-plan/);
+  assert.match(catalog, /button-create-kinflo-tenant-gated/);
+  assert.match(catalog, /never starts scraping or creates records/i);
+  assert.match(context, /provisionTenantAndSiteMutation/);
+  assert.match(context, /runtime\.canUseLiveProvisioning/);
+  assert.match(catalog, /tenantPlan\.sourceUrl/);
+  assert.match(catalog, /onCreateTenant\(\{\s*tenantName: tenantPlan\.name,[\s\S]*capabilityKeys: tenantPlan\.capabilities/);
+  assert.match(readFileSync("convex/controlPlane.ts", "utf8"), /capabilityKeys: v\.optional\(v\.array\(v\.string\(\)\)\)/);
+  assert.match(readFileSync("convex/controlPlane.ts", "utf8"), /tenantEntitlements/);
+});
+
+test("platform and tenant levels hand off on the route the reviewer entered through", () => {
+  const admin = "/admin/kinflo-os";
+  const demo = "/kinflo-demo/admin";
+  assert.equal(buildKinfloPlatformHref({}, admin), "/admin/kinflo-os?view=platform");
+  assert.equal(buildKinfloPlatformHref({}, demo), "/kinflo-demo/admin?demo=1&view=platform");
+  assert.equal(
+    buildKinfloPlatformHref({ section: "growth", tenantSlug: "julies-family" }, admin),
+    "/admin/kinflo-os?view=platform&platformTenant=julies-family&platformSection=growth",
+  );
+  assert.equal(buildKinfloTenantScopeHref(demo), "/kinflo-demo/admin?demo=1&scope=choose");
+  assert.equal(
+    buildKinfloTenantWorkspaceHref("vanguard-enterprises", undefined, demo),
+    "/kinflo-demo/admin?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises",
+  );
+  assert.equal(
+    buildKinfloTenantWorkspaceHref("julies-family", undefined, admin),
+    "/admin/kinflo-os?tenant=julies-family&site=julies-family-public",
+  );
+  const catalog = readFileSync("client/src/components/KinfloPlatformFeatureCatalog.tsx", "utf8");
+  const workspace = readFileSync("client/src/components/KinfloOperatorWorkspace.tsx", "utf8");
+  const home = readFileSync("client/src/pages/KinfloHome.tsx", "utf8");
+  assert.match(catalog, /buildKinfloTenantWorkspaceHref\(tenant\.tenantSlug\)/);
+  assert.match(workspace, /link-kinflo-operator-back-to-platform/);
+  assert.match(home, /ADMIN_DEMO_PATH = "\/kinflo-demo\/admin\?demo=1&view=platform&platformSection=overview"/);
+  assert.match(home, /TENANT_DEMO_PATH = "\/kinflo-demo\/admin\?demo=1&tenant=vanguard-enterprises&site=vanguard-enterprises"/);
 });
 
 test("KinFlo public controls do not link to Julie's legacy admin route", () => {

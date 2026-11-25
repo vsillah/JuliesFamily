@@ -46,15 +46,19 @@ function LegacyApplication() {
 function RoutedApplication() {
   const [location] = useLocation();
   if (
-    location === "/admin/kinflo-os"
+    location === "/"
+    || location === "/product"
+    || location === "/kinflo"
+    || location === "/admin/kinflo-os"
     || location === "/kinflo-sites/vanguard-enterprises/orders"
+    || location === "/kinflo-demo/admin"
   ) {
     return <Router />;
   }
 
   return <LegacyApplication />;
 }
-import Home from "@/pages/Home";
+import KinfloHome from "@/pages/KinfloHome";
 import HowItWorks from "@/pages/HowItWorks";
 import VirtualTour from "@/pages/VirtualTour";
 import Donate from "@/pages/Donate";
@@ -100,6 +104,7 @@ import KinfloAdminRoute from "@/components/KinfloAdminRoute";
 import AppointmentScheduling from "@/pages/AppointmentScheduling";
 import ProductLanding from "@/pages/ProductLanding";
 import KinfloPublicSitePreview from "@/pages/KinfloPublicSitePreview";
+import KinfloDemoAdmin from "@/pages/KinfloDemoAdmin";
 import VanguardOrderPortal from "@/pages/VanguardOrderPortal";
 import ImageComparison from "@/pages/ImageComparison";
 import TechGoesHomeLanding from "@/pages/TechGoesHomeLanding";
@@ -113,7 +118,7 @@ import NotFound from "@/pages/not-found";
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
+      <Route path="/" component={KinfloHome} />
       <Route path="/how-it-works" component={HowItWorks} />
       <Route path="/virtual-tour" component={VirtualTour} />
       <Route path="/donate" component={Donate} />
@@ -160,6 +165,7 @@ function Router() {
           <AdminKinfloShell />
         </KinfloAdminRoute>
       </Route>
+      <Route path="/kinflo-demo/admin" component={KinfloDemoAdmin} />
       <Route path="/admin/preferences" component={AdminPreferences} />
       <Route path="/schedule" component={AppointmentScheduling} />
       <Route path="/product" component={ProductLanding} />

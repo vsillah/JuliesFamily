@@ -2,6 +2,7 @@ import educationHero from "@assets/generated_images/Hero_education_classroom_sce
 import consultantHero from "@assets/generated_images/Professional_partnership_collaboration_meeting_f14bd523.png";
 import campaignHero from "@assets/generated_images/Hands_together_showing_community_b0e0e375.png";
 import vanguardIndustrialHero from "@assets/generated_images/Vanguard_industrial_welding_fabrication_hero.png";
+import vanguardIndustrialHeroVideo from "@assets/generated_images/Vanguard_industrial_welding_fabrication_hero.mp4";
 import { vanguardWorkflow } from "@/lib/kinfloVanguardWorkflow";
 import {
   resolveTenantPalette,
@@ -25,8 +26,14 @@ import {
 export type KinfloPublicBlockType =
   | "hero"
   | "services"
+  | "impact"
+  | "about"
+  | "stories"
+  | "volunteer"
   | "events"
   | "testimonials"
+  | "donation"
+  | "sponsors"
   | "lead_magnet"
   | "form"
   | "build_request"
@@ -88,6 +95,7 @@ export type KinfloPublicSitePreview = {
     };
     media: {
       heroImage: string;
+      heroVideo?: string;
       heroAlt?: string;
       heroPosition?: string;
       treatment: string;
@@ -113,6 +121,7 @@ export type KinfloPublicSitePreview = {
     device?: "desktop" | "tablet" | "mobile";
     studioSite?: string;
     reviewSource?: string;
+    demoMode?: boolean;
     audience?: KinfloAudiencePreviewResolution;
     experiment?: KinfloExperimentPreviewResolution;
     capabilityPreview?: KinfloCapabilityPreviewMarker;
@@ -129,6 +138,7 @@ export type KinfloPublicSitePreviewOptions = {
   device?: "desktop" | "tablet" | "mobile";
   studioSite?: string;
   reviewSource?: string;
+  demoMode?: boolean;
   experimentKey?: string;
   variantKey?: string;
   capabilityMode?: string;
@@ -202,12 +212,127 @@ const previews: KinfloPublicSitePreview[] = [
         publishedAt,
       },
       {
+        _id: "block_jf_impact",
+        type: "impact",
+        title: "A year of meaningful growth",
+        body: "Julie’s Family Learning Program grows with the people it serves, creating practical paths into education, family development, and community connection.",
+        metadata: {
+          items: [
+            { value: "299", label: "students served in 2024" },
+            { value: "+31%", label: "growth in enrollment" },
+            { value: "+155%", label: "increase in HSE testing" },
+            { value: "95", label: "monthly average enrollment" },
+          ],
+        },
+        order: 30,
+        publishedAt,
+      },
+      {
+        _id: "block_jf_about",
+        type: "about",
+        title: "A learning community built on welcome",
+        body: "For generations, Julie’s Family Learning Program has paired practical education with the relationships that help families keep moving forward.",
+        metadata: {
+          items: [
+            { eyebrow: "Our beginning", title: "Start with dignity", body: "Every learner brings knowledge, responsibility, and a reason to be here. Programs begin with that reality." },
+            { eyebrow: "Our approach", title: "Make room for real life", body: "Flexible schedules, family support, and patient instruction help learning fit alongside work and care." },
+            { eyebrow: "Our future", title: "Keep the door open", body: "The next generation of learners and volunteers should find a clear path into the same welcoming community." },
+          ],
+        },
+        order: 40,
+        publishedAt,
+      },
+      {
+        _id: "block_jf_stories",
+        type: "stories",
+        title: "Stories from the learning community",
+        body: "See how families, learners, and neighbors find practical support through shared learning and steady relationships.",
+        metadata: {
+          items: [
+            { eyebrow: "Adult education", title: "A steadier path back to learning", body: "Flexible support helps adults build confidence while making room for work, family, and the next step." },
+            { eyebrow: "Family development", title: "Learning grows through connection", body: "Families can find guidance, encouragement, and programs shaped around the realities of daily life." },
+            { eyebrow: "Digital access", title: "Tools that meet people where they are", body: "Practical digital support keeps learners connected to information, services, and community." },
+          ],
+        },
+        order: 50,
+        publishedAt,
+      },
+      {
+        _id: "block_jf_testimonials",
+        type: "testimonials",
+        title: "What our families say",
+        body: "The strongest evidence is the confidence learners carry back into their families, work, and communities.",
+        metadata: {
+          items: [
+            { eyebrow: "Adult learner", title: "I found my next step", body: "The support helped me return to learning without feeling like I had to leave the rest of my life at the door." },
+            { eyebrow: "Family partner", title: "The welcome was real", body: "I knew where to start, who to ask, and how to keep going when the first plan changed." },
+            { eyebrow: "Community partner", title: "The work is connected", body: "Julie’s brings education, family development, and community care into one practical path." },
+          ],
+        },
+        order: 60,
+        publishedAt,
+      },
+      {
+        _id: "block_jf_events",
+        type: "events",
+        title: "Be part of the community",
+        body: "Meet learners, celebrate progress, and find a way to participate at an upcoming community event.",
+        metadata: {
+          items: [
+            { eyebrow: "Open house", title: "Family learning welcome", body: "Visit the program, ask questions, and find the right starting point for your family." },
+            { eyebrow: "Learning fair", title: "Celebrate learner progress", body: "Share work, stories, and the small milestones that make a longer journey visible." },
+            { eyebrow: "Community gathering", title: "Connect with neighbors", body: "Build relationships with volunteers, partners, and families who make the work possible." },
+          ],
+        },
+        order: 70,
+        publishedAt,
+      },
+      {
+        _id: "block_jf_volunteer",
+        type: "volunteer",
+        title: "Volunteer in a way that fits",
+        body: "Share time, experience, or encouragement through clear pathways that respect the people and families being served.",
+        metadata: {
+          items: [
+            { eyebrow: "Tutor", title: "Support a learner", body: "Help with reading, digital skills, conversation practice, or a focused learning goal." },
+            { eyebrow: "Family partner", title: "Welcome families", body: "Offer practical guidance and a warm first connection to programs and community resources." },
+            { eyebrow: "Program support", title: "Strengthen the work", body: "Bring organization, outreach, event, or technology skills to the people coordinating each program." },
+          ],
+        },
+        order: 80,
+        publishedAt,
+      },
+      {
+        _id: "block_jf_donation",
+        type: "donation",
+        title: "Help keep learning within reach",
+        body: "Your support helps make flexible learning, family development, and digital access available to more people.",
+        metadata: { primaryCta: "Support the work", secondaryCta: "Volunteer instead", secondaryHref: "#volunteer" },
+        order: 90,
+        publishedAt,
+      },
+      {
+        _id: "block_jf_sponsors",
+        type: "sponsors",
+        title: "Supported by generous partners",
+        body: "Community investment gives learners the time, tools, and encouragement to keep going.",
+        metadata: {
+          items: [
+            { eyebrow: "Education partners", title: "Learning access", body: "Partners help sustain instruction and resources for adult learners and families." },
+            { eyebrow: "Community partners", title: "Shared care", body: "Local organizations connect families to practical support beyond the classroom." },
+            { eyebrow: "Individual supporters", title: "A wider circle", body: "Donors and volunteers turn a single welcome into a lasting community pathway." },
+          ],
+        },
+        order: 100,
+        publishedAt,
+      },
+      {
         _id: "block_jf_lead",
         type: "lead_magnet",
         title: "Find the right next step",
         body: "Capture interest by persona and journey stage, then route every lead into the CRM.",
         metadata: { source: "family-learning-public-preview", persona: "parent", journeyStage: "awareness" },
-        order: 30,
+        order: 110,
         publishedAt,
       },
     ],
@@ -314,6 +439,7 @@ const previews: KinfloPublicSitePreview[] = [
       radii: { card: 6, control: 6 },
       media: {
         heroImage: vanguardIndustrialHero,
+        heroVideo: vanguardIndustrialHeroVideo,
         heroAlt: "Welders fabricating a structural steel assembly in an industrial workshop",
         heroPosition: "68% center",
         treatment: "industrial-welding-fabrication-build",
@@ -521,11 +647,72 @@ export function resolveKinfloPublicSitePreview(siteSlug = "julies-family") {
   } satisfies KinfloPublicSitePreview;
 }
 
+function resolveKinfloDemoPresentation(preview: KinfloPublicSitePreview): KinfloPublicSitePreview {
+  if (preview.site.slug !== "vanguard-enterprises") return preview;
+
+  const demoCopy: Record<string, { title: string; body: string }> = {
+    block_vanguard_hero: {
+      title: "A clear path from idea to delivered work",
+      body: "See how KinFlo brings a public site, a structured request, and a visible delivery journey into one practical demo.",
+    },
+    block_vanguard_services: {
+      title: "A reusable operating layer for service teams",
+      body: "Show capabilities, qualify the request, and keep the next decision visible without losing the context that brought someone to the site.",
+    },
+    block_vanguard_source_parity: {
+      title: "The service story stays connected to the work",
+      body: "Use the same presentation pattern to explain capabilities, proof, roles, and the operating method behind a client-facing service.",
+    },
+    block_vanguard_order_backbone: {
+      title: "One workspace keeps the request and decisions together",
+      body: "Start with what is known, make the missing inputs visible, and carry the request through review, scope, delivery, and acceptance.",
+    },
+    block_vanguard_process: {
+      title: "A prepared request starts a structured review",
+      body: "The demo shows how a team can check feasibility, record assumptions, and make ownership and next steps clear before work begins.",
+    },
+    block_vanguard_request: {
+      title: "Prepare a request for the next conversation",
+      body: "Describe the outcome, attach the materials available on this device, and see how a request becomes a reviewable package without sending it anywhere.",
+    },
+  };
+
+  return {
+    ...preview,
+    tenant: { ...preview.tenant, name: "KinFlo Demo" },
+    site: { ...preview.site, name: "KinFlo Demo" },
+    theme: {
+      ...preview.theme,
+      media: {
+        ...preview.theme.media,
+        logoImage: undefined,
+        logoImageOnDark: undefined,
+        logoAlt: undefined,
+      },
+    },
+    page: {
+      ...preview.page,
+      seo: { title: "KinFlo Demo | A connected service experience" },
+    },
+    blocks: preview.blocks.map((block) => {
+      const copy = demoCopy[block._id];
+      if (!copy) return block;
+      return {
+        ...block,
+        ...copy,
+        metadata: { ...block.metadata, demoMode: true, source: "kinflo-generic-demo" },
+      };
+    }),
+  };
+}
+
 export function resolveKinfloPublicSitePreviewWithContext(
   siteSlug = "julies-family",
   options: KinfloPublicSitePreviewOptions = {},
 ) {
-  const preview = resolveKinfloPublicSitePreview(siteSlug);
+  const sourcePreview = resolveKinfloPublicSitePreview(siteSlug);
+  const demoMode = options.demoMode === true;
+  const preview = demoMode ? resolveKinfloDemoPresentation(sourcePreview) : sourcePreview;
   const route = options.route?.trim() || preview.context.route;
   const persona = options.persona?.trim() || undefined;
   const journeyStage = options.journeyStage?.trim() || undefined;
@@ -576,6 +763,7 @@ export function resolveKinfloPublicSitePreviewWithContext(
       device: options.device,
       studioSite,
       reviewSource,
+      demoMode,
       audience: scopedAudience,
       experiment: scopedExperiment,
       capabilityPreview,

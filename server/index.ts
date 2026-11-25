@@ -12,6 +12,9 @@ import type { Request, Response, NextFunction } from "express";
   const server = await registerRoutes(app);
 
   app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
+    if (res.headersSent || res.writableEnded) {
+      return;
+    }
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 

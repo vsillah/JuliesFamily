@@ -19,7 +19,8 @@
       "@/*": ["./client/src/*"],
       "@shared/*": ["./shared/*"],
       "@db/*": ["./shared/*"],
-      "@kinflo-phase174-generated-api": ["./client/src/lib/kinfloPhase174GeneratedApiBuildStub.ts"]
+      "@kinflo-phase174-generated-api": ["./client/src/lib/kinfloPhase174GeneratedApiBuildStub.ts"],
+      "@kinflo-phase175-generated-api": ["./client/src/lib/kinfloPhase175GeneratedApiBuildStub.ts"]
     }
   }
 }

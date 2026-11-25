@@ -33,14 +33,15 @@ export default function VanguardThemeControl({
       <DropdownMenuTrigger asChild>
         <Button
           type="button"
-          size="icon"
+          size="sm"
           variant="ghost"
           aria-label={`Color theme: ${activeOption.label}`}
           title={`Color theme: ${activeOption.label}`}
-          className={`h-9 w-9 rounded-full ${navSolid ? "text-foreground hover:bg-muted" : "text-white hover:bg-white/15 hover:text-white"}`}
+          className={`h-9 gap-1.5 rounded-full px-2 ${navSolid ? "text-foreground hover:bg-muted" : "text-white hover:bg-white/15 hover:text-white"}`}
           data-testid="vanguard-theme-control"
         >
           <ActiveIcon className="h-4 w-4" />
+          <span className="hidden text-xs font-medium sm:inline">{activeOption.label}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="kinflo-palette-surface w-44">

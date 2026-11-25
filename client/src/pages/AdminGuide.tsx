@@ -42,10 +42,10 @@ export default function AdminGuide() {
             </button>
           </Link>
           <h1 className="font-playfair text-4xl font-bold text-foreground mb-4">
-            Admin Guide
+              Platform Guide
           </h1>
           <p className="text-lg text-muted-foreground">
-            Complete documentation for managing the website, content, A/B tests, and user data
+            A practical guide to managing your website, content, experiments, and team access
           </p>
         </div>
 
