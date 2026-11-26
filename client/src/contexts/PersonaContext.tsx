@@ -112,7 +112,8 @@ export function PersonaProvider({ children }: { children: ReactNode }) {
 
     // Don't show persona modal on Kinflo product landing pages
     // Use startsWith to handle query strings and trailing slashes
-    const isKinfloPage = location.startsWith('/kinflo') || location.startsWith('/product');
+    // The root route ("/") is the neutral KinFlo homepage, not a Julie's page, so it is excluded as well.
+    const isKinfloPage = location === '/' || location.startsWith('/kinflo') || location.startsWith('/product');
 
     const adminOverride = sessionStorage.getItem(ADMIN_PERSONA_KEY);
     
